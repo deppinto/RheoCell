@@ -1,0 +1,42 @@
+##############################
+####  PROGRAM PARAMETERS  ####
+##############################
+backend = CPU
+debug = 1
+seed = 4982
+
+##############################
+####    SIM PARAMETERS    ####
+##############################
+equilibration_steps = 100
+steps = 100
+dt = 0.2
+R = 8
+zetaS = 0.003
+gamma = 0.02
+mu = 5
+lambda = 3
+kappa = 0.2
+friction = 1
+
+
+##############################
+####     INTERACTIONS     ####
+##############################
+
+interaction_type = activefield
+
+##############################
+####    INPUT / OUTPUT    ####
+##############################
+topology = test.top
+conf_file = prova.conf
+trajectory_file = trajectory.dat
+print_conf_interval = 10
+print_energy_every = 1000
+time_scale = linear
+external_forces = 0
+T=0.1
+
+
+restart_step_counter = 1
