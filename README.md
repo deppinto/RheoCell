@@ -1,2 +1,2 @@
 # RheoCell
-Phase field model
+Phase field model (under construction)
