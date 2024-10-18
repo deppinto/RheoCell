@@ -145,7 +145,7 @@ number get_temperature(std::string raw_T) {
 			}
 			break;
 		default:
-			throw oxDNAException("Unrecognizable temperature '%s'", raw_T.c_str());
+			throw RCexception("Unrecognizable temperature '%s'", raw_T.c_str());
 			/* no break */
 		}
 	}
@@ -179,7 +179,7 @@ std::string bytes_to_human(llint bytes) {
 		ret += std::string("GB");
 		break;
 	default:
-		throw oxDNAException("Should never get here... (ctr = %d) in %s:%d\n", ctr, __FILE__, __LINE__);
+		throw RCexception("Should never get here... (ctr = %d) in %s:%d\n", ctr, __FILE__, __LINE__);
 	}
 	return ret;
 }
@@ -229,7 +229,7 @@ number gamma(number alpha, number beta) {
 
 void assert_is_valid_field(int index, int N, std::string identifier) {
 	if(index >= N || index < -1) {
-		throw oxDNAException("Trying to add a %s on non-existent particle %d. Aborting", identifier.c_str(), index);
+		throw RCexception("Trying to add a %s on non-existent particle %d. Aborting", identifier.c_str(), index);
 	}
 }
 
@@ -269,7 +269,7 @@ std::vector<int> get_fields_from_string(std::vector<BaseField*> &fields, std::st
 						p[ii] = fields.size() - 1;
 					}
 					else {
-						throw oxDNAException("In %s I couldn't interpret particle identifier \"%s\" used as a boundary particle.", identifier.c_str(), p0_p1_index[ii].c_str());
+						throw RCexception("In %s I couldn't interpret particle identifier \"%s\" used as a boundary particle.", identifier.c_str(), p0_p1_index[ii].c_str());
 					}
 				}
 			}
@@ -278,7 +278,7 @@ std::vector<int> get_fields_from_string(std::vector<BaseField*> &fields, std::st
 
 			// add all the particles between p0 and p1 (extremes included)
 			if(p[0] >= p[1])
-				throw oxDNAException("%s: the two indexes in a particle range (here %d and %d) should be sorted (the first one should be smaller than the second one).", identifier.c_str(), p[0], p[1]);
+				throw RCexception("%s: the two indexes in a particle range (here %d and %d) should be sorted (the first one should be smaller than the second one).", identifier.c_str(), p[0], p[1]);
 			for(int p_idx = p[0]; p_idx <= p[1]; p_idx++) {
 				fields_index.push_back(p_idx);
 			}
@@ -293,7 +293,7 @@ std::vector<int> get_fields_from_string(std::vector<BaseField*> &fields, std::st
 		// add it to the vector, and make sure that the identifier is not an unidentified string
 		else {
 			if(temp[i] != "-1" && !is_integer(temp[i])) {
-				throw oxDNAException("In %s I couldn't interpret particle identifier \"%s\".", identifier.c_str(), temp[i].c_str());
+				throw RCexception("In %s I couldn't interpret particle identifier \"%s\".", identifier.c_str(), temp[i].c_str());
 
 			}
 			int j = atoi(temp[i].c_str());
@@ -306,13 +306,13 @@ std::vector<int> get_fields_from_string(std::vector<BaseField*> &fields, std::st
 	// check that if -1 is present then that's the only key - something must be wrong if you
 	// specified -1 (all particles) and then some more particles.
 	if(std::find(fields_index.begin(), fields_index.end(), -1) != fields_index.end() && fields_index.size() > 1) {
-		throw oxDNAException("In %s there is more than one particle identifier, including -1 or \"all\". If either -1 or \"all\" are used as particle identifiers then they have to be the only one, as both translate to \"all the particles\". Dying badly.", identifier.c_str());
+		throw RCexception("In %s there is more than one particle identifier, including -1 or \"all\". If either -1 or \"all\" are used as particle identifiers then they have to be the only one, as both translate to \"all the particles\". Dying badly.", identifier.c_str());
 	}
 	// check that no particle appears twice
 	for(std::vector<int>::size_type i = 0; i < fields_index.size(); i++) {
 		for(std::vector<int>::size_type j = i + 1; j < fields_index.size(); j++) {
 			if(fields_index[i] == fields_index[j]) {
-				throw oxDNAException("In %s particle index %d appears twice (both at position %d and at position %d), but each index can only appear once. Dying badly.", identifier.c_str(), fields_index[i], i + 1, j + 1);
+				throw RCexception("In %s particle index %d appears twice (both at position %d and at position %d), but each index can only appear once. Dying badly.", identifier.c_str(), fields_index[i], i + 1, j + 1);
 			}
 		}
 	}

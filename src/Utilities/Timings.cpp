@@ -1,5 +1,5 @@
 #include "Timings.h"
-#include "oxDNAException.h"
+#include "RCexception.h"
 #include "Logger.h"
 
 #include <algorithm>
@@ -36,7 +36,7 @@ Timer::~Timer() {
 
 void Timer::resume() {
 	if(active) {
-		throw oxDNAException("resuming already active timer %s", desc.c_str());
+		throw RCexception("resuming already active timer %s", desc.c_str());
 	}
 	last = OXDNA_CLOCK();
 	active = true;
@@ -47,7 +47,7 @@ void Timer::pause() {
 		SYNCHRONIZE();
 	}
 	if(!active) {
-		throw oxDNAException("pausing resuming already inactive timer %s", desc.c_str());
+		throw RCexception("pausing resuming already inactive timer %s", desc.c_str());
 	}
 	time += (OXDNA_CLOCK() - last);
 	active = false;
@@ -93,7 +93,7 @@ void TimingManager::disable_sync() {
 
 void TimingManager::init() {
 	if(timingManager != nullptr) {
-		throw oxDNAException("initializing an already initialized TimingManager");
+		throw RCexception("initializing an already initialized TimingManager");
 	}
 	timingManager = new TimingManager();
 }
@@ -107,7 +107,7 @@ void TimingManager::clear() {
 
 TimingManager *TimingManager::instance() {
 	if(timingManager == nullptr) {
-		throw oxDNAException("accessing uninitialized TimingManager");
+		throw RCexception("accessing uninitialized TimingManager");
 	}
 	return timingManager;
 }
@@ -120,7 +120,7 @@ void TimingManager::add_timer(TimerPtr arg) {
 
 TimerPtr TimingManager::new_timer(std::string desc) {
 	if(desc_map.count(desc) != 0) {
-		throw oxDNAException("timer %s already used! Aborting", desc.c_str());
+		throw RCexception("timer %s already used! Aborting", desc.c_str());
 	}
 
 	TimerPtr timer = std::make_shared<Timer>(desc, sync);
@@ -136,10 +136,10 @@ TimerPtr TimingManager::new_timer(std::string desc) {
 
 TimerPtr TimingManager::new_timer(std::string desc, std::string parent_desc) {
 	if(desc_map.count(desc) != 0) {
-		throw oxDNAException("timer %s already used! Aborting", desc.c_str());
+		throw RCexception("timer %s already used! Aborting", desc.c_str());
 	}
 	if(desc_map.count(parent_desc) == 0) {
-		throw oxDNAException("Cannot add timer %s because parent timer %s does not exist", desc.c_str(), parent_desc.c_str());
+		throw RCexception("Cannot add timer %s because parent timer %s does not exist", desc.c_str(), parent_desc.c_str());
 	}
 
 	TimerPtr timer = std::make_shared<Timer>(desc, sync);

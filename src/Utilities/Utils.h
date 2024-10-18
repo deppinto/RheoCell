@@ -2,7 +2,7 @@
 #define UTILS_H_
 
 #include "../defs.h"
-#include "oxDNAException.h"
+#include "RCexception.h"
 
 #include <fast_double_parser/fast_double_parser.h>
 
@@ -65,7 +65,7 @@ inline number lexical_cast(const std::string &source) {
 	double result;
 
 	if(fast_double_parser::parse_number(source.c_str(), &result) == nullptr) {
-		throw oxDNAException("Cannot convert '%s' to a number", source.c_str());
+		throw RCexception("Cannot convert '%s' to a number", source.c_str());
 	}
 
 	return result;

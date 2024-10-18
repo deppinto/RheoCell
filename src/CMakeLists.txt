@@ -40,6 +40,7 @@ SET(forces_SOURCES
 SET(box_SOURCES
 	Boxes/BaseBox.cpp
 	Boxes/SquareBox.cpp
+	Boxes/OrthogonalBox.cpp
 	Boxes/LeesEdwardsSquareBox.cpp
 	Boxes/BoxFactory.cpp
 )
@@ -50,7 +51,7 @@ SET(common_SOURCES
 	Managers/SimManager.cpp
 	Utilities/LR_vector.cpp
 	Utilities/Utils.cpp
-	Utilities/oxDNAException.cpp
+	Utilities/RCexception.cpp
 	Utilities/Logger.cpp
 	Utilities/parse_input/parse_input.cpp
 	Utilities/time_scales/time_scales.cpp

@@ -42,7 +42,7 @@ ObservableOutput::ObservableOutput(std::string &stream_string) :
 	}
 
 	if(only_last && update_name_with_time) {
-		throw oxDNAException("only_last and update_name_with_time are mutually exclusive");
+		throw RCexception("only_last and update_name_with_time are mutually exclusive");
 	}
 
 	linear = true;
@@ -102,7 +102,7 @@ void ObservableOutput::open_output() {
 	}
 
 	if(output->bad() || !output->good()) {
-		throw oxDNAException("Stream %s not writable", output_name.c_str());
+		throw RCexception("Stream %s not writable", output_name.c_str());
 	}
 }
 

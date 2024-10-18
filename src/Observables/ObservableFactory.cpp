@@ -13,7 +13,7 @@ ObservablePtr ObservableFactory::make_observable(input_file &obs_inp) {
 
 	if(!strncasecmp(obs_type, "configuration", 512)) res = std::make_shared<Configuration>();
 	else {
-		if(res == NULL) throw oxDNAException("Observable '%s' not found. Aborting", obs_type);
+		if(res == NULL) throw RCexception("Observable '%s' not found. Aborting", obs_type);
 	}
 
 	res->get_settings(obs_inp, *(CONFIG_INFO->sim_input));

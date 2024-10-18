@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
 		Logger::init();
 		SignalManager::manage_segfault();
 		if(argc < 3) {
-			throw oxDNAException("Usage is '%s input_file [box_size|density]'\nthe third argument will be interpreted as a density if it is less than 2.0", argv[0]);
+			throw RCexception("Usage is '%s input_file [box_size|density]'\nthe third argument will be interpreted as a density if it is less than 2.0", argv[0]);
 		}
 		else if(argc > 1 && !strcmp(argv[1], "-v")) {
 			print_version();
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 
 		OX_LOG(Logger::LOG_INFO, "END OF THE GENERATION, everything went OK!");
 	}
-	catch (oxDNAException &e) {
+	catch (RCexception &e) {
 		OX_LOG(Logger::LOG_ERROR, "%s", e.what());
 		exit(1);
 	}

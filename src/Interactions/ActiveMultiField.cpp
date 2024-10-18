@@ -39,7 +39,7 @@ void ActiveMultiField::read_topology(std::vector<BaseField*> &fields) {
 
         std::ifstream topology(topology_filename, std::ios::in);
         if(!topology.good()) {
-                throw oxDNAException("Can't read topology file '%s'. Aborting", topology_filename);
+                throw RCexception("Can't read topology file '%s'. Aborting", topology_filename);
         }
 
         allocate_fields(fields);

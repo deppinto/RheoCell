@@ -35,7 +35,7 @@ void ForceFactory::add_force(input_file &inp, std::vector<BaseField *> &fields, 
 	ForcePtr extF;
 
 	if(type_str.compare("hard_wall") == 0) extF = std::make_shared<HardWall>();
-	else throw oxDNAException("Invalid force type `%s\'", type_str.c_str());
+	else throw RCexception("Invalid force type `%s\'", type_str.c_str());
 
 	string group = string("default");
 	getInputString(&inp, "group_name", group, 0);
@@ -58,7 +58,7 @@ void ForceFactory::make_forces(std::vector<BaseField *> &fields, BaseBox *box) {
 
 		ifstream external(external_filename.c_str());
 		if(!external.good ()) {
-			throw oxDNAException ("Can't read external_forces_file '%s'", external_filename.c_str());
+			throw RCexception ("Can't read external_forces_file '%s'", external_filename.c_str());
 		}
 
 		bool is_json = false;
@@ -102,7 +102,7 @@ void ForceFactory::make_forces(std::vector<BaseField *> &fields, BaseBox *box) {
 					break;
 					case '}':
 					if(!is_commented) {
-						if(justopen) throw oxDNAException ("Syntax error in '%s': nothing between parentheses", external_filename.c_str());
+						if(justopen) throw RCexception ("Syntax error in '%s': nothing between parentheses", external_filename.c_str());
 						open--;
 					}
 					break;
@@ -111,7 +111,7 @@ void ForceFactory::make_forces(std::vector<BaseField *> &fields, BaseBox *box) {
 				}
 
 				if(!is_commented) external_string << (char)a;
-				if(open > 1 || open < 0) throw oxDNAException ("Syntax error in '%s': parentheses do not match", external_filename.c_str());
+				if(open > 1 || open < 0) throw RCexception ("Syntax error in '%s': parentheses do not match", external_filename.c_str());
 				a = external.get();
 			}
 			external_string.clear();

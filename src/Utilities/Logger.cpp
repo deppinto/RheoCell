@@ -1,4 +1,4 @@
-#include "oxDNAException.h"
+#include "RCexception.h"
 #include "Logger.h"
 
 std::shared_ptr<Logger> Logger::logger = nullptr;
@@ -39,7 +39,7 @@ void Logger::log(int log_level, const char *format, va_list &ap) {
 void Logger::set_stream(const char *filename) {
 	FILE *buff = fopen(filename, "w");
 	if(buff == nullptr) {
-		throw oxDNAException("Log file '%s' is not writable", filename);
+		throw RCexception("Log file '%s' is not writable", filename);
 	}
 
 	log_stream = buff;
@@ -69,7 +69,7 @@ void Logger::get_settings(input_file &inp) {
 
 void Logger::init() {
 	if(logger != nullptr) {
-		throw oxDNAException("The logger has been already initialised");
+		throw RCexception("The logger has been already initialised");
 	}
 
 	logger = std::shared_ptr<Logger>(new Logger());
@@ -77,7 +77,7 @@ void Logger::init() {
 
 std::shared_ptr<Logger> Logger::instance() {
 	if(logger == nullptr) {
-		throw oxDNAException("Trying to access an uninitialised logger");
+		throw RCexception("Trying to access an uninitialised logger");
 	}
 
 	return logger;

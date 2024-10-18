@@ -19,7 +19,7 @@ void SquareBox::get_settings(input_file &inp) {
 
 
 void SquareBox::init(int Lx, int Ly) {
-	if(Lx != Ly) throw("The box in the configuration file is not a square");
+	if(Lx != Ly) throw RCexception("The box in the configuration file is not a square");
 
 	side = Lx;
 	sides[0] = sides[1]= Lx;
@@ -46,7 +46,7 @@ int SquareBox::getYsize(){return side;}
 int SquareBox::getBoxsize(){return side*side;}
 
 std::vector<number> SquareBox::get_abs_pos(BaseField *p) {
-	return vector<number> {p->CoM[0] + p->pos_shift[0], p->CoM[0] + p->pos_shift[0]};
+	return vector<number> {p->CoM[0] + p->pos_shift[0], p->CoM[1] + p->pos_shift[1]};
 }
 
 void SquareBox::shift_particle(BaseField * p, std::vector<number> &amount) {

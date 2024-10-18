@@ -27,7 +27,7 @@ GeneratorManager::GeneratorManager(input_file inp, char *third_argument) :
 	else {
 		number argv2 = atof(tmpstr.c_str());
 		if(argv2 <= 0.) {
-			throw oxDNAException("Refusing to run with box_side/density = %g (converted from \"%s\")", argv2, tmpstr.c_str());
+			throw RCexception("Refusing to run with box_side/density = %g (converted from \"%s\")", argv2, tmpstr.c_str());
 		}
 		if(argv2 < 2.) {
 			use_density = true;
@@ -121,6 +121,8 @@ void GeneratorManager::init() {
 
 void GeneratorManager::generate() {
 	interaction->generate_random_configuration(fields);
+
+	OX_LOG(Logger::LOG_INFO, "Generating random configuration of %d cells", N);
 
 	for(auto p : fields) {
 		p->init();

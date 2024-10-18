@@ -1,6 +1,6 @@
 #include "ConfigInfo.h"
 
-#include "oxDNAException.h"
+#include "RCexception.h"
 #include "../Fields/BaseField.h"
 #include "../Interactions/BaseInteraction.h"
 #include "../Forces/BaseForce.h"
@@ -78,7 +78,7 @@ void ConfigInfo::set(BaseInteraction *i, std::string *info, BaseBox *abox) {
 
 void ConfigInfo::init(std::vector<BaseField *> *ps) {
 	if(config_info != nullptr) {
-		throw oxDNAException("The ConfigInfo object has been already initialised");
+		throw RCexception("The ConfigInfo object has been already initialised");
 	}
 
 	config_info = std::shared_ptr<ConfigInfo>(new ConfigInfo(ps));

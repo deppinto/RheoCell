@@ -46,7 +46,7 @@ std::shared_ptr<SimBackend> BackendFactory::make_backend(input_file &inp) {
 				new_backend = new FD_CUDABackend();
 			}
 			else {
-				throw oxDNAException("Backend precision '%s' is not allowed, as the code has been compiled with 'float' and 'mixed' support only", backend_prec.c_str());
+				throw RCexception("Backend precision '%s' is not allowed, as the code has been compiled with 'float' and 'mixed' support only", backend_prec.c_str());
 			}
 #else
 			if(precision_state == KEY_NOT_FOUND) {
@@ -56,18 +56,18 @@ std::shared_ptr<SimBackend> BackendFactory::make_backend(input_file &inp) {
 				new_backend = new FD_CUDABackend();
 			}
 			else {
-				throw oxDNAException("Backend precision '%s' is not allowed, as the code has been compiled with 'double' support only", backend_prec.c_str());
+				throw RCexception("Backend precision '%s' is not allowed, as the code has been compiled with 'double' support only", backend_prec.c_str());
 			}
 #endif
 			OX_LOG(Logger::LOG_INFO, "CUDA backend precision: %s", backend_prec.c_str());
 		}
 #endif
 		else {
-			throw oxDNAException("Backend '%s' not supported", backend_opt.c_str());
+			throw RCexception("Backend '%s' not supported", backend_opt.c_str());
 		}
 	}
 	else {
-		throw oxDNAException("Simulation type '%s' not supported", sim_type.c_str());
+		throw RCexception("Simulation type '%s' not supported", sim_type.c_str());
 	}
 
 	return std::shared_ptr<SimBackend>(new_backend);

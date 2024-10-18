@@ -19,6 +19,6 @@ InteractionPtr InteractionFactory::make_interaction(input_file &inp) {
         }
 
 	else {
-		throw oxDNAException("Interaction '%s' not found. Aborting", inter_type.c_str());
+		throw RCexception("Interaction '%s' not found. Aborting", inter_type.c_str());
 	}
 }

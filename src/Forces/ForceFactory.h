@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../Utilities/oxDNAException.h"
+#include "../Utilities/RCexception.h"
 #include "../Fields/BaseField.h"
 
 #include "BaseForce.h"

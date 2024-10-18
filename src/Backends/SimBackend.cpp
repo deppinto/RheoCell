@@ -89,15 +89,15 @@ void SimBackend::get_settings(input_file &inp) {
 		// check that conf_file is not specified
 		std::string tmpstring;
 		if(getInputString(&inp, "conf_file", tmpstring, 0) == KEY_FOUND)
-			throw oxDNAException("Input file error: \"conf_file\" cannot be specified if \"reload_from\" is specified");
+			throw RCexception("Input file error: \"conf_file\" cannot be specified if \"reload_from\" is specified");
 
 		// check that restart_step_counter is set to 0
 		if(restart_step_counter)
-			throw oxDNAException("Input file error: \"restart_step_counter\" must be set to false if \"reload_from\" is specified");
+			throw RCexception("Input file error: \"restart_step_counter\" must be set to false if \"reload_from\" is specified");
 
 		int my_seed;
 		if(getInputInt(&inp, "seed", &my_seed, 0) == KEY_FOUND)
-			throw oxDNAException("Input file error: \"seed\" must not be specified if \"reload_from\" is specified");
+			throw RCexception("Input file error: \"seed\" must not be specified if \"reload_from\" is specified");
 
 		conf_filename = std::string(reload_from);
 	}
@@ -149,7 +149,7 @@ void SimBackend::get_settings(input_file &inp) {
 	// set the max IO
 	if(getInputNumber(&inp, "max_io", &max_io, 0) == KEY_FOUND) {
 		if(max_io < 0)
-			throw oxDNAException("Cannot run with a negative I/O limit. Set the max_io key to something > 0");
+			throw RCexception("Cannot run with a negative I/O limit. Set the max_io key to something > 0");
 		else
 			OX_LOG(Logger::LOG_INFO, "Setting the maximum IO limit to %g MB/s", max_io);
 	}
@@ -164,7 +164,7 @@ void SimBackend::get_settings(input_file &inp) {
 void SimBackend::init() {
 	conf_input.open(conf_filename.c_str());
 	if(conf_input.good() == false) {
-		throw oxDNAException("Can't read configuration file '%s'", conf_filename.c_str());
+		throw RCexception("Can't read configuration file '%s'", conf_filename.c_str());
 	}
 
 	interaction->init();
@@ -183,14 +183,14 @@ void SimBackend::init() {
 		int i;
 		for(i = 0; i < confs_to_skip && conf_input.good(); i++) {
 			if(!read_next_configuration(false)) {
-				throw oxDNAException("Skipping %d configuration(s) is not possible, as the initial trajectory file only contains %d configurations", confs_to_skip, i);
+				throw RCexception("Skipping %d configuration(s) is not possible, as the initial trajectory file only contains %d configurations", confs_to_skip, i);
 			}
 		}
 	}
 
 	bool check = read_next_configuration(false);
         if(!check) {
-                throw oxDNAException("Could not read the initial configuration, aborting");
+                throw RCexception("Could not read the initial configuration, aborting");
         }
 
 	start_step_from_file = (restart_step_counter) ? 0 : read_conf_step;
@@ -244,7 +244,7 @@ bool SimBackend::read_next_configuration(bool binary) {
 			if(res == 15) {
 				error_message << "\nSince the line contains 15 floats, likely the configuration contains more particles than specified in the topology file, or the header has been trimmed away.";
 			}
-			throw oxDNAException(error_message.str().c_str());
+			throw RCexception(error_message.str().c_str());
 		}
 
 		//std::getline(conf_input, line);
@@ -279,10 +279,10 @@ bool SimBackend::read_next_configuration(bool binary) {
 
 	if(i != N()) {
 		if(confs_to_skip > 0) {
-			throw oxDNAException("Wrong number of particles (%d) found in configuration. Maybe you skipped too many configurations?", i);
+			throw RCexception("Wrong number of particles (%d) found in configuration. Maybe you skipped too many configurations?", i);
 		}
 		else {
-			throw oxDNAException("The number of lines found in configuration file (%d) doesn't match the parsed number of particles (%d)", i, N());
+			throw RCexception("The number of lines found in configuration file (%d) doesn't match the parsed number of particles (%d)", i, N());
 		}
 	}
 
@@ -307,7 +307,7 @@ void SimBackend::add_output(ObservableOutputPtr new_output) {
 void SimBackend::remove_output(std::string output_file) {
 	auto search = std::find_if(obs_outputs.begin(), obs_outputs.end(), [output_file](ObservableOutputPtr p) { return p->get_output_name() == output_file; });
 	if(search == obs_outputs.end()) {
-		throw oxDNAException("The output '%s' does not exist, can't remove it", output_file.c_str());
+		throw RCexception("The output '%s' does not exist, can't remove it", output_file.c_str());
 	}
 
 	obs_outputs.erase(search);
@@ -337,7 +337,7 @@ void SimBackend::print_observables() {
 			double MBps = (total_bytes / (1024. * 1024.)) / time_passed;
 			OX_DEBUG("Current data production rate: %g MB/s (total bytes: %lld, time_passed: %g)" , MBps, total_bytes, time_passed);
 			if(MBps > max_io) {
-				throw oxDNAException(
+				throw RCexception(
 						"Aborting because the program is generating too much data (%g MB/s).\n\t\t\tThe current limit is set to %g MB/s;\n\t\t\tyou can change it by setting max_io=<float> in the input file.",
 						MBps, max_io);
 			}

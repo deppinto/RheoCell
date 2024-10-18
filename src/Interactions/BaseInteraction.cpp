@@ -22,7 +22,7 @@ void BaseInteraction::get_settings(input_file &inp) {
 int BaseInteraction::get_N_from_topology() {
         std::ifstream topology;
         topology.open(topology_filename, std::ios::in);
-        if(!topology.good()) throw oxDNAException("Can't read topology file '%s'. Aborting", topology_filename);
+        if(!topology.good()) throw RCexception("Can't read topology file '%s'. Aborting", topology_filename);
         int ret;
         topology >> ret;
         topology.close();

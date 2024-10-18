@@ -1,6 +1,9 @@
 #include "BoxFactory.h"
 #include "SquareBox.h"
+#include "OrthogonalBox.h"
 #include "LeesEdwardsSquareBox.h"
+
+#include "../Utilities/RCexception.h"
 
 BoxPtr BoxFactory::make_box(input_file &inp) {
 	// the default box is the square one
@@ -13,5 +16,9 @@ BoxPtr BoxFactory::make_box(input_file &inp) {
 		if(!lees_edwards) return std::make_shared<SquareBox>();
 		else return std::make_shared<LeesEdwardsSquareBox>();
 	}
-	else throw("Unsupported box");
+	if(box_type.compare("orthogonal") == 0) {
+		if(!lees_edwards) return std::make_shared<OrthogonalBox>();
+		else throw RCexception("Lees-Edwards boundary conditions are not compatible with Orthogonal Box!");
+	}
+	else throw RCexception("Unsupported box");
 }

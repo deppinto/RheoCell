@@ -4,7 +4,7 @@
 #define CONFIG_INFO ConfigInfo::instance()
 
 #include "../defs.h"
-#include "oxDNAException.h"
+#include "RCexception.h"
 #include "FlattenedConfigInfo.h"
 
 #include <string>
@@ -119,7 +119,7 @@ public:
 };
 
 inline std::shared_ptr<ConfigInfo> ConfigInfo::instance() {
-	if(config_info == nullptr) throw oxDNAException("Trying to access an uninitialised ConfigInfo object");
+	if(config_info == nullptr) throw RCexception("Trying to access an uninitialised ConfigInfo object");
 
 	return config_info;
 }

@@ -3,7 +3,7 @@
 
 #include <string>
 #include "../defs.h"
-#include "../Utilities/oxDNAException.h"
+#include "../Utilities/RCexception.h"
 #include "../Utilities/Utils.h"
 #include "../Utilities/ConfigInfo.h"
 

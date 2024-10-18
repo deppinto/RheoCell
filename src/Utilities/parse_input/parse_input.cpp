@@ -2,7 +2,7 @@
 
 #include "../Utils.h"
 #include "../Logger.h"
-#include "../oxDNAException.h"
+#include "../RCexception.h"
 #include "../ConfigInfo.h"
 
 #include <nlohmann/json.hpp>
@@ -42,7 +42,7 @@ void input_value::expand_value(std::map<std::string, std::string> expanded_depen
 		exprtk::expression<double> expression;
 
 		if(!parser.compile(m[1].str(), expression) || std::isnan(expression.value())) {
-			throw oxDNAException("An error occurred during the evaluation of the mathematical expression '%s' required to expand the '%s' key", m[1].str().c_str(), key.c_str());
+			throw RCexception("An error occurred during the evaluation of the mathematical expression '%s' required to expand the '%s' key", m[1].str().c_str(), key.c_str());
 		}
 		std::string expr_value = Utils::sformat("%lf", expression.value());
 
@@ -57,7 +57,7 @@ input_file::input_file(bool is_main) :
 				is_main_input(is_main) {
 	if(is_main) {
 		if(input_file::main_input != nullptr) {
-			throw oxDNAException("There is already a main input file: Cannot initialise another one");
+			throw RCexception("There is already a main input file: Cannot initialise another one");
 		}
 		input_file::main_input = this;
 	}
@@ -109,7 +109,7 @@ void input_file::init_from_json(const nlohmann::json &json) {
 			std::stringstream ss;
 			ss << "The JSON line \"" << item.key() << " : " << item.value() << "\" cannot be converted to strings. ";
 			ss << "Please make sure that all keys and values are quoted.";
-			throw oxDNAException(ss.str());
+			throw RCexception(ss.str());
 		}
 	}
 }
@@ -117,7 +117,7 @@ void input_file::init_from_json(const nlohmann::json &json) {
 void input_file::init_from_command_line_args(int argc, char *argv[], int args_to_skip) {
 	init_from_filename(argv[1]);
 	if(state == ERROR) {
-		throw oxDNAException("Caught an error while opening the input file");
+		throw RCexception("Caught an error while opening the input file");
 	}
 
 	if(argc > (2 + args_to_skip)) {
@@ -206,11 +206,11 @@ std::string input_file::get_value(std::string key, int mandatory, bool &found) {
 			std::map<std::string, std::string> expanded_dependency_values;
 			for(const auto &k : current_value.depends_on) {
 				if(k == root_key) {
-					throw oxDNAException("Circular dependency found between keys '%s' and '%s', aborting", root_key.c_str(), current_value.key.c_str());
+					throw RCexception("Circular dependency found between keys '%s' and '%s', aborting", root_key.c_str(), current_value.key.c_str());
 				}
 				auto dep_it = input_file::main_input->keys.find(k);
 				if(dep_it == input_file::main_input->keys.end()) {
-					throw oxDNAException("Key '%s' (which is expanded by '%s') is not defined", k.c_str(), current_value.key.c_str());
+					throw RCexception("Key '%s' (which is expanded by '%s') is not defined", k.c_str(), current_value.key.c_str());
 				}
 				input_value &dep_value = input_file::main_input->keys[k];
 
@@ -227,7 +227,7 @@ std::string input_file::get_value(std::string key, int mandatory, bool &found) {
 		return value.expanded_value;
 	}
 	else if(mandatory) {
-		throw oxDNAException("Mandatory key `%s' not found", key.c_str());
+		throw RCexception("Mandatory key `%s' not found", key.c_str());
 	}
 	else {
 		return "";
@@ -320,7 +320,7 @@ int _readLine(std::vector<string>::iterator &it, std::vector<string>::iterator &
 				it++;
 
 				if(it == end) {
-					throw oxDNAException("Unclosed `{' at the end of file. Aborting");
+					throw RCexception("Unclosed `{' at the end of file. Aborting");
 				}
 
 				string new_line = string(*it);
@@ -336,7 +336,7 @@ int _readLine(std::vector<string>::iterator &it, std::vector<string>::iterator &
 					int last_pos = new_line.find_last_of("}");
 					string after_end = new_line.substr(last_pos + 1);
 					if(after_end.size() > 0)
-						throw oxDNAException("Found the string '%s' after a closing curly brace. You should either comment it or remove it. Aborting", after_end.c_str());
+						throw RCexception("Found the string '%s' after a closing curly brace. You should either comment it or remove it. Aborting", after_end.c_str());
 				}
 
 				my_value += new_line;
@@ -412,7 +412,7 @@ int getInputBool(input_file *inp, const char *skey, bool *dest, int mandatory) {
 			*dest = false;
 		}
 		else {
-			throw oxDNAException("boolean key `%s' is invalid (`%s'), aborting.", skey, value.c_str());
+			throw RCexception("boolean key `%s' is invalid (`%s'), aborting.", skey, value.c_str());
 		}
 	}
 
@@ -518,7 +518,7 @@ int getInputKeys(input_file *inp, string begins_with, vector<string> *dest, int 
 	}
 
 	if(mandatory && ret == 0) {
-		throw oxDNAException("At least one key starting with `%s' is required. Found none, exiting", begins_with.c_str());
+		throw RCexception("At least one key starting with `%s' is required. Found none, exiting", begins_with.c_str());
 	}
 
 	return ret;

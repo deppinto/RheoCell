@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include "SimManager.h"
 #include "../Backends/BackendFactory.h"
-#include "../Utilities/oxDNAException.h"
+#include "../Utilities/RCexception.h"
 #include "../Utilities/Timings.h"
 
 void gbl_terminate(int arg) {
@@ -62,10 +62,10 @@ void SimManager::load_options() {
 	bool my_restart_step_counter = false;
 	getInputBool(&input, "restart_step_counter", &my_restart_step_counter, 0);
 	if(my_restart_step_counter == false && equilibration_steps > 0) {
-		throw oxDNAException("Incompatible key values found:\n\tif equilibration_steps > 0, restart_step_counter must be set to true.\n\tAborting");
+		throw RCexception("Incompatible key values found:\n\tif equilibration_steps > 0, restart_step_counter must be set to true.\n\tAborting");
 	}
 
-	if(equilibration_steps < 0) throw oxDNAException("Equilibration steps can not be < 0. Aborting");
+	if(equilibration_steps < 0) throw RCexception("Equilibration steps can not be < 0. Aborting");
 	if(getInputInt(&input, "seed", &seed, 0) == KEY_NOT_FOUND) {
 		seed = time(NULL);
 		int rand_seed = 0;
@@ -107,7 +107,7 @@ void SimManager::init() {
 	time_scale_var = TS_LIN;
 	if(strcmp(ts_type, "linear") == 0) time_scale_var = TS_LIN;
 	else if(strcmp(ts_type, "log_lin") == 0) time_scale_var = TS_LOG_LIN;
-	else throw oxDNAException("Time scale '%s' not supported", ts_type);
+	else throw RCexception("Time scale '%s' not supported", ts_type);
 
 	backend->init();
 
