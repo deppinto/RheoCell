@@ -26,7 +26,7 @@ void SquareBox::init(int Lx, int Ly) {
 }
 
 int SquareBox::getElementX(int site, int distX){
-	int x = (site%side)+distX;
+	int x = (site-(int(site/side)*side))+distX;
 	while(x<0)x+=side;
 	while(x>=side)x-=side;
 	return x;

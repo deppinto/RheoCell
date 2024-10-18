@@ -24,8 +24,8 @@ void FD_CPUBackend::init() {
 	int sizeX = box->getXsize();
 	int sizeY = box->getYsize();
 	cos_x_table.resize(sizeX);
-	cos_y_table.resize(sizeX);
-	sin_x_table.resize(sizeY);
+	cos_y_table.resize(sizeY);
+	sin_x_table.resize(sizeX);
 	sin_y_table.resize(sizeY);
 	for(int i =0; i<sizeX; i++){
 		cos_x_table[i]=cos(2*PI*i/sizeX);

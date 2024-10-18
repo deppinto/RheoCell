@@ -29,7 +29,7 @@ void OrthogonalBox::init(int Lx, int Ly) {
 }
 
 int OrthogonalBox::getElementX(int site, int distX){
-	int x = (site%sidex)+distX;
+	int x = (site-(int(site/sidex)*sidex))+distX;
 	while(x<0)x+=sidex;
 	while(x>=sidex)x-=sidex;
 	return x;
@@ -37,7 +37,7 @@ int OrthogonalBox::getElementX(int site, int distX){
 }
 
 int OrthogonalBox::getElementY(int site, int distY){
-	int y = (site/sidey)+distY;
+	int y = (site/sidex)+distY;
         while(y<0)y+=sidey;
         while(y>=sidey)y-=sidey;
 	return y;
