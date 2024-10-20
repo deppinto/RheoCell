@@ -51,7 +51,9 @@ void BaseInteraction::resetSums(int k){
 }
 
 void BaseInteraction::updateFieldProperties(BaseField *p, int q){
-
+	int k = p->GetSubIndex(q, box);
+	p->set_F_ext(k, p->fieldScalar[q], box->getWalls(k));
+	p->freeEnergy[q] = p->F_ext;
 }
 
 number BaseInteraction::get_system_energy(std::vector<BaseField *> &fields) {
@@ -88,34 +90,46 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 	int N = fields.size();
 	number totalNodes=box->getXsize()*box->getYsize();
 	rcut= sqrt( (totalNodes/N)/PI );
+	rcut=5;
 	sqr_rcut = SQR(rcut);
+	std::cout<<"This is rcut: " << rcut <<std::endl;
 	for(int i = 0; i < N; i++) {
 		BaseField *p = fields[i];
 
 		bool inserted = false;
 		do {
 			p->CoM = std::vector<number> {drand48() * box->getXsize(), drand48() * box->getYsize()};
-
 			p->set_positions_initial(box);
-			p->set_ext_potential(0, box);
 
 			inserted = true;
-
-
 			for(int n = 0; n < i; n++) {
 				BaseField *q = fields[n];
 				// particles with an index larger than p->index have not been inserted yet
 				if(generate_random_configuration_overlap(p, q)) inserted = false;
 			}
 
-			// we take into account the external potential
-			//number boltzmann_factor = exp(-p->ext_potential / temperature);
-			//if(std::isnan(p->ext_potential) || drand48() > boltzmann_factor) {
-			//	inserted = false;
-			//}
+			//we take into account the external potential
+			number ext_value=0.;
+			int start=p->CoM[0]+p->CoM[1]*box->getXsize();
+			int startX=box->getElementX(start, (int)rcut*(-1));
+			int startY=box->getElementY(start, (int)rcut*(-1));
+			start=startX+startY*box->getXsize();
+			for(int y=0; y<2*rcut; y++){
+				for(int x=0; x<2*rcut; x++){
+					int f = box->getElementX(start, x) + box->getElementY(start, y) * box->getXsize();
+					p->set_ext_potential(f, box->getWalls(f));	
+					ext_value += p->ext_potential;
+				}	
+			}
+			//std::cout<<"generator: "<<start<<" "<<ext_value<<std::endl;
+			if(std::isnan(ext_value) || ext_value > 1.5) {
+				inserted = false;
+			}
+
 
 		} while(!inserted);
 
-		if(i > 0 && N > 5 && i % (N / 2) == 0) printf("Inserted %d%% of the particles (%d/%d)\n", i*100/N, i, N);
+		if(i > 0 && N > 5 && i % (N / 4) == 0) printf("Inserted %d%% of the particles (%d/%d)\n", i*100/N, i, N);
 	}
+	printf("Inserted %d%% of the particles (%d/%d)\n", 100, N, N);
 }

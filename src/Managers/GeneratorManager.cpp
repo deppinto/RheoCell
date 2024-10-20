@@ -84,6 +84,7 @@ void GeneratorManager::load_options() {
 	Logger::instance()->get_settings(input);
 
 	mybox = std::shared_ptr<BaseBox>(BoxFactory::make_box(input));
+	mybox->get_settings(input);
 
 	interaction = InteractionFactory::make_interaction(input);
 	interaction->get_settings(input);

@@ -31,9 +31,6 @@ protected:
 
 	number max_io;
 
-	bool external_forces;
-	std::string external_filename;
-
 	bool reseed;
 
 	std::shared_ptr<BaseBox> box;

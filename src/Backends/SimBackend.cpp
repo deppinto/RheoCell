@@ -14,7 +14,6 @@
 SimBackend::SimBackend() {
 	// we need to initialize everything so that we can check what we can
 	// and what we can't delete[] in the destructor
-	external_forces = false;
 	N_updates = 0;
 	confs_to_skip = 0;
 	interaction = nullptr;
@@ -156,8 +155,6 @@ void SimBackend::get_settings(input_file &inp) {
 	else {
 		max_io = 1.; // default value for a simulation is 1 MB/s;
 	}
-
-	getInputBool(&inp, "external_forces", &external_forces, 0);
 
 }
 

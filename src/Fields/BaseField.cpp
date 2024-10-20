@@ -3,8 +3,6 @@
 
 BaseField::BaseField() :
 				index(-1), LsubX(25), LsubY(25), area(0.), sumF(0.) {
-	ext_potential = (number) 0.;
-	force = std::vector<number> {0., 0.};
 	CoM = std::vector<number> {0., 0.};
 }
 				
@@ -12,10 +10,10 @@ BaseField::BaseField() :
 void BaseField::copy_from(const BaseField &p) {
 	index = p.index;
 	CoM = p.CoM;
-	velocityX = p.velocityX;
-	velocityY = p.velocityY;
-	force = p.force;
-	ext_potential = p.ext_potential;
+	for(int i=0; i<subSize; i++){
+		velocityX[i] = p.velocityX[i];
+		velocityY[i] = p.velocityY[i];
+	}
 }
 
 void BaseField::get_interaction_values(int R) {
@@ -32,8 +30,6 @@ bool BaseField::add_ext_force(BaseForce *f) {
 }
 
 void BaseField::init() {
-	force = std::vector<number> {0., 0.};
-	check();
 }
 
 void BaseField::check() {

@@ -40,6 +40,8 @@ public:
 	BaseInteraction();
 	virtual ~BaseInteraction();
 
+	number friction;
+
 	virtual void set_box(BaseBox *boxArg) {
 		box = boxArg;
 	}

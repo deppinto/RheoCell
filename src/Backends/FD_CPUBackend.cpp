@@ -12,6 +12,7 @@ FD_CPUBackend::~FD_CPUBackend() {
 
 void FD_CPUBackend::get_settings(input_file &inp) {
 	FDBackend::get_settings(inp);
+	getInputNumber(&inp, "J0", &J0, 0);
 }
 
 void FD_CPUBackend::init() {
@@ -66,9 +67,9 @@ void FD_CPUBackend::first_step(bool store) {
 			// compute dphi
 	                dphi =
 	                // free energy
-	                - J0 * p->freeEnergy[q]
+	                - J0 * p->freeEnergy[q] 
                		// advection term
-	                - p->velocityX * p->fieldDX[q] - p->velocityY * p->fieldDY[q];
+	                - p->velocityX[q] * p->fieldDX[q] - p->velocityY[q] * p->fieldDY[q];
 
 			//if(p->index==2 && store==true)printf("check: %d, %d | %f, %f, %f, %f, %f | %f, %f, %d, %d\n", p->index, q, p->freeEnergy[q], p->velocityX, p->velocityY, p->fieldDX[q], p->fieldDY[q], com_old[0], com_old[1], p->offset[0],  p->offset[1]);
 
@@ -98,7 +99,6 @@ void FD_CPUBackend::first_step(bool store) {
 			particles_with_warning.push_back(p->index);
 		}
 
-		//p->set_initial_forces(current_step(), box);
 		p->set_positions(config_info->box);
 	}
 

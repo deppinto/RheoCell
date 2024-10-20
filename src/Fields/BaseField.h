@@ -46,17 +46,12 @@ public:
 	 * @return true if the force was added, false otherwise
 	 */
 	bool add_ext_force(BaseForce *f);
-	std::vector<number> sf;
-
-	inline void set_initial_forces(llint step, const std::shared_ptr<BaseBox> &box) {
-		force = std::vector<number> {0., 0.};
-
+	number F_ext;
+	inline void set_F_ext(int k, number phi, number walls) {
 		if(ext_forces.size() > 0) {
-			std::vector<number> abs_pos = box->get_abs_pos(this);
-			sf = std::vector<number> {0., 0.};
+			F_ext = 0.;
 			for(auto ext_force : ext_forces) {
-				sf = ext_force->value(step, abs_pos);
-				force[0] += sf[0]; force[1] += sf[1];
+				F_ext += ext_force->free_energy(k, phi, walls);
 			}
 		}
 	}
@@ -69,13 +64,12 @@ public:
          * @return true if the external potential was added, false otherwise
          */
         /// Total potential energy due to external forces
-        double ext_potential;
-        inline void set_ext_potential(llint step, BaseBox *box) {
+        number ext_potential;
+        inline void set_ext_potential(int k, number walls) {
                 if(ext_forces.size() > 0) {
-                        std::vector<number> abs_pos = box->get_abs_pos(this);
-                        ext_potential = (double) 0.;
+                        ext_potential = 0.;
                         for(auto ext_force : ext_forces) {
-                                ext_potential += ext_force->potential(step, abs_pos);
+                                ext_potential += ext_force->potential(k, walls);
                         }
                 }
         }
@@ -86,22 +80,19 @@ public:
 
 	int type;
 
-	/// External force exerted on the field
-	std::vector<number> force;
-
 	/// Positions of all interaction centers. This array must be initialized by child classes
 	std::vector<number> CoM;
 
 	/// Velocity of the particle
-	number velocityX;
-	number velocityY;
+	std::vector<number> velocityX;
+	std::vector<number> velocityY;
 	std::vector<number> fieldDX;
 	std::vector<number> fieldDY;
 
 	number S01;
         number S00;
-	std::vector<number> Fpressure;
-	std::vector<number> Fshape;
+	std::vector<number> Fpassive;
+	std::vector<number> Factive;
 
 	//child functions need to initialize everything below
 	virtual int GetSubIndex(int site, BaseBox *box) = 0;

@@ -38,9 +38,10 @@ protected:
 	void computeGlobalSums(BaseField *p, int q, bool update_global_sums=false);
 	void initFieldProperties(BaseField *p);
 	std::vector<number> phi2;
-	std::vector<number> Pressure;
 	std::vector<number> sumS00;
 	std::vector<number> sumS01;
+	number velX;
+	number velY;
 
 public:
 	ActiveMultiField();

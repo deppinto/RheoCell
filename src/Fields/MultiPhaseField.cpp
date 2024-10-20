@@ -36,12 +36,12 @@ void MultiPhaseField::init(int Lx, int Ly) {
 	fieldScalar_old.resize(subSize);
 	dfield_old.resize(subSize);
 	neighbors_sub.resize(subSize*9);
-	velocityX=0.;
-        velocityY=0.;
+	velocityX.resize(subSize);
+        velocityY.resize(subSize);
 	S00=0.;
         S01=0.;
-	Fpressure= std::vector<number> {0.,0.};
-	Fshape= std::vector<number> {0.,0.};
+	Fpassive= std::vector<number> {0.,0.};
+	Factive= std::vector<number> {0.,0.};
 	area=0;
 	sumF=0;
 	offset.resize(2);
@@ -68,12 +68,12 @@ void MultiPhaseField::init() {
 	fieldScalar_old.resize(subSize);
         dfield_old.resize(subSize);
 	neighbors_sub.resize(subSize*9);
-	velocityX=0.;
-        velocityY=0.;
+	velocityX.resize(subSize);
+        velocityY.resize(subSize);
 	S00=0.;
         S01=0.;
-	Fpressure= std::vector<number> {0.,0.};
-        Fshape= std::vector<number> {0.,0.};
+	Fpassive = std::vector<number> {0.,0.};
+        Factive = std::vector<number> {0.,0.};
 	area=0;
 	offset.resize(2);
 	offset[0]=0; offset[1]=0;
@@ -82,6 +82,8 @@ void MultiPhaseField::init() {
 	for(int i=0; i<subSize; i++){
 		x=LsubX/2-i%LsubX;
 		y=LsubY/2-i/LsubY;
+		velocityX[i]=0;
+		velocityY[i]=0;
 		if(x*x+y*y<init_radius2+0.5){fieldScalar[i]=1.;area+=1;sumF+=1;}
 		else fieldScalar[i]=0.;
 	}
@@ -97,8 +99,8 @@ void MultiPhaseField::setNeighborsSub() {
 void MultiPhaseField::setNeighborsSubSquareDirichlet() {
 	int x,y,xx,yy,site,ss;
 	for(int i =0; i<subSize; i++) {
-		x=i%LsubX;
-		y=i/LsubY;
+		x=i%LsubY;
+		y=i/LsubX;
 		ss=0;
 		for(int j=-1; j<=1; j++){
 			for(int k=-1; k<=1; k++){
@@ -119,8 +121,8 @@ void MultiPhaseField::setNeighborsSubSquareDirichlet() {
 void MultiPhaseField::setNeighborsSubSquarePeriodic() {
 	int x,y,xx,yy,site,ss;
 	for(int i =0; i<subSize; i++) {
-		x=i%LsubX;
-		y=i/LsubY;
+		x=i%LsubY;
+		y=i/LsubX;
 		ss=0;
 		for(int j=-1; j<=1; j++){
 			for(int k=-1; k<=1; k++){

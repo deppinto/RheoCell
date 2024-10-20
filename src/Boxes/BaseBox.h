@@ -15,11 +15,6 @@ class BaseBox {
 		virtual int getElementX(int site, int distX) = 0;
 		virtual int getElementY(int site, int distY) = 0;
 
-		//virtual int getElementX(BaseField &p, int distX);
-		//virtual int getElementX(BaseField *p, int distX);
-		//virtual int getElementY(BaseField &p, int distY);
-		//virtual int getElementY(BaseField *p, int distY);
-
 		virtual std::vector<number> min_image(const std::vector<number> &v1, const std::vector<number> &v2) const = 0;
 		virtual std::vector<number> min_image(const BaseField &p, const BaseField &q);
 		virtual std::vector<number> min_image(const BaseField *p, const BaseField *q);
@@ -34,6 +29,8 @@ class BaseBox {
 
 		virtual std::vector<number> get_abs_pos(BaseField *p) = 0;
 		virtual void shift_particle(BaseField *p, std::vector<number> &amount) = 0;
+
+		virtual number getWalls(int k){return 0;};
 
 };
 

@@ -141,8 +141,6 @@ number SimpleMultiField::f_interaction(BaseField *p, int q) {
 	+ 2*kappa/lambda*phi*(phi2[k]-phi*phi)
 	);
 
-	//if(p->index==3 && 2*kappa/lambda*phi*(phi2[k]-phi*phi)>0.001)printf("interaction: %d, %d | %f, %f, %f | %f, %f, %d, %f | %f, %f\n",p->index, q, gamma*(8*phi*(1-phi)*(1-2*phi)/lambda - 2*lambda*laplacianPhi), -4*mu/a0*(1-a/a0)*phi, 2*kappa/lambda*phi*(phi2[k]-phi*phi), phi, phi2[k], k, a, p->CoM[0], p->CoM[1]);
-
 	p->freeEnergy[q] = V;
 	return V;
 }

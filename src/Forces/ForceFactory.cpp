@@ -1,6 +1,6 @@
 #include "ForceFactory.h"
 
-#include "HardWall.h"
+#include "ChannelWalls.h"
 
 #include <nlohmann/json.hpp>
 
@@ -34,7 +34,7 @@ void ForceFactory::add_force(input_file &inp, std::vector<BaseField *> &fields, 
 
 	ForcePtr extF;
 
-	if(type_str.compare("hard_wall") == 0) extF = std::make_shared<HardWall>();
+	if(type_str.compare("channel_walls") == 0) extF = std::make_shared<ChannelWalls>();
 	else throw RCexception("Invalid force type `%s\'", type_str.c_str());
 
 	string group = string("default");

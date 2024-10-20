@@ -34,12 +34,13 @@ SET(interactions_SOURCES
 SET(forces_SOURCES
 	Forces/ForceFactory.cpp
 	Forces/BaseForce.cpp
-	Forces/HardWall.cpp
+	Forces/ChannelWalls.cpp
 )
 
 SET(box_SOURCES
 	Boxes/BaseBox.cpp
 	Boxes/SquareBox.cpp
+	Boxes/Channel.cpp
 	Boxes/OrthogonalBox.cpp
 	Boxes/LeesEdwardsSquareBox.cpp
 	Boxes/BoxFactory.cpp

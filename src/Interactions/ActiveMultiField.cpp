@@ -60,7 +60,6 @@ void ActiveMultiField::set_box(BaseBox *boxArg) {
 	int Lx=box->getXsize();
 	int Ly=box->getYsize();
 	phi2.resize(Lx*Ly);
-	Pressure.resize(Lx*Ly);
 	sumS00.resize(Lx*Ly);
 	sumS01.resize(Lx*Ly);
 	for(int i =0; i<Lx*Ly; i++){resetSums(i);}
@@ -68,19 +67,17 @@ void ActiveMultiField::set_box(BaseBox *boxArg) {
 
 void ActiveMultiField::resetSums(int k) {
 	phi2[k]=0;
-        Pressure[k]=0;
         sumS00[k]=0;
         sumS01[k]=0;
 }
 
 
 void ActiveMultiField::updateFieldProperties(BaseField *p, int q) {
-
+	BaseInteraction::updateFieldProperties(p, q);
 	number dx = p->fieldDX[q]; 
 	number dy = p->fieldDY[q]; 
 	p->S00 += -0.5*(dx*dx-dy*dy);
 	p->S01 += -dx*dy;
-
 }
 
 
@@ -100,6 +97,7 @@ void ActiveMultiField::initFieldProperties(BaseField *p) {
 
 	int sub=p->subSize;
 	for(int q=0; q<sub;q++) {
+		BaseInteraction::updateFieldProperties(p, q);
 	        number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
 	        number dy = .5*( p->fieldScalar[p->neighbors_sub[1+q*9]] - p->fieldScalar[p->neighbors_sub[7+q*9]] );
 	        p->fieldDX[q] = dx;
@@ -129,13 +127,13 @@ void ActiveMultiField::begin_energy_computation(std::vector<BaseField *> &fields
         K = (number) 0;
         for(auto p : fields) {
         	int sub=p->subSize;
-                p->Fshape = std::vector<number> {0., 0.};
-                p->Fpressure = std::vector<number> {0., 0.};
+                p->Factive = std::vector<number> {0., 0.};
+                p->Fpassive = std::vector<number> {0., 0.};
                 for(int q=0; q<sub;q++)
 			calc_internal_forces(p, q);
-                p->velocityX = p->Fpressure[0] + p->Fshape[0];
-                p->velocityY = p->Fpressure[1] + p->Fshape[1];
-                K += .5 * (p->velocityX * p->velocityX + p->velocityY * p->velocityY);
+                velX = p->Fpassive[0] + p->Factive[0];
+                velY = p->Fpassive[1] + p->Factive[1];
+                K += .5 * (velX * velX + velY * velY);
         }
 
 }
@@ -176,8 +174,7 @@ number ActiveMultiField::f_interaction(BaseField *p, int q) {
 
 	// delta F / delta phi_i
 	number V = CH + A + Rep;
-	Pressure[k] += phi*Rep;
-	p->freeEnergy[q] = V;
+	p->freeEnergy[q] += V;
 
 	return V;
 }
@@ -192,11 +189,14 @@ void ActiveMultiField::calc_internal_forces(BaseField *p, int q) {
         p->fieldDX[q] = dx;
         p->fieldDY[q] = dy;
 
-	//pressure (passive force)
-	p->Fpressure[0] += Pressure[k]*dx/friction;
-	p->Fpressure[1] += Pressure[k]*dy/friction;
+	//passive (passive force)
+	p->Fpassive[0] += p->freeEnergy[q]*dx;
+	p->Fpassive[1] += p->freeEnergy[q]*dy;
 
 	//active inter cells (active force)
-	p->Fshape[0] += (zetaS*sumS00[k]*dx + zetaS*sumS01[k]*dy)/friction;
-	p->Fshape[1] += (zetaS*sumS01[k]*dx - zetaS*sumS00[k]*dy)/friction;
+	p->Factive[0] += zetaS*sumS00[k]*dx + zetaS*sumS01[k]*dy;
+	p->Factive[1] += zetaS*sumS01[k]*dx - zetaS*sumS00[k]*dy;
+
+	p->velocityX[q] = (p->freeEnergy[q]*dx - zetaS*sumS00[k]*dx - zetaS*sumS01[k]*dy)/friction;
+	p->velocityY[q] = (p->freeEnergy[q]*dy - zetaS*sumS01[k]*dx + zetaS*sumS00[k]*dy)/friction;
 }
