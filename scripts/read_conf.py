@@ -39,12 +39,14 @@ x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
 Z=[[0 for q in range(lx)] for k in range(ly)]
 fig = plt.figure(figsize=(6,6))
+start_value = 9
 for line in cfile:
     area=0
+    out_area=0
     words=line.split()
     Z=[[0 for q in range(lx)] for k in range(ly)]
     track_problem = 0
-    for i in range(7,len(words),2):
+    for i in range(start_value,len(words),2):
         site=int(float(words[i]))
         value=float(words[i+1])
         sim_grid[pt_num*site]=value
@@ -52,10 +54,19 @@ for line in cfile:
         xx=site-int(yy*lx)
         if value>0.5:
             Z[yy][xx]=value
+        else:
+            out_area=value*value
         area+=value*value
         if value>1.5 or value<-0.5:
-            print("problem: ",xx,yy,value,pt_num)
+            print("phase field is not in [0,1]!: ",xx,yy,value,pt_num)
             track_problem+=1
+
+    if abs(1-area/(pi*8*8)>0.2):
+        print("area is not conserved!")
+
+    if out_area/area > 0.9:
+        print("cell is leaking!")
+    
 
     X, Y = np.meshgrid(x, y)
     #norm = cm.colors.Normalize(vmax=abs(Z).max(), vmin=-abs(Z).max())
