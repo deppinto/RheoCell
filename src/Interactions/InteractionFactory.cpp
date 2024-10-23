@@ -2,6 +2,7 @@
 
 #include "SimpleMultiField.h"
 #include "ActiveMultiField.h"
+#include "ActiveNematic.h"
 
 InteractionPtr InteractionFactory::make_interaction(input_file &inp) {
 	std::string inter_type("simplefield");
@@ -17,7 +18,10 @@ InteractionPtr InteractionFactory::make_interaction(input_file &inp) {
                 if(backend.compare("CUDA") == 0) return std::make_shared<ActiveMultiField>();
                 else return std::make_shared<ActiveMultiField>();
         }
-
+	else if(inter_type.compare("activenematic") == 0){
+                if(backend.compare("CUDA") == 0) return std::make_shared<ActiveNematic>();
+                else return std::make_shared<ActiveNematic>();
+        }
 	else {
 		throw RCexception("Interaction '%s' not found. Aborting", inter_type.c_str());
 	}

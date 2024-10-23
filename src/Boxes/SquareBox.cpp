@@ -23,6 +23,9 @@ void SquareBox::init(int Lx, int Ly) {
 
 	side = Lx;
 	sides[0] = sides[1]= Lx;
+
+	neighbors.resize(Lx*Ly*9);
+	BaseBox::setNeighborsPeriodic(Lx, Ly);
 }
 
 int SquareBox::getElementX(int site, int distX){

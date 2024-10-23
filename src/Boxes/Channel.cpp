@@ -35,6 +35,9 @@ void Channel::init(int Lx, int Ly) {
 			walls[k] = exp(-double(y)/lambda_wall) + exp(-double(Ly-y-1)/lambda_wall);  
 		}
 	}
+
+	neighbors.resize(Lx*Ly*9);
+	BaseBox::setNeighborsPeriodic(Lx, Ly);
 }
 
 

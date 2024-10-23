@@ -29,6 +29,7 @@ SET(interactions_SOURCES
 	Interactions/BaseInteraction.cpp
 	Interactions/SimpleMultiField.cpp
 	Interactions/ActiveMultiField.cpp
+	Interactions/ActiveNematic.cpp
 )
 
 SET(forces_SOURCES

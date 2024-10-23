@@ -254,7 +254,7 @@ bool SimBackend::read_next_configuration(bool binary) {
 	int k, i;
 	i = 0;
 	std::string line;
-	int conf_initial_line=7;
+	int conf_initial_line=9;
 	while(!conf_input.eof() && i < N()) {
 		BaseField *p = fields[i];
 		std::getline(conf_input, line);
@@ -263,6 +263,11 @@ bool SimBackend::read_next_configuration(bool binary) {
 		p->init((int)spl_line[0], (int)spl_line[1]);
 		p->CoM = std::vector<number> {spl_line[2], spl_line[3]};
 		p->set_positions((int)spl_line[4], (int)spl_line[5], (int)spl_line[6]);
+
+		p->nemQ = {spl_line[7], spl_line[8]};
+		p->nemQ_old = {p->nemQ[0], p->nemQ[1]};
+		p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
+		p->Q01 = p->nemQ[0] * p->nemQ[1];
 
 		for(k=0; k<p->subSize; k+=1){
 			p->fieldScalar[k]=spl_line[conf_initial_line+(2*k)+1];

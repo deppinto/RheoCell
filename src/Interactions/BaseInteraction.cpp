@@ -90,7 +90,7 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 	int N = fields.size();
 	number totalNodes=box->getXsize()*box->getYsize();
 	rcut= sqrt( (totalNodes/N)/PI );
-	rcut=5;
+	rcut=6;
 	sqr_rcut = SQR(rcut);
 	std::cout<<"This is rcut: " << rcut <<std::endl;
 	for(int i = 0; i < N; i++) {

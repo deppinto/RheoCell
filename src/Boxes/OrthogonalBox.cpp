@@ -26,6 +26,9 @@ void OrthogonalBox::init(int Lx, int Ly) {
 	sidey = Ly;
 	sides[0] = Lx;
 	sides[1] = Ly;
+
+	neighbors.resize(Lx*Ly*9);
+	BaseBox::setNeighborsPeriodic(Lx, Ly);
 }
 
 int OrthogonalBox::getElementX(int site, int distX){

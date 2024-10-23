@@ -77,7 +77,6 @@ public:
 
 	/// Index of the particle. Usually it is a useful way of accessing arrays of particles
 	int index;
-
 	int type;
 
 	/// Positions of all interaction centers. This array must be initialized by child classes
@@ -86,11 +85,23 @@ public:
 	/// Velocity of the particle
 	std::vector<number> velocityX;
 	std::vector<number> velocityY;
+	//derivatives of the field
 	std::vector<number> fieldDX;
 	std::vector<number> fieldDY;
 
+	//shape tensor
 	number S01;
         number S00;
+
+	//nematic tensor
+	number Q00;
+	number Q01;
+	number thetaQ;
+	number thetaQ_old;
+	std::vector<number> nemQ;
+	std::vector<number> nemQ_old;
+
+	//passive and active forces
 	std::vector<number> Fpassive;
 	std::vector<number> Factive;
 
@@ -98,18 +109,22 @@ public:
 	virtual int GetSubIndex(int site, BaseBox *box) = 0;
         virtual int GetSubXIndex(int site, BaseBox *box) = 0;
         virtual int GetSubYIndex(int site, BaseBox *box) = 0;
+
+	//vectors for integration
         std::vector<number> fieldScalar;
         std::vector<number> freeEnergy;
         std::vector<number> fieldScalar_old;
         std::vector<number> dfield_old;
 	std::vector<int> neighbors_sub;
 
+	//fiedl patch values
 	int LsubX;
         int LsubY;
 	int subSize;
 	std::vector<int> offset;
         int sub_corner_bottom_left;
 
+	//general properties of fields
         number area;
         number sumF;
 };

@@ -40,6 +40,17 @@ void MultiPhaseField::init(int Lx, int Ly) {
         velocityY.resize(subSize);
 	S00=0.;
         S01=0.;
+
+	thetaQ = thetaQ_old = PI * (1-2*drand48());
+	Q00=cos(2*thetaQ);
+	Q01=sin(2*thetaQ);
+	nemQ.resize(2);
+	nemQ_old.resize(2);
+	nemQ = {0., 0.};
+	nemQ_old = {0., 0.};
+	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
+	Q01 = nemQ[0] * nemQ[1];
+
 	Fpassive= std::vector<number> {0.,0.};
 	Factive= std::vector<number> {0.,0.};
 	area=0;
@@ -72,6 +83,17 @@ void MultiPhaseField::init() {
         velocityY.resize(subSize);
 	S00=0.;
         S01=0.;
+
+	thetaQ = thetaQ_old = PI * (1-2*drand48());
+	Q00=cos(2*thetaQ);
+	Q01=sin(2*thetaQ);
+	nemQ.resize(2);
+	nemQ_old.resize(2);
+	nemQ = {0., 0.};
+	nemQ_old = {0., 0.};
+	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
+	Q01 = nemQ[0] * nemQ[1];
+
 	Fpassive = std::vector<number> {0.,0.};
         Factive = std::vector<number> {0.,0.};
 	area=0;

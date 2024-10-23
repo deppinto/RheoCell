@@ -145,6 +145,7 @@ public:
 	virtual void begin_energy_computation(std::vector<BaseField *> &fields);
 	virtual void resetSums(int k);
 	virtual void updateFieldProperties(BaseField *p, int q);
+	virtual void updateDirectedActiveForces(number dt, BaseField *p, bool store){};
 
 
         /**

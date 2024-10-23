@@ -138,7 +138,7 @@ void GeneratorManager::generate() {
 
 	for(int i = 0; i < N; i++) {
 		BaseField *p = fields[i];
-		conf_output << p->LsubX << " "<< p->LsubY<< " "<< p->CoM[0] << " " << p->CoM[1] << " " << p->offset[0] << " " << p->offset[1] << " " << p->sub_corner_bottom_left << " ";
+		conf_output << p->LsubX << " "<< p->LsubY<< " "<< p->CoM[0] << " " << p->CoM[1] << " " << p->offset[0] << " " << p->offset[1] << " " << p->sub_corner_bottom_left << " "<< p->nemQ[0] << " "<< p->nemQ[1] << " ";
 	        for(int q=0; q<p->subSize; q++)conf_output << p->GetSubIndex(q, CONFIG_INFO->box) << " " << p->fieldScalar[q] << " ";
 		conf_output << std::endl;
 	}

@@ -100,6 +100,7 @@ void FD_CPUBackend::first_step(bool store) {
 		}
 
 		p->set_positions(config_info->box);
+		interaction->updateDirectedActiveForces(dt, p, store);
 	}
 
 	if(particles_with_warning.size() > 0) {
