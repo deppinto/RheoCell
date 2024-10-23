@@ -138,7 +138,7 @@ number SimpleMultiField::f_interaction(BaseField *p, int q) {
 	- 4*mu/a0*(1-a/a0)*phi
 
 	// repulsion term
-	+ 2*kappa/lambda*phi*(phi2[k]-phi*phi)
+	+ 4*kappa/lambda*phi*(phi2[k]-phi*phi)
 	);
 
 	p->freeEnergy[q] = V;

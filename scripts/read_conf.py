@@ -43,6 +43,7 @@ for line in cfile:
     area=0
     words=line.split()
     Z=[[0 for q in range(lx)] for k in range(ly)]
+    track_problem = 0
     for i in range(7,len(words),2):
         site=int(float(words[i]))
         value=float(words[i+1])
@@ -54,10 +55,14 @@ for line in cfile:
         area+=value*value
         if value>1.5 or value<-0.5:
             print("problem: ",xx,yy,value,pt_num)
+            track_problem+=1
 
     X, Y = np.meshgrid(x, y)
     #norm = cm.colors.Normalize(vmax=abs(Z).max(), vmin=-abs(Z).max())
-    cmap = cm.binary
+    if track_problem==0:
+        cmap = cm.binary
+    else:
+        cmap = cm.cool
 
     #axs = _axs.flatten()
 

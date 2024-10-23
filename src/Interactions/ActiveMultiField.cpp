@@ -170,7 +170,7 @@ number ActiveMultiField::f_interaction(BaseField *p, int q) {
 	number A = - 4*mu/a0*(1-a/a0)*phi;
 
 	// repulsion term
-	number Rep = + 2*kappa/lambda*phi*(phi2[k]-phi*phi);
+	number Rep = + 4*kappa/lambda*phi*(phi2[k]-phi*phi);
 
 	// delta F / delta phi_i
 	number V = CH + A + Rep;

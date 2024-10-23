@@ -189,7 +189,7 @@ number ActiveNematic::f_interaction(BaseField *p, int q) {
 	number A = - 4*mu/a0*(1-a/a0)*phi;
 
 	// repulsion term
-	number Rep = + 2*kappa/lambda*phi*(phi2[k]-phi*phi);
+	number Rep = + 4*kappa/lambda*phi*(phi2[k]-phi*phi);
 
 	// adhesion term
 	number lsquare = 2 * phi * laplacianPhi + 2 * (dx *dx + dy * dy);
@@ -223,8 +223,8 @@ void ActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	number fQ_self_x = -zetaQ_self*(p->Q00*dx + p->Q01*dy);
 	number fQ_self_y = -zetaQ_self*(p->Q01*dx - p->Q00*dy);
 
-	number fQ_inter_x = -zetaQ_inter * ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[1+k*9]] - sumQ01[box->neighbors[7+k*9]] ) ) - fQ_self_x;
-	number fQ_inter_y = -zetaQ_inter * ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ00[box->neighbors[1+k*9]] - sumQ00[box->neighbors[7+k*9]] ) ) - fQ_self_y;
+	number fQ_inter_x = - zetaQ_inter * ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[1+k*9]] - sumQ01[box->neighbors[7+k*9]] ) ) - fQ_self_x;
+	number fQ_inter_y = - zetaQ_inter * ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ00[box->neighbors[1+k*9]] - sumQ00[box->neighbors[7+k*9]] ) ) - fQ_self_y;
 
 	p->Factive[0] += fQ_self_x + fQ_inter_x;
 	p->Factive[1] += fQ_self_y + fQ_inter_y;
