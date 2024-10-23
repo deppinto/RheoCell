@@ -145,6 +145,15 @@ void SimBackend::get_settings(input_file &inp) {
 	obs_output_last_conf->add_observable("type = configuration\nid = last_conf");
 	add_output(obs_output_last_conf);
 
+	// equilibrated configuration
+	std::string equilibratedconf_file = "equilibrated_conf.dat";
+	getInputString(&inp, "equilibratedconf_file", equilibratedconf_file, 0);
+	output_inp_text = Utils::sformat("{\n\tname = %s\n\tprint_every = 0\n}\n", equilibratedconf_file.c_str());
+	obs_output_equilibrated_conf = std::make_shared<ObservableOutput>(output_inp_text);
+	obs_output_equilibrated_conf->add_observable("type = configuration\nid = equilibrated_conf");
+	add_output(obs_output_equilibrated_conf);
+
+
 	// set the max IO
 	if(getInputNumber(&inp, "max_io", &max_io, 0) == KEY_FOUND) {
 		if(max_io < 0)
@@ -365,6 +374,10 @@ void SimBackend::update_observables_data() {
 	}
 }
 
+void SimBackend::print_equilibration_info(bool only_last) {
+	apply_simulation_data_changes();
+	obs_output_equilibrated_conf->print_output(current_step());
+}
 
 void SimBackend::print_conf(bool only_last) {
 	apply_simulation_data_changes();

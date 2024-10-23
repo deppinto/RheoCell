@@ -49,6 +49,7 @@ protected:
 	ObservableOutputPtr obs_output_file;
 	ObservableOutputPtr obs_output_trajectory;
 	ObservableOutputPtr obs_output_last_conf;
+	ObservableOutputPtr obs_output_equilibrated_conf;
 
 	/// Shared pointer to the interaction manager
 	InteractionPtr interaction;
@@ -119,6 +120,7 @@ public:
 	virtual void update_observables_data();
 
 	virtual void print_conf(bool only_last=false);
+	virtual void print_equilibration_info(bool only_last=false);
 
 	/**
 	 * @brief Performs a simulation step.
