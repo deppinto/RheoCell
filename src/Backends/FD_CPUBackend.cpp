@@ -37,7 +37,6 @@ void FD_CPUBackend::init() {
                 sin_y_table[i]=sin(2*PI*i/sizeY);
         }
 
-
 }
 
 void FD_CPUBackend::first_step(bool store) {

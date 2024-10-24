@@ -220,17 +220,17 @@ void ActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	p->Fpassive[1] += p->freeEnergy[q]*dy;
 
 	//active inter cells (active force)
-	number fQ_self_x = -zetaQ_self*(p->Q00*dx + p->Q01*dy);
-	number fQ_self_y = -zetaQ_self*(p->Q01*dx - p->Q00*dy);
+	number fQ_self_x = -(p->Q00*dx + p->Q01*dy);
+	number fQ_self_y = -(p->Q01*dx - p->Q00*dy);
 
-	number fQ_inter_x = - zetaQ_inter * ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[1+k*9]] - sumQ01[box->neighbors[7+k*9]] ) ) - fQ_self_x;
-	number fQ_inter_y = - zetaQ_inter * ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ00[box->neighbors[1+k*9]] - sumQ00[box->neighbors[7+k*9]] ) ) - fQ_self_y;
+	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[1+k*9]] - sumQ01[box->neighbors[7+k*9]] ) ) - fQ_self_x;
+	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[1+k*9]] - sumQ00[box->neighbors[7+k*9]] ) ) - fQ_self_y;
 
-	p->Factive[0] += fQ_self_x + fQ_inter_x;
-	p->Factive[1] += fQ_self_y + fQ_inter_y;
+	p->Factive[0] += zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
+	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
 
-	p->velocityX[q] = (p->freeEnergy[q]*dx + fQ_self_x + fQ_inter_x)/friction;
-	p->velocityY[q] = (p->freeEnergy[q]*dy + fQ_self_y + fQ_inter_y)/friction;
+	p->velocityX[q] = (p->freeEnergy[q]*dx + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
+	p->velocityY[q] = (p->freeEnergy[q]*dy + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction;
 }
 
 

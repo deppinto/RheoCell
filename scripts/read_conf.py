@@ -61,20 +61,22 @@ for line in cfile:
             print("phase field is not in [0,1]!: ",xx,yy,value,pt_num)
             track_problem+=1
 
-    if abs(1-area/(pi*8*8)>0.2):
-        print("area is not conserved!")
-
-    if out_area/area > 0.9:
-        print("cell is leaking!")
-    
-
-    X, Y = np.meshgrid(x, y)
     #norm = cm.colors.Normalize(vmax=abs(Z).max(), vmin=-abs(Z).max())
     if track_problem==0:
         cmap = cm.binary
     else:
         cmap = cm.cool
 
+    if abs(1-area/(pi*8*8)>0.2):
+        print("area is not conserved!")
+        cmap=cm.winter
+
+    if out_area/area > 0.9:
+        print("cell is leaking!")
+        cmap=cm.autumn
+    
+
+    X, Y = np.meshgrid(x, y)
     #axs = _axs.flatten()
 
     step = 0.01
