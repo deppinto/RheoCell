@@ -30,6 +30,7 @@ SET(interactions_SOURCES
 	Interactions/SimpleMultiField.cpp
 	Interactions/ActiveMultiField.cpp
 	Interactions/ActiveNematic.cpp
+	Interactions/WetModel.cpp
 )
 
 SET(forces_SOURCES

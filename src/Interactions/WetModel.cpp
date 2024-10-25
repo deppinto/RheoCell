@@ -1,7 +1,7 @@
-#include "ActiveNematic.h"
+#include "WetModel.h"
 #include "../Utilities/Utils.h"
 
-ActiveNematic::ActiveNematic() :
+WetModel::WetModel() :
 				BaseInteraction(),
 				gamma(0.01),
 				lambda(2.5),
@@ -12,16 +12,17 @@ ActiveNematic::ActiveNematic() :
 				friction(2.),
 				zetaQ_self(0.002),
 				zetaQ_inter(0.002),
-				J_Q(1) {
+				J_Q(1),
+				friction_cell(3.0){
 	a0=PI*R*R;
 }
 
-ActiveNematic::~ActiveNematic() {
+WetModel::~WetModel() {
 
 }
 
 
-void ActiveNematic::get_settings(input_file &inp) {
+void WetModel::get_settings(input_file &inp) {
 	BaseInteraction::get_settings(inp);
 
 	getInputInt(&inp, "R", &R, 0);
@@ -35,13 +36,14 @@ void ActiveNematic::get_settings(input_file &inp) {
 	getInputNumber(&inp, "zetaQ_inter", &zetaQ_inter, 0);
 	getInputNumber(&inp, "J_Q", &J_Q, 0);
 	getInputBool(&inp, "anchoring", &anchoring, 0);
+	getInputNumber(&inp, "friction_cell", &friction_cell, 0);
 }
 
-void ActiveNematic::init() {
+void WetModel::init() {
         a0=PI*R*R;
 }
 
-void ActiveNematic::read_topology(std::vector<BaseField*> &fields) {
+void WetModel::read_topology(std::vector<BaseField*> &fields) {
         int N = fields.size();
 
         std::ifstream topology(topology_filename, std::ios::in);
@@ -56,30 +58,36 @@ void ActiveNematic::read_topology(std::vector<BaseField*> &fields) {
         }
 }
 
-void ActiveNematic::allocate_fields(std::vector<BaseField *> &fields) {
+void WetModel::allocate_fields(std::vector<BaseField *> &fields) {
         for(int i = 0; i < (int) fields.size(); i++) {
                 fields[i] = new MultiPhaseField();
         }
 }
 
-void ActiveNematic::set_box(BaseBox *boxArg) {
+void WetModel::set_box(BaseBox *boxArg) {
 	box = boxArg;
 	int Lx=box->getXsize();
 	int Ly=box->getYsize();
 	phi2.resize(Lx*Ly);
+	sum_phi.resize(Lx*Ly);
 	sumQ00.resize(Lx*Ly);
 	sumQ01.resize(Lx*Ly);
+	velocity_field_x.resize(Lx*Ly);
+	velocity_field_y.resize(Lx*Ly);
 	for(int i =0; i<Lx*Ly; i++){resetSums(i);}
 }
 
-void ActiveNematic::resetSums(int k) {
+void WetModel::resetSums(int k) {
 	phi2[k]=0;
+	sum_phi[k]=0;
         sumQ00[k]=0;
         sumQ01[k]=0;
+	velocity_field_x[k]=0;
+	velocity_field_y[k]=0;
 }
 
 
-void ActiveNematic::updateFieldProperties(BaseField *p, int q) {
+void WetModel::updateFieldProperties(BaseField *p, int q) {
 	BaseInteraction::updateFieldProperties(p, q);
 	number dx = p->fieldDX[q]; 
 	number dy = p->fieldDY[q]; 
@@ -88,19 +96,19 @@ void ActiveNematic::updateFieldProperties(BaseField *p, int q) {
 }
 
 
-void ActiveNematic::check_input_sanity(std::vector<BaseField *> &fields) {
+void WetModel::check_input_sanity(std::vector<BaseField *> &fields) {
 
 }
 
 
-void ActiveNematic::begin_energy_computation() {
+void WetModel::begin_energy_computation() {
 		
         for(int i = 0; i < CONFIG_INFO->N(); i++) {
                 initFieldProperties(CONFIG_INFO->fields()[i]);
         }
 }
 
-void ActiveNematic::initFieldProperties(BaseField *p) {
+void WetModel::initFieldProperties(BaseField *p) {
 
 	int sub=p->subSize;
 	for(int q=0; q<sub;q++) {
@@ -116,7 +124,7 @@ void ActiveNematic::initFieldProperties(BaseField *p) {
 }
 
 
-void ActiveNematic::begin_energy_computation(std::vector<BaseField *> &fields) {
+void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 	for(auto p : fields) {
         	int sub=p->subSize;
@@ -145,15 +153,18 @@ void ActiveNematic::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 }
 
-void ActiveNematic::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
+void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 
 	int k = p->GetSubIndex(q, box);
+	sum_phi[k]+=p->fieldScalar[q];
 	phi2[k]+=p->fieldScalar[q]*p->fieldScalar[q];
 	sumQ00[k]+=p->fieldScalar[q]*p->Q00;
         sumQ01[k]+=p->fieldScalar[q]*p->Q01;
+	//velocity_field_x[k]+=p->fieldScalar[q]*p->velocityX[q];
+	//velocity_field_y[k]+=p->fieldScalar[q]*p->velocityY[q];
 }
 
-number ActiveNematic::f_interaction(BaseField *p, int q) {
+number WetModel::f_interaction(BaseField *p, int q) {
 
 	int  k  = p->GetSubIndex(q, box);
 	number a = p->area;	
@@ -204,7 +215,7 @@ number ActiveNematic::f_interaction(BaseField *p, int q) {
 }
 
 
-void ActiveNematic::calc_internal_forces(BaseField *p, int q) {
+void WetModel::calc_internal_forces(BaseField *p, int q) {
 
         int  k  = p->GetSubIndex(q, box);
         number dx = p->fieldDX[q];
@@ -224,24 +235,12 @@ void ActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	p->Factive[0] += zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
 	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
 
-	p->velocityX[q] = (p->freeEnergy[q]*dx + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
-	p->velocityY[q] = (p->freeEnergy[q]*dy + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction;
+	//p->velocityX[q] = (p->freeEnergy[q]*dx + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
+	//p->velocityY[q] = (p->freeEnergy[q]*dy + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction;
 }
 
 
-void ActiveNematic::updateDirectedActiveForces(number dt, BaseField*p, bool store){
-
-	/*if(store)
-		p->thetaQ_old = p->thetaQ;
-
-	number F00 = p->S00;
-	number F01 = p->S01;
-
-	number deformation = sqrt(sqrt(F01 * F01 + F00 * F00));
-
-	p->thetaQ = p->thetaQ_old - dt * J_Q * deformation * atan2(F00 * p->Q01 - F01 * p->Q00, F00 * p->Q00 + F01 * p->Q01);
-	p->Q00 = cos(2 * p->thetaQ);
-	p->Q01 = sin(2 * p->thetaQ);*/
+void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
 	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
 	
@@ -258,7 +257,7 @@ void ActiveNematic::updateDirectedActiveForces(number dt, BaseField*p, bool stor
 }
 
 
-void ActiveNematic::updateAnchoring(BaseField*p){
+void WetModel::updateAnchoring(BaseField*p){
 
 	number radius = R;
 	number delta = -PI/12;
