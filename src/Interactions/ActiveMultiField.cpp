@@ -9,7 +9,7 @@ ActiveMultiField::ActiveMultiField() :
 				R(8),
 				kappa(0.1),
 				friction(2.),
-				zetaS(0.002) {
+				zetaS(0) {
 	a0=PI*R*R;
 }
 
@@ -27,7 +27,7 @@ void ActiveMultiField::get_settings(input_file &inp) {
 	getInputNumber(&inp, "mu", &mu, 0);
 	getInputNumber(&inp, "kappa", &kappa, 0);
 	getInputNumber(&inp, "friction", &friction, 0);
-	getInputNumber(&inp, "zetaS", &zetaS, 0);
+	getInputNumber(&inp, "zetaS", &zetaS_active, 0);
 }
 
 void ActiveMultiField::init() {
@@ -55,6 +55,10 @@ void ActiveMultiField::allocate_fields(std::vector<BaseField *> &fields) {
         }
 }
 
+void ActiveMultiField::apply_changes_after_equilibration(){
+	zetaS=zetaS_active;
+}
+
 void ActiveMultiField::set_box(BaseBox *boxArg) {
 	box = boxArg;
 	int Lx=box->getXsize();
@@ -72,8 +76,8 @@ void ActiveMultiField::resetSums(int k) {
 }
 
 
-void ActiveMultiField::updateFieldProperties(BaseField *p, int q) {
-	BaseInteraction::updateFieldProperties(p, q);
+void ActiveMultiField::updateFieldProperties(BaseField *p, int q, int k) {
+	BaseInteraction::updateFieldProperties(p, q, k);
 	number dx = p->fieldDX[q]; 
 	number dy = p->fieldDY[q]; 
 	p->S00 += -0.5*(dx*dx-dy*dy);
@@ -97,7 +101,8 @@ void ActiveMultiField::initFieldProperties(BaseField *p) {
 
 	int sub=p->subSize;
 	for(int q=0; q<sub;q++) {
-		BaseInteraction::updateFieldProperties(p, q);
+		int k = p->GetSubIndex(q, box);
+		BaseInteraction::updateFieldProperties(p, q, k);
 	        number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
 	        number dy = .5*( p->fieldScalar[p->neighbors_sub[1+q*9]] - p->fieldScalar[p->neighbors_sub[7+q*9]] );
 	        p->fieldDX[q] = dx;
@@ -144,6 +149,7 @@ void ActiveMultiField::computeGlobalSums(BaseField *p, int q, bool update_global
 	phi2[k]+=p->fieldScalar[q]*p->fieldScalar[q];
 	sumS00[k]+=p->fieldScalar[q]*p->S00;
         sumS01[k]+=p->fieldScalar[q]*p->S01;
+	BaseInteraction::update_sub_to_box_map(p, q, k, p->GetSubXIndex(q, box), p->GetSubYIndex(q, box));
 }
 
 number ActiveMultiField::f_interaction(BaseField *p, int q) {

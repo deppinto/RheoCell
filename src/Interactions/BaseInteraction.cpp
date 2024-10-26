@@ -50,10 +50,14 @@ void BaseInteraction::resetSums(int k){
 
 }
 
-void BaseInteraction::updateFieldProperties(BaseField *p, int q){
-	int k = p->GetSubIndex(q, box);
-	p->set_F_ext(k, p->fieldScalar[q], box->getWalls(k));
-	p->freeEnergy[q] = p->F_ext;
+void BaseInteraction::updateFieldProperties(BaseField *p, int q, int k){
+	p->freeEnergy[q] = p->set_F_ext(k, p->fieldScalar[q], box->getWalls(k));
+}
+
+void BaseInteraction::update_sub_to_box_map(BaseField *p, int q, int sub_site, int sub_site_x, int sub_site_y){
+	p->map_sub_to_box[q]=sub_site;
+	p->map_sub_to_box_x[q]=sub_site_x;
+	p->map_sub_to_box_y[q]=sub_site_y;
 }
 
 number BaseInteraction::get_system_energy(std::vector<BaseField *> &fields) {

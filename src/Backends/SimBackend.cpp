@@ -302,6 +302,9 @@ bool SimBackend::read_next_configuration(bool binary) {
 	return true;
 }
 
+void SimBackend::apply_simulation_changes_after_equilibration(){
+	interaction->apply_changes_after_equilibration();
+}
 
 void SimBackend::apply_simulation_data_changes() {
 

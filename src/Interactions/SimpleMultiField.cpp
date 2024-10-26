@@ -71,6 +71,7 @@ void SimpleMultiField::computeGlobalSums(BaseField *p, int q, bool update_global
 
 	int k = p->GetSubIndex(q, box);
 	phi2[k]+=p->fieldScalar[q]*p->fieldScalar[q];
+	BaseInteraction::update_sub_to_box_map(p, q, k, p->GetSubXIndex(q, box), p->GetSubYIndex(q, box));
 }
 
 void SimpleMultiField::begin_energy_computation(std::vector<BaseField *> &fields) {

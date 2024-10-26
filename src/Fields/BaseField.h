@@ -47,13 +47,14 @@ public:
 	 */
 	bool add_ext_force(BaseForce *f);
 	number F_ext;
-	inline void set_F_ext(int k, number phi, number walls) {
+	inline number set_F_ext(int k, number phi, number walls) {
 		if(ext_forces.size() > 0) {
 			F_ext = 0.;
 			for(auto ext_force : ext_forces) {
 				F_ext += ext_force->free_energy(k, phi, walls);
 			}
 		}
+		return F_ext;
 	}
 
         /**
@@ -123,6 +124,9 @@ public:
 	int subSize;
 	std::vector<int> offset;
         int sub_corner_bottom_left;
+	std::vector<int> map_sub_to_box;
+	std::vector<int> map_sub_to_box_x;
+	std::vector<int> map_sub_to_box_y;
 
 	//general properties of fields
         number area;

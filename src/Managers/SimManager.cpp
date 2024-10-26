@@ -136,11 +136,12 @@ void SimManager::run() {
 	if(equilibration_steps > 0) {
 		OX_LOG(Logger::LOG_INFO, "Equilibrating...");
 		for(llint step = 0; step < equilibration_steps && !SimManager::stop; step++) {
-			backend->eq_step();
+			backend->sim_step();
 		}
 		OX_LOG(Logger::LOG_INFO, "Equilibration done");
 	}
 	backend->print_equilibration_info();
+	backend->apply_simulation_changes_after_equilibration();
 
 	// main loop
 	OX_LOG(Logger::LOG_INFO, "Starting main loop...");

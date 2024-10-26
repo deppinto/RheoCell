@@ -10,8 +10,8 @@ WetModel::WetModel() :
 				R(8),
 				kappa(0.1),
 				friction(2.),
-				zetaQ_self(0.002),
-				zetaQ_inter(0.002),
+				zetaQ_self(0),
+				zetaQ_inter(0),
 				J_Q(1),
 				friction_cell(3.0){
 	a0=PI*R*R;
@@ -32,8 +32,8 @@ void WetModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "mu", &mu, 0);
 	getInputNumber(&inp, "kappa", &kappa, 0);
 	getInputNumber(&inp, "friction", &friction, 0);
-	getInputNumber(&inp, "zetaQ_self", &zetaQ_self, 0);
-	getInputNumber(&inp, "zetaQ_inter", &zetaQ_inter, 0);
+	getInputNumber(&inp, "zetaQ_self", &zetaQ_self_active, 0);
+	getInputNumber(&inp, "zetaQ_inter", &zetaQ_inter_active, 0);
 	getInputNumber(&inp, "J_Q", &J_Q, 0);
 	getInputBool(&inp, "anchoring", &anchoring, 0);
 	getInputNumber(&inp, "friction_cell", &friction_cell, 0);
@@ -64,31 +64,32 @@ void WetModel::allocate_fields(std::vector<BaseField *> &fields) {
         }
 }
 
+void WetModel::apply_changes_after_equilibration(){
+	zetaQ_self=zetaQ_self_active;
+	zetaQ_inter=zetaQ_inter_active;
+}
+
 void WetModel::set_box(BaseBox *boxArg) {
 	box = boxArg;
 	int Lx=box->getXsize();
 	int Ly=box->getYsize();
 	phi2.resize(Lx*Ly);
-	sum_phi.resize(Lx*Ly);
 	sumQ00.resize(Lx*Ly);
 	sumQ01.resize(Lx*Ly);
-	velocity_field_x.resize(Lx*Ly);
-	velocity_field_y.resize(Lx*Ly);
+	sum_phi.resize(Lx*Ly);
 	for(int i =0; i<Lx*Ly; i++){resetSums(i);}
 }
 
 void WetModel::resetSums(int k) {
 	phi2[k]=0;
-	sum_phi[k]=0;
         sumQ00[k]=0;
         sumQ01[k]=0;
-	velocity_field_x[k]=0;
-	velocity_field_y[k]=0;
+        sum_phi[k]=0;
 }
 
 
-void WetModel::updateFieldProperties(BaseField *p, int q) {
-	BaseInteraction::updateFieldProperties(p, q);
+void WetModel::updateFieldProperties(BaseField *p, int q, int k) {
+	BaseInteraction::updateFieldProperties(p, q, k);
 	number dx = p->fieldDX[q]; 
 	number dy = p->fieldDY[q]; 
 	p->S00 += -0.5*(dx*dx-dy*dy);
@@ -110,9 +111,9 @@ void WetModel::begin_energy_computation() {
 
 void WetModel::initFieldProperties(BaseField *p) {
 
-	int sub=p->subSize;
-	for(int q=0; q<sub;q++) {
-		BaseInteraction::updateFieldProperties(p, q);
+	for(int q=0; q<p->subSize;q++) {
+		int k = p->GetSubIndex(q, box);
+		BaseInteraction::updateFieldProperties(p, q, k);
 	        number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
 	        number dy = .5*( p->fieldScalar[p->neighbors_sub[1+q*9]] - p->fieldScalar[p->neighbors_sub[7+q*9]] );
 	        p->fieldDX[q] = dx;
@@ -156,20 +157,18 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 
 	int k = p->GetSubIndex(q, box);
-	sum_phi[k]+=p->fieldScalar[q];
 	phi2[k]+=p->fieldScalar[q]*p->fieldScalar[q];
+	sum_phi[k]+=p->fieldScalar[q];
 	sumQ00[k]+=p->fieldScalar[q]*p->Q00;
         sumQ01[k]+=p->fieldScalar[q]*p->Q01;
-	//velocity_field_x[k]+=p->fieldScalar[q]*p->velocityX[q];
-	//velocity_field_y[k]+=p->fieldScalar[q]*p->velocityY[q];
+
+	BaseInteraction::update_sub_to_box_map(p, q, k, p->GetSubXIndex(q, box), p->GetSubYIndex(q, box));
 }
 
 number WetModel::f_interaction(BaseField *p, int q) {
 
-	int  k  = p->GetSubIndex(q, box);
-	number a = p->area;	
-	number phi  = p->fieldScalar[q];
-
+	//int  k  = p->GetSubIndex(q, box);
+	int k = p->map_sub_to_box[q];
         number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
         number dy = .5*( p->fieldScalar[p->neighbors_sub[1+q*9]] - p->fieldScalar[p->neighbors_sub[7+q*9]] );
         p->fieldDX[q] = dx;
@@ -178,34 +177,34 @@ number WetModel::f_interaction(BaseField *p, int q) {
 	//this part gets the field values in teh respective directions from q;
 	//It is hardcoded so take care, the relvant part is that the lattice is square;
 	//The neighbors start form the top and rotate couterclockwise.
-	number xleft, xright, ybottom, ytop;
-	xright=p->fieldScalar[p->neighbors_sub[5+q*9]]; 
-	ybottom=p->fieldScalar[p->neighbors_sub[7+q*9]]; 
-	xleft=p->fieldScalar[p->neighbors_sub[3+q*9]]; 
-	ytop=p->fieldScalar[p->neighbors_sub[1+q*9]];
+	//number xleft, xright, ybottom, ytop;
+	//xright=p->fieldScalar[p->neighbors_sub[5+q*9]]; 
+	//ybottom=p->fieldScalar[p->neighbors_sub[7+q*9]]; 
+	//xleft=p->fieldScalar[p->neighbors_sub[3+q*9]]; 
+	//ytop=p->fieldScalar[p->neighbors_sub[1+q*9]];
+	
+	number laplacianPhi = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] - 4.*p->fieldScalar[q];
 
-	number laplacianPhi = xright + ybottom + xleft + ytop - 4.*p->fieldScalar[q];
+	//xright=phi2[box->neighbors[5+k*9]]; 
+	//ybottom=phi2[box->neighbors[7+k*9]]; 
+	//xleft=phi2[box->neighbors[3+k*9]]; 
+	//ytop=phi2[box->neighbors[1+k*9]];
 
-	xright=phi2[box->neighbors[5+k*9]]; 
-	ybottom=phi2[box->neighbors[7+k*9]]; 
-	xleft=phi2[box->neighbors[3+k*9]]; 
-	ytop=phi2[box->neighbors[1+k*9]];
-
-	number laplacianSquare = xright + ybottom + xleft + ytop - 4.*phi2[k];
+	number laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[7+k*9]] + phi2[box->neighbors[3+k*9]] +  phi2[box->neighbors[1+k*9]] - 4.*phi2[k];
 
 	// CH term coupled to chemical
-	number CH =+ gamma*(8*phi*(1-phi)*(1-2*phi)/lambda - 2*lambda*laplacianPhi);
+	number CH =+ gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*laplacianPhi);
    
 	// area conservation term
-	number A = - 4*mu/a0*(1-a/a0)*phi;
+	number A = - 4*mu/a0*(1-p->area/a0)*p->fieldScalar[q];
 
 	// repulsion term
-	number Rep = + 4*kappa/lambda*phi*(phi2[k]-phi*phi);
+	number Rep = + 4*kappa/lambda*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
 
 	// adhesion term
-	number lsquare = 2 * phi * laplacianPhi + 2 * (dx *dx + dy * dy);
+	number lsquare = 2 * p->fieldScalar[q] * laplacianPhi + 2 * (dx *dx + dy * dy);
 	number suppress = (laplacianSquare-lsquare)/sqrt(1+(laplacianSquare-lsquare)*(laplacianSquare-lsquare));
-	number Adh = - 4*lambda*omega*suppress*phi;
+	number Adh = - 4*lambda*omega*suppress*p->fieldScalar[q];
 
 	// delta F / delta phi_i
 	number V = CH + A + Rep + Adh;
@@ -217,17 +216,16 @@ number WetModel::f_interaction(BaseField *p, int q) {
 
 void WetModel::calc_internal_forces(BaseField *p, int q) {
 
-        int  k  = p->GetSubIndex(q, box);
-        number dx = p->fieldDX[q];
-        number dy = p->fieldDY[q];
+        //int  k  = p->GetSubIndex(q, box);
+	int k = p->map_sub_to_box[q];
 
 	//passive (passive force)
-	p->Fpassive[0] += p->freeEnergy[q]*dx;
-	p->Fpassive[1] += p->freeEnergy[q]*dy;
+	p->Fpassive[0] += p->freeEnergy[q]*p->fieldDX[q];
+	p->Fpassive[1] += p->freeEnergy[q]*p->fieldDY[q];
 
 	//active inter cells (active force)
-	number fQ_self_x = -(p->Q00*dx + p->Q01*dy);
-	number fQ_self_y = -(p->Q01*dx - p->Q00*dy);
+	number fQ_self_x = -(p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
+	number fQ_self_y = -(p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
 
 	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[1+k*9]] - sumQ01[box->neighbors[7+k*9]] ) ) - fQ_self_x;
 	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[1+k*9]] - sumQ00[box->neighbors[7+k*9]] ) ) - fQ_self_y;
@@ -235,8 +233,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	p->Factive[0] += zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
 	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
 
-	//p->velocityX[q] = (p->freeEnergy[q]*dx + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
-	//p->velocityY[q] = (p->freeEnergy[q]*dy + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction;
+	p->velocityX[q] = (p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
+	p->velocityY[q] = (p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction;
 }
 
 
@@ -259,17 +257,16 @@ void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
 void WetModel::updateAnchoring(BaseField*p){
 
-	number radius = R;
 	number delta = -PI/12;
 	number theta = 0;
 	number S = 0.5;
 
-	if(p->CoM[1] < 2.5 * radius){
+	if(p->CoM[1] < 2.5 * R){
 		theta = (PI/2 + delta);
 		p->Q00 = S * cos(2*theta);
 		p->Q01 = S * sin(2*theta);
 	}
-	else if(p->CoM[1] > box->getYsize() - 2.5 * radius){
+	else if(p->CoM[1] > box->getYsize() - 2.5 * R){
 		theta = -(PI/2 + delta);
 		p->Q00 = S * cos(2*theta);
 		p->Q01 = S * sin(2*theta);

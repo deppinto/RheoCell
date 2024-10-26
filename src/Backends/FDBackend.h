@@ -19,8 +19,8 @@ protected:
 
 	// timers
 	std::shared_ptr<Timer> timer_first_step;
-	std::shared_ptr<Timer> timer_eq_step;
 	std::shared_ptr<Timer> timer_forces;
+	std::shared_ptr<Timer> timer_testing;
 
 	bool lees_edwards;
 	number shear_rate;

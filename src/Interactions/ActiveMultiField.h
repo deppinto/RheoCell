@@ -23,6 +23,7 @@ protected:
 	number a0;
 	number friction;
 	number zetaS;
+	number zetaS_active;
 
 	/**
 	 * @brief Patchy interaction between two particles.
@@ -52,11 +53,12 @@ public:
 	void set_box(BaseBox *boxArg) override;
 
 	void allocate_fields(std::vector<BaseField *> &fields) override;
+	void apply_changes_after_equilibration() override;
 
 	void begin_energy_computation() override;
 	void begin_energy_computation(std::vector<BaseField *> &fields) override;
 	void resetSums(int k) override;
-	void updateFieldProperties(BaseField *p, int q) override;
+	void updateFieldProperties(BaseField *p, int q, int k) override;
 
         void read_topology(std::vector<BaseField *> &fields) override;
 	void check_input_sanity(std::vector<BaseField *> &fields) override;

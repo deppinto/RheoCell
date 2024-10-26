@@ -38,6 +38,9 @@ void MultiPhaseField::init(int Lx, int Ly) {
 	neighbors_sub.resize(subSize*9);
 	velocityX.resize(subSize);
         velocityY.resize(subSize);
+	map_sub_to_box.resize(subSize);
+	map_sub_to_box_x.resize(subSize);
+	map_sub_to_box_y.resize(subSize);
 	S00=0.;
         S01=0.;
 
@@ -81,6 +84,9 @@ void MultiPhaseField::init() {
 	neighbors_sub.resize(subSize*9);
 	velocityX.resize(subSize);
         velocityY.resize(subSize);
+	map_sub_to_box.resize(subSize);
+	map_sub_to_box_x.resize(subSize);
+	map_sub_to_box_y.resize(subSize);
 	S00=0.;
         S01=0.;
 

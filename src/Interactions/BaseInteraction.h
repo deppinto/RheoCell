@@ -53,6 +53,9 @@ public:
 	 */
 	virtual void init() = 0;
 
+	virtual void apply_changes_after_equilibration(){};
+
+
 	/**
 	 * @brief Handles particle allocation. Child classes must implement it.
 	 *
@@ -144,7 +147,7 @@ public:
         virtual void begin_energy_computation();
 	virtual void begin_energy_computation(std::vector<BaseField *> &fields);
 	virtual void resetSums(int k);
-	virtual void updateFieldProperties(BaseField *p, int q);
+	virtual void updateFieldProperties(BaseField *p, int q, int k);
 	virtual void updateDirectedActiveForces(number dt, BaseField *p, bool store){};
 
 
@@ -169,6 +172,7 @@ public:
          */
         virtual int get_N_from_topology();
 
+	virtual void update_sub_to_box_map(BaseField *p, int q, int sub_site, int sub_site_x, int sub_site_y);
 
 	virtual void get_settings(input_file &inp);
 	number K;

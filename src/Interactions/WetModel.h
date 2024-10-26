@@ -3,12 +3,15 @@
 
 #include "BaseInteraction.h"
 #include "../Fields/MultiPhaseField.h"
+//#include <Eigen/Sparse>
+//#include <Eigen/SparseLU>
+//#include <Eigen/SparseCore>
 
 /**
- * @brief Manages the interaction between fields with a dipolar force which aligns with shape
+ * @brief Manages the interaction between fields with a dipolar force which aligns with shape and introduces viscosity
  *
  * This interaction is selected with
- * interaction_type = activenematic
+ * interaction_type = wetmodel
  *
  */
 
@@ -25,6 +28,8 @@ protected:
 	number friction;
 	number zetaQ_self;
 	number zetaQ_inter;
+	number zetaQ_self_active;
+	number zetaQ_inter_active;
 	number J_Q;
 	bool anchoring = false;
 	number friction_cell;
@@ -34,12 +39,14 @@ protected:
 	void computeGlobalSums(BaseField *p, int q, bool update_global_sums=false);
 	void initFieldProperties(BaseField *p);
 	void updateAnchoring(BaseField *p);
+	//Eigen::VectorXd V_X, V_Y;
+	//Eigen::VectorXd F_X, F_Y;
+	//Eigen::SparseMatrix<double> M;
+	//Eigen::SparseLU<SparseMatrix<double>, COLAMDOrdering<int> >  solver;
 	std::vector<number> phi2;
-	std::vector<number> sum_phi;
 	std::vector<number> sumQ00;
 	std::vector<number> sumQ01;
-	std::vector<number> velocity_field_x;
-	std::vector<number> velocity_field_y;
+	std::vector<number> sum_phi;
 	number velX;
 	number velY;
 
@@ -52,11 +59,12 @@ public:
 	void set_box(BaseBox *boxArg) override;
 
 	void allocate_fields(std::vector<BaseField *> &fields) override;
+	void apply_changes_after_equilibration() override;
 
 	void begin_energy_computation() override;
 	void begin_energy_computation(std::vector<BaseField *> &fields) override;
 	void resetSums(int k) override;
-	void updateFieldProperties(BaseField *p, int q) override;
+	void updateFieldProperties(BaseField *p, int q, int k) override;
 
         void read_topology(std::vector<BaseField *> &fields) override;
 	void check_input_sanity(std::vector<BaseField *> &fields) override;

@@ -7,7 +7,7 @@
 
 FDBackend::FDBackend() :
 				SimBackend() {
-	timer_first_step = timer_forces = timer_eq_step = NULL;
+	timer_first_step = timer_forces = timer_testing = NULL;
 	lees_edwards = false;
 	shear_rate = -0.f;
 }
@@ -34,8 +34,8 @@ void FDBackend::init() {
 	SimBackend::init();
 
 	timer_first_step = TimingManager::instance()->new_timer(string("First Step"), string("SimBackend"));
-	timer_eq_step = TimingManager::instance()->new_timer(string("Equilibration"), string("SimBackend"));
 	timer_forces = TimingManager::instance()->new_timer(string("Forces"), string("SimBackend"));
+	timer_testing = TimingManager::instance()->new_timer(string("Testing"), string("SimBackend"));
 }
 
 void FDBackend::print_observables() {

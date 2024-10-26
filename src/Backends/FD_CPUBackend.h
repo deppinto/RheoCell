@@ -11,7 +11,6 @@ class FD_CPUBackend: public FDBackend {
 protected:
 
 	void first_step(bool store);
-	void first_eq_step(bool store);
 	void compute_forces();
 	void second_step();
 
@@ -23,6 +22,10 @@ protected:
 	vector<number> sin_x_table;
         vector<number> sin_y_table;
 
+	number dphi, phi;
+	number distance_thresh=5.;
+	std::vector<number> com_old = vector<number> {0., 0.};
+	std::vector<number> temp = vector <number> {0., 0., 0., 0.};
 
 public:
 	FD_CPUBackend();
@@ -31,7 +34,6 @@ public:
 	void init();
 	void get_settings(input_file &inp);
 	void sim_step();
-	void eq_step();
 };
 
 #endif /* FD_CPUBACKEND_H_ */
