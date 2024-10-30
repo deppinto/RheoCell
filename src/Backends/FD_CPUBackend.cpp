@@ -20,7 +20,7 @@ void FD_CPUBackend::init() {
 	FDBackend::init();
 
 	interaction->begin_energy_computation();
-	compute_forces();
+	//compute_forces();
 
 	int sizeX = box->getXsize();
 	int sizeY = box->getYsize();
@@ -63,7 +63,7 @@ void FD_CPUBackend::first_step(bool store) {
 	                // free energy
 	                - J0 * p->freeEnergy[q] 
                		// advection term
-	                - p->velocityX[q] * p->fieldDX[q] - p->velocityY[q] * p->fieldDY[q];
+	                - interaction->get_velocity_x(p,q) * p->fieldDX[q] - interaction->get_velocity_y(p,q) * p->fieldDY[q];
 
 			//if(p->index==2 && store==true)printf("check: %d, %d | %f, %f, %f, %f, %f | %f, %f, %d, %d\n", p->index, q, p->freeEnergy[q], p->velocityX, p->velocityY, p->fieldDX[q], p->fieldDY[q], com_old[0], com_old[1], p->offset[0],  p->offset[1]);
 

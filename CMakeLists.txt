@@ -47,6 +47,9 @@ ENDIF(INTEL)
 
 PROJECT(rheoCell)
 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmakeHelp)
+find_package(Eigen3 REQUIRED)
+
 # The default behaviour is to compile with optimisations
 SET(CMAKE_BUILD_TYPE Release)
 
@@ -81,7 +84,8 @@ IF(NOT DOUBLE)
 	ADD_DEFINITIONS(-DFLOAT_PRECISION)
 ENDIF()
 
-include_directories(src/extern)
+include_directories(src/extern 
+	${EIGEN3_INCLUDE_DIR})
 
 ADD_DEFINITIONS(-Wall -Wshadow -Wextra -Wno-unused-parameter)
 

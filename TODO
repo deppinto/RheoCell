@@ -12,3 +12,4 @@ Low Priority:
 - Parallelize with MPI
 - Change OXLOG
 - Uniformize code conventions (put functions and variables as snake_case, classes as PascalCase, and macros as UPPERCASE)
+- Implement lattice subdivisions (extra care since this might not interact well with the different objects)

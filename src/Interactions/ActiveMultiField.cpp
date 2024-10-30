@@ -117,24 +117,21 @@ void ActiveMultiField::initFieldProperties(BaseField *p) {
 void ActiveMultiField::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 	for(auto p : fields) {
-        	int sub=p->subSize;
-		for(int q=0; q<sub;q++)
+		for(int q=0; q<p->subSize;q++)
 			computeGlobalSums(p, q, false);
 	}
 
         U = (number) 0;
         for(auto p : fields) {
-	        int sub=p->subSize;
-                for(int q=0; q<sub;q++)
+                for(int q=0; q<p->subSize;q++)
 			U += f_interaction(p, q);
         }
 
         K = (number) 0;
         for(auto p : fields) {
-        	int sub=p->subSize;
                 p->Factive = std::vector<number> {0., 0.};
                 p->Fpassive = std::vector<number> {0., 0.};
-                for(int q=0; q<sub;q++)
+                for(int q=0; q<p->subSize;q++)
 			calc_internal_forces(p, q);
                 velX = p->Fpassive[0] + p->Factive[0];
                 velY = p->Fpassive[1] + p->Factive[1];

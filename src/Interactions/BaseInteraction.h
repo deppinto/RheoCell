@@ -173,6 +173,8 @@ public:
         virtual int get_N_from_topology();
 
 	virtual void update_sub_to_box_map(BaseField *p, int q, int sub_site, int sub_site_x, int sub_site_y);
+	virtual number get_velocity_x(BaseField *p, int q){return p->velocityX[q];}
+	virtual number get_velocity_y(BaseField *p, int q){return p->velocityY[q];}
 
 	virtual void get_settings(input_file &inp);
 	number K;

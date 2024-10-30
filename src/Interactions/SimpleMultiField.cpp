@@ -77,15 +77,13 @@ void SimpleMultiField::computeGlobalSums(BaseField *p, int q, bool update_global
 void SimpleMultiField::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 	for(auto p : fields) {
-        	int sub=p->subSize;
-		for(int q=0; q<sub;q++)
+		for(int q=0; q<p->subSize;q++)
 			computeGlobalSums(p, q, false);
 	}
 
         U = (number) 0;
         for(auto p : fields) {
-                int sub=p->subSize;
-                for(int q=0; q<sub;q++) {
+                for(int q=0; q<p->subSize;q++) {
                         U += f_interaction(p, q);
                 }
         }
