@@ -26,7 +26,6 @@ protected:
 	number distance_thresh=5.;
 	std::vector<number> com_old = vector<number> {0., 0.};
 	std::vector<number> temp = vector <number> {0., 0., 0., 0.};
-	int dd;
 
 public:
 	FD_CPUBackend();

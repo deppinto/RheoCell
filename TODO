@@ -7,6 +7,7 @@ Medium Priority:
 - Parallelize with CUDA
 - Fix the comments of the different files
 - Optimize printing of configurations (files too large...)
+- Add get_settings(input) to the fields object
 
 Low Priority:
 - Parallelize with MPI

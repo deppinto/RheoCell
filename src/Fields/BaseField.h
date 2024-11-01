@@ -27,8 +27,10 @@ public:
 	virtual void set_positions_initial(BaseBox *box) {}
 	virtual void set_positions(BaseBox *box) {}
 	virtual void set_positions(int offsetx, int offsety, int corner) {}
+	virtual void set_properties_to_zero() {};
 	virtual void copy_from(const BaseField &p);
 	virtual void get_interaction_values(int R);
+	virtual void check_borders(int q, int box_size_x, int box_size_y) {};
 
 	virtual void init();
 	virtual void init(int Lx, int Ly) {}

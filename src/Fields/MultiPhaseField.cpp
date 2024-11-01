@@ -24,11 +24,7 @@ void MultiPhaseField::get_interaction_values(int R) {
 	init_radius2=init_radius*init_radius;
 }
 
-
-void MultiPhaseField::init(int Lx, int Ly) {
-        LsubX = Lx;
-	LsubY = Ly;
-	subSize = Lx*Ly;
+void MultiPhaseField::resizing() {
 	fieldScalar.resize(subSize);
 	fieldDX.resize(subSize);
 	fieldDY.resize(subSize);	
@@ -41,6 +37,13 @@ void MultiPhaseField::init(int Lx, int Ly) {
 	map_sub_to_box.resize(subSize);
 	map_sub_to_box_x.resize(subSize);
 	map_sub_to_box_y.resize(subSize);
+}
+
+void MultiPhaseField::init(int Lx, int Ly) {
+        LsubX = Lx;
+	LsubY = Ly;
+	subSize = Lx*Ly;
+	resizing();
 	S00=0.;
         S01=0.;
 
@@ -60,15 +63,6 @@ void MultiPhaseField::init(int Lx, int Ly) {
 	sumF=0;
 	offset.resize(2);
 	offset[0]=0; offset[1]=0;
-        //int center=LsubX/2+(LsubY/2)*LsubX;
-        /*int x,y;
-        for(int i=0; i<subSize; i++){
-		freeEnergy[i]=0;
-                x=LsubX/2-i%LsubX;
-                y=LsubY/2-i/LsubY;
-                if(x*x+y*y<init_radius2){fieldScalar[i]=1.;area+=1.;sumF+=1;}
-                else fieldScalar[i]=0.;
-        }*/
 	setNeighborsSub();
 }
 
@@ -77,18 +71,7 @@ void MultiPhaseField::init() {
         subSize = LsubX*LsubY;
 
 	//standard field properties
-        fieldScalar.resize(subSize);
-	fieldDX.resize(subSize);
-        fieldDY.resize(subSize);
-	freeEnergy.resize(subSize);
-	fieldScalar_old.resize(subSize);
-        dfield_old.resize(subSize);
-	neighbors_sub.resize(subSize*9);
-	velocityX.resize(subSize);
-        velocityY.resize(subSize);
-	map_sub_to_box.resize(subSize);
-	map_sub_to_box_x.resize(subSize);
-	map_sub_to_box_y.resize(subSize);
+	resizing();
 
 	//shape tensor
 	S00=0.;
@@ -195,7 +178,7 @@ void MultiPhaseField::set_positions(BaseBox *box) {
 		offset[0] =  int(offset[0] + LsubX - displacement[0])%LsubX; offset[1] =  int(offset[1] + LsubY - displacement[1])%LsubY;
 	}
 	else{
-		//std::cout<<"start: "<<index<<" "<<x_sub_left<<" "<<y_sub_bottom<<" "<<border<<std::endl;
+		//create new sizes
 		int new_LsubX = LsubX - (2 * x_sub_left) + (2 * border);
 		int new_LsubY = LsubY - (2 * y_sub_bottom) + (2 * border);
 		int new_subSize = new_LsubX * new_LsubY;
@@ -203,8 +186,6 @@ void MultiPhaseField::set_positions(BaseBox *box) {
 		std::vector<number> new_field_scalar(new_subSize, 0.);
 		area=0;
 	
-		//std::cout<<"new values: "<<new_LsubX<<" "<<new_LsubY<<" "<<new_subSize<<" "<<new_sub_corner_bottom_left<<std::endl;
-
 		//do mapping between old and new fieldScalars (due to the way the code is written all other variables will be overwritten so a simple resize is enough)
 		int start_site_y, start_site_x, dimension_x, dimension_y;
 		if(new_LsubY<LsubY){start_site_y=(LsubY-new_LsubY)/2; dimension_y=new_LsubY;}
@@ -212,15 +193,12 @@ void MultiPhaseField::set_positions(BaseBox *box) {
 		if(new_LsubX<LsubX){start_site_x=(LsubX-new_LsubX)/2; dimension_x=new_LsubX;}
 		else{start_site_x=0; dimension_x=LsubX;}
 
-		//std::cout<<"loop "<< start_site_x<< " "<<start_site_y<<" "<<dimension_x<<" "<<dimension_y<<" "<<offset[0]<<" "<<offset[1]<<std::endl;
 		for(int i=start_site_y; i<dimension_y; i++){
 			int yy = box->getElementY(sub_corner_bottom_left, i);
-			//int off_y = (i - offset[1])%LsubY;
 			int off_y = i - offset[1];
 			if(off_y<0)off_y+=LsubY;
 			for(int j=start_site_x; j<dimension_x; j++){
 				int xx = box->getElementX(sub_corner_bottom_left, j);
-				//int ss = xx + yy * box->getXsize();
 
 				int dx = (new_sub_corner_bottom_left-int(new_sub_corner_bottom_left/box->getXsize())*box->getXsize()) - xx;
 				if(dx>box->getXsize()/2)dx-=box->getXsize();
@@ -230,39 +208,21 @@ void MultiPhaseField::set_positions(BaseBox *box) {
 				if(dy>box->getYsize()/2)dy-=box->getYsize();
 				else if(dy<-box->getYsize()/2)dy+=box->getYsize();
 
-				//int off_x = (j - offset[0])%LsubX;
 				int off_x = j - offset[0];
 				if(off_x<0)off_x+=LsubX;
-				//std::cout<<"here: "<<abs(dx)<<" "<<abs(dy)<<" "<<off_x<<" "<<off_y<<std::endl;
 				new_field_scalar[abs(dx)+abs(dy)*new_LsubX]=fieldScalar[off_x+off_y*LsubX];
 				area+=fieldScalar[off_x+off_y*LsubX]*fieldScalar[off_x+off_y*LsubX];
 			}
 		}
-
-		//std::cout<<"middle"<<std::endl;
 
 		LsubX = new_LsubX;
 		LsubY=new_LsubY;
 		sub_corner_bottom_left = new_sub_corner_bottom_left;
 		offset[0] = 0; offset[1] = 0;	
 		subSize = LsubX*LsubY;
-	        fieldScalar.resize(subSize);
+		resizing();
 		fieldScalar = new_field_scalar;
-
-		fieldDX.resize(subSize);
-	        fieldDY.resize(subSize);
-		freeEnergy.resize(subSize);
-		fieldScalar_old.resize(subSize);
-	        dfield_old.resize(subSize);
-		neighbors_sub.resize(subSize*9);
-		velocityX.resize(subSize);
-	        velocityY.resize(subSize);
-		map_sub_to_box.resize(subSize);
-		map_sub_to_box_x.resize(subSize);
-		map_sub_to_box_y.resize(subSize);
-	
 		setNeighborsSub();
-		//std::cout<<"end"<<std::endl;
 	}
 }
 
@@ -271,7 +231,33 @@ void MultiPhaseField::set_positions(int offsetx, int offsety, int corner) {
 	offset[0]=offsetx;offset[1]=offsety;
 }
 
-/*transform subdomain sites into grid sites*/
+
+void MultiPhaseField::set_properties_to_zero() {
+	S00=0;
+	S01=0;
+	x_sub_left = LsubX;
+	y_sub_bottom = LsubY;
+	area=0;
+	sumF=0;
+	CoM[0] = 0.; 
+	CoM[1] = 0.;
+}
+
+
+void MultiPhaseField::check_borders(int q, int box_size_x, int box_size_y) {
+
+	int dd = (sub_corner_bottom_left-int(sub_corner_bottom_left/box_size_x)*box_size_x) - map_sub_to_box_x[q];
+	if(dd>box_size_x/2)dd-=box_size_x;
+	else if(dd<-box_size_x/2)dd+=box_size_x;
+	if(abs(dd) < x_sub_left)x_sub_left=abs(dd);
+
+	dd = (sub_corner_bottom_left/box_size_x) - map_sub_to_box_y[q];
+	if(dd>box_size_y/2)dd-=box_size_y;
+	else if(dd<-box_size_y/2)dd+=box_size_y;
+	if(abs(dd) < y_sub_bottom)y_sub_bottom=abs(dd);
+}
+
+/*transform subdomain sites (patch) into grid sites (box)*/
 
 int MultiPhaseField::GetSubIndex(int site, BaseBox *box){
 	return box->getElementX(sub_corner_bottom_left, int((site-(int(site/LsubX)*LsubX))+offset[0])%LsubX) + box->getElementY(sub_corner_bottom_left, int((site/LsubX)+offset[1])%LsubY) * box->getXsize();

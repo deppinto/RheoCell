@@ -43,17 +43,10 @@ void FD_CPUBackend::first_step(bool store) {
 	std::vector<int> particles_with_warning;
 
 	for(auto p : fields) {
-		//printf("first: %f, %f, %f, %f\n", p->area, p->sumF, p->CoM[0], p->CoM[1]);
-		p->S00=0;
-		p->S01=0;
-		p->area=0;
-		p->sumF=0;
 		com_old[0]=p->CoM[0];
 		com_old[1]=p->CoM[1];
-		p->CoM[0] = 0; p->CoM[1] = 0;
 		temp[0]=0; temp[1]=0; temp[2]=0; temp[3]=0;
-		p->x_sub_left = box->getXsize();
-		p->y_sub_bottom = box->getYsize();
+		p->set_properties_to_zero();
 
 		for(int q=0; q<p->subSize; q++) { 
 
@@ -67,15 +60,12 @@ void FD_CPUBackend::first_step(bool store) {
                		// advection term
 	                - interaction->get_velocity_x(p,q) * p->fieldDX[q] - interaction->get_velocity_y(p,q) * p->fieldDY[q];
 
-			//if(p->index==2 && store==true)printf("check: %d, %d | %f, %f, %f, %f, %f | %f, %f, %d, %d\n", p->index, q, p->freeEnergy[q], p->velocityX, p->velocityY, p->fieldDX[q], p->fieldDY[q], com_old[0], com_old[1], p->offset[0],  p->offset[1]);
-
 			if(store) {
 				p->fieldScalar_old[q]=p->fieldScalar[q];
 				p->dfield_old[q]=dphi;
 			}
 
 			phi = p->fieldScalar_old[q] + dt*.5*(dphi + p->dfield_old[q]);
-
 			p->fieldScalar[q] = phi;
 			p->area += phi * phi;
 			p->sumF += phi;
@@ -86,19 +76,8 @@ void FD_CPUBackend::first_step(bool store) {
 			temp[2] += phi * cos_y_table[p->map_sub_to_box_y[q]];//GetSubYIndex(q, config_info->box)]; //cos(2*PI*p->GetSubYIndex(q, config_info->box)/box->getYsize());
 			temp[3] += phi * sin_y_table[p->map_sub_to_box_y[q]];//GetSubYIndex(q, config_info->box)]; //sin(2*PI*p->GetSubYIndex(q, config_info->box)/box->getYsize());
 			//timer_testing->pause();
-			if(phi>0.1 && phi<0.2){
-				dd = (p->sub_corner_bottom_left-int(p->sub_corner_bottom_left/box->getXsize())*box->getXsize()) - p->map_sub_to_box_x[q];
-				if(dd>box->getXsize()/2)dd-=box->getXsize();
-				else if(dd<-box->getXsize()/2)dd+=box->getXsize();
-				if(abs(dd) < p->x_sub_left){p->x_sub_left=abs(dd);}
 
-				dd = (p->sub_corner_bottom_left/box->getXsize()) - p->map_sub_to_box_y[q];
-				if(dd>box->getYsize()/2)dd-=box->getYsize();
-				else if(dd<-box->getYsize()/2)dd+=box->getYsize();
-				if(abs(dd) < p->y_sub_bottom){p->y_sub_bottom=abs(dd);}
-			}
-
-
+			if(!store && phi<0.2 && phi>0.1)p->check_borders(q, box->getXsize(), box->getYsize());
 			interaction->resetSums(k);
 			interaction->updateFieldProperties(p, q, k);
 		}
@@ -109,7 +88,6 @@ void FD_CPUBackend::first_step(bool store) {
 			particles_with_warning.push_back(p->index);
 		}
 
-		//std::cout<< p->y_sub_bottom << " "<< p->x_sub_left << " "<< p->sub_corner_bottom_left/box->getXsize() << " "<<p->sub_corner_bottom_left-int(p->sub_corner_bottom_left/box->getXsize())*box->getXsize()<<" "<< p->map_sub_to_box_y[save_q]<<" "<<p->map_sub_to_box_x[save_q]<<std::endl;
 		interaction->updateDirectedActiveForces(dt, p, store);
 		if(!store)p->set_positions(config_info->box);
 	}
