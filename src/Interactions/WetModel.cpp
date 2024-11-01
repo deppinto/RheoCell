@@ -104,7 +104,7 @@ void WetModel::initFieldProperties(BaseField *p) {
 		p->S00 += -0.5*(dx*dx-dy*dy);
 		p->S01 += -dx*dy;
 	}
-	size_rows += 2*p->subSize;
+	size_rows += p->subSize;
 }
 
 
@@ -129,15 +129,11 @@ void WetModel::begin_energy_computation() {
         }
 
 	if(size_rows/CONFIG_INFO->fields()[0]->subSize!=2*CONFIG_INFO->N())throw RCexception("Not all fields have the same patch size for the wet model. Aborting");
-	/*vec_v.resize(size_rows);
-	vec_f.resize(size_rows);
-	mat_m.resize(size_rows, size_rows);*/
-
-	vec_v_x.resize(size_rows/2);
-	vec_f_x.resize(size_rows/2);
-	vec_v_y.resize(size_rows/2);
-	vec_f_y.resize(size_rows/2);
-	mat_m_x.resize(size_rows/2, size_rows/2);
+	vec_v_x.resize(size_rows);
+	vec_f_x.resize(size_rows);
+	vec_v_y.resize(size_rows);
+	vec_f_y.resize(size_rows);
+	mat_m_x.resize(size_rows, size_rows);
 }
 
 void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
@@ -155,8 +151,6 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
         }
 
         K = (number) 0;
-	//std::vector<Eigen::Triplet<double>> tri_t;
-	//mat_m.setZero();
 	std::vector<Eigen::Triplet<double>> tri_t_x;
 	//mat_m_x.setZero();
         for(auto p : fields) {
@@ -166,9 +160,6 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			calc_internal_forces(p, q);
 
 			//populate sparse matrix
-			//tri_t.push_back(Eigen::Triplet<double> (0+(q+p->index*p->subSize)*2, 0+(q+p->index*p->subSize)*2, (double)(friction+4*friction_cell)));
-			//tri_t.push_back(Eigen::Triplet<double> (1+(q+p->index*p->subSize)*2, 1+(q+p->index*p->subSize)*2, (double)(friction+4*friction_cell)));
-
 			tri_t_x.push_back(Eigen::Triplet<double> (q+p->index*p->subSize, q+p->index*p->subSize, (double)(friction+4*friction_cell)));
 
 			for(auto j : neigh_values){
@@ -178,27 +169,11 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 				for(int i=0; i<size_store_site_velocity_index[other_site_box]; i++){
 					index = store_site_velocity_index[i+other_site_box*store_max_size]/p->subSize;
 					sub_q = (store_site_velocity_index[i+other_site_box*store_max_size]-(index*p->subSize));
-					//tri_t.push_back(Eigen::Triplet<double> (0+(q+p->index*p->subSize)*2, 0+(sub_q+index*p->subSize)*2, (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
-					//tri_t.push_back(Eigen::Triplet<double> (1+(q+p->index*p->subSize)*2, 1+(sub_q+index*p->subSize)*2, (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
-
 					tri_t_x.push_back(Eigen::Triplet<double> (q+p->index*p->subSize, sub_q+index*p->subSize, (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
 				}
 			}
 		}
         }
-
-	/*
-	//std::cout<<"start solver xy: "<<size_rows <<std::endl;
-	mat_m.setFromTriplets(tri_t.begin(), tri_t.end());
-	mat_m.makeCompressed();
-	//std::cout<<"copy done xy"<<std::endl;
-	solverLU.analyzePattern(mat_m);
-	//std::cout<<"pattern analyzed xy"<<std::endl;
-	solverLU.factorize(mat_m);
-	//std::cout<<"solver factorized xy"<<std::endl;
-	vec_v = solverLU.solve(vec_f);
-	//std::cout<<"end solver xy"<<std::endl;
-	*/
 
 	/*
 	//std::cout<<"start solver: "<<size_rows/2 <<std::endl;
@@ -209,18 +184,6 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	solverLU.factorize(mat_m_x);
 	vec_v_x = solverLU.solve(vec_f_x);
 	vec_v_y = solverLU.solve(vec_f_y);
-	*/
-
-	/*
-	//std::cout<<"start solver xy: "<<size_rows <<std::endl;
-	mat_m.setFromTriplets(tri_t.begin(), tri_t.end());
-	//mat_m.makeCompressed();
-	//std::cout<<"copy done xy"<<std::endl;
-	//std::cout<<"pattern analyzed xy"<<std::endl;
-	//std::cout<<"solver factorized xy"<<std::endl;
-	solverCG.compute(mat_m);
-	vec_v = solverCG.solve(vec_f);
-	//std::cout<<"end solver xy"<<std::endl;
 	*/
 
 	//std::cout<<"start solver: "<<size_rows/2 <<std::endl;
@@ -241,7 +204,6 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	//std::cout<<"testing x: "<<vec_v_x[312]<<" "<<vec_v_y[312]<<std::endl;
 	//std::cout<<"testing old: "<< fields[0]->velocityX[312] <<" "<< fields[0]->velocityY[312]<<std::endl;
 	//exit (911);
-	
 
 	//velX = p->Fpassive[0] + p->Factive[0];
 	//velY = p->Fpassive[1] + p->Factive[1];

@@ -75,6 +75,8 @@ void MultiPhaseField::init(int Lx, int Ly) {
 
 void MultiPhaseField::init() {
         subSize = LsubX*LsubY;
+
+	//standard field properties
         fieldScalar.resize(subSize);
 	fieldDX.resize(subSize);
         fieldDY.resize(subSize);
@@ -87,9 +89,12 @@ void MultiPhaseField::init() {
 	map_sub_to_box.resize(subSize);
 	map_sub_to_box_x.resize(subSize);
 	map_sub_to_box_y.resize(subSize);
+
+	//shape tensor
 	S00=0.;
         S01=0.;
 
+	//nematic part
 	thetaQ = thetaQ_old = PI * (1-2*drand48());
 	Q00=cos(2*thetaQ);
 	Q01=sin(2*thetaQ);
@@ -100,16 +105,16 @@ void MultiPhaseField::init() {
 	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
 	Q01 = nemQ[0] * nemQ[1];
 
+	//minor bookkeeping
 	Fpassive = std::vector<number> {0.,0.};
         Factive = std::vector<number> {0.,0.};
 	area=0;
 	offset.resize(2);
 	offset[0]=0; offset[1]=0;
-	//int center=LsubX/2+(LsubY/2)*LsubX;
 	int x,y;
 	for(int i=0; i<subSize; i++){
-		x=LsubX/2-i%LsubX;
-		y=LsubY/2-i/LsubY;
+		y=LsubY/2-i/LsubX;
+		x=LsubX/2-(i-int(i/LsubX)*LsubX);
 		velocityX[i]=0;
 		velocityY[i]=0;
 		if(x*x+y*y<init_radius2+0.5){fieldScalar[i]=1.;area+=1;sumF+=1;}
@@ -127,8 +132,8 @@ void MultiPhaseField::setNeighborsSub() {
 void MultiPhaseField::setNeighborsSubSquareDirichlet() {
 	int x,y,xx,yy,site,ss;
 	for(int i =0; i<subSize; i++) {
-		x=i%LsubY;
 		y=i/LsubX;
+		x=i-y*LsubX;
 		ss=0;
 		for(int j=-1; j<=1; j++){
 			for(int k=-1; k<=1; k++){
@@ -149,8 +154,8 @@ void MultiPhaseField::setNeighborsSubSquareDirichlet() {
 void MultiPhaseField::setNeighborsSubSquarePeriodic() {
 	int x,y,xx,yy,site,ss;
 	for(int i =0; i<subSize; i++) {
-		x=i%LsubY;
 		y=i/LsubX;
+		x=i-y*LsubX;
 		ss=0;
 		for(int j=-1; j<=1; j++){
 			for(int k=-1; k<=1; k++){
@@ -177,15 +182,88 @@ void MultiPhaseField::set_positions_initial(BaseBox *box) {
 }
 
 void MultiPhaseField::set_positions(BaseBox *box) {
-	int x=CoM[0];
-	int y=CoM[1];
-	int site=x+y*box->getXsize();
-	std::vector<number> corner_old = std::vector<number> { (number)box->getElementX(sub_corner_bottom_left, 0) , (number)box->getElementY(sub_corner_bottom_left, 0) };
-	sub_corner_bottom_left=box->getElementX(site, (int)-LsubX/2) + box->getElementY(site, (int)-LsubY/2) * box->getXsize();
+
+	if(x_sub_left>=border && y_sub_bottom>=border){
+		int x=CoM[0];
+		int y=CoM[1];
+		int site=x+y*box->getXsize();
+		std::vector<number> corner_old = std::vector<number> { (number)box->getElementX(sub_corner_bottom_left, 0) , (number)box->getElementY(sub_corner_bottom_left, 0) };
+		sub_corner_bottom_left=box->getElementX(site, (int)-LsubX/2) + box->getElementY(site, (int)-LsubY/2) * box->getXsize();
 	
-	std::vector<number> corner_new = std::vector<number> { (number)box->getElementX(sub_corner_bottom_left, 0) , (number)box->getElementY(sub_corner_bottom_left, 0) };
-	std::vector<number> displacement = box->min_image(corner_old, corner_new);
-	offset[0] =  int(offset[0] + LsubX - displacement[0])%LsubX; offset[1] =  int(offset[1] + LsubY - displacement[1])%LsubY;
+		std::vector<number> corner_new = std::vector<number> { (number)box->getElementX(sub_corner_bottom_left, 0) , (number)box->getElementY(sub_corner_bottom_left, 0) };
+		std::vector<number> displacement = box->min_image(corner_old, corner_new);
+		offset[0] =  int(offset[0] + LsubX - displacement[0])%LsubX; offset[1] =  int(offset[1] + LsubY - displacement[1])%LsubY;
+	}
+	else{
+		//std::cout<<"start: "<<index<<" "<<x_sub_left<<" "<<y_sub_bottom<<" "<<border<<std::endl;
+		int new_LsubX = LsubX - (2 * x_sub_left) + (2 * border);
+		int new_LsubY = LsubY - (2 * y_sub_bottom) + (2 * border);
+		int new_subSize = new_LsubX * new_LsubY;
+		int new_sub_corner_bottom_left=box->getElementX(sub_corner_bottom_left, -(-(2 * x_sub_left)+(2 * border))/2) + box->getElementY(sub_corner_bottom_left, -(-(2 * y_sub_bottom)+(2 * border))/2) * box->getXsize();
+		std::vector<number> new_field_scalar(new_subSize, 0.);
+		area=0;
+	
+		//std::cout<<"new values: "<<new_LsubX<<" "<<new_LsubY<<" "<<new_subSize<<" "<<new_sub_corner_bottom_left<<std::endl;
+
+		//do mapping between old and new fieldScalars (due to the way the code is written all other variables will be overwritten so a simple resize is enough)
+		int start_site_y, start_site_x, dimension_x, dimension_y;
+		if(new_LsubY<LsubY){start_site_y=(LsubY-new_LsubY)/2; dimension_y=new_LsubY;}
+		else{start_site_y=0; dimension_y=LsubY;}
+		if(new_LsubX<LsubX){start_site_x=(LsubX-new_LsubX)/2; dimension_x=new_LsubX;}
+		else{start_site_x=0; dimension_x=LsubX;}
+
+		//std::cout<<"loop "<< start_site_x<< " "<<start_site_y<<" "<<dimension_x<<" "<<dimension_y<<" "<<offset[0]<<" "<<offset[1]<<std::endl;
+		for(int i=start_site_y; i<dimension_y; i++){
+			int yy = box->getElementY(sub_corner_bottom_left, i);
+			//int off_y = (i - offset[1])%LsubY;
+			int off_y = i - offset[1];
+			if(off_y<0)off_y+=LsubY;
+			for(int j=start_site_x; j<dimension_x; j++){
+				int xx = box->getElementX(sub_corner_bottom_left, j);
+				//int ss = xx + yy * box->getXsize();
+
+				int dx = (new_sub_corner_bottom_left-int(new_sub_corner_bottom_left/box->getXsize())*box->getXsize()) - xx;
+				if(dx>box->getXsize()/2)dx-=box->getXsize();
+				else if(dx<-box->getXsize()/2)dx+=box->getXsize();
+
+				int dy = (new_sub_corner_bottom_left/box->getXsize()) - yy;
+				if(dy>box->getYsize()/2)dy-=box->getYsize();
+				else if(dy<-box->getYsize()/2)dy+=box->getYsize();
+
+				//int off_x = (j - offset[0])%LsubX;
+				int off_x = j - offset[0];
+				if(off_x<0)off_x+=LsubX;
+				//std::cout<<"here: "<<abs(dx)<<" "<<abs(dy)<<" "<<off_x<<" "<<off_y<<std::endl;
+				new_field_scalar[abs(dx)+abs(dy)*new_LsubX]=fieldScalar[off_x+off_y*LsubX];
+				area+=fieldScalar[off_x+off_y*LsubX]*fieldScalar[off_x+off_y*LsubX];
+			}
+		}
+
+		//std::cout<<"middle"<<std::endl;
+
+		LsubX = new_LsubX;
+		LsubY=new_LsubY;
+		sub_corner_bottom_left = new_sub_corner_bottom_left;
+		offset[0] = 0; offset[1] = 0;	
+		subSize = LsubX*LsubY;
+	        fieldScalar.resize(subSize);
+		fieldScalar = new_field_scalar;
+
+		fieldDX.resize(subSize);
+	        fieldDY.resize(subSize);
+		freeEnergy.resize(subSize);
+		fieldScalar_old.resize(subSize);
+	        dfield_old.resize(subSize);
+		neighbors_sub.resize(subSize*9);
+		velocityX.resize(subSize);
+	        velocityY.resize(subSize);
+		map_sub_to_box.resize(subSize);
+		map_sub_to_box_x.resize(subSize);
+		map_sub_to_box_y.resize(subSize);
+	
+		setNeighborsSub();
+		//std::cout<<"end"<<std::endl;
+	}
 }
 
 void MultiPhaseField::set_positions(int offsetx, int offsety, int corner) {
@@ -196,13 +274,13 @@ void MultiPhaseField::set_positions(int offsetx, int offsety, int corner) {
 /*transform subdomain sites into grid sites*/
 
 int MultiPhaseField::GetSubIndex(int site, BaseBox *box){
-	return box->getElementX(sub_corner_bottom_left, int((site%LsubX)+offset[0])%LsubX) + box->getElementY(sub_corner_bottom_left, int((site/LsubY)+offset[1])%LsubY) * box->getXsize();
+	return box->getElementX(sub_corner_bottom_left, int((site-(int(site/LsubX)*LsubX))+offset[0])%LsubX) + box->getElementY(sub_corner_bottom_left, int((site/LsubX)+offset[1])%LsubY) * box->getXsize();
 }
 
 int MultiPhaseField::GetSubXIndex(int site, BaseBox *box){
-	return box->getElementX(sub_corner_bottom_left, int((site%LsubX)+offset[0])%LsubX);
+	return box->getElementX(sub_corner_bottom_left, int((site-(int(site/LsubX)*LsubX))+offset[0])%LsubX);
 }
 
 int MultiPhaseField::GetSubYIndex(int site, BaseBox *box){
-	return box->getElementY(sub_corner_bottom_left, int((site/LsubY)+offset[1])%LsubY);
+	return box->getElementY(sub_corner_bottom_left, int((site/LsubX)+offset[1])%LsubY);
 }

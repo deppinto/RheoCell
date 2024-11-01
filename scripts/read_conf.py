@@ -66,7 +66,7 @@ for line in cfile:
         yy=int(site/lx)
         xx=site-int(yy*lx)
 
-        if value>0.5:
+        if value>0.01:
             Z[yy][xx]=value
         else:
             out_area=value*value
@@ -81,7 +81,7 @@ for line in cfile:
     else:
         cmap = cm.cool
 
-    if abs(1-area/(pi*8*8)>0.2):
+    if abs(1-area/(pi*8*8)>0.5):
         print("area is not conserved: ", pt_num, area)
         cmap=cm.winter
 
@@ -99,10 +99,11 @@ for line in cfile:
         continue
 
     levels = np.arange(0.0, m, step) + step
-    if pt_num<3:
+    cmap=cm.winter
+    if pt_num==1000000:
         cset1 = plt.contour(X, Y, Z, levels, cmap=cmap, alpha=0.5)
     else:
-        cset1 = plt.contour(X, Y, Z, levels, levels=[0.5], cmap=cmap, alpha=0.5)
+        cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cmap, alpha=0.5)
 
     #print(pt_num, area)
     pt_num+=1
@@ -117,24 +118,23 @@ if variable==2:
     plt.show()
 
 
-'''
-fig = plt.figure(figsize=(6,6))
-totphi = [[0. for j in range(lx)] for i in range(ly)]
-for k in range(lx*ly):
-    yy=int(k/lx)
-    xx=k-int(yy*lx)
-    for i in range(pt_num):
-        totphi[yy][xx] += sim_grid[k+i*lx*ly] * walls[k]
-        for j in range(i+1, pt_num):
-            totphi[yy][xx] += sim_grid[k+i*lx*ly] * sim_grid[k+j*lx*ly]
+if variable==3:
+    fig = plt.figure(figsize=(6,6))
+    totphi = [[0. for j in range(lx)] for i in range(ly)]
+    for k in range(lx*ly):
+        yy=int(k/lx)
+        xx=k-int(yy*lx)
+        for i in range(pt_num):
+            totphi[yy][xx] += sim_grid[k+i*lx*ly] * walls[k]
+            for j in range(i+1, pt_num):
+                totphi[yy][xx] += sim_grid[k+i*lx*ly] * sim_grid[k+j*lx*ly]
 
 
-cmap = LinearSegmentedColormap.from_list('mycmap', ['grey', 'white'])
-plt.imshow(totphi, interpolation='lanczos', cmap=cmap, origin='lower')
+    cmap = LinearSegmentedColormap.from_list('mycmap', ['grey', 'white'])
+    plt.imshow(totphi, interpolation='lanczos', cmap=cmap, origin='lower')
 
-ax = plt.gca()
-ax.set_aspect('equal', adjustable='box')
-fig.tight_layout()
-plt.savefig('frame.png')
-plt.show()
-'''
+    ax = plt.gca()
+    ax.set_aspect('equal', adjustable='box')
+    fig.tight_layout()
+    plt.savefig('frame.png')
+    plt.show()
