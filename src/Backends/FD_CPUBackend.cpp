@@ -77,6 +77,7 @@ void FD_CPUBackend::first_step(bool store) {
 			temp[3] += phi * sin_y_table[p->map_sub_to_box_y[q]];//GetSubYIndex(q, config_info->box)]; //sin(2*PI*p->GetSubYIndex(q, config_info->box)/box->getYsize());
 			//timer_testing->pause();
 
+			//if(q==0)std::cout<<p->fieldScalar[0]<<" "<<p->freeEnergy[0]<<" "<<interaction->get_velocity_x(p,0) <<" "<<interaction->get_velocity_y(p,0) <<" "<<p->fieldDX[0]<<" "<<p->fieldDY[0]  <<std::endl;
 			if(!store && phi<0.2 && phi>0.1)p->check_borders(q, box->getXsize(), box->getYsize());
 			interaction->resetSums(k);
 			interaction->updateFieldProperties(p, q, k);
@@ -88,6 +89,7 @@ void FD_CPUBackend::first_step(bool store) {
 			particles_with_warning.push_back(p->index);
 		}
 
+		//std::cout<<p->fieldScalar[0]<<" "<<p->freeEnergy[0]<<" "<<interaction->get_velocity_x(p,0) <<" "<<interaction->get_velocity_y(p,0) <<" "<<p->fieldDX[0]<<" "<<p->fieldDY[0]  <<std::endl;
 		interaction->updateDirectedActiveForces(dt, p, store);
 		if(!store)p->set_positions(config_info->box);
 	}

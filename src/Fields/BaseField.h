@@ -126,7 +126,7 @@ public:
 	int subSize;
 	std::vector<int> offset;
         int sub_corner_bottom_left;
-	int border;
+	int border; //usually equals 4
 	int x_sub_left, y_sub_top, x_sub_right, y_sub_bottom;
 	std::vector<int> map_sub_to_box;
 	std::vector<int> map_sub_to_box_x;

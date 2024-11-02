@@ -260,13 +260,21 @@ void MultiPhaseField::check_borders(int q, int box_size_x, int box_size_y) {
 /*transform subdomain sites (patch) into grid sites (box)*/
 
 int MultiPhaseField::GetSubIndex(int site, BaseBox *box){
-	return box->getElementX(sub_corner_bottom_left, int((site-(int(site/LsubX)*LsubX))+offset[0])%LsubX) + box->getElementY(sub_corner_bottom_left, int((site/LsubX)+offset[1])%LsubY) * box->getXsize();
+	int y = (site/LsubX)+offset[1];
+	if(y>=LsubY)y-=LsubY;
+	int x = (site - int(site/LsubX) * LsubX)+offset[0];
+	if(x>=LsubX)x-=LsubX;
+	return box->getElementX(sub_corner_bottom_left, ((site - int(site/LsubX) * LsubX)+offset[0])%LsubX ) + box->getElementY(sub_corner_bottom_left, ((site/LsubX)+offset[1])%LsubY ) * box->getXsize();
 }
 
 int MultiPhaseField::GetSubXIndex(int site, BaseBox *box){
-	return box->getElementX(sub_corner_bottom_left, int((site-(int(site/LsubX)*LsubX))+offset[0])%LsubX);
+	int x = (site - int(site/LsubX) * LsubX) - offset[0];
+	if(x<0)x+=LsubX;
+	return box->getElementX(sub_corner_bottom_left, ((site - int(site/LsubX) * LsubX)+offset[0])%LsubX);
 }
 
 int MultiPhaseField::GetSubYIndex(int site, BaseBox *box){
-	return box->getElementY(sub_corner_bottom_left, int((site/LsubX)+offset[1])%LsubY);
+	int y = (site/LsubX)-offset[1];
+	if(y<0)y+=LsubY;
+	return box->getElementY(sub_corner_bottom_left, ((site/LsubX)+offset[1])%LsubY);
 }

@@ -37,9 +37,6 @@ protected:
 	void computeGlobalSums(BaseField *p, int q, bool update_global_sums=false);
 	void initFieldProperties(BaseField *p);
 	void update_anchoring(BaseField *p);
-	Eigen::VectorXd vec_v;
-	Eigen::VectorXd vec_f;
-	Eigen::SparseMatrix<double> mat_m;
 
 	Eigen::VectorXd vec_v_x;
 	Eigen::VectorXd vec_f_x;
@@ -54,6 +51,7 @@ protected:
 	std::vector<int> neigh_values = std::vector<int> {5,3,1,7};
 	std::vector<int> size_store_site_velocity_index;
 	std::vector<int> store_site_velocity_index;
+	std::vector<int> field_start_index;
 	int store_max_size = 0;
 	std::vector<number> phi2;
 	std::vector<number> sumQ00;
@@ -72,10 +70,10 @@ public:
 
 	void allocate_fields(std::vector<BaseField *> &fields) override;
 	void apply_changes_after_equilibration() override;
-	//number get_velocity_x(BaseField *p, int q){return vec_v[0+(q+p->index*p->subSize)*2];}
-	//number get_velocity_y(BaseField *p, int q){return vec_v[1+(q+p->index*p->subSize)*2];}
-	number get_velocity_x(BaseField *p, int q){return vec_v_x[q+p->index*p->subSize];}
-	number get_velocity_y(BaseField *p, int q){return vec_v_y[q+p->index*p->subSize];}
+	number get_velocity_x(BaseField *p, int q){return vec_v_x[q+field_start_index[p->index]];}
+	number get_velocity_y(BaseField *p, int q){return vec_v_y[q+field_start_index[p->index]];}
+	//number get_velocity_x(BaseField *p, int q){return vec_v_x[q+p->index*p->subSize];}
+	//number get_velocity_y(BaseField *p, int q){return vec_v_y[q+p->index*p->subSize];}
 
 	void begin_energy_computation() override;
 	void begin_energy_computation(std::vector<BaseField *> &fields) override;
