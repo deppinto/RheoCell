@@ -69,6 +69,11 @@ protected:
 	int N_updates;
 	int confs_to_skip;
 
+        //!Allow a openMP threads
+        int omp_thread_num = 1;
+        //set number of threads
+        virtual void set_omp_threads(int num_threads){omp_thread_num = num_threads;};
+
 public:
 	SimBackend();
 	virtual ~SimBackend();

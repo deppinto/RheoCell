@@ -59,6 +59,15 @@ for line in cfile:
     words=line.split()
     Z=[[0 for q in range(lx)] for k in range(ly)]
     track_problem = 0
+    LsubX=int(float(words[0]))
+    LsubY=int(float(words[1]))
+    CoMX=float(words[2])
+    CoMY=float(words[3])
+    offsetX=int(float(words[4]))
+    offsetY=int(float(words[5]))
+    corner=int(float(words[6]))
+    nemX=float(words[7])
+    nemY=float(words[8])
     for i in range(start_value,len(words),2):
         site=int(float(words[i]))
         value=float(words[i+1])
@@ -100,10 +109,12 @@ for line in cfile:
 
     levels = np.arange(0.0, m, step) + step
     cmap=cm.winter
-    if pt_num==1:
+    if pt_num==-1:
         cset1 = plt.contour(X, Y, Z, levels, cmap=cmap, alpha=0.5)
     else:
         cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cmap, alpha=0.5)
+
+    cset1 = plt.arrow(CoMX, CoMY, nemX, nemY, color='k')
 
     #print(pt_num, area)
     pt_num+=1

@@ -13,6 +13,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_FORCE_INLINES")
 
 OPTION(CUDA "Set to ON to compile with CUDA support" OFF)
 OPTION(MPI "Set to ON to compile with MPI support" OFF)
+OPTION(OPENMP "Set to ON to compile with OPENMP support" ON)
 OPTION(Debug "Set to ON to compile with debug symbols" OFF)
 OPTION(G "Set to ON to compile with optimisations and debug symbols" OFF)
 OPTION(INTEL "Use the Intel compiler" OFF)
@@ -112,6 +113,11 @@ ENDIF()
 IF(MPI)
 	ADD_DEFINITIONS(-DHAVE_MPI)
 ENDIF(MPI)
+
+IF(OPENMP)
+	find_package(OpenMP REQUIRED)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+ENDIF(OPENMP)
 
 # return the current date as day/month/year
 MACRO(CURRENT_DATE result)

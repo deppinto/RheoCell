@@ -16,6 +16,7 @@ BaseInteraction::~BaseInteraction() {
 void BaseInteraction::get_settings(input_file &inp) {
 	getInputString(&inp, "topology", topology_filename, 1);
 	getInputNumber(&inp, "energy_threshold", &energy_threshold, 0);
+	getInputInt(&inp, "omp_thread_num", &omp_thread_num, 0);
 }
 
 
