@@ -75,7 +75,7 @@ for line in cfile:
         yy=int(site/lx)
         xx=site-int(yy*lx)
 
-        if value>0.01:
+        if value>0:
             Z[yy][xx]=value
         else:
             out_area=value*value
@@ -104,17 +104,17 @@ for line in cfile:
 
     step = 0.01
     m = np.amax(Z)
-    if m<0.000001:
-        continue
+    #if m<0.000001:
+        #continue
 
     levels = np.arange(0.0, m, step) + step
     cmap=cm.winter
-    if pt_num==-1:
+    if pt_num<0:
         cset1 = plt.contour(X, Y, Z, levels, cmap=cmap, alpha=0.5)
     else:
         cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cmap, alpha=0.5)
 
-    cset1 = plt.arrow(CoMX, CoMY, nemX, nemY, color='k')
+    #cset1 = plt.arrow(CoMX, CoMY, nemX, nemY, color='k')
 
     #print(pt_num, area)
     pt_num+=1
@@ -122,7 +122,7 @@ for line in cfile:
 
 ax = plt.gca()
 ax.set_aspect('equal', adjustable='box')
-fig.tight_layout()
+#fig.tight_layout()
 if variable==1:
     plt.savefig('frame.png')
 if variable==2:
