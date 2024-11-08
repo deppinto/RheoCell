@@ -9,8 +9,8 @@ import scipy.ndimage
 
 from matplotlib import cm
 
-if len(sys.argv)!=3:
-    print(sys.argv[0]," [input] [variable]")
+if len(sys.argv)!=4:
+    print(sys.argv[0]," [input] [variable] [start line]")
     sys.exit(1)
 
 
@@ -46,6 +46,7 @@ external_forces_file = 'external.conf '
 topology = 'test.top'
 conf_file = 'start.conf'
 trajectory_file = 'trajectory.dat'
+lastconf_file = 'last_conf.dat'
 
 ifile=open(sys.argv[1],"r")
 for line in ifile:
@@ -58,6 +59,8 @@ for line in ifile:
         conf_file = words[2]
     elif words[0]=='trajectory_file':
         trajectory_file = words[2]
+    elif words[0]=='lastconf_file':
+        lastconf_file = words[2]
     elif words[0]=='seed':
         seed=int(float(words[2]))
     elif words[0]=='equilibration_steps':
@@ -104,11 +107,8 @@ lline=line.split()
 for l in lline:
         species.append(int(l))
 tfile.close()
-
 numspecies=len(set(species))
 
-
-cfile=open(trajectory_file,"r")
 v_com_x_t = []
 v_com_y_t = []
 com_x_t = []
@@ -118,6 +118,8 @@ start_value = 9
 
 CoMX=[0. for i in range(0,N)]
 CoMY=[0. for i in range(0,N)]
+CoMX_old=[0. for i in range(0,N)]
+CoMY_old=[0. for i in range(0,N)]
 theta_nem=[0. for i in range(0,N)]
 area=[0. for i in range(0,N)]
 Q00=[0. for i in range(0,N)]
@@ -129,13 +131,30 @@ offsetY=[0 for i in range(0,N)]
 cornerSite=[0 for i in range(0,N)]
 com_velocity_x = [0. for i in range(0,N)]
 com_velocity_y = [0. for i in range(0,N)]
-lx=0
-ly=0
+
+lfile=open(lastconf_file,"r")
+header=lfile.readline().split()
+t=int(header[2])
+header=lfile.readline().split()
+lx=int(float(header[2]))
+ly=int(float(header[3]))
 x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
 
+
+lambda_wall+=2
+avg_velocity_x=np.zeros(ly-ceil(2*lambda_wall))
+avg_velocity_y=np.zeros(ly-ceil(2*lambda_wall))
+counter_for_avg=np.zeros(ly-ceil(2*lambda_wall))
+
+
 cont_line=0
 vmax=0.005
+start_line=(N+2)*int(float(sys.argv[3])) 
+cfile=open(trajectory_file,"r")
+for i in range(start_line):
+    cfile.readline()
+
 
 fig = plt.figure(figsize=(6,6))
 for line in cfile:
@@ -147,6 +166,8 @@ for line in cfile:
         time_conf.append(t)
 
         pt_num=0
+        CoMX_old=CoMX
+        CoMY_old=CoMY
         CoMX=[0. for i in range(0,N)]
         CoMY=[0. for i in range(0,N)]
         theta_nem=[0. for i in range(0,N)]
@@ -179,15 +200,14 @@ for line in cfile:
         offsetY[pt_num]=int(float(words[5]))
         cornerSite[pt_num]=int(float(words[6]))
 
-        if t==print_conf_interval:
+        if cont_line<=N+2:
             com_velocity_x[pt_num]=0.
             com_velocity_y[pt_num]=0.
         else:
             t1=len(time_conf)-1
             t2=len(time_conf)-2
-            com_velocity_x[pt_num]=(CoMX[pt_num]-com_x_t[t2][pt_num])/((time_conf[t1]-time_conf[t2])*dt)
-            com_velocity_y[pt_num]=(CoMY[pt_num]-com_y_t[t2][pt_num])/((time_conf[t1]-time_conf[t2])*dt)
-            #print(com_velocity_x[pt_num], com_velocity_y[pt_num])
+            com_velocity_x[pt_num]=(CoMX[pt_num]-CoMX_old[pt_num])/((time_conf[t1]-time_conf[t2])*dt)
+            com_velocity_y[pt_num]=(CoMY[pt_num]-CoMY_old[pt_num])/((time_conf[t1]-time_conf[t2])*dt)
 
         nemX=float(words[7])
         nemY=float(words[8])
@@ -203,6 +223,12 @@ for line in cfile:
             Z[yy][xx]=value
             area[pt_num]+=value*value
 
+            if cont_line>N+2 and yy>=int(ceil(2*lambda_wall)/2) and yy<ly-int(ceil(2*lambda_wall)/2):
+                avg_velocity_x[yy-int(ceil(2*lambda_wall)/2)]+=com_velocity_x[pt_num]
+                avg_velocity_y[yy-int(ceil(2*lambda_wall)/2)]+=com_velocity_y[pt_num]
+                counter_for_avg[yy-int(ceil(2*lambda_wall)/2)]+=1
+
+
         X, Y = np.meshgrid(x, y)
         if pt_num<0:
             cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
@@ -215,7 +241,7 @@ for line in cfile:
             norm=1
         cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color=cm.hot(color_val))
 
-        #print(pt_num, area)
+        #increment phase field index
         pt_num+=1
 
 
@@ -229,15 +255,56 @@ for line in cfile:
             ax.set_xlim([0, lx])
             ax.set_ylim([0, ly])
             frame_num=int(t/print_conf_interval)-1
-            print(frame_num)
+            if frame_num%1==0:
+                print(frame_num, t)
             if variable==1:
-                plt.savefig('./Video_velocity/frame_'+str(frame_num)+'.png')
+                if frame_num<10:
+                    plt.savefig('./Video_velocity/frame_00'+str(frame_num)+'.png')
+                elif frame_num<100:
+                    plt.savefig('./Video_velocity/frame_0'+str(frame_num)+'.png')
+                elif frame_num<1000:
+                    plt.savefig('./Video_velocity/frame_'+str(frame_num)+'.png')
             if variable==2:
                 plt.show()
+            plt.clf()
 
-            if t==3*print_conf_interval:
-                exit(1)
+plt.close()
 
+
+if variable==3:
+
+    y=np.arange(int(ceil(2*lambda_wall)/2), ly-int(ceil(2*lambda_wall)/2), 1)
+    #fig = plt.figure(figsize=(8,6))
+    fig = plt.figure(figsize=(5.452423529, 4.089317647))
+    plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+    plt.plot(y, avg_velocity_y/counter_for_avg, '-o' , color='darkred')
+    #plt.xlabel('Channel width', fontsize=18, fontname='Times New Roman')
+    #plt.ylabel(r'Velocity $v_y$', fontsize=18, fontname='Times New Roman')
+    #plt.xticks(fontsize=18, fontname='Times New Roman')
+    #plt.yticks(fontsize=18, fontname='Times New Roman')
+    plt.xlabel('Channel width', fontsize=18)
+    plt.ylabel(r'Velocity $v_y$', fontsize=18)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+    plt.show()
+    plt.clf()
+
+    #fig = plt.figure(figsize=(8,6))
+    #fig = plt.figure(figsize=(5.452423529, 4.089317647))
+    plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+    plt.plot(y, avg_velocity_x/counter_for_avg, '-o' , color='darkgreen')
+    #plt.xlabel('Channel width', fontsize=18, fontname='Times New Roman')
+    #plt.ylabel(r'Velocity $v_x$', fontsize=18, fontname='Times New Roman')
+    #plt.xticks(fontsize=18, fontname='Times New Roman')
+    #plt.yticks(fontsize=18, fontname='Times New Roman')
+    plt.xlabel('Channel width', fontsize=18)
+    plt.ylabel(r'Velocity $v_x$', fontsize=18)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+    plt.show()
+    plt.close()
 
 print('done')
 exit (1)
