@@ -8,6 +8,7 @@ import numpy as np
 import scipy.ndimage
 
 from matplotlib import cm
+import matplotlib
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -140,6 +141,7 @@ lx=int(float(header[2]))
 ly=int(float(header[3]))
 x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
+velocity_grid=[[0. for q in range(lx)] for k in range(ly)]
 
 
 lambda_wall+=2
@@ -149,7 +151,7 @@ counter_for_avg=np.zeros(ly-ceil(2*lambda_wall))
 
 
 cont_line=0
-vmax=0.005
+vmax=0.1
 start_line=(N+2)*int(float(sys.argv[3])) 
 cfile=open(trajectory_file,"r")
 for i in range(start_line):
@@ -157,6 +159,8 @@ for i in range(start_line):
 
 
 fig = plt.figure(figsize=(6,6))
+velmax=0.
+velmin=10000.
 for line in cfile:
     cont_line+=1
     words=line.split()
@@ -187,11 +191,15 @@ for line in cfile:
         ly=int(float(words[3]))
         x=np.arange(0,lx,1)
         y=np.arange(0,ly,1)
+        velocity_grid=[[0. for q in range(lx)] for k in range(ly)]
+        velmax=0.
+        velmin=10000.
         #walls = [0. for i in range(lx*ly)]
         #set_walls(lx,ly,walls)
 
     else:
-        Z=[[0 for q in range(lx)] for k in range(ly)]
+        Z=[[0. for q in range(lx)] for k in range(ly)]
+        #velocity_grid=[[0. for q in range(lx)] for k in range(ly)]
         LsubX[pt_num]=int(float(words[0]))
         LsubY[pt_num]=int(float(words[1]))
         CoMX[pt_num]=float(words[2])
@@ -223,29 +231,43 @@ for line in cfile:
             Z[yy][xx]=value
             area[pt_num]+=value*value
 
-            if cont_line>N+2 and yy>=int(ceil(2*lambda_wall)/2) and yy<ly-int(ceil(2*lambda_wall)/2):
+            if cont_line>N+2 and yy>=int(ceil(2*lambda_wall)/2) and yy<ly-int(ceil(2*lambda_wall)/2) and value>=0.5:
+                velocity_grid[yy][xx]=sqrt(com_velocity_x[pt_num]*com_velocity_x[pt_num]+com_velocity_y[pt_num]*com_velocity_y[pt_num])
                 avg_velocity_x[yy-int(ceil(2*lambda_wall)/2)]+=com_velocity_x[pt_num]
                 avg_velocity_y[yy-int(ceil(2*lambda_wall)/2)]+=com_velocity_y[pt_num]
                 counter_for_avg[yy-int(ceil(2*lambda_wall)/2)]+=1
 
 
         X, Y = np.meshgrid(x, y)
-        if pt_num<0:
-            cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
-        else:
-            cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)
-
         norm=sqrt(com_velocity_x[pt_num]*com_velocity_x[pt_num]+com_velocity_y[pt_num]*com_velocity_y[pt_num])
         color_val=norm/vmax
+        if norm>velmax:
+            velmax=norm
+        if norm<velmin:
+            velmin=norm
         if norm==0:
             norm=1
-        cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color=cm.hot(color_val))
+
+        if variable==1 or variable==2:
+            if pt_num<0:
+                cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
+            else:
+                cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)
+
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color="k")
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color=cm.hot(color_val))
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
 
         #increment phase field index
         pt_num+=1
 
 
     if cont_line%(N+2)==0:
+            frame_num=int(t/print_conf_interval)-1
+            if frame_num%1==0:
+                print(frame_num, cont_line, t)
+            #if cont_line>N+2:
+                #cset1 = plt.imshow(velocity_grid, vmin=velmin, vmax=velmax, cmap=cm.Reds)
             com_x_t.append(CoMX)
             com_y_t.append(CoMY)
             v_com_x_t.append(com_velocity_x)
@@ -254,16 +276,13 @@ for line in cfile:
             ax.set_aspect('equal', adjustable='box')
             ax.set_xlim([0, lx])
             ax.set_ylim([0, ly])
-            frame_num=int(t/print_conf_interval)-1
-            if frame_num%1==0:
-                print(frame_num, t)
             if variable==1:
                 if frame_num<10:
-                    plt.savefig('./Video_velocity/frame_00'+str(frame_num)+'.png')
+                    plt.savefig('./Video/frame_00'+str(frame_num)+'.png')
                 elif frame_num<100:
-                    plt.savefig('./Video_velocity/frame_0'+str(frame_num)+'.png')
+                    plt.savefig('./Video/frame_0'+str(frame_num)+'.png')
                 elif frame_num<1000:
-                    plt.savefig('./Video_velocity/frame_'+str(frame_num)+'.png')
+                    plt.savefig('./Video/frame_'+str(frame_num)+'.png')
             if variable==2:
                 plt.show()
             plt.clf()
