@@ -43,6 +43,7 @@ void WetModel::init() {
         a0=PI*R*R;
 	store_max_size=20;
 	solverCG.setTolerance(0.000000001);
+        set_omp_tasks(omp_thread_num);
 }
 
 void WetModel::read_topology(std::vector<BaseField*> &fields) {
@@ -150,7 +151,6 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
         for(auto p : fields) {
                 for(int q=0; q<p->subSize;q++)
 			U += f_interaction(p, q);
-		//std::cout<<p->freeEnergy[0]<<std::endl;
         }
 
 
@@ -176,6 +176,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 					//sub_q = (store_site_velocity_index[i+other_site_box*store_max_size]-(index*p->subSize));
 					//tri_t_x.push_back(Eigen::Triplet<double> (q+p->index*p->subSize, sub_q+index*p->subSize, (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
 					tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
+					//tri_t_x.push_back(Eigen::Triplet<double> (store_site_velocity_index[i+other_site_box*store_max_size], q+field_start_index[p->index], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
 				}
 			}
 		}
@@ -192,6 +193,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	vec_v_y = solverLU.solve(vec_f_y);
 	*/
 
+	//std::cout<<Eigen::nbThreads( )<<std::endl;
 	//std::cout<<"start solver: "<<size_rows/2 <<std::endl;
 	mat_m_x.setFromTriplets(tri_t_x.begin(), tri_t_x.end());
 	solverCG.compute(mat_m_x);

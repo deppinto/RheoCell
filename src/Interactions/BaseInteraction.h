@@ -33,6 +33,12 @@ protected:
 
 	number energy_threshold;
 
+        //!Allow a openMP threads
+        int omp_thread_num = 1;
+        //set number of threads
+        virtual void set_omp_threads(int num_threads){omp_thread_num = num_threads;};
+        virtual void set_omp_tasks(int num_threads){};
+
 public:
 	/**
 	 * @brief Basic constructor. By default, it does not need anything.

@@ -4,6 +4,7 @@
 #include "BaseInteraction.h"
 #include "../Fields/MultiPhaseField.h"
 #include <Eigen/Sparse>
+#include <Eigen/Core>
 
 /**
  * @brief Manages the interaction between fields with a dipolar force which aligns with shape and introduces viscosity
@@ -40,12 +41,15 @@ protected:
 
 	Eigen::VectorXd vec_v_x;
 	Eigen::VectorXd vec_f_x;
-	Eigen::SparseMatrix<double> mat_m_x;
+	Eigen::SparseMatrix<double, Eigen::RowMajor> mat_m_x;
+	//Eigen::SparseMatrix<double> mat_m_x;
 	Eigen::VectorXd vec_v_y;
 	Eigen::VectorXd vec_f_y;
+        void set_omp_tasks(int num_threads){Eigen::setNbThreads(num_threads);std::cout<<"TESTING: Set eigen openMP threads: "<<num_threads<<std::endl;};
 
 	Eigen::SparseLU<Eigen::SparseMatrix<double>, Eigen::COLAMDOrdering<int> >  solverLU;
-	Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solverCG;
+	Eigen::BiCGSTAB<Eigen::SparseMatrix<double, Eigen::RowMajor> > solverCG;
+	//Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solverCG;
 	int size_rows = 0;
 	int index, sub_q, other_site_patch, other_site_box;
 	std::vector<int> neigh_values = std::vector<int> {5,3,1,7};

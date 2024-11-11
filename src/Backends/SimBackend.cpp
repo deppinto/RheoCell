@@ -165,6 +165,7 @@ void SimBackend::get_settings(input_file &inp) {
 		max_io = 1.; // default value for a simulation is 1 MB/s;
 	}
 
+	getInputInt(&inp, "omp_thread_num", &omp_thread_num, 0);
 }
 
 void SimBackend::init() {
