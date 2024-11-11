@@ -193,7 +193,6 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	vec_v_y = solverLU.solve(vec_f_y);
 	*/
 
-
 	//std::cout<<Eigen::nbThreads( )<<std::endl;
 	//std::cout<<"start solver: "<<size_rows/2 <<std::endl;
 	mat_m_x.setFromTriplets(tri_t_x.begin(), tri_t_x.end());
@@ -205,7 +204,6 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	//std::cout << "#iterations:     " << solverCG.iterations() << std::endl;
 	//std::cout << "estimated error: " << solverCG.error()      << std::endl;	
 	//std::cout<<"end solver"<<std::endl;
-
 
 	//velX = p->Fpassive[0] + p->Factive[0];
 	//velY = p->Fpassive[1] + p->Factive[1];

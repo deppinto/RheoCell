@@ -95,7 +95,7 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 	int N = fields.size();
 	number totalNodes=box->getXsize()*box->getYsize();
 	rcut= sqrt( (totalNodes/N)/PI );
-	rcut=6;
+	rcut=7;
 	sqr_rcut = SQR(rcut);
 	std::cout<<"This is rcut: " << rcut <<std::endl;
 	for(int i = 0; i < N; i++) {
@@ -127,7 +127,7 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 				}	
 			}
 			//std::cout<<"generator: "<<start<<" "<<ext_value<<std::endl;
-			if(std::isnan(ext_value) || ext_value > 1.5) {
+			if(std::isnan(ext_value) || ext_value > 20) {
 				inserted = false;
 			}
 
