@@ -9,11 +9,11 @@ WetModel::WetModel() :
 				mu(3.),
 				R(8),
 				kappa(0.1),
-				friction(2.),
+				friction(1.),
 				zetaQ_self(0),
 				zetaQ_inter(0),
 				J_Q(1),
-				friction_cell(3.0){
+				friction_cell(1.){
 	a0=PI*R*R;
 }
 
@@ -31,12 +31,12 @@ void WetModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "gamma", &gamma, 0);
 	getInputNumber(&inp, "mu", &mu, 0);
 	getInputNumber(&inp, "kappa", &kappa, 0);
-	getInputNumber(&inp, "friction", &friction, 0);
 	getInputNumber(&inp, "zetaQ_self", &zetaQ_self_active, 0);
 	getInputNumber(&inp, "zetaQ_inter", &zetaQ_inter_active, 0);
 	getInputNumber(&inp, "J_Q", &J_Q, 0);
 	getInputBool(&inp, "anchoring", &anchoring, 0);
 	getInputNumber(&inp, "friction_cell", &friction_cell, 0);
+	getInputNumber(&inp, "friction", &friction_active, 0);
 }
 
 void WetModel::init() {
@@ -71,6 +71,7 @@ void WetModel::allocate_fields(std::vector<BaseField *> &fields) {
 void WetModel::apply_changes_after_equilibration(){
 	zetaQ_self=zetaQ_self_active;
 	zetaQ_inter=zetaQ_inter_active;
+	friction=friction_active;
 }
 
 void WetModel::set_box(BaseBox *boxArg) {
