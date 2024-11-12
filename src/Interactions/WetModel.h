@@ -25,6 +25,7 @@ protected:
 	number kappa;
 	number a0;
 	number friction;
+	number friction_active;
 	number zetaQ_self;
 	number zetaQ_inter;
 	number zetaQ_self_active;

@@ -306,8 +306,8 @@ if variable==3:
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-    #plt.show()
-    plt.savefig('./vy_width.png')
+    plt.show()
+    #plt.savefig('./vy_width.png')
     plt.clf()
 
     #fig = plt.figure(figsize=(8,6))
@@ -323,8 +323,8 @@ if variable==3:
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-    #plt.show()
-    plt.savefig('./vx_width.png')
+    plt.show()
+    #plt.savefig('./vx_width.png')
     plt.close()
 
 print('done')

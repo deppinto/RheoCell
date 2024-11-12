@@ -1,10 +1,3 @@
-/*
- * BaseObservable.cpp
- *
- *  Created on: Mar 21, 2020
- *      Author: lorenzo
- */
-
 #include "BaseObservable.h"
 
 BaseObservable::BaseObservable() :
