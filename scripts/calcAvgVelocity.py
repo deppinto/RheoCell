@@ -161,6 +161,9 @@ for i in range(start_line):
 fig = plt.figure(figsize=(6,6))
 velmax=0.
 velmin=10000.
+
+velmax_x=0.
+velmin_x=10000.
 for line in cfile:
     cont_line+=1
     words=line.split()
@@ -231,10 +234,21 @@ for line in cfile:
             Z[yy][xx]=value
             area[pt_num]+=value*value
 
-            if cont_line>N+2 and yy>=int(ceil(2*lambda_wall)/2) and yy<ly-int(ceil(2*lambda_wall)/2) and value>=0.5:
-                velocity_grid[yy][xx]=sqrt(com_velocity_x[pt_num]*com_velocity_x[pt_num]+com_velocity_y[pt_num]*com_velocity_y[pt_num])
-                avg_velocity_x[yy-int(ceil(2*lambda_wall)/2)]+=com_velocity_x[pt_num]
-                avg_velocity_y[yy-int(ceil(2*lambda_wall)/2)]+=com_velocity_y[pt_num]
+            if cont_line>N+2 and yy>=int(ceil(2*lambda_wall)/2) and yy<ly-int(ceil(2*lambda_wall)/2):
+                velocity_grid[yy][xx]=value*sqrt(com_velocity_x[pt_num]*com_velocity_x[pt_num]+com_velocity_y[pt_num]*com_velocity_y[pt_num])
+                avg_velocity_x[yy-int(ceil(2*lambda_wall)/2)]+=value*com_velocity_x[pt_num]
+                avg_velocity_y[yy-int(ceil(2*lambda_wall)/2)]+=value*com_velocity_y[pt_num]
+
+                if value*com_velocity_x[pt_num]<velmin_x:
+                    velmin_x=value*com_velocity_x[pt_num]
+                if value*com_velocity_y[pt_num]<velmin_x:
+                    velmin_x=value*com_velocity_y[pt_num]
+
+                if value*com_velocity_x[pt_num]>velmax_x:
+                    velmax_x=value*com_velocity_x[pt_num]
+                if value*com_velocity_y[pt_num]>velmax_x:
+                    velmax_x=value*com_velocity_y[pt_num]
+
                 counter_for_avg[yy-int(ceil(2*lambda_wall)/2)]+=1
 
 
@@ -295,36 +309,40 @@ if variable==3:
     y=np.arange(int(ceil(2*lambda_wall)/2), ly-int(ceil(2*lambda_wall)/2), 1)
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
-    plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-    plt.plot(y, avg_velocity_y/counter_for_avg, '-o' , color='darkred')
+    plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+    plt.plot(avg_velocity_y/counter_for_avg, y, '-o' , color='darkred')
     #plt.xlabel('Channel width', fontsize=18, fontname='Times New Roman')
     #plt.ylabel(r'Velocity $v_y$', fontsize=18, fontname='Times New Roman')
     #plt.xticks(fontsize=18, fontname='Times New Roman')
     #plt.yticks(fontsize=18, fontname='Times New Roman')
-    plt.xlabel('Channel width', fontsize=18)
-    plt.ylabel(r'Velocity $v_y$', fontsize=18)
+    plt.ylabel('Channel width', fontsize=18)
+    plt.xlabel(r'Velocity $v_y$', fontsize=18)
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
+    #plt.xlim(velmin_x,velmax_x)
+    #plt.xlim(-3*1e-5,2.5*1e-5)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-    plt.show()
-    #plt.savefig('./vy_width.png')
+    #plt.show()
+    plt.savefig('./vy_width_new.png')
     plt.clf()
 
     #fig = plt.figure(figsize=(8,6))
     #fig = plt.figure(figsize=(5.452423529, 4.089317647))
-    plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-    plt.plot(y, avg_velocity_x/counter_for_avg, '-o' , color='darkgreen')
+    plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+    plt.plot(avg_velocity_x/counter_for_avg, y, '-o' , color='darkgreen')
     #plt.xlabel('Channel width', fontsize=18, fontname='Times New Roman')
     #plt.ylabel(r'Velocity $v_x$', fontsize=18, fontname='Times New Roman')
     #plt.xticks(fontsize=18, fontname='Times New Roman')
     #plt.yticks(fontsize=18, fontname='Times New Roman')
-    plt.xlabel('Channel width', fontsize=18)
-    plt.ylabel(r'Velocity $v_x$', fontsize=18)
+    plt.ylabel('Channel width', fontsize=18)
+    plt.xlabel(r'Velocity $v_x$', fontsize=18)
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
+    #plt.xlim(velmin_x,velmax_x)
+    #plt.xlim(-3*1e-5,2.5*1e-5)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-    plt.show()
-    #plt.savefig('./vx_width.png')
+    #plt.show()
+    plt.savefig('./vx_width_new.png')
     plt.close()
 
 print('done')
