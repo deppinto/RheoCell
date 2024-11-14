@@ -43,6 +43,7 @@ SET(box_SOURCES
 	Boxes/BaseBox.cpp
 	Boxes/SquareBox.cpp
 	Boxes/Channel.cpp
+	Boxes/SquareWalls.cpp
 	Boxes/OrthogonalBox.cpp
 	Boxes/LeesEdwardsSquareBox.cpp
 	Boxes/BoxFactory.cpp

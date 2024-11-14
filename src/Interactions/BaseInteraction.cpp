@@ -115,7 +115,7 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 
 			//we take into account the external potential
 			number ext_value=0.;
-			int start=p->CoM[0]+p->CoM[1]*box->getXsize();
+			int start=int(p->CoM[0])+int(p->CoM[1])*box->getXsize();
 			int startX=box->getElementX(start, (int)rcut*(-1));
 			int startY=box->getElementY(start, (int)rcut*(-1));
 			start=startX+startY*box->getXsize();
@@ -124,8 +124,10 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 					int f = box->getElementX(start, x) + box->getElementY(start, y) * box->getXsize();
 					p->set_ext_potential(f, box->getWalls(f));	
 					ext_value += p->ext_potential;
+					//if(box->getElementX(start, x)==0)std::cout<<"print here: "<<box->getWalls(f)<<" "<< p->ext_potential<<" "<<ext_value<<std::endl;
 				}	
 			}
+
 			//std::cout<<"generator: "<<start<<" "<<ext_value<<std::endl;
 			if(std::isnan(ext_value) || ext_value > 20) {
 				inserted = false;

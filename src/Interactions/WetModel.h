@@ -75,8 +75,8 @@ public:
 
 	void allocate_fields(std::vector<BaseField *> &fields) override;
 	void apply_changes_after_equilibration() override;
-	number get_velocity_x(BaseField *p, int q){return vec_v_x[q+field_start_index[p->index]];}
-	number get_velocity_y(BaseField *p, int q){return vec_v_y[q+field_start_index[p->index]];}
+	number get_velocity_x(BaseField *p, int q){return vec_v_x[q+field_start_index[p->index]]*(1-box->getWalls(p->map_sub_to_box[q]));}
+	number get_velocity_y(BaseField *p, int q){return vec_v_y[q+field_start_index[p->index]]*(1-box->getWalls(p->map_sub_to_box[q]));}
 	//number get_velocity_x(BaseField *p, int q){return vec_v_x[q+p->index*p->subSize];}
 	//number get_velocity_y(BaseField *p, int q){return vec_v_y[q+p->index*p->subSize];}
 

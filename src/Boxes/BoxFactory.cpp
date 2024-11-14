@@ -3,6 +3,7 @@
 #include "OrthogonalBox.h"
 #include "LeesEdwardsSquareBox.h"
 #include "Channel.h"
+#include "SquareWalls.h"
 
 #include "../Utilities/RCexception.h"
 
@@ -18,8 +19,10 @@ BoxPtr BoxFactory::make_box(input_file &inp) {
 
 
 	if(box_type.compare("square") == 0) {
-		if(!lees_edwards) return std::make_shared<SquareBox>();
-		else return std::make_shared<LeesEdwardsSquareBox>();
+		if(lees_edwards) return std::make_shared<LeesEdwardsSquareBox>();
+			
+		if(type_str.compare("channel_walls") == 0) return std::make_shared<SquareWalls>();
+		else return std::make_shared<SquareBox>();
 	}
 	if(box_type.compare("orthogonal") == 0) {
 		if(lees_edwards) throw RCexception("Lees-Edwards boundary conditions are not compatible with Orthogonal Box!");

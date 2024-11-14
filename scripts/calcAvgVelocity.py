@@ -142,6 +142,9 @@ ly=int(float(header[3]))
 x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
 velocity_grid=[[0. for q in range(lx)] for k in range(ly)]
+velocity_grid_x=[[0. for q in range(lx)] for k in range(ly)]
+velocity_grid_y=[[0. for q in range(lx)] for k in range(ly)]
+sum_phi=[[0. for q in range(lx)] for k in range(ly)]
 
 
 lambda_wall+=2
@@ -195,6 +198,9 @@ for line in cfile:
         x=np.arange(0,lx,1)
         y=np.arange(0,ly,1)
         velocity_grid=[[0. for q in range(lx)] for k in range(ly)]
+        velocity_grid_x=[[0. for q in range(lx)] for k in range(ly)]
+        velocity_grid_y=[[0. for q in range(lx)] for k in range(ly)]
+        sum_phi=[[0. for q in range(lx)] for k in range(ly)]
         velmax=0.
         velmin=10000.
         #walls = [0. for i in range(lx*ly)]
@@ -236,6 +242,9 @@ for line in cfile:
 
             if cont_line>N+2 and yy>=int(ceil(2*lambda_wall)/2) and yy<ly-int(ceil(2*lambda_wall)/2):
                 velocity_grid[yy][xx]=value*sqrt(com_velocity_x[pt_num]*com_velocity_x[pt_num]+com_velocity_y[pt_num]*com_velocity_y[pt_num])
+                velocity_grid_x[yy][xx]+=value*com_velocity_x[pt_num]
+                velocity_grid_y[yy][xx]+=value*com_velocity_y[pt_num]
+                sum_phi[yy][xx]+=value
                 avg_velocity_x[yy-int(ceil(2*lambda_wall)/2)]+=value*com_velocity_x[pt_num]
                 avg_velocity_y[yy-int(ceil(2*lambda_wall)/2)]+=value*com_velocity_y[pt_num]
 
@@ -274,9 +283,17 @@ for line in cfile:
 
         #increment phase field index
         pt_num+=1
-
+        
 
     if cont_line%(N+2)==0:
+
+            '''
+            for p in range(20,45):
+                for q in range(20,45):
+                    if sum_phi[p][q]>0:
+                        cset1 = plt.arrow(q, p, 100*velocity_grid_x[p][q]/sum_phi[p][q], 100*velocity_grid_y[p][q]/sum_phi[p][q], width=0.075, color="k")
+            '''
+
             frame_num=int(t/print_conf_interval)-1
             if frame_num%1==0:
                 print(frame_num, cont_line, t)
@@ -290,15 +307,18 @@ for line in cfile:
             ax.set_aspect('equal', adjustable='box')
             ax.set_xlim([0, lx])
             ax.set_ylim([0, ly])
+            #ax.set_xlim([20, 45])
+            #ax.set_ylim([20, 45])
             if variable==1:
                 if frame_num<10:
-                    plt.savefig('./Video/frame_00'+str(frame_num)+'.png')
+                    plt.savefig('./Video/frame_00'+str(frame_num)+'.png', transparent=True)
                 elif frame_num<100:
                     plt.savefig('./Video/frame_0'+str(frame_num)+'.png')
                 elif frame_num<1000:
                     plt.savefig('./Video/frame_'+str(frame_num)+'.png')
             if variable==2:
                 plt.show()
+                #plt.savefig('./newfig_'+str(frame_num)+'.png', transparent=True)
             plt.clf()
 
 plt.close()
@@ -322,8 +342,8 @@ if variable==3:
     #plt.xlim(velmin_x,velmax_x)
     #plt.xlim(-3*1e-5,2.5*1e-5)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-    #plt.show()
-    plt.savefig('./vy_width_new.png')
+    plt.show()
+    #plt.savefig('./vy_width_new.png')
     plt.clf()
 
     #fig = plt.figure(figsize=(8,6))
@@ -341,8 +361,8 @@ if variable==3:
     #plt.xlim(velmin_x,velmax_x)
     #plt.xlim(-3*1e-5,2.5*1e-5)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-    #plt.show()
-    plt.savefig('./vx_width_new.png')
+    plt.show()
+    #plt.savefig('./vx_width_new.png')
     plt.close()
 
 print('done')
