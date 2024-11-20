@@ -318,6 +318,22 @@ void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
 void WetModel::update_anchoring(BaseField*p){
 
+	number walls_length = 15;
+	number dist1 = (p->CoM[1] - walls_length);
+	number dist2 = (box->getYsize() - walls_length) - p->CoM[1];
+	number theta;
+	if(dist1<dist2) theta = PI * dist1 / (box->getYsize() - 2 * walls_length);
+	else theta = PI - (PI * dist2 / (box->getYsize() - 2 * walls_length));
+
+	p->nemQ[0]=cos(theta);
+	p->nemQ[1]=sin(theta);
+
+	p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
+	p->Q01 = p->nemQ[0] * p->nemQ[1];
+	//p->Q00 = S * cos(2*theta);
+	//p->Q01 = S * sin(2*theta);
+
+	/*
 	number delta = -PI/12;
 	number theta = 0;
 	number S = 0.5;
@@ -332,4 +348,5 @@ void WetModel::update_anchoring(BaseField*p){
 		p->Q00 = S * cos(2*theta);
 		p->Q01 = S * sin(2*theta);
 	}
+	*/
 }
