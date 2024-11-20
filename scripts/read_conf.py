@@ -109,7 +109,7 @@ for line in cfile:
 
     levels = np.arange(0.0, m, step) + step
     cmap=cm.winter
-    if pt_num==-1:
+    if pt_num==0:
         cset1 = plt.contour(X, Y, Z, levels, cmap=cmap, alpha=0.5)
     else:
         cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cmap, alpha=0.5)
@@ -119,7 +119,7 @@ for line in cfile:
     else:
         cset1 = plt.arrow(CoMX, CoMY, 3*nemX, 3*nemY, color='k')
 
-    #print(pt_num, area)
+    print(pt_num, area)
     pt_num+=1
 
 

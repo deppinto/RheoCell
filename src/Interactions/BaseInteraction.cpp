@@ -4,7 +4,7 @@ BaseInteraction::BaseInteraction() {
 	energy_threshold = (number) 100.f;
 	is_infinite = false;
 	box = NULL;
-	rcut = 5*5; //care initial cell size
+	rcut = 7; //care initial cell size
 	sqr_rcut = SQR(rcut);
 }
 
@@ -104,6 +104,9 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 		bool inserted = false;
 		do {
 			p->CoM = std::vector<number> {drand48() * box->getXsize(), drand48() * box->getYsize()};
+			//if(i==0)p->CoM = std::vector<number> {25, 47};
+			//if(i==1)p->CoM = std::vector<number> {75, 53};
+
 			p->set_positions_initial(box);
 
 			inserted = true;

@@ -271,15 +271,22 @@ for line in cfile:
         if norm==0:
             norm=1
 
+        step = 0.01
+        m = np.amax(Z)
+        #if m<0.000001:
+            #continue
+
+        levels = np.arange(0.0, m, step) + step
         if variable==1 or variable==2:
-            if pt_num<0:
+            if pt_num==0:
                 cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
             else:
                 cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)
 
-            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color="k")
+            
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color="k")
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color=cm.hot(color_val))
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
 
         #increment phase field index
         pt_num+=1
@@ -325,6 +332,25 @@ plt.close()
 
 
 if variable==3:
+
+    '''
+    plot_vel=[]
+    for i in range(len(time_conf)):
+        norm=sqrt(v_com_x_t[i][0]*v_com_x_t[i][0])/0.01
+        plot_vel.append(norm)
+    fig = plt.figure(figsize=(5.452423529, 4.089317647))
+    plt.plot(time_conf, plot_vel, '-o' , color='darkgreen')
+    plt.ylabel(r'$v_a/v_0$', fontsize=18)
+    plt.xlabel('time', fontsize=18)
+    plt.xlim(500,7000)
+    plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+    plt.show()
+    plt.close()
+    exit(1)
+    '''
 
     y=np.arange(int(ceil(2*lambda_wall)/2), ly-int(ceil(2*lambda_wall)/2), 1)
     #fig = plt.figure(figsize=(8,6))

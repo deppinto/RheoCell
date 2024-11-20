@@ -33,6 +33,7 @@ class BaseBox {
 		virtual number getWalls(int k){return 0;};
 		virtual void setNeighborsPeriodic(int Lx, int Ly);
 		std::vector<int> neighbors;
+		bool lees_edwards = false;
 };
 
 using BoxPtr = std::shared_ptr<BaseBox>;

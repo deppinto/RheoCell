@@ -35,7 +35,7 @@ void WetModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "zetaQ_inter", &zetaQ_inter_active, 0);
 	getInputNumber(&inp, "J_Q", &J_Q, 0);
 	getInputBool(&inp, "anchoring", &anchoring, 0);
-	getInputNumber(&inp, "friction_cell", &friction_cell, 0);
+	getInputNumber(&inp, "friction_cell", &friction_cell_active, 0);
 	getInputNumber(&inp, "friction", &friction_active, 0);
 }
 
@@ -72,6 +72,7 @@ void WetModel::apply_changes_after_equilibration(){
 	zetaQ_self=zetaQ_self_active;
 	zetaQ_inter=zetaQ_inter_active;
 	friction=friction_active;
+	friction_cell=friction_cell_active;
 }
 
 void WetModel::set_box(BaseBox *boxArg) {
@@ -167,6 +168,16 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			//populate sparse matrix
 			//tri_t_x.push_back(Eigen::Triplet<double> (q+p->index*p->subSize, q+p->index*p->subSize, (double)(friction+4*friction_cell)));
 			tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+4*friction_cell)));
+			//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction) ));
+
+			/*other_site_patch = q;
+			other_site_box = p->map_sub_to_box[other_site_patch];
+			if(sum_phi[other_site_box]!=0){
+				for(int i=0; i<size_store_site_velocity_index[other_site_box]; i++){
+					tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(4*friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
+				}
+			}*/
+
 
 			for(auto j : neigh_values){
 				other_site_patch = p->neighbors_sub[j+q*9];
@@ -176,8 +187,9 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 					//index = store_site_velocity_index[i+other_site_box*store_max_size]/p->subSize;
 					//sub_q = (store_site_velocity_index[i+other_site_box*store_max_size]-(index*p->subSize));
 					//tri_t_x.push_back(Eigen::Triplet<double> (q+p->index*p->subSize, sub_q+index*p->subSize, (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
-					tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
 					//tri_t_x.push_back(Eigen::Triplet<double> (store_site_velocity_index[i+other_site_box*store_max_size], q+field_start_index[p->index], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
+					tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
+					//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
 				}
 			}
 		}
@@ -293,9 +305,11 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 
 	//vec_f_x[q+p->index*p->subSize] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 	//vec_f_y[q+p->index*p->subSize] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+	/*double v0=0.01;
+	if(p->index==0)v0*=1;
+	else v0*=-1;*/
 	vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 	vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
-	//if(q==0)std::cout<<vec_f_x[q+field_start_index[p->index]]<<" "<<vec_f_y[q+field_start_index[p->index]] <<std::endl;
 }
 
 

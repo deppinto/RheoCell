@@ -45,7 +45,7 @@ SET(box_SOURCES
 	Boxes/Channel.cpp
 	Boxes/SquareWalls.cpp
 	Boxes/OrthogonalBox.cpp
-	Boxes/LeesEdwardsSquareBox.cpp
+	Boxes/LeesEdwardsBox.cpp
 	Boxes/BoxFactory.cpp
 )
 

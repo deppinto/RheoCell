@@ -1,7 +1,7 @@
 #include "BoxFactory.h"
 #include "SquareBox.h"
 #include "OrthogonalBox.h"
-#include "LeesEdwardsSquareBox.h"
+#include "LeesEdwardsBox.h"
 #include "Channel.h"
 #include "SquareWalls.h"
 
@@ -17,9 +17,8 @@ BoxPtr BoxFactory::make_box(input_file &inp) {
 	std::string type_str("none");
 	getInputString(&inp, "type", type_str, 0);
 
-
 	if(box_type.compare("square") == 0) {
-		if(lees_edwards) return std::make_shared<LeesEdwardsSquareBox>();
+		if(lees_edwards) return std::make_shared<LeesEdwardsBox>();
 			
 		if(type_str.compare("channel_walls") == 0) return std::make_shared<SquareWalls>();
 		else return std::make_shared<SquareBox>();

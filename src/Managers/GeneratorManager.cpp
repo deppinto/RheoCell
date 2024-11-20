@@ -105,7 +105,7 @@ void GeneratorManager::init() {
 		OX_LOG(Logger::LOG_INFO, "Generating square configuration with box_side %g", box_side);
 	}
 	else {
-		density = N / (box_side_x * box_side_y);
+		density = N*PI*8*8 / (box_side_x * (box_side_y-16));
 		OX_LOG(Logger::LOG_INFO, "Generating configuration with density %g (%d particles, box sides %g %g)", density, N, box_side_x, box_side_y);
 	}
 
