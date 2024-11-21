@@ -223,8 +223,18 @@ for line in cfile:
         else:
             t1=len(time_conf)-1
             t2=len(time_conf)-2
-            com_velocity_x[pt_num]=(CoMX[pt_num]-CoMX_old[pt_num])/((time_conf[t1]-time_conf[t2])*dt)
-            com_velocity_y[pt_num]=(CoMY[pt_num]-CoMY_old[pt_num])/((time_conf[t1]-time_conf[t2])*dt)
+            dist_com_x=(CoMX[pt_num]-CoMX_old[pt_num])
+            if dist_com_x>lx/2:
+                dist_com_x-=lx
+            if dist_com_x<-lx/2:
+                dist_com_x+=lx
+            dist_com_y=(CoMY[pt_num]-CoMY_old[pt_num])
+            if dist_com_y>ly/2:
+                dist_com_y-=ly
+            if dist_com_y<-ly/2:
+                dist_com_y+=ly
+            com_velocity_x[pt_num]=dist_com_x/((time_conf[t1]-time_conf[t2])*dt)
+            com_velocity_y[pt_num]=dist_com_y/((time_conf[t1]-time_conf[t2])*dt)
 
         nemX=float(words[7])
         nemY=float(words[8])
