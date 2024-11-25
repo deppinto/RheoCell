@@ -6,7 +6,6 @@ SimpleMultiField::SimpleMultiField() :
 				gamma(0.01),
 				lambda(2.5),
 				mu(3.),
-				R(8),
 				kappa(0.1) {
 	a0=PI*R*R;
 }
@@ -46,6 +45,7 @@ void SimpleMultiField::set_box(BaseBox *boxArg) {
                 box = boxArg;
 		int Lx=box->getXsize();
 	        int Ly=box->getYsize();
+		if(box->lees_edwards)throw RCexception("Interaction is not compatible with LEBc. Aborting");
         	phi2.resize(Lx*Ly);
 }
 

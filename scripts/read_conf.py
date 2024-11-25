@@ -75,9 +75,10 @@ for line in cfile:
         yy=int(site/lx)
         xx=site-int(yy*lx)
 
-        if value>0.:
+        if value>=0.:
             Z[yy][xx]=value
-        else:
+
+        if value<0.5:
             out_area=value*value
 
         area+=value*value
@@ -90,7 +91,7 @@ for line in cfile:
     else:
         cmap = cm.cool
 
-    if abs(1-area/(pi*8*8)>0.5):
+    if abs(1-area/(pi*8*8)>0.9):
         print("area is not conserved: ", pt_num, area)
         cmap=cm.winter
 

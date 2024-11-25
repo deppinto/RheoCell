@@ -6,7 +6,6 @@ ActiveMultiField::ActiveMultiField() :
 				gamma(0.01),
 				lambda(2.5),
 				mu(3.),
-				R(8),
 				kappa(0.1),
 				friction(2.),
 				zetaS(0) {
@@ -63,6 +62,7 @@ void ActiveMultiField::set_box(BaseBox *boxArg) {
 	box = boxArg;
 	int Lx=box->getXsize();
 	int Ly=box->getYsize();
+	if(box->lees_edwards)throw RCexception("Interaction is not compatible with LEBc. Aborting");
 	phi2.resize(Lx*Ly);
 	sumS00.resize(Lx*Ly);
 	sumS01.resize(Lx*Ly);

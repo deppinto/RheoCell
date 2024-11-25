@@ -1,5 +1,5 @@
-#ifndef ACTIVENEMATIC_H_
-#define ACTIVENEMATIC_H_
+#ifndef LEBCACTIVENEMATIC_H_
+#define LEBCACTIVENEMATIC_H_
 
 #include "BaseInteraction.h"
 #include "../Fields/MultiPhaseField.h"
@@ -12,14 +12,13 @@
  *
  */
 
-class ActiveNematic: public BaseInteraction {
+class LEBcActiveNematic: public BaseInteraction {
 protected:
 
 	number gamma;
 	number lambda;
 	number omega;
 	number mu;
-	//int R;
 	number kappa;
 	number a0;
 	number friction;
@@ -28,6 +27,7 @@ protected:
 	number zetaQ_self_active;
 	number zetaQ_inter_active;
 	number J_Q;
+	number shear_rate;
 	bool anchoring = false;
 
 	number f_interaction(BaseField *p, int q);
@@ -42,8 +42,8 @@ protected:
 	number velY;
 
 public:
-	ActiveNematic();
-	virtual ~ActiveNematic();
+	LEBcActiveNematic();
+	virtual ~LEBcActiveNematic();
 
 	//void get_settings(input_file &inp) override;
 	void init() override;
@@ -56,6 +56,13 @@ public:
 	void begin_energy_computation(std::vector<BaseField *> &fields) override;
 	void resetSums(int k) override;
 	void updateFieldProperties(BaseField *p, int q, int k) override;
+	number get_velocity_x(BaseField *p, int q){
+		int y = p->map_sub_to_box[q]/box->getXsize();
+		if(y==0) return p->velocityX[q] - shear_rate * box->getYsize();
+		if(y==box->getYsize()-1) return p->velocityX[q] + shear_rate * box->getYsize();
+		else return p->velocityX[q];
+	}
+	number get_velocity_y(BaseField *p, int q){return p->velocityY[q];}
 
         void read_topology(std::vector<BaseField *> &fields) override;
 	void check_input_sanity(std::vector<BaseField *> &fields) override;
@@ -63,4 +70,4 @@ public:
 	void updateDirectedActiveForces(number dt, BaseField*p, bool store) override;
 };
 
-#endif /* ACTIVENEMATIC_H_ */
+#endif /* LEBCACTIVENEMATIC_H_ */

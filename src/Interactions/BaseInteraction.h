@@ -24,6 +24,7 @@ private:
 protected:
 	BaseBox *box;
 
+	int R;
         number rcut, sqr_rcut;
 	/// This is useful for "hard" potentials
 	bool is_infinite;

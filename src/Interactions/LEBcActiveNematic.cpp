@@ -1,7 +1,7 @@
-#include "ActiveNematic.h"
+#include "LEBcActiveNematic.h"
 #include "../Utilities/Utils.h"
 
-ActiveNematic::ActiveNematic() :
+LEBcActiveNematic::LEBcActiveNematic() :
 				BaseInteraction(),
 				gamma(0.01),
 				lambda(2.5),
@@ -15,12 +15,12 @@ ActiveNematic::ActiveNematic() :
 	a0=PI*R*R;
 }
 
-ActiveNematic::~ActiveNematic() {
+LEBcActiveNematic::~LEBcActiveNematic() {
 
 }
 
 
-void ActiveNematic::get_settings(input_file &inp) {
+void LEBcActiveNematic::get_settings(input_file &inp) {
 	BaseInteraction::get_settings(inp);
 
 	getInputInt(&inp, "R", &R, 0);
@@ -34,13 +34,14 @@ void ActiveNematic::get_settings(input_file &inp) {
 	getInputNumber(&inp, "zetaQ_inter", &zetaQ_inter_active, 0);
 	getInputNumber(&inp, "J_Q", &J_Q, 0);
 	getInputBool(&inp, "anchoring", &anchoring, 0);
+	getInputNumber(&inp, "lees_edwards_shear_rate", &shear_rate, 1);
 }
 
-void ActiveNematic::init() {
+void LEBcActiveNematic::init() {
         a0=PI*R*R;
 }
 
-void ActiveNematic::read_topology(std::vector<BaseField*> &fields) {
+void LEBcActiveNematic::read_topology(std::vector<BaseField*> &fields) {
         int N = fields.size();
 
         std::ifstream topology(topology_filename, std::ios::in);
@@ -55,36 +56,36 @@ void ActiveNematic::read_topology(std::vector<BaseField*> &fields) {
         }
 }
 
-void ActiveNematic::allocate_fields(std::vector<BaseField *> &fields) {
+void LEBcActiveNematic::allocate_fields(std::vector<BaseField *> &fields) {
         for(int i = 0; i < (int) fields.size(); i++) {
                 fields[i] = new MultiPhaseField();
         }
 }
 
-void ActiveNematic::apply_changes_after_equilibration(){
+void LEBcActiveNematic::apply_changes_after_equilibration(){
 	zetaQ_self=zetaQ_self_active;
 	zetaQ_inter=zetaQ_inter_active;
 }
 
-void ActiveNematic::set_box(BaseBox *boxArg) {
+void LEBcActiveNematic::set_box(BaseBox *boxArg) {
 	box = boxArg;
 	int Lx=box->getXsize();
 	int Ly=box->getYsize();
-	if(box->lees_edwards)throw RCexception("Interaction is not compatible with LEBc. Aborting");
+	if(!box->lees_edwards)throw RCexception("LEBc interaction...but no LEBc box...Aborting");
 	phi2.resize(Lx*Ly);
 	sumQ00.resize(Lx*Ly);
 	sumQ01.resize(Lx*Ly);
 	for(int i =0; i<Lx*Ly; i++){resetSums(i);}
 }
 
-void ActiveNematic::resetSums(int k) {
+void LEBcActiveNematic::resetSums(int k) {
 	phi2[k]=0;
         sumQ00[k]=0;
         sumQ01[k]=0;
 }
 
 
-void ActiveNematic::updateFieldProperties(BaseField *p, int q, int k) {
+void LEBcActiveNematic::updateFieldProperties(BaseField *p, int q, int k) {
 	BaseInteraction::updateFieldProperties(p, q, k);
 	number dx = p->fieldDX[q]; 
 	number dy = p->fieldDY[q]; 
@@ -93,19 +94,19 @@ void ActiveNematic::updateFieldProperties(BaseField *p, int q, int k) {
 }
 
 
-void ActiveNematic::check_input_sanity(std::vector<BaseField *> &fields) {
+void LEBcActiveNematic::check_input_sanity(std::vector<BaseField *> &fields) {
 
 }
 
 
-void ActiveNematic::begin_energy_computation() {
+void LEBcActiveNematic::begin_energy_computation() {
 		
         for(int i = 0; i < CONFIG_INFO->N(); i++) {
                 initFieldProperties(CONFIG_INFO->fields()[i]);
         }
 }
 
-void ActiveNematic::initFieldProperties(BaseField *p) {
+void LEBcActiveNematic::initFieldProperties(BaseField *p) {
 
 	for(int q=0; q<p->subSize;q++) {
 		int k = p->GetSubIndex(q, box);
@@ -121,7 +122,7 @@ void ActiveNematic::initFieldProperties(BaseField *p) {
 }
 
 
-void ActiveNematic::begin_energy_computation(std::vector<BaseField *> &fields) {
+void LEBcActiveNematic::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 	for(auto p : fields) {
 		for(int q=0; q<p->subSize;q++)
@@ -147,7 +148,7 @@ void ActiveNematic::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 }
 
-void ActiveNematic::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
+void LEBcActiveNematic::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 
 	int k = p->GetSubIndex(q, box);
 	phi2[k]+=p->fieldScalar[q]*p->fieldScalar[q];
@@ -157,32 +158,39 @@ void ActiveNematic::computeGlobalSums(BaseField *p, int q, bool update_global_su
 	BaseInteraction::update_sub_to_box_map(p, q, k, p->GetSubXIndex(q, box), p->GetSubYIndex(q, box));
 }
 
-number ActiveNematic::f_interaction(BaseField *p, int q) {
+number LEBcActiveNematic::f_interaction(BaseField *p, int q) {
 
 	//int  k  = p->GetSubIndex(q, box);
 	int k = p->map_sub_to_box[q];
+	number ytop=(box->weight_site[7+k*9]*p->fieldScalar[p->neighbors_sub[7+q*9]]+box->weight_site_next[7+k*9]*p->fieldScalar[p->neighbors_sub[8+q*9]])/2;
+	number ybottom=(box->weight_site[1+k*9]*p->fieldScalar[p->neighbors_sub[1+q*9]]+box->weight_site_next[1+k*9]*p->fieldScalar[p->neighbors_sub[2+q*9]])/2;
+
         number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
-        number dy = .5*( p->fieldScalar[p->neighbors_sub[1+q*9]] - p->fieldScalar[p->neighbors_sub[7+q*9]] );
+        number dy = .5*( ytop - ybottom ); 
+
         p->fieldDX[q] = dx;
         p->fieldDY[q] = dy;
 
 	//this part gets the field values in teh respective directions from q;
 	//It is hardcoded so take care, the relvant part is that the lattice is square;
-	//The neighbors start form the top and rotate couterclockwise.
+	//The neighbors start form the bottom and rotate couterclockwise.
 	//number xleft, xright, ybottom, ytop;
 	//xright=p->fieldScalar[p->neighbors_sub[5+q*9]]; 
 	//ybottom=p->fieldScalar[p->neighbors_sub[7+q*9]]; 
 	//xleft=p->fieldScalar[p->neighbors_sub[3+q*9]]; 
 	//ytop=p->fieldScalar[p->neighbors_sub[1+q*9]];
 	
-	number laplacianPhi = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] - 4.*p->fieldScalar[q];
+	number laplacianPhi = p->fieldScalar[p->neighbors_sub[5+q*9]] + ytop + p->fieldScalar[p->neighbors_sub[3+q*9]] + ybottom - 4.*p->fieldScalar[q];
 
 	//xright=phi2[box->neighbors[5+k*9]]; 
 	//ybottom=phi2[box->neighbors[7+k*9]]; 
 	//xleft=phi2[box->neighbors[3+k*9]]; 
 	//ytop=phi2[box->neighbors[1+k*9]];
+	
+	ytop=(box->weight_site[7+k*9]*phi2[box->neighbors[7+q*9]]+box->weight_site_next[7+k*9]*phi2[box->neighbors[8+q*9]])/2;
+	ybottom=(box->weight_site[1+k*9]*phi2[box->neighbors[1+q*9]]+box->weight_site_next[1+k*9]*phi2[box->neighbors[2+q*9]])/2;
 
-	number laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[7+k*9]] + phi2[box->neighbors[3+k*9]] +  phi2[box->neighbors[1+k*9]] - 4.*phi2[k];
+	number laplacianSquare = phi2[box->neighbors[5+k*9]] + ytop + phi2[box->neighbors[3+k*9]] +  ybottom - 4.*phi2[k];
 
 	// CH term coupled to chemical
 	number CH =+ gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*laplacianPhi);
@@ -206,7 +214,7 @@ number ActiveNematic::f_interaction(BaseField *p, int q) {
 }
 
 
-void ActiveNematic::calc_internal_forces(BaseField *p, int q) {
+void LEBcActiveNematic::calc_internal_forces(BaseField *p, int q) {
 
         //int  k  = p->GetSubIndex(q, box);
 	int k = p->map_sub_to_box[q];
@@ -219,8 +227,9 @@ void ActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	number fQ_self_x = -(p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
 	number fQ_self_y = -(p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
 
-	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[1+k*9]] - sumQ01[box->neighbors[7+k*9]] ) ) - fQ_self_x;
-	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[1+k*9]] - sumQ00[box->neighbors[7+k*9]] ) ) - fQ_self_y;
+	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( (box->weight_site[7+k*9]*sumQ01[box->neighbors[7+q*9]]+box->weight_site_next[7+k*9]*sumQ01[box->neighbors[8+q*9]])/2 - (box->weight_site[1+k*9]*sumQ01[box->neighbors[1+q*9]]+box->weight_site_next[1+k*9]*sumQ01[box->neighbors[2+q*9]])/2 ) ) - fQ_self_x;
+
+	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( (box->weight_site[7+k*9]*sumQ00[box->neighbors[7+q*9]]+box->weight_site_next[7+k*9]*sumQ00[box->neighbors[8+q*9]])/2 - (box->weight_site[1+k*9]*sumQ00[box->neighbors[1+q*9]]+box->weight_site_next[1+k*9]*sumQ00[box->neighbors[2+q*9]])/2 ) ) - fQ_self_y;
 
 	p->Factive[0] += zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
 	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
@@ -230,7 +239,7 @@ void ActiveNematic::calc_internal_forces(BaseField *p, int q) {
 }
 
 
-void ActiveNematic::updateDirectedActiveForces(number dt, BaseField*p, bool store){
+void LEBcActiveNematic::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
 	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
 	
@@ -247,7 +256,7 @@ void ActiveNematic::updateDirectedActiveForces(number dt, BaseField*p, bool stor
 }
 
 
-void ActiveNematic::updateAnchoring(BaseField*p){
+void LEBcActiveNematic::updateAnchoring(BaseField*p){
 
 	number delta = -PI/12;
 	number theta = 0;

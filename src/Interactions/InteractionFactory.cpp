@@ -4,6 +4,8 @@
 #include "ActiveMultiField.h"
 #include "ActiveNematic.h"
 #include "WetModel.h"
+#include "GeneralizedWetModel.h"
+#include "LEBcActiveNematic.h"
 
 InteractionPtr InteractionFactory::make_interaction(input_file &inp) {
 	std::string inter_type("simplefield");
@@ -26,6 +28,14 @@ InteractionPtr InteractionFactory::make_interaction(input_file &inp) {
 	else if(inter_type.compare("wetmodel") == 0){
                 if(backend.compare("CUDA") == 0) return std::make_shared<WetModel>();
                 else return std::make_shared<WetModel>();
+        }
+	else if(inter_type.compare("lebcactivenematic") == 0){
+                if(backend.compare("CUDA") == 0) return std::make_shared<LEBcActiveNematic>();
+                else return std::make_shared<LEBcActiveNematic>();
+        }
+	else if(inter_type.compare("generalizedwetmodel") == 0){
+                if(backend.compare("CUDA") == 0) return std::make_shared<GeneralizedWetModel>();
+                else return std::make_shared<GeneralizedWetModel>();
         }
 	else {
 		throw RCexception("Interaction '%s' not found. Aborting", inter_type.c_str());

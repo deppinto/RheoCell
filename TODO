@@ -1,15 +1,16 @@
 High priority:
-- Fix initialization radius (currently hardcoded in...)
+- Fix periodic neighbour functions: only top, down, left, and right are correctly implemented (in my defense, only these are actually used...currently...)
 
 Medium Priority:
 - Fix coupling between channel box and external channel walls force (the implementation should be improved)
-- Parallelize with OpenMP
 - Parallelize with CUDA
 - Fix the comments of the different files
 - Optimize printing of configurations (files too large...)
 - Add get_settings(input) to the fields object
+- Technically, LEBc interactions can be merged with normal interactions...
 
 Low Priority:
+- Improve parallelization with OpenMP
 - Parallelize with MPI
 - Change OXLOG
 - Uniformize code conventions (put functions and variables as snake_case, classes as PascalCase, and macros as UPPERCASE)

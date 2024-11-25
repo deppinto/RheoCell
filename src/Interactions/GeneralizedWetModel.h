@@ -1,5 +1,5 @@
-#ifndef WETMODEL_H_
-#define WETMODEL_H_
+#ifndef GENERALIZEDWETMODEL_H_
+#define GENERALIZEDWETMODEL_H_
 
 #include "BaseInteraction.h"
 #include "../Fields/MultiPhaseField.h"
@@ -14,14 +14,13 @@
  *
  */
 
-class WetModel: public BaseInteraction {
+class GeneralizedWetModel: public BaseInteraction {
 protected:
 
 	number gamma;
 	number lambda;
 	number omega;
 	number mu;
-	//int R;
 	number kappa;
 	number a0;
 	number friction;
@@ -44,9 +43,10 @@ protected:
 	Eigen::VectorXd vec_v_x;
 	Eigen::VectorXd vec_f_x;
 	Eigen::SparseMatrix<double, Eigen::RowMajor> mat_m_x;
+	//Eigen::SparseMatrix<double, Eigen::RowMajor> mat_m_y;
 	//Eigen::SparseMatrix<double> mat_m_x;
-	Eigen::VectorXd vec_v_y;
-	Eigen::VectorXd vec_f_y;
+	//Eigen::VectorXd vec_v_y;
+	//Eigen::VectorXd vec_f_y;
         void set_omp_tasks(int num_threads){Eigen::setNbThreads(num_threads);std::cout<<"TESTING: Set eigen openMP threads: "<<num_threads<<std::endl;};
 
 	Eigen::SparseLU<Eigen::SparseMatrix<double>, Eigen::COLAMDOrdering<int> >  solverLU;
@@ -54,7 +54,7 @@ protected:
 	//Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solverCG;
 	int size_rows = 0;
 	int index, sub_q, other_site_patch, other_site_box;
-	std::vector<int> neigh_values = std::vector<int> {5,3,1,7};
+	std::vector<int> neigh_values = std::vector<int> {0,1,2,3,4,5,6,7,8};
 	std::vector<int> size_store_site_velocity_index;
 	std::vector<int> store_site_velocity_index;
 	std::vector<int> field_start_index;
@@ -67,8 +67,8 @@ protected:
 	number velY;
 
 public:
-	WetModel();
-	virtual ~WetModel();
+	GeneralizedWetModel();
+	virtual ~GeneralizedWetModel();
 
 	//void get_settings(input_file &inp) override;
 	void init() override;
@@ -76,8 +76,10 @@ public:
 
 	void allocate_fields(std::vector<BaseField *> &fields) override;
 	void apply_changes_after_equilibration() override;
-	number get_velocity_x(BaseField *p, int q){return vec_v_x[q+field_start_index[p->index]];}
-	number get_velocity_y(BaseField *p, int q){return vec_v_y[q+field_start_index[p->index]];}
+	number get_velocity_x(BaseField *p, int q){return vec_v_x[0+q+field_start_index[p->index]];}
+	number get_velocity_y(BaseField *p, int q){return vec_v_x[1+q+field_start_index[p->index]];}
+	//number get_velocity_x(BaseField *p, int q){return vec_v_x[q+field_start_index[p->index]];}
+	//number get_velocity_y(BaseField *p, int q){return vec_v_y[q+field_start_index[p->index]];}
 	//number get_velocity_x(BaseField *p, int q){return vec_v_x[q+p->index*p->subSize];}
 	//number get_velocity_y(BaseField *p, int q){return vec_v_y[q+p->index*p->subSize];}
 
@@ -92,4 +94,4 @@ public:
 	void updateDirectedActiveForces(number dt, BaseField*p, bool store) override;
 };
 
-#endif /* WETMODEL_H_ */
+#endif /* GENERALIZEDWETMODEL_H_ */

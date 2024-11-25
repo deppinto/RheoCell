@@ -148,6 +148,7 @@ sum_phi=[[0. for q in range(lx)] for k in range(ly)]
 
 
 lambda_wall+=2
+lambda_wall=0
 avg_velocity_x=np.zeros(ly-ceil(2*lambda_wall))
 avg_velocity_y=np.zeros(ly-ceil(2*lambda_wall))
 counter_for_avg=np.zeros(ly-ceil(2*lambda_wall))

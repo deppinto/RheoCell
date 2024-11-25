@@ -18,7 +18,7 @@ protected:
 	number gamma;
 	number lambda;
 	number mu;
-	int R;
+	//int R;
 	number kappa;
 	number a0;
 

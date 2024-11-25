@@ -129,9 +129,9 @@ void MultiPhaseField::setNeighborsSubSquareDirichlet() {
 				yy=y+j;
 				if(x==0 && k==-1)site=-1;
 				else if(x==LsubX-1 && k==1)site=-1;
-				else if(y==0 && j==-1)site=-1;
+				if(y==0 && j==-1)site=-1;
 				else if(y==LsubY-1 && j==1)site=-1;
-				else site=xx+yy*LsubX;
+				site=xx+yy*LsubX;
 				neighbors_sub[ss+i*9]=site;
 				ss++;
 			}
@@ -149,11 +149,11 @@ void MultiPhaseField::setNeighborsSubSquarePeriodic() {
 			for(int k=-1; k<=1; k++){
 				xx=x+k;
 				yy=y+j;
-				if(x==0 && k==-1)site=LsubX-1+yy*LsubX;
-				else if(x==LsubX-1 && k==1)site=yy*LsubX;
-				else if(y==0 && j==-1)site=xx+(LsubY-1)*LsubX;
-				else if(y==LsubY-1 && j==1)site=xx;
-				else site=xx+yy*LsubX;
+				if(x==0 && k==-1)xx=LsubX-1;
+				else if(x==LsubX-1 && k==1)xx=0;
+				if(y==0 && j==-1)yy=LsubY-1;
+				else if(y==LsubY-1 && j==1)yy=0;
+				site=xx+yy*LsubX;
 				neighbors_sub[ss+i*9]=site;
 				ss++;
 			}
@@ -265,7 +265,7 @@ void MultiPhaseField::check_borders(int q, int box_size_x, int box_size_y) {
 /*transform subdomain sites (patch) into grid sites (box)*/
 
 int MultiPhaseField::GetSubIndex(int site, BaseBox *box){
-	return box->getElementX(sub_corner_bottom_left, ((site - int(site/LsubX) * LsubX)+offset[0])%LsubX ) + box->getElementY(sub_corner_bottom_left, ((site/LsubX)+offset[1])%LsubY ) * box->getXsize();
+	return box->getElement(sub_corner_bottom_left, ((site - int(site/LsubX) * LsubX)+offset[0])%LsubX , ((site/LsubX)+offset[1])%LsubY );
 }
 
 int MultiPhaseField::GetSubXIndex(int site, BaseBox *box){

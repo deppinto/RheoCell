@@ -1,7 +1,7 @@
-#include "WetModel.h"
+#include "GeneralizedWetModel.h"
 #include "../Utilities/Utils.h"
 
-WetModel::WetModel() :
+GeneralizedWetModel::GeneralizedWetModel() :
 				BaseInteraction(),
 				gamma(0.01),
 				lambda(2.5),
@@ -16,12 +16,12 @@ WetModel::WetModel() :
 	a0=PI*R*R;
 }
 
-WetModel::~WetModel() {
+GeneralizedWetModel::~GeneralizedWetModel() {
 
 }
 
 
-void WetModel::get_settings(input_file &inp) {
+void GeneralizedWetModel::get_settings(input_file &inp) {
 	BaseInteraction::get_settings(inp);
 
 	getInputInt(&inp, "R", &R, 0);
@@ -38,14 +38,14 @@ void WetModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "friction", &friction_active, 0);
 }
 
-void WetModel::init() {
+void GeneralizedWetModel::init() {
         a0=PI*R*R;
 	store_max_size=20;
 	solverCG.setTolerance(0.000000001);
         set_omp_tasks(omp_thread_num);
 }
 
-void WetModel::read_topology(std::vector<BaseField*> &fields) {
+void GeneralizedWetModel::read_topology(std::vector<BaseField*> &fields) {
         int N = fields.size();
 	field_start_index.resize(N);
 
@@ -61,20 +61,20 @@ void WetModel::read_topology(std::vector<BaseField*> &fields) {
         }
 }
 
-void WetModel::allocate_fields(std::vector<BaseField *> &fields) {
+void GeneralizedWetModel::allocate_fields(std::vector<BaseField *> &fields) {
         for(int i = 0; i < (int) fields.size(); i++) {
                 fields[i] = new MultiPhaseField();
         }
 }
 
-void WetModel::apply_changes_after_equilibration(){
+void GeneralizedWetModel::apply_changes_after_equilibration(){
 	zetaQ_self=zetaQ_self_active;
 	zetaQ_inter=zetaQ_inter_active;
 	friction=friction_active;
 	friction_cell=friction_cell_active;
 }
 
-void WetModel::set_box(BaseBox *boxArg) {
+void GeneralizedWetModel::set_box(BaseBox *boxArg) {
 	box = boxArg;
 	int Lx=box->getXsize();
 	int Ly=box->getYsize();
@@ -88,14 +88,14 @@ void WetModel::set_box(BaseBox *boxArg) {
 	for(int i =0; i<Lx*Ly; i++){resetSums(i);size_store_site_velocity_index[i]=0;}
 }
 
-void WetModel::resetSums(int k) {
+void GeneralizedWetModel::resetSums(int k) {
 	phi2[k]=0;
         sumQ00[k]=0;
         sumQ01[k]=0;
         sum_phi[k]=0;
 }
 
-void WetModel::initFieldProperties(BaseField *p) {
+void GeneralizedWetModel::initFieldProperties(BaseField *p) {
 
 	for(int q=0; q<p->subSize;q++) {
 		int k = p->GetSubIndex(q, box);
@@ -111,7 +111,7 @@ void WetModel::initFieldProperties(BaseField *p) {
 }
 
 
-void WetModel::updateFieldProperties(BaseField *p, int q, int k) {
+void GeneralizedWetModel::updateFieldProperties(BaseField *p, int q, int k) {
 	BaseInteraction::updateFieldProperties(p, q, k);
 	number dx = p->fieldDX[q]; 
 	number dy = p->fieldDY[q]; 
@@ -120,33 +120,34 @@ void WetModel::updateFieldProperties(BaseField *p, int q, int k) {
 }
 
 
-void WetModel::check_input_sanity(std::vector<BaseField *> &fields) {
+void GeneralizedWetModel::check_input_sanity(std::vector<BaseField *> &fields) {
 
 }
 
 
-void WetModel::begin_energy_computation() {
+void GeneralizedWetModel::begin_energy_computation() {
 		
         for(int i = 0; i < CONFIG_INFO->N(); i++) {
                 initFieldProperties(CONFIG_INFO->fields()[i]);
         }
 }
 
-void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
+void GeneralizedWetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 	std::fill(size_store_site_velocity_index.begin(), size_store_site_velocity_index.end(), 0);
 	size_rows=0;
 	for(auto p : fields) {
 		field_start_index[p->index]=size_rows;
-		size_rows += p->subSize;
+		size_rows += p->subSize*2;
 		for(int q=0; q<p->subSize;q++)
 			computeGlobalSums(p, q, false);
 	}
 	vec_v_x.resize(size_rows);
 	vec_f_x.resize(size_rows);
-	vec_v_y.resize(size_rows);
-	vec_f_y.resize(size_rows);
 	mat_m_x.resize(size_rows, size_rows);
+	//vec_v_y.resize(size_rows);
+	//vec_f_y.resize(size_rows);
+	//mat_m_y.resize(size_rows, size_rows);
 
 
         U = (number) 0;
@@ -157,8 +158,10 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 
         K = (number) 0;
+	number nu = friction_cell;
+	number eta=2*nu/3;
 	std::vector<Eigen::Triplet<double>> tri_t_x;
-	//mat_m_x.setZero();
+	std::vector<Eigen::Triplet<double>> tri_t_y;
         for(auto p : fields) {
                 p->Factive = std::vector<number> {0., 0.};
                 p->Fpassive = std::vector<number> {0., 0.};
@@ -166,34 +169,45 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			calc_internal_forces(p, q);
 
 			//populate sparse matrix
-			//tri_t_x.push_back(Eigen::Triplet<double> (q+p->index*p->subSize, q+p->index*p->subSize, (double)(friction+4*friction_cell)));
-			tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+4*friction_cell)));
-			//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction) ));
-
-			/*other_site_patch = q;
-			other_site_box = p->map_sub_to_box[other_site_patch];
-			if(sum_phi[other_site_box]!=0){
-				for(int i=0; i<size_store_site_velocity_index[other_site_box]; i++){
-					tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(4*friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
-				}
-			}*/
-
+			//tri_t_x.push_back(Eigen::Triplet<double> (0+q+field_start_index[p->index], 0+q+field_start_index[p->index], (double)(friction) ));
+			//tri_t_x.push_back(Eigen::Triplet<double> (1+q+field_start_index[p->index], 1+q+field_start_index[p->index], (double)(friction) ));
 
 			for(auto j : neigh_values){
 				other_site_patch = p->neighbors_sub[j+q*9];
 				other_site_box = p->map_sub_to_box[other_site_patch];
 				if(sum_phi[other_site_box]==0)continue;
 				for(int i=0; i<size_store_site_velocity_index[other_site_box]; i++){
-					//index = store_site_velocity_index[i+other_site_box*store_max_size]/p->subSize;
-					//sub_q = (store_site_velocity_index[i+other_site_box*store_max_size]-(index*p->subSize));
-					//tri_t_x.push_back(Eigen::Triplet<double> (q+p->index*p->subSize, sub_q+index*p->subSize, (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
-					//tri_t_x.push_back(Eigen::Triplet<double> (store_site_velocity_index[i+other_site_box*store_max_size], q+field_start_index[p->index], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
-					tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
-					//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
+
+					if(j==4){
+						tri_t_x.push_back(Eigen::Triplet<double> (0+q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size]+0, (double)( (14*nu/3+2*eta) * friction_cell )*p->fieldScalar[other_site_patch]/sum_phi[other_site_box] ) );
+						tri_t_x.push_back(Eigen::Triplet<double> (1+q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size]+1, (double)( (14*nu/3+2*eta) * friction_cell )*p->fieldScalar[other_site_patch]/sum_phi[other_site_box] ) );
+
+						tri_t_x.push_back(Eigen::Triplet<double> (0+q+field_start_index[p->index], 0+q+field_start_index[p->index], (double)(friction)*p->fieldScalar[other_site_patch]/sum_phi[other_site_box] ));
+						tri_t_x.push_back(Eigen::Triplet<double> (1+q+field_start_index[p->index], 1+q+field_start_index[p->index], (double)(friction)*p->fieldScalar[other_site_patch]/sum_phi[other_site_box] ));
+
+					}
+					else if(j==1 || j==7){
+						tri_t_x.push_back(Eigen::Triplet<double> (0+q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size]+0, (double)( - nu * friction_cell )*p->fieldScalar[other_site_patch]/sum_phi[other_site_box] ) );
+						tri_t_x.push_back(Eigen::Triplet<double> (1+q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size]+1, (double)( - (4*nu/3+eta) * friction_cell )*p->fieldScalar[other_site_patch]/sum_phi[other_site_box] ) );
+					}
+					else if(j==3 || j==5){
+						tri_t_x.push_back(Eigen::Triplet<double> (0+q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size]+0, (double)( - (4*nu/3+eta) * friction_cell )*p->fieldScalar[other_site_patch]/sum_phi[other_site_box] ) );
+						tri_t_x.push_back(Eigen::Triplet<double> (1+q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size]+1, (double)( - nu * friction_cell )*p->fieldScalar[other_site_patch]/sum_phi[other_site_box] ) );
+					}
+					else if(j==0 || j==8){
+						tri_t_x.push_back(Eigen::Triplet<double> (0+q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size]+1, (double)( - 0.25*(nu/3+eta) * friction_cell )*p->fieldScalar[other_site_patch]/sum_phi[other_site_box] ) );
+						tri_t_x.push_back(Eigen::Triplet<double> (1+q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size]+0, (double)( - 0.25*(nu/3+eta) * friction_cell )*p->fieldScalar[other_site_patch]/sum_phi[other_site_box] ) );
+					}
+					else{
+						tri_t_x.push_back(Eigen::Triplet<double> (0+q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size]+1, (double)( 0.25*(nu/3+eta) * friction_cell )*p->fieldScalar[other_site_patch]/sum_phi[other_site_box] ) );
+						tri_t_x.push_back(Eigen::Triplet<double> (1+q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size]+0, (double)( 0.25*(nu/3+eta) * friction_cell )*p->fieldScalar[other_site_patch]/sum_phi[other_site_box] ) );
+					}
+
 				}
 			}
 		}
         }
+
 
 	/*
 	//std::cout<<"start solver: "<<size_rows/2 <<std::endl;
@@ -210,20 +224,24 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	//std::cout<<"start solver: "<<size_rows/2 <<std::endl;
 	mat_m_x.setFromTriplets(tri_t_x.begin(), tri_t_x.end());
 	solverCG.compute(mat_m_x);
-	//vec_v_x = solverCG.solveWithGuess(vec_f_x, vec_v_x);
-	//vec_v_y = solverCG.solveWithGuess(vec_f_y, vec_v_y);
 	vec_v_x = solverCG.solve(vec_f_x);
-	vec_v_y = solverCG.solve(vec_f_y);
+
+	//mat_m_y.setFromTriplets(tri_t_y.begin(), tri_t_y.end());
+	//solverCG.compute(mat_m_y);
+	//vec_v_y = solverCG.solve(vec_f_y);
+
 	//std::cout << "#iterations:     " << solverCG.iterations() << std::endl;
 	//std::cout << "estimated error: " << solverCG.error()      << std::endl;	
 	//std::cout<<"end solver"<<std::endl;
+	//vec_v_x = solverCG.solveWithGuess(vec_f_x, vec_v_x);
+	//vec_v_y = solverCG.solveWithGuess(vec_f_y, vec_v_y);
 
 	//velX = p->Fpassive[0] + p->Factive[0];
 	//velY = p->Fpassive[1] + p->Factive[1];
 	//K += .5 * (velX * velX + velY * velY);
 }
 
-void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
+void GeneralizedWetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 
 	int k = p->GetSubIndex(q, box);
 	phi2[k]+=p->fieldScalar[q]*p->fieldScalar[q];
@@ -239,12 +257,12 @@ void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 		}	
 		throw RCexception("Too many field patches overlap: %d, %d, %d, %d, %d, %d", p->index, k, q, p->sub_corner_bottom_left, p->GetSubXIndex(q, box), p->GetSubYIndex(q, box));
 	}
-	//store_site_velocity_index[size_store_site_velocity_index[k]+k*store_max_size]=q+p->index*p->subSize;
-	store_site_velocity_index[size_store_site_velocity_index[k]+k*store_max_size]=q+field_start_index[p->index];
+
+	store_site_velocity_index[size_store_site_velocity_index[k]+k*store_max_size]=2*q+field_start_index[p->index];
 	size_store_site_velocity_index[k]++;
 }
 
-number WetModel::f_interaction(BaseField *p, int q) {
+number GeneralizedWetModel::f_interaction(BaseField *p, int q) {
 
 	//int  k  = p->GetSubIndex(q, box);
 	int k = p->map_sub_to_box[q];
@@ -281,39 +299,39 @@ number WetModel::f_interaction(BaseField *p, int q) {
 }
 
 
-void WetModel::calc_internal_forces(BaseField *p, int q) {
+void GeneralizedWetModel::calc_internal_forces(BaseField *p, int q) {
 
         //int  k  = p->GetSubIndex(q, box);
 	int k = p->map_sub_to_box[q];
 
 	//passive (passive force)
-	p->Fpassive[0] += p->freeEnergy[q]*p->fieldDX[q];
-	p->Fpassive[1] += p->freeEnergy[q]*p->fieldDY[q];
+	number Fpas_x = - 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]]  ) * p->fieldScalar[q];
+	number Fpas_y = - 0.5 * ( p->freeEnergy[p->neighbors_sub[1+q*9]] - p->freeEnergy[p->neighbors_sub[7+q*9]]  ) * p->fieldScalar[q];
+	//number Fpas_x = p->freeEnergy[q]*p->fieldDX[q];
+	//number Fpas_y = p->freeEnergy[q]*p->fieldDY[q];
+	p->Fpassive[0] += Fpas_x;
+	p->Fpassive[1] += Fpas_y;
+
 
 	//active inter cells (active force)
-	number fQ_self_x = -(p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
-	number fQ_self_y = -(p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
+	number fQ_self_x = - (p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
+	number fQ_self_y = - (p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
+
 
 	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[1+k*9]] - sumQ01[box->neighbors[7+k*9]] ) ) - fQ_self_x;
 	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[1+k*9]] - sumQ00[box->neighbors[7+k*9]] ) ) - fQ_self_y;
 
+
 	p->Factive[0] += zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
 	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
 
-	//p->velocityX[q] = (p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
-	//p->velocityY[q] = (p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction;
 
-	//vec_f_x[q+p->index*p->subSize] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
-	//vec_f_y[q+p->index*p->subSize] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
-	/*double v0=0.01;
-	if(p->index==0)v0*=1;
-	else v0*=-1;*/
-	vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
-	vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+	vec_f_x[0+q+field_start_index[p->index]] = Fpas_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+	vec_f_x[1+q+field_start_index[p->index]] = Fpas_y + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 }
 
 
-void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
+void GeneralizedWetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
 	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
 	
@@ -330,7 +348,7 @@ void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 }
 
 
-void WetModel::update_anchoring(BaseField*p){
+void GeneralizedWetModel::update_anchoring(BaseField*p){
 
 	number delta = -PI/12;
 	number theta = 0;

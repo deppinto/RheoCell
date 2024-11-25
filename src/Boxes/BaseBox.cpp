@@ -37,11 +37,11 @@ void BaseBox::setNeighborsPeriodic(int Lx, int Ly){
 			for(int k=-1; k<=1; k++){
 				xx=x+k;
 				yy=y+j;
-				if(x==0 && k==-1)site=Lx-1+yy*Lx;
-				else if(x==Lx-1 && k==1)site=yy*Lx;
-				else if(y==0 && j==-1)site=xx+(Ly-1)*Lx;
-				else if(y==Ly-1 && j==1)site=xx;
-				else site=xx+yy*Lx;
+				if(x==0 && k==-1)xx=Lx-1;
+				else if(x==Lx-1 && k==1)xx=0;
+				if(y==0 && j==-1)yy=Ly-1;
+				else if(y==Ly-1 && j==1)yy=0;
+				site=xx+yy*Lx;
 				neighbors[ss+i*9]=site;
 				ss++;
 			}

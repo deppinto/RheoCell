@@ -4,6 +4,7 @@ BaseInteraction::BaseInteraction() {
 	energy_threshold = (number) 100.f;
 	is_infinite = false;
 	box = NULL;
+	R=8;
 	rcut = 7; //care initial cell size
 	sqr_rcut = SQR(rcut);
 }
@@ -17,6 +18,7 @@ void BaseInteraction::get_settings(input_file &inp) {
 	getInputString(&inp, "topology", topology_filename, 1);
 	getInputNumber(&inp, "energy_threshold", &energy_threshold, 0);
 	getInputInt(&inp, "omp_thread_num", &omp_thread_num, 0);
+	getInputInt(&inp, "R", &R, 1);
 }
 
 
@@ -95,7 +97,7 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 	int N = fields.size();
 	number totalNodes=box->getXsize()*box->getYsize();
 	rcut= sqrt( (totalNodes/N)/PI );
-	rcut=7;
+	rcut=(double)R-1;
 	sqr_rcut = SQR(rcut);
 	std::cout<<"This is rcut: " << rcut <<std::endl;
 	for(int i = 0; i < N; i++) {
