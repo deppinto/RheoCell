@@ -124,6 +124,7 @@ void LEBcActiveNematic::initFieldProperties(BaseField *p) {
 
 void LEBcActiveNematic::begin_energy_computation(std::vector<BaseField *> &fields) {
 
+	box->setNeighborsPeriodic(box->getXsize(), box->getYsize());
 	for(auto p : fields) {
 		for(int q=0; q<p->subSize;q++)
 			computeGlobalSums(p, q, false);

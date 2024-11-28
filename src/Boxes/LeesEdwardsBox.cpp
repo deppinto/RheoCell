@@ -116,6 +116,7 @@ void LeesEdwardsBox::setNeighborsPeriodic(int Lx, int Ly){
 		delta_x = factor * curr_step;
 		last_step = curr_step;
 	}
+	else return;
 
 	//initialize neighbors of lattice sites
 	int x,y,xx,yy,ss;
@@ -143,19 +144,19 @@ void LeesEdwardsBox::setNeighborsPeriodic(int Lx, int Ly){
 
 				if(y==0 && j==-1){
 					x_shifted = (double)xx + delta_x;
-					while(x_shifted>=sidex)x_shifted-=sidex;
+					while(x_shifted>=Lx)x_shifted-=Lx;
 					xx = (int)x_shifted;
 					x_next = xx + 1;
-					if(x_next>=sidex)x_next-=sidex;
+					if(x_next>=Lx)x_next-=Lx;
 					weight = x_shifted - (double)xx;
 					yy = Ly-1;
 				}
 				else if(y==Ly-1 && j==1){
 					x_shifted = (double)xx - delta_x;
-					while(x_shifted<0)x_shifted+=sidex;
+					while(x_shifted<0)x_shifted+=Lx;
 					xx = (int)x_shifted;
 					x_next = xx + 1;
-					if(x_next>=sidex)x_next-=sidex;
+					if(x_next>=Lx)x_next-=Lx;
 					weight = x_shifted - (double)xx;
 					yy = 0;
 				}
