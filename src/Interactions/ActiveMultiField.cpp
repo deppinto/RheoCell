@@ -104,7 +104,7 @@ void ActiveMultiField::initFieldProperties(BaseField *p) {
 		int k = p->GetSubIndex(q, box);
 		BaseInteraction::updateFieldProperties(p, q, k);
 	        number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
-	        number dy = .5*( p->fieldScalar[p->neighbors_sub[1+q*9]] - p->fieldScalar[p->neighbors_sub[7+q*9]] );
+	        number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
 	        p->fieldDX[q] = dx;
 	        p->fieldDY[q] = dy;
 
@@ -188,7 +188,7 @@ void ActiveMultiField::calc_internal_forces(BaseField *p, int q) {
         int  k  = p->GetSubIndex(q, box);
         // store derivatives
         number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
-        number dy = .5*( p->fieldScalar[p->neighbors_sub[1+q*9]] - p->fieldScalar[p->neighbors_sub[7+q*9]] );
+        number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
         p->fieldDX[q] = dx;
         p->fieldDY[q] = dy;
 

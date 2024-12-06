@@ -17,6 +17,7 @@ class BaseBox {
 		virtual int getElement(int site, int distX, int distY){return getElementX(site, distX) + getElementY(site, distY) * getXsize();};
 
 		virtual std::vector<number> min_image(const std::vector<number> &v1, const std::vector<number> &v2) const = 0;
+		virtual std::vector<number> min_image_PBC(const std::vector<number> &v1, const std::vector<number> &v2) {return std::vector<number> {0,0};};
 		virtual std::vector<number> min_image(const BaseField &p, const BaseField &q);
 		virtual std::vector<number> min_image(const BaseField *p, const BaseField *q);
 		virtual number sqr_min_image_distance(const std::vector<number> &v1, const std::vector<number> &v2) const = 0;

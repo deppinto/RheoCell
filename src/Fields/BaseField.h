@@ -26,11 +26,11 @@ public:
 
 	virtual void set_positions_initial(BaseBox *box) {}
 	virtual void set_positions(BaseBox *box) {}
-	virtual void set_positions(int offsetx, int offsety, int corner) {}
+	virtual void set_positions(int offsetx, int offsety, int corner, int corner_x, int corner_y, int size_x) {}
 	virtual void set_properties_to_zero() {};
 	virtual void copy_from(const BaseField &p);
 	virtual void get_interaction_values(int R);
-	virtual void check_borders(int q, int box_size_x, int box_size_y) {};
+	virtual void check_borders(int q) {};
 
 	virtual void init();
 	virtual void init(int Lx, int Ly) {}
@@ -48,7 +48,7 @@ public:
 	 * @return true if the force was added, false otherwise
 	 */
 	bool add_ext_force(BaseForce *f);
-	number F_ext;
+	number F_ext = 0;
 	inline number set_F_ext(int k, number phi, number walls) {
 		if(ext_forces.size() > 0) {
 			F_ext = 0.;
@@ -67,7 +67,7 @@ public:
          * @return true if the external potential was added, false otherwise
          */
         /// Total potential energy due to external forces
-        number ext_potential;
+        number ext_potential = 0;
         inline void set_ext_potential(int k, number walls) {
                 if(ext_forces.size() > 0) {
                         ext_potential = 0.;
@@ -126,6 +126,9 @@ public:
 	int subSize;
 	std::vector<int> offset;
         int sub_corner_bottom_left;
+        number unrap_sub_corner_bottom_left_x;
+        number unrap_sub_corner_bottom_left_y;
+        int sub_corner_bottom_left_old;
 	int border; //usually equals 4
 	int x_sub_left, y_sub_top, x_sub_right, y_sub_bottom;
 	std::vector<int> map_sub_to_box;

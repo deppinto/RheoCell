@@ -71,6 +71,7 @@ void ActiveNematic::set_box(BaseBox *boxArg) {
 	int Lx=box->getXsize();
 	int Ly=box->getYsize();
 	if(box->lees_edwards)throw RCexception("Interaction is not compatible with LEBc. Aborting");
+
 	phi2.resize(Lx*Ly);
 	sumQ00.resize(Lx*Ly);
 	sumQ01.resize(Lx*Ly);
@@ -111,7 +112,7 @@ void ActiveNematic::initFieldProperties(BaseField *p) {
 		int k = p->GetSubIndex(q, box);
 		BaseInteraction::updateFieldProperties(p, q, k);
 	        number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
-	        number dy = .5*( p->fieldScalar[p->neighbors_sub[1+q*9]] - p->fieldScalar[p->neighbors_sub[7+q*9]] );
+	        number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
 	        p->fieldDX[q] = dx;
 	        p->fieldDY[q] = dy;
 
@@ -144,7 +145,8 @@ void ActiveNematic::begin_energy_computation(std::vector<BaseField *> &fields) {
                 velY = p->Fpassive[1] + p->Factive[1];
                 K += .5 * (velX * velX + velY * velY);
         }
-
+	//std::cout<<U<<" "<<K<<std::endl;
+	//exit(911);
 }
 
 void ActiveNematic::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
@@ -162,9 +164,11 @@ number ActiveNematic::f_interaction(BaseField *p, int q) {
 	//int  k  = p->GetSubIndex(q, box);
 	int k = p->map_sub_to_box[q];
         number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
-        number dy = .5*( p->fieldScalar[p->neighbors_sub[1+q*9]] - p->fieldScalar[p->neighbors_sub[7+q*9]] );
+        number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
         p->fieldDX[q] = dx;
         p->fieldDY[q] = dy;
+
+	//std::cout<<k<<" "<<dx<<" "<<dy<<" "<<p->neighbors_sub[7+q*9]<<std::endl;
 
 	//this part gets the field values in teh respective directions from q;
 	//It is hardcoded so take care, the relvant part is that the lattice is square;
@@ -183,6 +187,8 @@ number ActiveNematic::f_interaction(BaseField *p, int q) {
 	//ytop=phi2[box->neighbors[1+k*9]];
 
 	number laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[7+k*9]] + phi2[box->neighbors[3+k*9]] +  phi2[box->neighbors[1+k*9]] - 4.*phi2[k];
+	
+	//if(p->index==0 && q==0)std::cout<<k<<" "<<phi2[k]<<" "<<phi2[box->neighbors[5+k*9]]<<" "<<phi2[box->neighbors[7+k*9]]<<" "<<phi2[box->neighbors[3+k*9]]<<" "<<phi2[box->neighbors[1+k*9]]  <<std::endl;
 
 	// CH term coupled to chemical
 	number CH =+ gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*laplacianPhi);
@@ -202,6 +208,8 @@ number ActiveNematic::f_interaction(BaseField *p, int q) {
 	number V = CH + A + Rep + Adh;
 	p->freeEnergy[q] += V;
 
+	//if(p->index==0 && q==0)std::cout<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<std::endl;
+
 	return V;
 }
 
@@ -219,8 +227,8 @@ void ActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	number fQ_self_x = -(p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
 	number fQ_self_y = -(p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
 
-	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[1+k*9]] - sumQ01[box->neighbors[7+k*9]] ) ) - fQ_self_x;
-	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[1+k*9]] - sumQ00[box->neighbors[7+k*9]] ) ) - fQ_self_y;
+	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[7+k*9]] - sumQ01[box->neighbors[1+k*9]] ) ) - fQ_self_x;
+	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[7+k*9]] - sumQ00[box->neighbors[1+k*9]] ) ) - fQ_self_y;
 
 	p->Factive[0] += zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
 	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;

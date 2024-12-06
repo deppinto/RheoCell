@@ -2,7 +2,7 @@
 #define LEBCACTIVENEMATIC_H_
 
 #include "BaseInteraction.h"
-#include "../Fields/MultiPhaseField.h"
+#include "../Fields/LEBcMultiPhaseField.h"
 
 /**
  * @brief Manages the interaction between fields with a dipolar force which aligns with shape
@@ -28,6 +28,7 @@ protected:
 	number zetaQ_inter_active;
 	number J_Q;
 	number shear_rate;
+	number shear_rate_active;
 	bool anchoring = false;
 
 	number f_interaction(BaseField *p, int q);
@@ -56,13 +57,8 @@ public:
 	void begin_energy_computation(std::vector<BaseField *> &fields) override;
 	void resetSums(int k) override;
 	void updateFieldProperties(BaseField *p, int q, int k) override;
-	number get_velocity_x(BaseField *p, int q){
-		int y = p->map_sub_to_box[q]/box->getXsize();
-		if(y==0) return p->velocityX[q] - shear_rate * box->getYsize();
-		if(y==box->getYsize()-1) return p->velocityX[q] + shear_rate * box->getYsize();
-		else return p->velocityX[q];
-	}
-	number get_velocity_y(BaseField *p, int q){return p->velocityY[q];}
+	number get_velocity_x(BaseField *p, int q);
+	number get_velocity_y(BaseField *p, int q);
 
         void read_topology(std::vector<BaseField *> &fields) override;
 	void check_input_sanity(std::vector<BaseField *> &fields) override;

@@ -34,6 +34,7 @@ protected:
 	bool anchoring = false;
 	number friction_cell;
 	number friction_cell_active;
+	number tolerance;
 
 	number f_interaction(BaseField *p, int q);
 	void calc_internal_forces(BaseField *p, int q);

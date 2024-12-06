@@ -131,7 +131,7 @@ void MultiPhaseField::setNeighborsSubSquareDirichlet() {
 				else if(x==LsubX-1 && k==1)site=-1;
 				if(y==0 && j==-1)site=-1;
 				else if(y==LsubY-1 && j==1)site=-1;
-				site=xx+yy*LsubX;
+				if(site!=-1)site=xx+yy*LsubX;
 				neighbors_sub[ss+i*9]=site;
 				ss++;
 			}
@@ -166,7 +166,12 @@ void MultiPhaseField::set_positions_initial(BaseBox *box) {
 	int x=CoM[0];
 	int y=CoM[1];
 	int site=x+y*box->getXsize();
-	sub_corner_bottom_left=box->getElementX(site, (int)-LsubX/2) + box->getElementY(site, (int)-LsubY/2) * box->getXsize();
+	x = box->getElementX(site, (int)-LsubX/2);
+	y = box->getElementY(site, (int)-LsubY/2);
+	sub_corner_bottom_left = x + y * box->getXsize();
+	sub_corner_bottom_left_old = sub_corner_bottom_left;
+	unrap_sub_corner_bottom_left_x = x;
+	unrap_sub_corner_bottom_left_y = y;
 }
 
 void MultiPhaseField::set_positions(BaseBox *box) {
@@ -176,19 +181,26 @@ void MultiPhaseField::set_positions(BaseBox *box) {
 		int y=CoM[1];
 		int site=x+y*box->getXsize();
 		std::vector<number> corner_old = std::vector<number> { (number)box->getElementX(sub_corner_bottom_left, 0) , (number)box->getElementY(sub_corner_bottom_left, 0) };
-		sub_corner_bottom_left=box->getElementX(site, (int)-LsubX/2) + box->getElementY(site, (int)-LsubY/2) * box->getXsize();
+
+		sub_corner_bottom_left_old = sub_corner_bottom_left;
+		sub_corner_bottom_left = box->getElement(site, (int)-LsubX/2, (int)-LsubY/2);
 	
 		std::vector<number> corner_new = std::vector<number> { (number)box->getElementX(sub_corner_bottom_left, 0) , (number)box->getElementY(sub_corner_bottom_left, 0) };
 		std::vector<number> displacement = box->min_image(corner_old, corner_new);
+
+		unrap_sub_corner_bottom_left_x += displacement[0];
+		unrap_sub_corner_bottom_left_y += displacement[1];
 		offset[0] =  int(offset[0] + LsubX - displacement[0])%LsubX; offset[1] =  int(offset[1] + LsubY - displacement[1])%LsubY;
+
 	}
 	else{
 		//create new sizes
 		int new_LsubX = LsubX - (2 * x_sub_left) + (2 * border);
 		int new_LsubY = LsubY - (2 * y_sub_bottom) + (2 * border);
 		int new_subSize = new_LsubX * new_LsubY;
-		int new_sub_corner_bottom_left=box->getElementX(sub_corner_bottom_left, -(-(2 * x_sub_left)+(2 * border))/2) + box->getElementY(sub_corner_bottom_left, -(-(2 * y_sub_bottom)+(2 * border))/2) * box->getXsize();
+		int new_sub_corner_bottom_left=box->getElement(sub_corner_bottom_left, -(-(2 * x_sub_left)+(2 * border))/2, -(-(2 * y_sub_bottom)+(2 * border))/2);
 		std::vector<number> new_field_scalar(new_subSize, 0.);
+		//double area_old = area;
 		area=0;
 	
 		//do mapping between old and new fieldScalars (due to the way the code is written all other variables will be overwritten so a simple resize is enough)
@@ -197,31 +209,41 @@ void MultiPhaseField::set_positions(BaseBox *box) {
 		else{start_site_y=0; dimension_y=LsubY;}
 		if(new_LsubX<LsubX){start_site_x=(LsubX-new_LsubX)/2; dimension_x=new_LsubX;}
 		else{start_site_x=0; dimension_x=LsubX;}
-
+		
+		std::vector<number> displacement;
+		int yy,xx,dx,dy;
+		int off_y, off_x;
 		for(int i=start_site_y; i<dimension_y; i++){
-			int yy = box->getElementY(sub_corner_bottom_left, i);
-			int off_y = i - offset[1];
-			if(off_y<0)off_y+=LsubY;
+			yy = box->getElementY(sub_corner_bottom_left, i);
+                        off_y = i - offset[1];
+                        if(off_y<0)off_y+=LsubY;
 			for(int j=start_site_x; j<dimension_x; j++){
-				int xx = box->getElementX(sub_corner_bottom_left, j);
 
-				int dx = (new_sub_corner_bottom_left-int(new_sub_corner_bottom_left/box->getXsize())*box->getXsize()) - xx;
-				if(dx>box->getXsize()/2)dx-=box->getXsize();
-				else if(dx<-box->getXsize()/2)dx+=box->getXsize();
+				xx = box->getElementX(sub_corner_bottom_left, j);
 
-				int dy = (new_sub_corner_bottom_left/box->getXsize()) - yy;
-				if(dy>box->getYsize()/2)dy-=box->getYsize();
-				else if(dy<-box->getYsize()/2)dy+=box->getYsize();
+                                dx = (new_sub_corner_bottom_left-int(new_sub_corner_bottom_left/box->getXsize())*box->getXsize()) - xx;
+                                if(dx>box->getXsize()/2)dx-=box->getXsize();
+                                else if(dx<-box->getXsize()/2)dx+=box->getXsize();
 
-				int off_x = j - offset[0];
-				if(off_x<0)off_x+=LsubX;
-				new_field_scalar[abs(dx)+abs(dy)*new_LsubX]=fieldScalar[off_x+off_y*LsubX];
-				area+=fieldScalar[off_x+off_y*LsubX]*fieldScalar[off_x+off_y*LsubX];
+                                dy = (new_sub_corner_bottom_left/box->getXsize()) - yy;
+                                if(dy>box->getYsize()/2)dy-=box->getYsize();
+                                else if(dy<-box->getYsize()/2)dy+=box->getYsize();
+
+                                off_x = j - offset[0];
+                                if(off_x<0)off_x+=LsubX;
+                                new_field_scalar[abs(dx)+abs(dy)*new_LsubX]=fieldScalar[off_x+off_y*LsubX];
+                                area+=fieldScalar[off_x+off_y*LsubX]*fieldScalar[off_x+off_y*LsubX];
 			}
 		}
+		//if(area<area_old-10)throw RCexception("Patch change altered the area too much. Old: %f, New: %f", area_old, area);
+
+		displacement = box->min_image(std::vector<number> { (number)box->getElementX(sub_corner_bottom_left, 0) , (number)box->getElementY(sub_corner_bottom_left, 0) } , std::vector<number> { (number)box->getElementX(new_sub_corner_bottom_left, 0) , (number)box->getElementY(new_sub_corner_bottom_left, 0)} );
+		unrap_sub_corner_bottom_left_x += displacement[0];
+		unrap_sub_corner_bottom_left_y += displacement[1];
 
 		LsubX = new_LsubX;
 		LsubY=new_LsubY;
+		sub_corner_bottom_left_old = sub_corner_bottom_left;
 		sub_corner_bottom_left = new_sub_corner_bottom_left;
 		offset[0] = 0; offset[1] = 0;	
 		subSize = LsubX*LsubY;
@@ -231,8 +253,11 @@ void MultiPhaseField::set_positions(BaseBox *box) {
 	}
 }
 
-void MultiPhaseField::set_positions(int offsetx, int offsety, int corner) {
-	sub_corner_bottom_left=corner;
+void MultiPhaseField::set_positions(int offsetx, int offsety, int corner, int corner_x, int corner_y, int size_x) {
+	unrap_sub_corner_bottom_left_x = corner_x;
+	unrap_sub_corner_bottom_left_y = corner_y;
+	sub_corner_bottom_left = corner;
+	sub_corner_bottom_left_old = sub_corner_bottom_left;
 	offset[0]=offsetx;offset[1]=offsety;
 }
 
@@ -249,17 +274,16 @@ void MultiPhaseField::set_properties_to_zero() {
 }
 
 
-void MultiPhaseField::check_borders(int q, int box_size_x, int box_size_y) {
+void MultiPhaseField::check_borders(int q) {
 
-	int dd = (sub_corner_bottom_left-int(sub_corner_bottom_left/box_size_x)*box_size_x) - map_sub_to_box_x[q];
-	if(dd>box_size_x/2)dd-=box_size_x;
-	else if(dd<-box_size_x/2)dd+=box_size_x;
-	if(abs(dd) < x_sub_left)x_sub_left=abs(dd);
+	int y = q / LsubX;
+	int x = q - y * LsubX;
 
-	dd = (sub_corner_bottom_left/box_size_x) - map_sub_to_box_y[q];
-	if(dd>box_size_y/2)dd-=box_size_y;
-	else if(dd<-box_size_y/2)dd+=box_size_y;
-	if(abs(dd) < y_sub_bottom)y_sub_bottom=abs(dd);
+	x = (x + offset[0])%LsubX;
+	y = (y + offset[1])%LsubY;
+
+	if(x < x_sub_left)x_sub_left= x;
+	if(y < y_sub_bottom)y_sub_bottom=y;
 }
 
 /*transform subdomain sites (patch) into grid sites (box)*/

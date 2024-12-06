@@ -106,7 +106,7 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 		bool inserted = false;
 		do {
 			p->CoM = std::vector<number> {drand48() * box->getXsize(), drand48() * box->getYsize()};
-			//if(i==0)p->CoM = std::vector<number> {25, 47};
+			if(i==0)p->CoM = std::vector<number> {25, 25};
 			//if(i==1)p->CoM = std::vector<number> {75, 53};
 
 			p->set_positions_initial(box);
@@ -129,7 +129,7 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 					int f = box->getElementX(start, x) + box->getElementY(start, y) * box->getXsize();
 					p->set_ext_potential(f, box->getWalls(f));	
 					ext_value += p->ext_potential;
-					//if(box->getElementX(start, x)==0)std::cout<<"print here: "<<box->getWalls(f)<<" "<< p->ext_potential<<" "<<ext_value<<std::endl;
+					//if(box->getElementX(start, x)==0)std::cout<<"print here: "<< f <<" "<<box->getWalls(f)<<" "<< p->ext_potential<<" "<<ext_value<<std::endl;
 				}	
 			}
 

@@ -19,10 +19,15 @@ FDBackend::~FDBackend() {
 void FDBackend::get_settings(input_file &inp) {
 	SimBackend::get_settings(inp);
 
-	getInputBool(&inp, "lees_edwards", &lees_edwards, 0);
+	//getInputBool(&inp, "lees_edwards", &lees_edwards, 0);
+	
+	std::string box_type("square");
+        getInputString(&inp, "box", box_type, 0);
+	if(box_type.compare("lees_edwards") == 0) lees_edwards=true;
+
 	if(lees_edwards) {
 		getInputNumber(&inp, "lees_edwards_shear_rate", &shear_rate, 1);
-		if(shear_rate <= 0.) throw RCexception("lees_edwards_shear_rate should be > 0");
+		if(shear_rate < 0.) throw RCexception("lees_edwards_shear_rate should be > 0");
 		OX_LOG(Logger::LOG_INFO, "Using Lees-Edwards boundary conditions with shear rate %lf", shear_rate);
 	}
 

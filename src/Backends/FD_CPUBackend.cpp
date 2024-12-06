@@ -48,6 +48,9 @@ void FD_CPUBackend::first_step(bool store) {
 		temp[0]=0; temp[1]=0; temp[2]=0; temp[3]=0;
 		p->set_properties_to_zero();
 
+		//number sumTest_x=0.;
+		//number sum_x=0.;
+
 		for(int q=0; q<p->subSize; q++) { 
 
 			//int  k  = p->GetSubIndex(q, config_info->box);
@@ -66,10 +69,13 @@ void FD_CPUBackend::first_step(bool store) {
 			}
 
 			phi = p->fieldScalar_old[q] + dt*.5*(dphi + p->dfield_old[q]);
+
+			//if(int(q/p->LsubX)>3){sumTest_x+=phi * p->map_sub_to_box_x[q];sum_x+=phi;}
+
 			p->fieldScalar[q] = phi;
 			p->area += phi * phi;
 			p->sumF += phi;
-
+			
 			//timer_testing->resume();
 			temp[0] += phi * cos_x_table[p->map_sub_to_box_x[q]];//GetSubXIndex(q, config_info->box)]; //cos(2*PI*p->GetSubXIndex(q, config_info->box)/box->getXsize()); 
 			temp[1] += phi * sin_x_table[p->map_sub_to_box_x[q]];//GetSubXIndex(q, config_info->box)]; //sin(2*PI*p->GetSubXIndex(q, config_info->box)/box->getXsize());
@@ -77,19 +83,21 @@ void FD_CPUBackend::first_step(bool store) {
 			temp[3] += phi * sin_y_table[p->map_sub_to_box_y[q]];//GetSubYIndex(q, config_info->box)]; //sin(2*PI*p->GetSubYIndex(q, config_info->box)/box->getYsize());
 			//timer_testing->pause();
 
-			//if(q==0)std::cout<<p->fieldScalar[0]<<" "<<p->freeEnergy[0]<<" "<<interaction->get_velocity_x(p,0) <<" "<<interaction->get_velocity_y(p,0) <<" "<<p->fieldDX[0]<<" "<<p->fieldDY[0]  <<std::endl;
-			if(!store && phi<0.2 && phi>0.1)p->check_borders(q, box->getXsize(), box->getYsize());
+			if(!store && phi<0.2 && phi>0.1)p->check_borders(q);
 			interaction->resetSums(k);
 			interaction->updateFieldProperties(p, q, k);
 		}
 		p->CoM[0] = box->getXsize()*( atan2(-temp[1]/p->sumF, -temp[0]/p->sumF) + PI ) / (2*PI); 
 		p->CoM[1] = box->getYsize()*( atan2(-temp[3]/p->sumF, -temp[2]/p->sumF) + PI ) / (2*PI);
 
+		//if(com_old[0]>24.5 && p->CoM[0]<24.5)std::cout<<p->CoM[0]<<" "<<p->CoM[1]<<" "<< p->unrap_sub_corner_bottom_left_x<<" "<<p->unrap_sub_corner_bottom_left_y<<" "<<config_info->curr_step<<" "<< p->offset[0]<<" "<<p->offset[1]  <<std::endl;
+
 		if(box->sqr_min_image_distance(com_old, p->CoM) > distance_thresh) {
 			particles_with_warning.push_back(p->index);
 		}
 
-		//std::cout<<p->fieldScalar[0]<<" "<<p->freeEnergy[0]<<" "<<interaction->get_velocity_x(p,0) <<" "<<interaction->get_velocity_y(p,0) <<" "<<p->fieldDX[0]<<" "<<p->fieldDY[0]  <<std::endl;
+		//std::cout<<"backend: "<<p->fieldScalar[p->subSize-1]<<" "<<p->freeEnergy[p->subSize-1]<<" "<<interaction->get_velocity_x(p,p->subSize-1) <<" "<<interaction->get_velocity_y(p,p->subSize-1) <<" "<<p->fieldDX[p->subSize-1]<<" "<<p->fieldDY[p->subSize-1]<<" "<<p->CoM[0]<<" "<<p->CoM[1]<<" "<<config_info->curr_step  <<std::endl;
+		//std::cout<<"backend: "<<p->fieldScalar[0]<<" "<<p->freeEnergy[0]<<" "<<interaction->get_velocity_x(p,0) <<" "<<interaction->get_velocity_y(p,0) <<" "<<p->fieldDX[0]<<" "<<p->fieldDY[0]<<" "<<p->CoM[0]<<" "<<p->CoM[1]<<" "<<config_info->curr_step  <<" "<<sumTest_x/sum_x  <<std::endl;
 		interaction->updateDirectedActiveForces(dt, p, store);
 		if(!store)p->set_positions(config_info->box);
 	}

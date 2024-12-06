@@ -1,5 +1,5 @@
-#ifndef MULTIPHASEFIELD_H_
-#define MULTIPHASEFIELD_H_
+#ifndef LEBCMULTIPHASEFIELD_H_
+#define LEBCMULTIPHASEFIELD_H_
 
 #include "BaseField.h"
 #include "../Boxes/BaseBox.h"
@@ -8,7 +8,7 @@
  * @brief A customisable particle. Used by CustomInteraction.
  */
 
-class MultiPhaseField: public BaseField {
+class LEBcMultiPhaseField: public BaseField {
 protected:
 	int init_radius=4;
 	int init_radius2=4*4;
@@ -17,9 +17,9 @@ protected:
 	void resizing();
 
 public:
-	MultiPhaseField();
-	MultiPhaseField(int Lx, int Ly);
-	virtual ~MultiPhaseField();
+	LEBcMultiPhaseField();
+	LEBcMultiPhaseField(int Lx, int Ly);
+	virtual ~LEBcMultiPhaseField();
 
 	void setNeighborsSub();
 
@@ -37,4 +37,4 @@ public:
 	int GetSubYIndex(int site, BaseBox *box);
 };
 
-#endif /* MULTIPHASEFIELD_H_ */
+#endif /* LEBCMULTIPHASEFIELD_H_ */

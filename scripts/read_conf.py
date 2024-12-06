@@ -51,7 +51,7 @@ x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
 Z=[[0 for q in range(lx)] for k in range(ly)]
 fig = plt.figure(figsize=(6,6))
-start_value = 9
+start_value = 11
 totphi=[0. for i in range(lx*ly)]
 for line in cfile:
     area=0
@@ -66,8 +66,10 @@ for line in cfile:
     offsetX=int(float(words[4]))
     offsetY=int(float(words[5]))
     corner=int(float(words[6]))
-    nemX=float(words[7])
-    nemY=float(words[8])
+    corner_x=float(words[7])
+    corner_y=float(words[8])
+    nemX=float(words[9])
+    nemY=float(words[10])
     for i in range(start_value,len(words),2):
         site=int(float(words[i]))
         value=float(words[i+1])
@@ -110,7 +112,7 @@ for line in cfile:
 
     levels = np.arange(0.0, m, step) + step
     cmap=cm.winter
-    if pt_num==0:
+    if pt_num==34:
         cset1 = plt.contour(X, Y, Z, levels, cmap=cmap, alpha=0.5)
     else:
         cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cmap, alpha=0.5)

@@ -2,7 +2,10 @@
 #include "../Fields/BaseField.h"
 
 LeesEdwardsBox::LeesEdwardsBox() {
-lees_edwards=true;
+	lees_edwards=true;
+	sidex = -1.0;
+	sidey = -1.0;
+	sides.resize(2);
 }
 
 
@@ -51,7 +54,6 @@ int LeesEdwardsBox::getElementY(int site, int distY){
 int LeesEdwardsBox::getElement(int site, int distX, int distY){
 
 	int cross=0;
-
 	int x = (site-(int(site/sidex)*sidex))+distX;
 	while(x<0)x+=sidex;
 	while(x>=sidex)x-=sidex;
@@ -61,11 +63,11 @@ int LeesEdwardsBox::getElement(int site, int distX, int distY){
         while(y>=sidey){y-=sidey;cross=2;}
 
 	if(cross==1){
-		x = int(x + delta_x);
+		x = int(x + (int)delta_x);
 		while(x>=sidex)x-=sidex;
 	}
 	else if(cross==2){
-		x = int(x - delta_x);
+		x = int(x - (int)delta_x);
 		while(x<0)x+=sidex;
 	}
 
@@ -99,9 +101,16 @@ std::vector<number> LeesEdwardsBox::min_image(const std::vector<number> &v1, con
 
 	number ny = v2[1] - v1[1];
 	number cy = rint(ny / sidey);
-	number nx = v2[0] - v1[0] - cy * delta_x;
+	number nx = v2[0] - v1[0] - cy * (int)delta_x;
 
-	return std::vector<number> (nx - rint(nx / sidex) * sidex, ny - cy * sidey);
+	return std::vector<number> {nx - rint(nx / sidex) * sidex, ny - cy * sidey};
+}
+
+std::vector<number> LeesEdwardsBox::min_image_PBC(const std::vector<number> &v1, const std::vector<number> &v2) const {
+        return std::vector<number> {
+                v2[0] - v1[0] - rint((v2[0] - v1[0]) / sidex) * sidex,
+                v2[1] - v1[1] - rint((v2[1] - v1[1]) / sidey) * sidey
+        };
 }
 
 number LeesEdwardsBox::sqr_min_image_distance(const std::vector<number> &v1, const std::vector<number> &v2) const {
@@ -118,6 +127,9 @@ void LeesEdwardsBox::setNeighborsPeriodic(int Lx, int Ly){
 	}
 	else return;
 
+
+	std::cout<<"delta_x: "<<delta_x<<std::endl;
+
 	//initialize neighbors of lattice sites
 	int x,y,xx,yy,ss;
 	int x_next;
@@ -133,7 +145,7 @@ void LeesEdwardsBox::setNeighborsPeriodic(int Lx, int Ly){
 				yy=y+j;
 
 				x_next=0;
-				weight=0.;
+				weight=1.;
 
 				if(x==0 && k==-1){
 					xx=Lx-1;
@@ -145,26 +157,28 @@ void LeesEdwardsBox::setNeighborsPeriodic(int Lx, int Ly){
 				if(y==0 && j==-1){
 					x_shifted = (double)xx + delta_x;
 					while(x_shifted>=Lx)x_shifted-=Lx;
-					xx = (int)x_shifted;
+					xx = xx + (int)delta_x;
+					while(xx>=Lx)xx-=Lx;
 					x_next = xx + 1;
 					if(x_next>=Lx)x_next-=Lx;
-					weight = x_shifted - (double)xx;
+					weight = 1 - (x_shifted - (double)xx);
 					yy = Ly-1;
 				}
 				else if(y==Ly-1 && j==1){
 					x_shifted = (double)xx - delta_x;
 					while(x_shifted<0)x_shifted+=Lx;
-					xx = (int)x_shifted;
-					x_next = xx + 1;
-					if(x_next>=Lx)x_next-=Lx;
-					weight = x_shifted - (double)xx;
+					xx = xx - (int)delta_x;
+					while(xx<0)xx+=Lx;
+					x_next = xx - 1;
+					if(x_next<0)x_next+=Lx;
+					weight = 1 - ((double)xx - x_shifted);
 					yy = 0;
 				}
 
 				neighbors[ss+i*9]=xx+yy*Lx;
 				neighbors_next[ss+i*9]=x_next+yy*Lx;
-				weight_site[ss+i*9]=1-weight;
-				weight_site_next[ss+i*9]=weight;
+				weight_site[ss+i*9]=weight;
+				weight_site_next[ss+i*9]=1-weight;
 
 				ss++;
 			}

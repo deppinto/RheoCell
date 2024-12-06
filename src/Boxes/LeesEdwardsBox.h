@@ -27,6 +27,7 @@ public:
         virtual int getBoxsize();
 
 	virtual std::vector<number> min_image(const std::vector<number> &v1, const std::vector<number> &v2) const;
+	virtual std::vector<number> min_image_PBC(const std::vector<number> &v1, const std::vector<number> &v2) const;
 	virtual number sqr_min_image_distance(const std::vector<number> &v1, const std::vector<number> &v2) const;
         virtual std::vector<number> normalised_in_box(const std::vector<number> &v);
 

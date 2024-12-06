@@ -54,6 +54,7 @@ SET(box_SOURCES
 SET(common_SOURCES
 	Fields/BaseField.cpp
 	Fields/MultiPhaseField.cpp
+	Fields/LEBcMultiPhaseField.cpp
 	Managers/SimManager.cpp
 	Utilities/LR_vector.cpp
 	Utilities/Utils.cpp

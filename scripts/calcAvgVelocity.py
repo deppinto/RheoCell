@@ -114,8 +114,15 @@ v_com_x_t = []
 v_com_y_t = []
 com_x_t = []
 com_y_t = []
+MSD = []
 time_conf = []
-start_value = 9
+start_value = 11
+avg_mean_velocity=0.
+
+unrap_comx=[0. for i in range(0,N)]
+unrap_comx_save_1=[0. for i in range(0,N)]
+unrap_comx_save_2=[0. for i in range(0,N)]
+unrap_comy=[0. for i in range(0,N)]
 
 CoMX=[0. for i in range(0,N)]
 CoMY=[0. for i in range(0,N)]
@@ -130,6 +137,8 @@ LsubY=[0 for i in range(0,N)]
 offsetX=[0 for i in range(0,N)]
 offsetY=[0 for i in range(0,N)]
 cornerSite=[0 for i in range(0,N)]
+cornerSite_x=[0. for i in range(0,N)]
+cornerSite_y=[0. for i in range(0,N)]
 com_velocity_x = [0. for i in range(0,N)]
 com_velocity_y = [0. for i in range(0,N)]
 
@@ -175,6 +184,7 @@ for line in cfile:
     if words[0]=='t':
         t=int(float(words[2]))
         time_conf.append(t)
+        MSD.append(0.)
 
         pt_num=0
         CoMX_old=CoMX
@@ -190,6 +200,8 @@ for line in cfile:
         offsetX=[0 for i in range(0,N)]
         offsetY=[0 for i in range(0,N)]
         cornerSite=[0 for i in range(0,N)]
+        cornerSite_x=[0. for i in range(0,N)]
+        cornerSite_y=[0. for i in range(0,N)]
         com_velocity_x = [0. for i in range(0,N)]
         com_velocity_x = [0. for i in range(0,N)]
 
@@ -217,6 +229,8 @@ for line in cfile:
         offsetX[pt_num]=int(float(words[4]))
         offsetY[pt_num]=int(float(words[5]))
         cornerSite[pt_num]=int(float(words[6]))
+        cornerSite_x[pt_num]=int(float(words[7]))
+        cornerSite_y[pt_num]=int(float(words[8]))
 
         if cont_line<=N+2:
             com_velocity_x[pt_num]=0.
@@ -234,11 +248,20 @@ for line in cfile:
                 dist_com_y-=ly
             if dist_com_y<-ly/2:
                 dist_com_y+=ly
+            unrap_comx[pt_num]+=dist_com_x
+            if t==10000:
+                unrap_comx_save_1[pt_num]=unrap_comx[pt_num]
+            if t==30000:
+                unrap_comx_save_2[pt_num]=unrap_comx[pt_num]
+                avg_mean_velocity+=(unrap_comx_save_2[pt_num]-unrap_comx_save_1[pt_num])/(20000*dt*N)
+
+            unrap_comy[pt_num]+=dist_com_y
+            MSD[len(MSD)-1]+=sqrt(unrap_comx[pt_num]*unrap_comx[pt_num]+unrap_comy[pt_num]*unrap_comy[pt_num])/N
             com_velocity_x[pt_num]=dist_com_x/((time_conf[t1]-time_conf[t2])*dt)
             com_velocity_y[pt_num]=dist_com_y/((time_conf[t1]-time_conf[t2])*dt)
 
-        nemX=float(words[7])
-        nemY=float(words[8])
+        nemX=float(words[9])
+        nemY=float(words[10])
         theta_nem[pt_num]=asin((nemX*nemY)/0.5)/2
         Q00[pt_num]= 0.5 * (nemX * nemX - nemY * nemY)
         Q01[pt_num]= nemX * nemY
@@ -313,8 +336,8 @@ for line in cfile:
             '''
 
             frame_num=int(t/print_conf_interval)-1
-            if frame_num%1==0:
-                print(frame_num, cont_line, t)
+            #if frame_num%1==0:
+                #print(frame_num, cont_line, t)
             #if cont_line>N+2:
                 #cset1 = plt.imshow(velocity_grid, vmin=velmin, vmax=velmax, cmap=cm.Reds)
             com_x_t.append(CoMX)
@@ -401,6 +424,37 @@ if variable==3:
     plt.show()
     #plt.savefig('./vx_width_new.png')
     plt.close()
+
+
+if variable==4:
+
+    '''
+    #fig = plt.figure(figsize=(8,6))
+    fig = plt.figure(figsize=(5.452423529, 4.089317647))
+    plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+    plt.plot(time_conf, MSD, '-o' , color='darkgreen')
+    plt.ylabel('MSD', fontsize=18)
+    plt.xlabel('time', fontsize=18)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+    plt.show()
+    #plt.savefig('./MSD_time.png')
+    plt.close()
+    '''
+
+    with open('MSD.txt', 'w') as f:
+        for i in range(len(MSD)):
+            print(time_conf[i]*dt,MSD[i], file=f)  
+
+    with open('mean_velocity.txt', 'w') as f:
+        print(abs(avg_mean_velocity), file=f)  
+
+    y=np.arange(int(ceil(2*lambda_wall)/2), ly-int(ceil(2*lambda_wall)/2), 1)
+    with open('v_width.txt', 'w') as f:
+        for i in range(len(y)):
+            print(avg_velocity_y[i]/counter_for_avg[i], avg_velocity_x[i]/counter_for_avg[i], y[i], file=f)  
+
 
 print('done')
 exit (1)
