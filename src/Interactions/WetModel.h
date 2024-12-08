@@ -35,6 +35,7 @@ protected:
 	number friction_cell;
 	number friction_cell_active;
 	number tolerance;
+	number wall_slip; //if more than 1 there is no slip, if smaller than 1 there is slip. The length of slip on the walls is greater with decreasing values
 
 	number f_interaction(BaseField *p, int q);
 	void calc_internal_forces(BaseField *p, int q);

@@ -13,7 +13,8 @@ WetModel::WetModel() :
 				zetaQ_inter(0),
 				J_Q(1),
 				friction_cell(1.),
-				tolerance(0.0001){
+				tolerance(0.0001),
+				wall_slip(0.5){
 	a0=PI*R*R;
 }
 
@@ -38,6 +39,7 @@ void WetModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "friction_cell", &friction_cell_active, 0);
 	getInputNumber(&inp, "friction", &friction_active, 0);
 	getInputNumber(&inp, "CGtolerance", &tolerance, 0);
+	getInputNumber(&inp, "wall_slip", &wall_slip, 0);
 }
 
 void WetModel::init() {
@@ -170,7 +172,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			calc_internal_forces(p, q);
 
 			//populate sparse matrix
-			if(box->getWalls(p->map_sub_to_box[q])<0.5)
+			if(box->getWalls(p->map_sub_to_box[q])<wall_slip)
 				tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+4*friction_cell)));
 			else
 				tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], 1.0));
@@ -191,7 +193,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 				if(sum_phi[other_site_box]==0)continue;
 				for(int i=0; i<size_store_site_velocity_index[other_site_box]; i++){
 					//tri_t_x.push_back(Eigen::Triplet<double> (store_site_velocity_index[i+other_site_box*store_max_size], q+field_start_index[p->index], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
-					if(box->getWalls(p->map_sub_to_box[q])<0.5)
+					if(box->getWalls(p->map_sub_to_box[q])<wall_slip)
 						tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
 					//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
 				}
@@ -309,7 +311,7 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	if(p->index==0)v0*=1;
 	else v0*=-1;*/
 
-	if(box->getWalls(k)<0.5){
+	if(box->getWalls(k)<wall_slip){
 		vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 	}
