@@ -14,7 +14,8 @@ protected:
 	void compute_forces();
 	void second_step();
 
-	number J0= 1.0;
+	number J0 = 1.0;
+	bool analysis = false;
 
 	void update_forces(BaseField *p, BaseField *q);
 	vector<number> cos_x_table;

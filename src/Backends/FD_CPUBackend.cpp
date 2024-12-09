@@ -13,6 +13,7 @@ FD_CPUBackend::~FD_CPUBackend() {
 void FD_CPUBackend::get_settings(input_file &inp) {
 	FDBackend::get_settings(inp);
 	getInputNumber(&inp, "J0", &J0, 0);
+	getInputBool(&inp, "analysis", &analysis, 0);
 }
 
 void FD_CPUBackend::init() {
@@ -20,7 +21,7 @@ void FD_CPUBackend::init() {
 	FDBackend::init();
 
 	interaction->begin_energy_computation();
-	//compute_forces();
+	if(analysis){compute_forces();}
 
 	int sizeX = box->getXsize();
 	int sizeY = box->getYsize();

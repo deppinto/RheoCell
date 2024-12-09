@@ -15,6 +15,7 @@ SET(observables_SOURCES
 	Observables/ObservableFactory.cpp
 	Observables/ObservableOutput.cpp
 	Observables/Configuration.cpp
+	Observables/VelocityField.cpp
 )
 
 SET(backends_SOURCES
@@ -80,6 +81,10 @@ SET(confGenerator_SOURCES
 	Managers/GeneratorManager.cpp
 )
 
+SET(analyser_SOURCES
+	analyser.cpp
+)
+
 SET(rheoCell_SOURCES
 	rheoCell.cpp 
 )
@@ -93,8 +98,10 @@ SET(common_SOURCES
 ADD_EXECUTABLE(${exe_name} ${rheoCell_SOURCES})
 ADD_LIBRARY(${lib_name} ${common_SOURCES})
 ADD_EXECUTABLE(confGenerator ${confGenerator_SOURCES})
+ADD_EXECUTABLE(analyser ${analyser_SOURCES})
 
 TARGET_LINK_LIBRARIES(${lib_name} ${CMAKE_DL_LIBS})
 
 TARGET_LINK_LIBRARIES(${exe_name} ${lib_name})
 TARGET_LINK_LIBRARIES(confGenerator ${lib_name})
+TARGET_LINK_LIBRARIES(analyser ${lib_name})

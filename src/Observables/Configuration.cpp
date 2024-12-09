@@ -5,6 +5,7 @@
 #include "Configuration.h"
 #include "../Fields/BaseField.h"
 #include "../Fields/MultiPhaseField.h"
+#include "../Fields/LEBcMultiPhaseField.h"
 
 using namespace std;
 

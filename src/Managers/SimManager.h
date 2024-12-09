@@ -34,6 +34,7 @@ public:
 	virtual void load_options();
 	virtual void init();
 	virtual void run();
+	virtual void analyse();
 };
 
 void gbl_termhandler(int);
