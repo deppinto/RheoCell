@@ -63,8 +63,8 @@ void VelocityField::calc_velocity_field(BaseField *p) {
 	for(int i=0;i<p->subSize; i++){
 		number velocityX = config_info->interaction->get_velocity_x(p, i);
 		number velocityY = config_info->interaction->get_velocity_y(p, i);
-		v_field_x[p->GetSubIndex(i, config_info->box)] += velocityX * p->fieldScalar[i];
-		v_field_y[p->GetSubIndex(i, config_info->box)] += velocityY * p->fieldScalar[i];
+		v_field_x[p->GetSubIndex(i, config_info->box)] += velocityX; //* p->fieldScalar[i];
+		v_field_y[p->GetSubIndex(i, config_info->box)] += velocityY; //* p->fieldScalar[i];
 		phi_field[p->GetSubIndex(i, config_info->box)] += p->fieldScalar[i];
 	}
 }
@@ -88,7 +88,8 @@ string VelocityField::velocity_field(llint step) {
 		for(int j=0; j<Lx; j++){
 			int site = j + i * Lx;
 			if(phi_field[site]>0)
-				conf << site << " " << v_field_x[site]/phi_field[site] << " " << v_field_y[site]/phi_field[site] << " ";
+				conf << site << " " << v_field_x[site] << " " << v_field_y[site] << " ";
+				//conf << site << " " << v_field_x[site]/phi_field[site] << " " << v_field_y[site]/phi_field[site] << " ";
 			else
 				conf << site << " " << 0 << " " << 0 << " ";
 		}
