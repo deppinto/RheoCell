@@ -66,7 +66,7 @@ for line in cfile:
         Z_x[yy][xx]=value_x
         Z_y[yy][xx]=value_y
         Z[yy][xx]=sqrt(value_x*value_x+value_y*value_y)
-        cset1 = plt.arrow(xx, yy, 50*value_x, 50*value_y, width=0.075, color='k')
+        cset1 = plt.arrow(xx, yy, value_x, value_y, width=0.075, color='k')
 
     #z_min, z_max = -np.abs(Z).max(), np.abs(Z).max()
     z_min, z_max = 0., np.abs(Z).max()

@@ -37,6 +37,19 @@ void LEBcMultiPhaseField::resizing() {
 	map_sub_to_box.resize(subSize);
 	map_sub_to_box_x.resize(subSize);
 	map_sub_to_box_y.resize(subSize);
+
+	cos_x_table.resize(LsubX);
+	cos_y_table.resize(LsubY);
+	sin_x_table.resize(LsubX);
+	sin_y_table.resize(LsubY);
+	for(int i =0; i<LsubX; i++){
+		cos_x_table[i]=cos(2*PI*i/LsubX);
+		sin_x_table[i]=sin(2*PI*i/LsubX);
+	}
+        for(int i =0; i<LsubY; i++){
+                cos_y_table[i]=cos(2*PI*i/LsubY);
+                sin_y_table[i]=sin(2*PI*i/LsubY);
+        }
 }
 
 void LEBcMultiPhaseField::init(int Lx, int Ly) {
@@ -179,7 +192,11 @@ void LEBcMultiPhaseField::set_positions_initial(BaseBox *box) {
 void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 
 	if(index>=0){
-		int new_sub_corner_bottom_left = box->getElement((int)CoM[0]+(int)CoM[1]*box->getXsize(), (int)-LsubX/2, (int)-LsubY/2);
+		int siteCoM = box->getElement(sub_corner_bottom_left, int(CoM[0]), int(CoM[1]));
+		CoM[1] = int(siteCoM / box->getXsize()) + (CoM[1]-int(CoM[1]));
+		CoM[0] = int(siteCoM - int(siteCoM / box->getXsize()) * box->getXsize()) + (CoM[0]-int(CoM[0]));
+
+		int new_sub_corner_bottom_left = box->getElement(siteCoM, (int)-LsubX/2, (int)-LsubY/2);
 		int new_y = new_sub_corner_bottom_left / box->getXsize();
 		int new_x = new_sub_corner_bottom_left - new_y * box->getXsize();
 		int old_y = sub_corner_bottom_left / box->getXsize();

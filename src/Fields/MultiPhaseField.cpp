@@ -37,6 +37,19 @@ void MultiPhaseField::resizing() {
 	map_sub_to_box.resize(subSize);
 	map_sub_to_box_x.resize(subSize);
 	map_sub_to_box_y.resize(subSize);
+
+	cos_x_table.resize(LsubX);
+	cos_y_table.resize(LsubY);
+	sin_x_table.resize(LsubX);
+	sin_y_table.resize(LsubY);
+	for(int i =0; i<LsubX; i++){
+		cos_x_table[i]=cos(2*PI*i/LsubX);
+		sin_x_table[i]=sin(2*PI*i/LsubX);
+	}
+        for(int i =0; i<LsubY; i++){
+                cos_y_table[i]=cos(2*PI*i/LsubY);
+                sin_y_table[i]=sin(2*PI*i/LsubY);
+        }
 }
 
 void MultiPhaseField::init(int Lx, int Ly) {
@@ -177,9 +190,13 @@ void MultiPhaseField::set_positions_initial(BaseBox *box) {
 void MultiPhaseField::set_positions(BaseBox *box) {
 
 	if(x_sub_left>=border && y_sub_bottom>=border){
-		int x=CoM[0];
-		int y=CoM[1];
-		int site=x+y*box->getXsize();
+		//int x=map_sub_to_box_x[int(CoM[0])];
+		//int y=map_sub_to_box_y[int(CoM[1])];
+		//int site=x+y*box->getXsize();
+		int site = box->getElement(sub_corner_bottom_left, int(CoM[0]), int(CoM[1]));
+		CoM[1] = int(site / box->getXsize()) + (CoM[1]-int(CoM[1]));
+		CoM[0] = int(site - int(site / box->getXsize()) * box->getXsize()) + (CoM[0]-int(CoM[0]));
+
 		std::vector<number> corner_old = std::vector<number> { (number)box->getElementX(sub_corner_bottom_left, 0) , (number)box->getElementY(sub_corner_bottom_left, 0) };
 
 		sub_corner_bottom_left_old = sub_corner_bottom_left;
@@ -191,6 +208,10 @@ void MultiPhaseField::set_positions(BaseBox *box) {
 		unrap_sub_corner_bottom_left_x += displacement[0];
 		unrap_sub_corner_bottom_left_y += displacement[1];
 		offset[0] =  int(offset[0] + LsubX - displacement[0])%LsubX; offset[1] =  int(offset[1] + LsubY - displacement[1])%LsubY;
+
+		if(displacement[0] * displacement[0] + displacement[1] * displacement[1] > 5.) {
+			OX_LOG(Logger::LOG_WARNING, "The following particle had a displacement greater than %f in this step: %d", 5. , index);
+		}
 
 	}
 	else{

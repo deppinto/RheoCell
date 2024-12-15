@@ -24,7 +24,6 @@ protected:
         vector<number> sin_y_table;
 
 	number dphi, phi;
-	number distance_thresh=5.;
 	std::vector<number> com_old = vector<number> {0., 0.};
 	std::vector<number> temp = vector <number> {0., 0., 0., 0.};
 

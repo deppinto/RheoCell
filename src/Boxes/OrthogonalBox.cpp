@@ -65,8 +65,8 @@ void OrthogonalBox::shift_particle(BaseField * p, std::vector<number> &amount) {
 
 std::vector<number> OrthogonalBox::normalised_in_box(const std::vector<number> &v) {
         return std::vector<number> {
-                (v[0] / sidex - floor(v[0] / sidex)),
-                (v[1] / sidey - floor(v[1] / sidey)) 
+                (v[0] / sidex - floor(v[0] / sidex)) * sidex,
+                (v[1] / sidey - floor(v[1] / sidey)) * sidey
         };
 }
 

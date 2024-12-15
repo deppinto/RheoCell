@@ -156,12 +156,25 @@ velocity_grid_y=[[0. for q in range(lx)] for k in range(ly)]
 sum_phi=[[0. for q in range(lx)] for k in range(ly)]
 
 
+sizex_coarse=int(lx/(R))+1
+sizey_coarse=int(ly/(R))+1
+
+deltax_coarse=float(lx)/float(sizex_coarse)
+deltay_coarse=float(ly)/float(sizey_coarse)
+
+velocity_grid_coarse_x=[[0. for j in range(0, sizex_coarse)] for i in range(0,sizey_coarse)]
+velocity_grid_coarse_y=[[0. for j in range(0, sizex_coarse)] for i in range(0,sizey_coarse)]
+n_coarse=[[0. for j in range(0, sizex_coarse)] for i in range(0,sizey_coarse)]
+
+timeavg_velocity_grid_coarse_x=[[0. for j in range(0, sizex_coarse)] for i in range(0,sizey_coarse)]
+timeavg_velocity_grid_coarse_y=[[0. for j in range(0, sizex_coarse)] for i in range(0,sizey_coarse)]
+timeavg_n_coarse=[[0. for j in range(0, sizex_coarse)] for i in range(0,sizey_coarse)]
+
 lambda_wall+=2
 lambda_wall=0
 avg_velocity_x=np.zeros(ly-ceil(2*lambda_wall))
 avg_velocity_y=np.zeros(ly-ceil(2*lambda_wall))
 counter_for_avg=np.zeros(ly-ceil(2*lambda_wall))
-
 
 cont_line=0
 vmax=0.1
@@ -213,6 +226,9 @@ for line in cfile:
         velocity_grid=[[0. for q in range(lx)] for k in range(ly)]
         velocity_grid_x=[[0. for q in range(lx)] for k in range(ly)]
         velocity_grid_y=[[0. for q in range(lx)] for k in range(ly)]
+        velocity_grid_coarse_x=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
+        velocity_grid_coarse_y=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
+        n_coarse=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
         sum_phi=[[0. for q in range(lx)] for k in range(ly)]
         velmax=0.
         velmin=10000.
@@ -262,6 +278,7 @@ for line in cfile:
 
         nemX=float(words[9])
         nemY=float(words[10])
+        normNem = sqrt(nemX * nemX + nemY * nemY)
         theta_nem[pt_num]=asin((nemX*nemY)/0.5)/2
         Q00[pt_num]= 0.5 * (nemX * nemX - nemY * nemY)
         Q01[pt_num]= nemX * nemY
@@ -274,11 +291,15 @@ for line in cfile:
             Z[yy][xx]=value
             area[pt_num]+=value*value
 
+
             if cont_line>N+2 and yy>=int(ceil(2*lambda_wall)/2) and yy<ly-int(ceil(2*lambda_wall)/2):
                 velocity_grid[yy][xx]=value*sqrt(com_velocity_x[pt_num]*com_velocity_x[pt_num]+com_velocity_y[pt_num]*com_velocity_y[pt_num])
                 velocity_grid_x[yy][xx]+=value*com_velocity_x[pt_num]
                 velocity_grid_y[yy][xx]+=value*com_velocity_y[pt_num]
                 sum_phi[yy][xx]+=value
+                velocity_grid_coarse_x[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value*com_velocity_x[pt_num]
+                velocity_grid_coarse_y[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value*com_velocity_y[pt_num]
+                n_coarse[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value
                 avg_velocity_x[yy-int(ceil(2*lambda_wall)/2)]+=value*com_velocity_x[pt_num]
                 avg_velocity_y[yy-int(ceil(2*lambda_wall)/2)]+=value*com_velocity_y[pt_num]
 
@@ -311,16 +332,15 @@ for line in cfile:
             #continue
 
         levels = np.arange(0.0, m, step) + step
+
         if variable==1 or variable==2:
             if pt_num==0:
                 cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
             else:
                 cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)
 
-            
             cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color="k")
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color=cm.hot(color_val))
-            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
 
         #increment phase field index
         pt_num+=1
@@ -328,16 +348,127 @@ for line in cfile:
 
     if cont_line%(N+2)==0:
 
-            '''
-            for p in range(20,45):
-                for q in range(20,45):
-                    if sum_phi[p][q]>0:
-                        cset1 = plt.arrow(q, p, 100*velocity_grid_x[p][q]/sum_phi[p][q], 100*velocity_grid_y[p][q]/sum_phi[p][q], width=0.075, color="k")
-            '''
+            #vx_max = max(map(max, velocity_grid_coarse_x))
+            #vy_max = max(map(max, velocity_grid_coarse_y))
+            vx_max = 0.2
+            vy_max = 0.2
+
+            vorticity=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
+            Q_criterion=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
+
+            for p in range(0,sizey_coarse):
+                ynext = p + 1
+                yprev = p - 1
+                if ynext>=sizey_coarse:
+                    ynext-=sizey_coarse
+                if yprev<0:
+                    yprev+=sizey_coarse
+
+                for q in range(0,sizex_coarse):
+                    if n_coarse[p][q]>0:
+                        timeavg_velocity_grid_coarse_x[p][q]+=velocity_grid_coarse_x[p][q]/n_coarse[p][q]
+                        timeavg_velocity_grid_coarse_y[p][q]+=velocity_grid_coarse_y[p][q]/n_coarse[p][q]
+                        timeavg_n_coarse[p][q]+=1
+
+                    xnext = q + 1
+                    xprev = q - 1
+                    if xnext>=sizex_coarse:
+                        xnext-=sizex_coarse
+                    if xprev<0:
+                        xprev+=sizex_coarse
+
+                    if n_coarse[ynext][q]>0:
+                        vx = velocity_grid_coarse_x[ynext][q]/n_coarse[ynext][q]
+                        vy = velocity_grid_coarse_y[ynext][q]/n_coarse[ynext][q]
+                        norm = sqrt(vx*vx+vy*vy)
+                        vx_ynext = vx
+                        vy_ynext = vy
+                    else:
+                        vx_ynext = 0
+                        vy_ynext = 0
+
+                    if n_coarse[yprev][q]>0:
+                        vx = velocity_grid_coarse_x[yprev][q]/n_coarse[yprev][q]
+                        vy = velocity_grid_coarse_y[yprev][q]/n_coarse[yprev][q]
+                        norm = sqrt(vx*vx+vy*vy)
+                        vx_yprev = vx
+                        vy_yprev = vy
+                    else:
+                        vx_yprev = 0
+                        vy_yprev = 0
+
+                    if n_coarse[p][xnext]>0:
+                        vx = velocity_grid_coarse_x[p][xnext]/n_coarse[p][xnext]
+                        vy = velocity_grid_coarse_y[p][xnext]/n_coarse[p][xnext]
+                        norm = sqrt(vx*vx+vy*vy)
+                        vx_xnext = vx
+                        vy_xnext = vy
+                    else:
+                        vx_xnext = 0
+                        vy_xnext = 0
+
+                    if n_coarse[p][xprev]>0:
+                        vx = velocity_grid_coarse_x[p][xprev]/n_coarse[p][xprev]
+                        vy = velocity_grid_coarse_y[p][xprev]/n_coarse[p][xprev]
+                        norm = sqrt(vx*vx+vy*vy)
+                        vx_xprev = vx
+                        vy_xprev = vy
+                    else:
+                        vx_xprev = 0
+                        vy_xprev = 0
+
+                    dvxdx = (vx_xnext-vx_xprev)/(2*deltax_coarse)
+                    dvydx = (vy_xnext-vy_xprev)/(2*deltax_coarse)
+                    dvxdy = (vx_ynext-vx_yprev)/(2*deltay_coarse)
+                    dvydy = (vy_ynext-vy_yprev)/(2*deltay_coarse)
+
+                    vorticity[p][q] = dvydx - dvxdy
+                    Q_criterion[p][q] = dvxdx * dvydy - dvxdy * dvydx
+
+                    '''
+                    if Q_criterion[p][q]>0:
+                        Q_criterion[p][q]=1
+                    elif Q_criterion[p][q]<0:
+                        Q_criterion[p][q]=-1
+                    else:
+                        Q_criterion[p][q]=0
+                    '''
+
+                    '''
+                    if abs(Q_criterion[p][q])>2e-5:
+                       print("max: ",Q_criterion[p][q])
+                    '''
+
+                    if n_coarse[p][q]>0:
+                        if variable==3 or variable==4:
+                            cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.8*deltax_coarse*velocity_grid_coarse_x[p][q]/(n_coarse[p][q]*vx_max), 0.8*deltay_coarse*velocity_grid_coarse_y[p][q]/(n_coarse[p][q]*vy_max), width=deltax_coarse/15, color="k")
+                    else:
+                        if variable==3 or variable==4:
+                            cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.8*deltax_coarse*velocity_grid_coarse_x[p][q], 0.8*deltay_coarse*velocity_grid_coarse_y[p][q], width=deltax_coarse/15, color="k")
+                    
+
+            #X, Y = np.meshgrid( np.arange(0+deltax_coarse/2, lx+deltax_coarse/2, deltax_coarse) , np.arange(0+deltay_coarse/2, ly+deltay_coarse/2, deltay_coarse) )
+            #z_min, z_max = -np.abs(vorticity).max(), np.abs(vorticity).max()
+            z_min, z_max = -np.abs(Q_criterion).max(), np.abs(Q_criterion).max()
+            #print(z_min, z_max)
+
+            #z_min = -0.015
+            #z_max = 0.015 
+            #z_min = -0.009
+            #z_max = 0.009 
+            #cset1 = plt.pcolormesh(X, Y, vorticity, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.25)
+            #cset1 = plt.imshow(vorticity, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos', extent=[0,lx,0,ly])
+
+            #z_min = -3.5e-5
+            #z_max = 3.5e-5
+            #z_min = -2e-5
+            #z_max = 2e-5
+            if variable==3 or variable==4:
+                cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos', extent=[0,lx,0,ly])
 
             frame_num=int(t/print_conf_interval)-1
-            #if frame_num%1==0:
-                #print(frame_num, cont_line, t)
+            if frame_num%1==0:
+                print(frame_num, cont_line, t)
             #if cont_line>N+2:
                 #cset1 = plt.imshow(velocity_grid, vmin=velmin, vmax=velmax, cmap=cm.Reds)
             com_x_t.append(CoMX)
@@ -348,24 +479,39 @@ for line in cfile:
             ax.set_aspect('equal', adjustable='box')
             ax.set_xlim([0, lx])
             ax.set_ylim([0, ly])
-            #ax.set_xlim([20, 45])
-            #ax.set_ylim([20, 45])
-            if variable==1:
+            if variable==1 or variable==3:
                 if frame_num<10:
                     plt.savefig('./Video/frame_00'+str(frame_num)+'.png', transparent=True)
                 elif frame_num<100:
                     plt.savefig('./Video/frame_0'+str(frame_num)+'.png')
                 elif frame_num<1000:
                     plt.savefig('./Video/frame_'+str(frame_num)+'.png')
-            if variable==2:
+            if variable==2 or variable==4:
                 plt.show()
                 #plt.savefig('./newfig_'+str(frame_num)+'.png', transparent=True)
-            plt.clf()
+
+            if variable<=4:
+                plt.clf()
 
 plt.close()
 
 
-if variable==3:
+y=np.arange(0., ly, deltay_coarse)
+vx_width=[0. for i in range(0, sizey_coarse)]
+vy_width=[0. for i in range(0, sizey_coarse)]
+avg_val=0
+for p in range(0, sizey_coarse):
+    avg_val=0
+    for q in range(0, sizex_coarse):
+        vx_width[p]+=timeavg_velocity_grid_coarse_x[p][q]/float(timeavg_n_coarse[p][q])
+        vy_width[p]+=timeavg_velocity_grid_coarse_y[p][q]/float(timeavg_n_coarse[p][q])
+        avg_val+=1
+
+    vx_width[p] = vx_width[p]/float(avg_val)
+    vy_width[p] = vy_width[p]/float(avg_val)
+
+
+if variable==5:
 
     '''
     plot_vel=[]
@@ -386,17 +532,34 @@ if variable==3:
     exit(1)
     '''
 
-    y=np.arange(int(ceil(2*lambda_wall)/2), ly-int(ceil(2*lambda_wall)/2), 1)
+    vx_max = 0.3
+    vy_max = 0.3
+    fig = plt.figure(figsize=(6,6))
+    for p in range(0, sizey_coarse):
+        for q in range(0, sizex_coarse):
+            vx=timeavg_velocity_grid_coarse_x[p][q]/float(timeavg_n_coarse[p][q])
+            vy=timeavg_velocity_grid_coarse_y[p][q]/float(timeavg_n_coarse[p][q])
+
+            cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.8*deltax_coarse*vx/(vx_max), 0.8*deltay_coarse*vy/(vy_max), width=deltax_coarse/15, color="k")
+
+    ax = plt.gca()
+    ax.set_aspect('equal', adjustable='box')
+    ax.set_xlim([0, lx])
+    ax.set_ylim([0, ly])
+    plt.show()
+    #plt.savefig('./vy_width_new.png')
+    plt.close()
+
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-    plt.plot(avg_velocity_y/counter_for_avg, y, '-o' , color='darkred')
+    plt.plot(vx_width, y, '-o' , color='darkred')
     #plt.xlabel('Channel width', fontsize=18, fontname='Times New Roman')
     #plt.ylabel(r'Velocity $v_y$', fontsize=18, fontname='Times New Roman')
     #plt.xticks(fontsize=18, fontname='Times New Roman')
     #plt.yticks(fontsize=18, fontname='Times New Roman')
     plt.ylabel('Channel width', fontsize=18)
-    plt.xlabel(r'Velocity $v_y$', fontsize=18)
+    plt.xlabel(r'Velocity $v_x$', fontsize=18)
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
     #plt.xlim(velmin_x,velmax_x)
@@ -409,13 +572,13 @@ if variable==3:
     #fig = plt.figure(figsize=(8,6))
     #fig = plt.figure(figsize=(5.452423529, 4.089317647))
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-    plt.plot(avg_velocity_x/counter_for_avg, y, '-o' , color='darkgreen')
+    plt.plot(vy_width, y, '-o' , color='darkgreen')
     #plt.xlabel('Channel width', fontsize=18, fontname='Times New Roman')
     #plt.ylabel(r'Velocity $v_x$', fontsize=18, fontname='Times New Roman')
     #plt.xticks(fontsize=18, fontname='Times New Roman')
     #plt.yticks(fontsize=18, fontname='Times New Roman')
     plt.ylabel('Channel width', fontsize=18)
-    plt.xlabel(r'Velocity $v_x$', fontsize=18)
+    plt.xlabel(r'Velocity $v_y$', fontsize=18)
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
     #plt.xlim(velmin_x,velmax_x)
@@ -426,7 +589,7 @@ if variable==3:
     plt.close()
 
 
-if variable==4:
+if variable==6:
 
     '''
     #fig = plt.figure(figsize=(8,6))
@@ -450,53 +613,9 @@ if variable==4:
     with open('mean_velocity.txt', 'w') as f:
         print(abs(avg_mean_velocity), file=f)  
 
-    y=np.arange(int(ceil(2*lambda_wall)/2), ly-int(ceil(2*lambda_wall)/2), 1)
     with open('v_width.txt', 'w') as f:
         for i in range(len(y)):
-            print(avg_velocity_y[i]/counter_for_avg[i], avg_velocity_x[i]/counter_for_avg[i], y[i], file=f)  
+            print(vy_width[i], vx_width[i], y[i], file=f)  
 
 
 print('done')
-exit (1)
-
-
-def getElementX(site, distX, sidex, sidey):
-    x = int( (site-(int(site/sidex)*sidex))+distX )
-    if x<0:
-        x+=sidex
-    if x>=sidex:
-        x-=sidex
-    return x
-
-def getElementY(site, distY, sidex, sidey):
-    y = int( int(site/sidex)+distY )
-    if y<0:
-        y+=sidey
-    if y>=sidey:
-        y-=sidey
-    return y
-
-def getElement(site, LsubX, LsubY, offsetX, offsetY, sub_corner_bottom_left, boxXsize, boxYsize):
-    return getElementX(sub_corner_bottom_left, ((site - int(site/LsubX) * LsubX)+offsetX)%LsubX, boxXsize, boxYsize ) + getElementY(sub_corner_bottom_left, ((site/LsubX)+offsetY)%LsubY , boxXsize, boxYsize) * boxXsize
-
-def getX(site, LsubX, LsubY, offsetX, offsetY, sub_corner_bottom_left, boxXsize, boxYsize):
-    return getElementX(sub_corner_bottom_left, ((site - int(site/LsubX) * LsubX)+offsetX)%LsubX , boxXsize, boxYsize)
-
-def getY(site, LsubX, LsubY, offsetX, offsetY, sub_corner_bottom_left, boxXsize, boxYsize):
-    return getElementY(sub_corner_bottom_left, ((site/LsubX)+offsetY)%LsubY , boxXsize, boxYsize)
-
-
-all_phi=row_phi
-for i in range(len(row_phi)):
-    for j in range(LsubY[i]):
-        for k in range(LsubX[i]):
-            row_site=k+j*LsubX[i]
-            column_site=j+LsubY[i]*k
-            all_phi[i][row_site]=row_phi[i][row_site]
-            if j==1 and i==0:
-                print("this: ", k,j,row_phi[i][row_site])
-            if i==0 and getY(row_site, LsubX[i], LsubY[i], offsetX[i], offsetY[i], cornerSite[i], lx, ly)==40:
-                print( getX(row_site, LsubX[i], LsubY[i], offsetX[i], offsetY[i], cornerSite[i], lx, ly), getY(row_site, LsubX[i], LsubY[i], offsetX[i], offsetY[i], cornerSite[i], lx, ly), getElement(row_site, LsubX[i], LsubY[i], offsetX[i], offsetY[i], cornerSite[i], lx, ly), row_phi[i][row_site])
-
-
-print("end")

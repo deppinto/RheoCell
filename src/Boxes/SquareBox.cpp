@@ -62,8 +62,8 @@ void SquareBox::shift_particle(BaseField * p, std::vector<number> &amount) {
 
 std::vector<number> SquareBox::normalised_in_box(const std::vector<number> &v) {
         return std::vector<number> {
-                (v[0] / side - floor(v[0] / side)),
-                (v[1] / side - floor(v[1] / side)) 
+                (v[0] / side - floor(v[0] / side))*side,
+                (v[1] / side - floor(v[1] / side))*side 
         };
 }
 

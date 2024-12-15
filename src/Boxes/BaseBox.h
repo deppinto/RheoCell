@@ -23,7 +23,7 @@ class BaseBox {
 		virtual number sqr_min_image_distance(const std::vector<number> &v1, const std::vector<number> &v2) const = 0;
 		virtual number sqr_min_image_distance(const BaseField &p, const BaseField &q);
 		virtual number sqr_min_image_distance(const BaseField *p, const BaseField *q);
-		virtual std::vector<number> normalised_in_box(const std::vector<number> &v) = 0;
+		virtual std::vector<number> normalised_in_box(const std::vector<number> &v){return std::vector<number> {0,0};};;
 
 		virtual int getXsize() = 0;
 		virtual int getYsize() = 0;

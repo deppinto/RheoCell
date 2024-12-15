@@ -141,6 +141,7 @@ void WetModel::begin_energy_computation() {
 void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 	std::fill(size_store_site_velocity_index.begin(), size_store_site_velocity_index.end(), 0);
+	size_rows_old = size_rows;
 	size_rows=0;
 	for(auto p : fields) {
 		field_start_index[p->index]=size_rows;
@@ -148,11 +149,15 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 		for(int q=0; q<p->subSize;q++)
 			computeGlobalSums(p, q, false);
 	}
-	vec_v_x.resize(size_rows);
-	vec_f_x.resize(size_rows);
-	vec_v_y.resize(size_rows);
-	vec_f_y.resize(size_rows);
-	mat_m_x.resize(size_rows, size_rows);
+	if(size_rows != size_rows_old){
+		vec_v_x.resize(size_rows);
+		vec_f_x.resize(size_rows);
+		vec_v_y.resize(size_rows);
+		vec_f_y.resize(size_rows);
+		mat_m_x.resize(size_rows, size_rows);
+	}
+	else
+		mat_m_x.setZero();
 
 
         U = (number) 0;
@@ -216,10 +221,14 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	//std::cout<<"start solver: "<<size_rows/2 <<std::endl;
 	mat_m_x.setFromTriplets(tri_t_x.begin(), tri_t_x.end());
 	solverCG.compute(mat_m_x);
-	//vec_v_x = solverCG.solveWithGuess(vec_f_x, vec_v_x);
-	//vec_v_y = solverCG.solveWithGuess(vec_f_y, vec_v_y);
-	vec_v_x = solverCG.solve(vec_f_x);
-	vec_v_y = solverCG.solve(vec_f_y);
+	if(size_rows != size_rows_old){
+		vec_v_x = solverCG.solve(vec_f_x);
+		vec_v_y = solverCG.solve(vec_f_y);
+	}
+	else{
+		vec_v_x = solverCG.solveWithGuess(vec_f_x, vec_v_x);
+		vec_v_y = solverCG.solveWithGuess(vec_f_y, vec_v_y);
+	}
 	//std::cout << "#iterations:     " << solverCG.iterations() << std::endl;
 	//std::cout << "estimated error: " << solverCG.error()      << std::endl;	
 	//std::cout<<"end solver"<<std::endl;
@@ -237,7 +246,7 @@ void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 
 	if(size_store_site_velocity_index[k]>=store_max_size){
 		for(int m=0; m<size_store_site_velocity_index[k];m++){
-			std::cout<<"here: "<<store_site_velocity_index[m+k*store_max_size]<<std::endl;
+			std::cout<<"Too many fields list: "<<store_site_velocity_index[m+k*store_max_size]<<std::endl;
 		}	
 		throw RCexception("Too many field patches overlap: %d, %d, %d, %d, %d, %d", p->index, k, q, p->sub_corner_bottom_left, p->GetSubXIndex(q, box), p->GetSubYIndex(q, box));
 	}

@@ -55,6 +55,7 @@ protected:
 	Eigen::BiCGSTAB<Eigen::SparseMatrix<double, Eigen::RowMajor> > solverCG;
 	//Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solverCG;
 	int size_rows = 0;
+	int size_rows_old = 0;
 	int index, sub_q, other_site_patch, other_site_box;
 	std::vector<int> neigh_values = std::vector<int> {5,3,1,7};
 	std::vector<int> size_store_site_velocity_index;

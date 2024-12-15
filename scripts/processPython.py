@@ -12,6 +12,33 @@ scripts=int(float(sys.argv[1]))
 variable=int(float(sys.argv[2]))
 
 '''
+#-------------------------------------optimization plot
+plt.figure(figsize=(5.452423529,4.089317647))
+fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/optimization.txt","r")
+cores=[]
+runtime=[]
+for line in fileoutput:
+    save=line.split()
+    cores.append((float(save[0])))
+    runtime.append((float(save[1])))
+fileoutput.close()
+
+plt.plot(cores, runtime, '--o')
+#plt.yscale('log')
+#plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+plt.ylabel('Runtime(s)', fontsize=18)
+plt.xlabel('# cores', fontsize=18)
+plt.xticks(fontsize=18)
+plt.yticks(fontsize=18)
+plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/runtime_cores.png", transparent=True)
+plt.show()
+exit(1)
+#-------------------------------------optimization plot
+'''
+
+'''
 filedata=open("/home/diogo/MEGA/cenas/SAT-assembly/PatchyParticles_fork/Results/finite_size_shells/scripts"+str(scripts)+"/dados.txt","r")
 #filedata=open("/home/diogo/MEGA/cenas/SAT-assembly/PatchyParticles_fork/Results/scripts"+str(scripts)+"/dados_total.txt","r")
 N=[]
@@ -36,7 +63,7 @@ filedata.close()
 # read output file
 plt.figure(figsize=(5.452423529,4.089317647))
 avg_vel=[]
-for job in range(1, 17, 2):
+for job in range(1, 6, 2):
     fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/MSD.txt","r")
     time=[]
     MSD=[]
@@ -67,8 +94,8 @@ for job in range(1, 17, 2):
     #plt.plot(time, MSD, 'o')
     #plt.plot(y, vel, 'o')
 
-xi=[0.009, 0.008, 0.007, 0.006, 0.005, 0.004, 0.003, 0.002]
-plt.plot(xi, avg_vel, '--o')
+xvals=[0.01, 0.1, 0.4]
+plt.plot(xvals, avg_vel, '--o')
 
 '''
 fitline2=[]
@@ -80,9 +107,9 @@ plt.plot(time, fitline2, '--', lw=2)
 plt.plot(time, fitline1, '--', lw=2)
 '''
 
-plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-#plt.xscale('log')
+#plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+#plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+plt.xscale('log')
 #plt.yscale('log')
 #plt.ylabel('MSD', fontsize=18)
 #plt.xlabel('Time', fontsize=18)
@@ -90,10 +117,13 @@ plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 #plt.ylabel('Velocity', fontsize=18)
 #plt.xlabel('Width', fontsize=18)
 plt.ylabel('Mean velocity', fontsize=18)
-plt.xlabel(r'$\xi$', fontsize=18)
+plt.xlabel(r'$\omega$', fontsize=18)
 plt.xticks(fontsize=18)
 plt.yticks(fontsize=18)
+#plt.legend([r'$\omega$=0.01',r'$\omega$=0.1',r'$\omega$=0.4'], fontsize=14, loc=(0.,0.65), frameon=False)
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/MSD_2.png", transparent=True)
+plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
 plt.show()
 
 exit(1)

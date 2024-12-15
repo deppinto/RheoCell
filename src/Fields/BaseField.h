@@ -135,9 +135,16 @@ public:
 	std::vector<int> map_sub_to_box_x;
 	std::vector<int> map_sub_to_box_y;
 
+	std::vector<number> cos_x_table;
+	std::vector<number> cos_y_table;
+	std::vector<number> sin_x_table;
+	std::vector<number> sin_y_table;
+
 	//general properties of fields
         number area;
+        number area_old;
         number sumF;
+        number sumF_old;
 };
 
 using FieldPtr = std::shared_ptr<BaseField>;
