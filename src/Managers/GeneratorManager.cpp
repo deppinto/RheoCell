@@ -127,7 +127,7 @@ void GeneratorManager::generate() {
 
 	for(auto p : fields) {
 		p->init();
-		p->set_positions(CONFIG_INFO->box);
+		p->set_positions_initial(CONFIG_INFO->box);
 	} 
 
 	std::ofstream conf_output(output_conf);

@@ -113,7 +113,7 @@ numspecies=len(set(species))
 com_x_t = []
 com_y_t = []
 time_conf = []
-start_value = 9
+start_value = 11
 
 
 unrap_comx=[0. for i in range(0,N)]
@@ -223,8 +223,8 @@ for line in cfile:
         cornerSite_x[pt_num]=int(float(words[7]))
         cornerSite_y[pt_num]=int(float(words[8]))
 
-        nemX=float(words[7])
-        nemY=float(words[8])
+        nemX=float(words[9])
+        nemY=float(words[10])
         normNem = sqrt(nemX * nemX + nemY * nemY)
         theta_nem[pt_num]=asin((nemX*nemY)/0.5)/2
         Q00[pt_num]= 0.5 * (nemX * nemX - nemY * nemY)
@@ -297,8 +297,8 @@ for line in cfile:
                     
 
             frame_num=int(t/print_conf_interval)-1
-            if frame_num%1==0:
-                print(frame_num, cont_line, t)
+            #if frame_num%1==0:
+                #print(frame_num, cont_line, t)
             #if cont_line>N+2:
                 #cset1 = plt.imshow(velocity_grid, vmin=velmin, vmax=velmax, cmap=cm.Reds)
             com_x_t.append(CoMX)
@@ -359,8 +359,8 @@ if variable==5:
     ax.set_aspect('equal', adjustable='box')
     ax.set_xlim([0, lx])
     ax.set_ylim([0, ly])
-    plt.show()
-    #plt.savefig('./vy_width_new.png')
+    #plt.show()
+    plt.savefig('./theta_avg_coarse.png')
     plt.close()
 
     #fig = plt.figure(figsize=(8,6))
@@ -378,8 +378,9 @@ if variable==5:
     #plt.xlim(velmin_x,velmax_x)
     #plt.xlim(-3*1e-5,2.5*1e-5)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-    plt.show()
-    #plt.savefig('./vy_width_new.png')
+    plt.locator_params(axis='x', nbins=6)
+    #plt.show()
+    plt.savefig('./theta_width_coarse.png')
     plt.close()
 
 if variable==6:

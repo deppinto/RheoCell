@@ -226,11 +226,12 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 				else
 					yy = int(box->getYsize() + displacement[1])%LsubY;
 
-				new_field_scalar[xx+yy*LsubX]=fieldScalar[site];
 
 				//if(i==LsubY-1 && j==LsubX-1)std::cout<<"mid: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
-				if(i==LsubY-1 && j==0)std::cout<<"mid: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
-				if(xx+yy*LsubX==26)std::cout<<"mult: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
+				//if(i==LsubY-1 && j==0)std::cout<<"mid: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
+				if(index==14)std::cout<<"mult: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
+
+				new_field_scalar[xx+yy*LsubX]=fieldScalar[site];
 			}
 		}
 
@@ -239,7 +240,7 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 		unrap_sub_corner_bottom_left_y += displacement[1];
 
 		//std::cout<<"here-------"<<new_x<<" "<<new_y<<" "<<old_x<<" "<<old_y<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<new_field_scalar[subSize-1]<<" "<<fieldScalar[subSize-1]<<" "<<new_field_scalar[subSize-1]  <<" "<<CoM[0]<<" "<<CoM[1]<<" "<<unrap_sub_corner_bottom_left_x<<" "<<unrap_sub_corner_bottom_left_y<<" "<<offset[0]<<" "<<offset[1]  <<std::endl;
-		std::cout<<"here-------"<<new_x<<" "<<new_y<<" "<<old_x<<" "<<old_y<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<new_field_scalar[26]<<" "<<fieldScalar[0]<<" "<<new_field_scalar[0]<<" "<<fieldScalar[0]  <<" "<<CoM[0]<<" "<<CoM[1]<<" "<<unrap_sub_corner_bottom_left_x<<" "<<unrap_sub_corner_bottom_left_y<<" "<<offset[0]<<" "<<offset[1]  <<std::endl;
+		//std::cout<<"here-------"<<new_x<<" "<<new_y<<" "<<old_x<<" "<<old_y<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<new_field_scalar[26]<<" "<<fieldScalar[0]<<" "<<new_field_scalar[0]<<" "<<fieldScalar[0]  <<" "<<CoM[0]<<" "<<CoM[1]<<" "<<unrap_sub_corner_bottom_left_x<<" "<<unrap_sub_corner_bottom_left_y<<" "<<offset[0]<<" "<<offset[1]  <<std::endl;
 
 		//exit(911);
 

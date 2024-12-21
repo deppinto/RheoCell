@@ -467,8 +467,8 @@ for line in cfile:
                 cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos', extent=[0,lx,0,ly])
 
             frame_num=int(t/print_conf_interval)-1
-            if frame_num%1==0:
-                print(frame_num, cont_line, t)
+            #if frame_num%1==0:
+                #print(frame_num, cont_line, t)
             #if cont_line>N+2:
                 #cset1 = plt.imshow(velocity_grid, vmin=velmin, vmax=velmax, cmap=cm.Reds)
             com_x_t.append(CoMX)
@@ -546,8 +546,8 @@ if variable==5:
     ax.set_aspect('equal', adjustable='box')
     ax.set_xlim([0, lx])
     ax.set_ylim([0, ly])
-    plt.show()
-    #plt.savefig('./vy_width_new.png')
+    #plt.show()
+    plt.savefig('./v_avg_coarse.png')
     plt.close()
 
     #fig = plt.figure(figsize=(8,6))
@@ -564,9 +564,11 @@ if variable==5:
     plt.yticks(fontsize=18)
     #plt.xlim(velmin_x,velmax_x)
     #plt.xlim(-3*1e-5,2.5*1e-5)
+    plt.locator_params(axis='x', nbins=6)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+    plt.savefig('./vx_width_coarse.png')
     plt.show()
-    #plt.savefig('./vy_width_new.png')
+    #plt.savefig('./vx_width.png')
     plt.clf()
 
     #fig = plt.figure(figsize=(8,6))
@@ -583,9 +585,10 @@ if variable==5:
     plt.yticks(fontsize=18)
     #plt.xlim(velmin_x,velmax_x)
     #plt.xlim(-3*1e-5,2.5*1e-5)
+    plt.locator_params(axis='x', nbins=6)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-    plt.show()
-    #plt.savefig('./vx_width_new.png')
+    #plt.show()
+    plt.savefig('./vy_width_coarse.png')
     plt.close()
 
 

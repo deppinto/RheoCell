@@ -159,7 +159,7 @@ void LEBcActiveNematic::computeGlobalSums(BaseField *p, int q, bool update_globa
 	sumQ00[k]+=p->fieldScalar[q]*p->Q00;
         sumQ01[k]+=p->fieldScalar[q]*p->Q01;
 
-	if(q==0 || q==25 || q==26)std::cout<<"interaction: "<<k<<" "<<  box->getElementX(k, 0) <<" "<< box->getElementY(k, 0) <<std::endl;
+	//if(q==0 || q==25 || q==26)std::cout<<"interaction: "<<k<<" "<<  box->getElementX(k, 0) <<" "<< box->getElementY(k, 0) <<std::endl;
 	BaseInteraction::update_sub_to_box_map(p, q, k, box->getElementX(k, 0), box->getElementY(k, 0));
 }
 
@@ -245,7 +245,7 @@ void LEBcActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
 
 	p->velocityX[q] = (p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
-	p->velocityY[q] = (p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction + 0.05;
+	p->velocityY[q] = (p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction; //- 0.05;
 }
 
 

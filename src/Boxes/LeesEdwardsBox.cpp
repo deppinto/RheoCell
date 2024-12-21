@@ -128,7 +128,7 @@ void LeesEdwardsBox::setNeighborsPeriodic(int Lx, int Ly){
 	else return;
 
 
-	std::cout<<"delta_x: "<<delta_x<<std::endl;
+	//std::cout<<"delta_x: "<<delta_x<<std::endl;
 
 	//initialize neighbors of lattice sites
 	int x,y,xx,yy,ss;
