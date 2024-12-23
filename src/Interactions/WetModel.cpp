@@ -46,7 +46,8 @@ void WetModel::init() {
         a0=PI*R*R;
 	store_max_size=20;
 	//solverCG.setTolerance(0.000000001);
-	solverCG.setTolerance(tolerance);
+	if(tolerance>0)
+		solverCG.setTolerance(tolerance);
         set_omp_tasks(omp_thread_num);
 	std::cout<<"TESTING: Running with tolerance (CG): "<<tolerance<<std::endl;
 }
@@ -178,16 +179,21 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 			//populate sparse matrix
 			if(box->getWalls(p->map_sub_to_box[q])<wall_slip)
-				tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+4*friction_cell)));
+				//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+4*friction_cell)));
+				tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+8*friction_cell)));
+				//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction)));
 			else
 				tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], 1.0));
 			//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction) ));
 
 			/*other_site_patch = q;
 			other_site_box = p->map_sub_to_box[other_site_patch];
+			if(box->getWalls(p->map_sub_to_box[q])<wall_slip)
+				tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], other_site_patch+field_start_index[p->index] , (double)(-4*friction_cell)));
 			if(sum_phi[other_site_box]!=0){
 				for(int i=0; i<size_store_site_velocity_index[other_site_box]; i++){
-					tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(4*friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
+					if(box->getWalls(p->map_sub_to_box[q])<wall_slip)
+						tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(4*friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
 				}
 			}*/
 
@@ -196,10 +202,17 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 				other_site_patch = p->neighbors_sub[j+q*9];
 				other_site_box = p->map_sub_to_box[other_site_patch];
 				if(sum_phi[other_site_box]==0)continue;
+
+				//if(box->getWalls(p->map_sub_to_box[q])<wall_slip)
+					//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], other_site_patch+field_start_index[p->index] , (double)(friction_cell)));
+
 				for(int i=0; i<size_store_site_velocity_index[other_site_box]; i++){
 					//tri_t_x.push_back(Eigen::Triplet<double> (store_site_velocity_index[i+other_site_box*store_max_size], q+field_start_index[p->index], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
+					
 					if(box->getWalls(p->map_sub_to_box[q])<wall_slip)
+						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
 						tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
+
 					//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
 				}
 			}
@@ -225,10 +238,10 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 		vec_v_x = solverCG.solve(vec_f_x);
 		vec_v_y = solverCG.solve(vec_f_y);
 	}
-	else{
+	/*else{
 		vec_v_x = solverCG.solveWithGuess(vec_f_x, vec_v_x);
 		vec_v_y = solverCG.solveWithGuess(vec_f_y, vec_v_y);
-	}
+	}*/
 	//std::cout << "#iterations:     " << solverCG.iterations() << std::endl;
 	//std::cout << "estimated error: " << solverCG.error()      << std::endl;	
 	//std::cout<<"end solver"<<std::endl;
