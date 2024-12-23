@@ -234,10 +234,10 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	//std::cout<<"start solver: "<<size_rows/2 <<std::endl;
 	mat_m_x.setFromTriplets(tri_t_x.begin(), tri_t_x.end());
 	solverCG.compute(mat_m_x);
-	if(size_rows != size_rows_old){
-		vec_v_x = solverCG.solve(vec_f_x);
-		vec_v_y = solverCG.solve(vec_f_y);
-	}
+	//if(size_rows != size_rows_old){
+	vec_v_x = solverCG.solve(vec_f_x);
+	vec_v_y = solverCG.solve(vec_f_y);
+	//}
 	/*else{
 		vec_v_x = solverCG.solveWithGuess(vec_f_x, vec_v_x);
 		vec_v_y = solverCG.solveWithGuess(vec_f_y, vec_v_y);
