@@ -60,6 +60,7 @@ protected:
 	std::vector<int> neigh_values = std::vector<int> {0,1,2,3,5,6,7,8};
 	std::vector<int> size_store_site_velocity_index;
 	std::vector<int> store_site_velocity_index;
+	std::vector<int> store_site_field;
 	std::vector<int> field_start_index;
 	int store_max_size = 0;
 	std::vector<number> phi2;
