@@ -74,6 +74,8 @@ void FD_CPUBackend::first_step(bool store) {
 
 			phi = p->fieldScalar_old[q] + dt*.5*(dphi + p->dfield_old[q]);
 
+			//if(phi>2)std::cout<<"Error phi > 2: "<<p->index<<" "<<q<<" "<<phi<<" "<<p->fieldScalar_old[q]<<" "<<p->map_sub_to_box_x[q]<<" "<<p->map_sub_to_box_y[q]<< " "<<dphi<<" "<<p->freeEnergy[q]<< "---------"<<std::endl;
+
 			//if(int(q/p->LsubX)>3){sumTest_x+=phi * p->map_sub_to_box_x[q];sum_x+=phi;}
 
 			p->fieldScalar[q] = phi;
@@ -99,8 +101,8 @@ void FD_CPUBackend::first_step(bool store) {
 		p->CoM[1] = p->LsubY*( atan2(-temp[3]/p->sumF, -temp[2]/p->sumF) + PI ) / (2*PI);
 
 
-		//std::cout<<"backend: "<<p->fieldScalar[p->subSize-1]<<" "<<p->freeEnergy[p->subSize-1]<<" "<<interaction->get_velocity_x(p,p->subSize-1) <<" "<<interaction->get_velocity_y(p,p->subSize-1) <<" "<<p->fieldDX[p->subSize-1]<<" "<<p->fieldDY[p->subSize-1]<<" "<<p->CoM[0]<<" "<<p->CoM[1]<<" "<<config_info->curr_step  <<std::endl;
-		//std::cout<<"backend: "<<p->fieldScalar[0]<<" "<<p->freeEnergy[0]<<" "<<interaction->get_velocity_x(p,0) <<" "<<interaction->get_velocity_y(p,0) <<" "<<p->fieldDX[0]<<" "<<p->fieldDY[0]<<" "<<p->CoM[0]<<" "<<p->CoM[1]<<" "<<config_info->curr_step << " " << p->index << " "<<p->sub_corner_bottom_left/box->getXsize() <<std::endl;
+		//if(p->index==1)std::cout<<"backend S: "<<p->fieldScalar[p->subSize-1]<<" "<<p->freeEnergy[p->subSize-1]<<" "<<interaction->get_velocity_x(p,p->subSize-1) <<" "<<interaction->get_velocity_y(p,p->subSize-1) <<" "<<p->fieldDX[p->subSize-1]<<" "<<p->fieldDY[p->subSize-1]<<" "<<p->CoM[0]<<" "<<p->CoM[1]<<" " << p->index << " "<<p->sub_corner_bottom_left/box->getXsize()<<" "<<p->area<<" "<<config_info->curr_step <<std::endl;
+		//if(p->index==1)std::cout<<"backend 0: "<<p->fieldScalar[0]<<" "<<p->freeEnergy[0]<<" "<<interaction->get_velocity_x(p,0) <<" "<<interaction->get_velocity_y(p,0) <<" "<<p->fieldDX[0]<<" "<<p->fieldDY[0]<<" "<<p->CoM[0]<<" "<<p->CoM[1]<<" " << p->index << " "<<p->sub_corner_bottom_left/box->getXsize()<<" "<<p->area<<" "<<config_info->curr_step <<std::endl;
 
 		interaction->updateDirectedActiveForces(dt, p, store);
 		if(!store)p->set_positions(config_info->box);

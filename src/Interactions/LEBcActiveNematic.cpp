@@ -187,6 +187,8 @@ number LEBcActiveNematic::f_interaction(BaseField *p, int q) {
 	
 	number laplacianPhi = p->fieldScalar[p->neighbors_sub[5+q*9]] + ytop + p->fieldScalar[p->neighbors_sub[3+q*9]] + ybottom - 4.*p->fieldScalar[q];
 
+	if(q==509 && p->index==1)std::cout<<"Free Energy 509--: "<< p->fieldScalar[p->neighbors_sub[5+q*9]]<<" "<< ytop<<" "<< p->fieldScalar[p->neighbors_sub[3+q*9]]<<" "<< ybottom <<" "<< 4.*p->fieldScalar[q] << std::endl;
+
 	//xright=phi2[box->neighbors[5+k*9]]; 
 	//ybottom=phi2[box->neighbors[7+k*9]]; 
 	//xleft=phi2[box->neighbors[3+k*9]]; 
@@ -218,7 +220,9 @@ number LEBcActiveNematic::f_interaction(BaseField *p, int q) {
 	number V = CH + A + Rep + Adh;
 	p->freeEnergy[q] += V;
 
-	//if(p->index==0 && q==0)std::cout<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<std::endl;
+	if(q==p->subSize-1 && p->index==1)std::cout<<"Free Energy S: "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<" "<<p->fieldScalar[q]<<" "<<dx<<" "<<dy<<" "<<k<<" "<<laplacianPhi<< std::endl;
+	if(q==0 && p->index==1)std::cout<<"Free Energy 0: "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<" "<<p->fieldScalar[q]<<" "<<dx<<" "<<dy<<" "<<k<<" "<<laplacianPhi<< std::endl;
+	if(q==509 && p->index==1)std::cout<<"Free Energy 509: "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<" "<<p->fieldScalar[q]<<" "<<dx<<" "<<dy<<" "<<k<<" "<<laplacianPhi<<" "<<ytop<<" " <<ybottom << std::endl;
 
 	return V;
 }
@@ -290,13 +294,13 @@ number LEBcActiveNematic::get_velocity_x(BaseField *p, int q){
 	int unrap_number = p->unrap_sub_corner_bottom_left_y / box->getYsize();
 
 	if(p->unrap_sub_corner_bottom_left_y>=0){
-		//if(q==p->subSize-1)std::cout<<"velocity: "<<unrap_number<<" "<< p->velocityX[q] << " " << unrap_number * shear_rate * box->getYsize() << " "<< p->velocityX[q] - unrap_number * shear_rate * box->getYsize() << " "<< y << " "<< box->getYsize()-y_sub  << std::endl;
+		//if(q==0)std::cout<<"velocity 1: "<<unrap_number<<" "<< p->velocityX[q] << " " << unrap_number * shear_rate * box->getYsize() << " "<< p->velocityX[q] - unrap_number * shear_rate * box->getYsize() << " "<< y << " "<< box->getYsize()-y_sub  << std::endl;
 		if(y<box->getYsize() && y>=y_sub)return p->velocityX[q] - unrap_number * shear_rate * box->getYsize();
 		else return p->velocityX[q] - (unrap_number+1) * shear_rate * box->getYsize();
 	}
 	else{
 		unrap_number-=1;
-		//if(q==p->subSize-1)std::cout<<"velocity: "<<unrap_number<<" "<< p->velocityX[q] << " " << (number)unrap_number * shear_rate * box->getYsize() << " "<< p->velocityX[q] - unrap_number * shear_rate * box->getYsize() << " "<< y << " "<< box->getYsize() <<" "<<y_sub << std::endl;
+		//if(q==0)std::cout<<"velocity 2: "<<unrap_number<<" "<< p->velocityX[q] << " " << (number)unrap_number * shear_rate * box->getYsize() << " "<< p->velocityX[q] - unrap_number * shear_rate * box->getYsize() << " "<< y << " "<< box->getYsize() <<" "<<y_sub << std::endl;
 		if(y<box->getYsize() && y>=y_sub)return p->velocityX[q] - unrap_number * shear_rate * box->getYsize();
 		else return p->velocityX[q] - (unrap_number+1) * shear_rate * box->getYsize();
 	}

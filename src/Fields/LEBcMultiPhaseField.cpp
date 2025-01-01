@@ -216,20 +216,23 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 				displacement = box->min_image(std::vector<number> {(number)new_x, (number)new_y}, std::vector<number> {(number)xx, (number)yy});
 				//xx = int(LsubX + displacement[0])%LsubX;
 				//yy = int(LsubY + displacement[1])%LsubY;
+
+				//if(index==1)std::cout<<"mid: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<new_x <<" "<<new_y <<" "<<sub_corner_bottom_left<<" "<<new_sub_corner_bottom_left<<std::endl;
+
 				if(displacement[0]>=0)
-					xx = abs(int(displacement[0]));
+					xx = abs(int(displacement[0]))%LsubX;
 				else
 					xx = int(box->getXsize() + displacement[0])%LsubX;
 
 				if(displacement[1]>=0)
-					yy = abs(int(displacement[1]));
+					yy = abs(int(displacement[1]))%LsubY;
 				else
 					yy = int(box->getYsize() + displacement[1])%LsubY;
 
 
 				//if(i==LsubY-1 && j==LsubX-1)std::cout<<"mid: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
 				//if(i==LsubY-1 && j==0)std::cout<<"mid: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
-				if(index==14)std::cout<<"mult: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
+				//if(index==1)std::cout<<"mult: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
 
 				new_field_scalar[xx+yy*LsubX]=fieldScalar[site];
 			}
