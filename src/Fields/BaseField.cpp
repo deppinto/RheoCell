@@ -2,7 +2,7 @@
 #include "../Boxes/BaseBox.h"
 
 BaseField::BaseField() :
-				index(-1), LsubX(16), LsubY(16), border(4), area(0.), sumF(0.) {
+				index(-1), LsubX(30), LsubY(30), border(4), area(0.), sumF(0.) {
 	CoM = std::vector<number> {0., 0.};
 }
 				

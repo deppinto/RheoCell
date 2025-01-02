@@ -187,7 +187,8 @@ number LEBcActiveNematic::f_interaction(BaseField *p, int q) {
 	
 	number laplacianPhi = p->fieldScalar[p->neighbors_sub[5+q*9]] + ytop + p->fieldScalar[p->neighbors_sub[3+q*9]] + ybottom - 4.*p->fieldScalar[q];
 
-	if(q==509 && p->index==1)std::cout<<"Free Energy 509--: "<< p->fieldScalar[p->neighbors_sub[5+q*9]]<<" "<< ytop<<" "<< p->fieldScalar[p->neighbors_sub[3+q*9]]<<" "<< ybottom <<" "<< 4.*p->fieldScalar[q] << std::endl;
+	//if(q==509 && p->index==1)std::cout<<"Free Energy 509--: "<< p->fieldScalar[p->neighbors_sub[5+q*9]]<<" "<< ytop<<" "<< p->fieldScalar[p->neighbors_sub[3+q*9]]<<" "<< ybottom <<" "<< 4.*p->fieldScalar[q] << std::endl;
+	//if(q==509 && p->index==1)std::cout<<"Free Energy 509--TOP: "<< box->weight_site[7+k*9] << " "<<p->fieldScalar[p->neighbors_sub[7+q*9]]<<" "<<box->weight_site_next[7+k*9]<<" "<<p->fieldScalar[p->neighbors_sub[6+q*9]]<<std::endl;
 
 	//xright=phi2[box->neighbors[5+k*9]]; 
 	//ybottom=phi2[box->neighbors[7+k*9]]; 
@@ -220,9 +221,9 @@ number LEBcActiveNematic::f_interaction(BaseField *p, int q) {
 	number V = CH + A + Rep + Adh;
 	p->freeEnergy[q] += V;
 
-	if(q==p->subSize-1 && p->index==1)std::cout<<"Free Energy S: "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<" "<<p->fieldScalar[q]<<" "<<dx<<" "<<dy<<" "<<k<<" "<<laplacianPhi<< std::endl;
-	if(q==0 && p->index==1)std::cout<<"Free Energy 0: "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<" "<<p->fieldScalar[q]<<" "<<dx<<" "<<dy<<" "<<k<<" "<<laplacianPhi<< std::endl;
-	if(q==509 && p->index==1)std::cout<<"Free Energy 509: "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<" "<<p->fieldScalar[q]<<" "<<dx<<" "<<dy<<" "<<k<<" "<<laplacianPhi<<" "<<ytop<<" " <<ybottom << std::endl;
+	//if(q==p->subSize-1 && p->index==1)std::cout<<"Free Energy S: "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<" "<<p->fieldScalar[q]<<" "<<dx<<" "<<dy<<" "<<k<<" "<<laplacianPhi<< std::endl;
+	//if(q==0 && p->index==1)std::cout<<"Free Energy 0: "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<" "<<p->fieldScalar[q]<<" "<<dx<<" "<<dy<<" "<<k<<" "<<laplacianPhi<< std::endl;
+	//if(q==509 && p->index==1)std::cout<<"Free Energy 509: "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<" "<<p->fieldScalar[q]<<" "<<dx<<" "<<dy<<" "<<k<<" "<<laplacianPhi<<" "<<ytop<<" " <<ybottom << std::endl;
 
 	return V;
 }
@@ -249,7 +250,7 @@ void LEBcActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
 
 	p->velocityX[q] = (p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
-	p->velocityY[q] = (p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction; //- 0.05;
+	p->velocityY[q] = (p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction; 
 }
 
 

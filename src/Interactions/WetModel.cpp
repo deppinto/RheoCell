@@ -208,7 +208,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 					//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], other_site_patch+field_start_index[p->index] , (double)(friction_cell)));
 
 				for(int i=0; i<size_store_site_velocity_index[other_site_box]; i++){
-					number weight = 1.0; //p->fieldScalar[q] * store_site_field[i+other_site_box*store_max_size];
+					number weight = p->fieldScalar[q]; // * store_site_field[i+other_site_box*store_max_size];
 					//tri_t_x.push_back(Eigen::Triplet<double> (store_site_velocity_index[i+other_site_box*store_max_size], q+field_start_index[p->index], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
 					
 					if(box->getWalls(p->map_sub_to_box[q])<wall_slip){
