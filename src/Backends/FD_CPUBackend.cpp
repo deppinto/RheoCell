@@ -74,7 +74,7 @@ void FD_CPUBackend::first_step(bool store) {
 
 			phi = p->fieldScalar_old[q] + dt*.5*(dphi + p->dfield_old[q]);
 
-			if(phi>2)std::cout<<"Error phi > 2: "<<p->index<<" "<<q<<" "<<phi<<" "<<p->fieldScalar_old[q]<<" "<<p->map_sub_to_box_x[q]<<" "<<p->map_sub_to_box_y[q]<< " "<<dphi<<" "<<p->freeEnergy[q]<< "---------"<<std::endl;
+			//if(phi>2)std::cout<<"Error phi > 2: "<<p->index<<" "<<q<<" "<<phi<<" "<<p->fieldScalar_old[q]<<" "<<p->map_sub_to_box_x[q]<<" "<<p->map_sub_to_box_y[q]<< " "<<dphi<<" "<<p->freeEnergy[q]<< "---------"<<std::endl;
 
 			//if(int(q/p->LsubX)>3){sumTest_x+=phi * p->map_sub_to_box_x[q];sum_x+=phi;}
 

@@ -200,21 +200,22 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 
 			for(auto j : neigh_values){
-				other_site_patch = p->neighbors_sub[j+q*9];
-				other_site_box = p->map_sub_to_box[other_site_patch];
-				//if(sum_phi[other_site_box]==0)continue;
+				//other_site_patch = p->neighbors_sub[j+q*9];
+				other_site_box = box->neighbors[j+p->map_sub_to_box[q]*9];
+				//if(sum_phi[q]==0)continue;
 
 				//if(box->getWalls(p->map_sub_to_box[q])<wall_slip)
 					//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], other_site_patch+field_start_index[p->index] , (double)(friction_cell)));
 
 				for(int i=0; i<size_store_site_velocity_index[other_site_box]; i++){
-					number weight = p->fieldScalar[q]; // * store_site_field[i+other_site_box*store_max_size];
+					number weight = 1.0; // * store_site_field[i+other_site_box*store_max_size];
 					//tri_t_x.push_back(Eigen::Triplet<double> (store_site_velocity_index[i+other_site_box*store_max_size], q+field_start_index[p->index], (double)(-friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
 					
 					if(box->getWalls(p->map_sub_to_box[q])<wall_slip){
 						tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction_cell)*weight));
 						tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell)*weight));
 						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*store_site_field[i+other_site_box*store_max_size]/sum_phi[other_site_box])));
+						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*p->fieldScalar[q]/sum_phi[q])));
 					}
 
 					//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
