@@ -271,6 +271,9 @@ void MultiPhaseField::set_positions(BaseBox *box) {
 		resizing();
 		fieldScalar = new_field_scalar;
 		setNeighborsSub();
+		int site = box->getElement(sub_corner_bottom_left, LsubX/2, LsubY/2);
+		CoM[1] = int(site / box->getXsize());
+		CoM[0] = int(site - int(site / box->getXsize()) * box->getXsize());
 	}
 }
 
