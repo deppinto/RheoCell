@@ -50,9 +50,6 @@ void FD_CPUBackend::first_step(bool store) {
 		number sumF = p->sumF;
 		p->set_properties_to_zero();
 
-		//number sumTest_x=0.;
-		//number sum_x=0.;
-
 		for(int q=0; q<p->subSize; q++) { 
 
 			//int  k  = p->GetSubIndex(q, config_info->box);
@@ -75,8 +72,6 @@ void FD_CPUBackend::first_step(bool store) {
 			phi = p->fieldScalar_old[q] + dt*.5*(dphi + p->dfield_old[q]);
 
 			//if(phi>2)std::cout<<"Error phi > 2: "<<p->index<<" "<<q<<" "<<phi<<" "<<p->fieldScalar_old[q]<<" "<<p->map_sub_to_box_x[q]<<" "<<p->map_sub_to_box_y[q]<< " "<<dphi<<" "<<p->freeEnergy[q]<< "---------"<<std::endl;
-
-			//if(int(q/p->LsubX)>3){sumTest_x+=phi * p->map_sub_to_box_x[q];sum_x+=phi;}
 
 			p->fieldScalar[q] = phi;
 			p->area += phi * phi;

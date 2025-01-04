@@ -245,8 +245,6 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 		//std::cout<<"here-------"<<new_x<<" "<<new_y<<" "<<old_x<<" "<<old_y<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<new_field_scalar[subSize-1]<<" "<<fieldScalar[subSize-1]<<" "<<new_field_scalar[subSize-1]  <<" "<<CoM[0]<<" "<<CoM[1]<<" "<<unrap_sub_corner_bottom_left_x<<" "<<unrap_sub_corner_bottom_left_y<<" "<<offset[0]<<" "<<offset[1]  <<std::endl;
 		//std::cout<<"here-------"<<new_x<<" "<<new_y<<" "<<old_x<<" "<<old_y<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<new_field_scalar[26]<<" "<<fieldScalar[0]<<" "<<new_field_scalar[0]<<" "<<fieldScalar[0]  <<" "<<CoM[0]<<" "<<CoM[1]<<" "<<unrap_sub_corner_bottom_left_x<<" "<<unrap_sub_corner_bottom_left_y<<" "<<offset[0]<<" "<<offset[1]  <<std::endl;
 
-		//exit(911);
-
 		sub_corner_bottom_left_old = sub_corner_bottom_left;
 		sub_corner_bottom_left = new_sub_corner_bottom_left;
 		fieldScalar = new_field_scalar;
