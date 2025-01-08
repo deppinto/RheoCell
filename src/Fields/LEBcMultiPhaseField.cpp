@@ -239,6 +239,8 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 			CoM[0] = int(siteCoM - int(siteCoM / box->getXsize()) * box->getXsize()) + (CoM[0]-int(CoM[0]));
 		}
 
+		//if(index==97)std::cout<<"Before: "<< CoM_old[0]<<" "<<CoM_old[1]<<" "<<CoM[0]<<" "<<CoM[1]<<" "<< LsubX/2<<" "<<LsubY/2<<" "<<(int)CoM[0]-(int)LsubX/2  <<" "<< (int)CoM[1]-(int)LsubY/2 << " "<<new_sub_corner_bottom_left <<" "<< sub_corner_bottom_left<<" "<<sub_corner_bottom_left/box->getXsize()  <<std::endl;
+
 
 		int new_y = new_sub_corner_bottom_left / box->getXsize();
 		int new_x = new_sub_corner_bottom_left - new_y * box->getXsize();
@@ -297,12 +299,12 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 				while(xx<0){xx+=LsubX;}
 				while(xx>=LsubX){xx-=LsubX;}
 
-				if(new_map_sub_to_box_y[site]-map_sub_to_box_y[site]>=box->getXsize()/2){
+				if(new_map_sub_to_box_y[site]-map_sub_to_box_y[site]>=box->getYsize()/2){
 					xx = int(xx + (int)box->get_shear_displacement());
 					while(xx>=LsubX)xx-=LsubX;
 					shear_velocity_sign[xx+yy*LsubX] = 1;
 				}
-				else if(new_map_sub_to_box_y[site]-map_sub_to_box_y[site]<=-box->getXsize()/2){
+				else if(new_map_sub_to_box_y[site]-map_sub_to_box_y[site]<=-box->getYsize()/2){
 					xx = int(xx - (int)box->get_shear_displacement());
 					while(xx<0)xx+=LsubX;
 					shear_velocity_sign[xx+yy*LsubX] = -1;

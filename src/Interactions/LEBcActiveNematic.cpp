@@ -184,8 +184,10 @@ number LEBcActiveNematic::f_interaction(BaseField *p, int q) {
 		if(qy>=p->LsubY)qy-=p->LsubY;
 		//int delta_q = ((int(q - int(q/p->LsubX) * p->LsubX) + dist)%p->LsubX) + ((int(q/p->LsubX) + 1)%p->LsubY) * p->LsubX;
 		int delta_q = qx + qy * p->LsubX;
-		ytop=(box->weight_site[7+k*9]*p->fieldScalar[delta_q]+box->weight_site_next[7+k*9]*p->fieldScalar[p->neighbors_sub[5+delta_q*9]]);
+		ytop=(box->weight_site[7+k*9]*p->fieldScalar[delta_q]+box->weight_site_next[7+k*9]*p->fieldScalar[p->neighbors_sub[3+delta_q*9]]);
 		ybottom=p->fieldScalar[p->neighbors_sub[1+q*9]];
+		
+		//if(p->index==97 && k - ky * box->getXsize() == 75)std::cout<<"Free Energy-----TOP: "<< box->weight_site[7+k*9] << " "<<box->neighbors[7+k*9] - int(box->neighbors[7+k*9]/box->getXsize()) * box->getXsize()<<" "<<box->weight_site_next[7+k*9]<<" "<<box->neighbors[8+k*9] - int(box->neighbors[8+k*9]/box->getXsize()) * box->getXsize()<<" "<<box->neighbors[7+k*9]/box->getXsize()<<" "<<box->get_shear_displacement()  <<std::endl;
 
 	}
 	else if(ky==0){
@@ -193,7 +195,7 @@ number LEBcActiveNematic::f_interaction(BaseField *p, int q) {
 		if(dist>=box->getXsize()/2)dist-=box->getXsize();
 		if(dist<=-box->getXsize()/2)dist+=box->getXsize();*/
 
-		int qx = (int(q - int(q/p->LsubX) * p->LsubX) + box->get_shear_displacement());
+		int qx = (int(q - int(q/p->LsubX) * p->LsubX) + (int)box->get_shear_displacement());
 		int qy = (int(q/p->LsubX) - 1);
 		while(qx>=p->LsubX)qx-=p->LsubX;
 		if(qy<0)qy+=p->LsubY;
@@ -343,7 +345,8 @@ number LEBcActiveNematic::get_velocity_x(BaseField *p, int q){
 		else return p->velocityX[q] - (unrap_number+1) * shear_rate * box->getYsize();
 	}*/
 
-	return p->velocityX[q] + p->shear_velocity_sign[q] * shear_rate * box->getYsize();
+	//return p->velocityX[q] + p->shear_velocity_sign[q] * shear_rate * box->getYsize();
+	return p->velocityX[q] + p->shear_velocity_sign[q] * shear_rate * box->getYsize() + shear_rate * (p->map_sub_to_box_y[q] - 0.5 * box->getYsize());
 }
 
 number LEBcActiveNematic::get_velocity_y(BaseField *p, int q){return p->velocityY[q];}

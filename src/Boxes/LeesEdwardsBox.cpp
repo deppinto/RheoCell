@@ -35,7 +35,10 @@ void LeesEdwardsBox::init(int Lx, int Ly) {
 	weight_site.resize(Lx*Ly*9);
 	weight_site_next.resize(Lx*Ly*9);
 
-	//BaseBox::setNeighborsPeriodic(Lx, Ly);
+	std::fill(weight_site.begin(), weight_site.end(), 1.0);
+	std::fill(weight_site_next.begin(), weight_site_next.end(), 0.0);
+
+	BaseBox::setNeighborsPeriodic(Lx, Ly);
 	setNeighborsPeriodic(Lx, Ly);
 }
 
@@ -137,7 +140,8 @@ void LeesEdwardsBox::setNeighborsPeriodic(int Lx, int Ly){
 	int x_next;
 	number weight;
 	number x_shifted;
-	for(int i =0; i<Lx*Ly; i++) {
+	for(int i = 0; i<Lx*Ly; i++) {
+		if(i==Lx)i=(Ly-1)*Lx;
 		y = i/Lx;
 		x = i-(int(i/Lx)*Lx);
 		ss=0;
