@@ -34,6 +34,7 @@ void LEBcMultiPhaseField::resizing() {
 	neighbors_sub.resize(subSize*9);
 	velocityX.resize(subSize);
         velocityY.resize(subSize);
+        shear_velocity_sign.resize(subSize);
 	map_sub_to_box.resize(subSize);
 	map_sub_to_box_x.resize(subSize);
 	map_sub_to_box_y.resize(subSize);
@@ -176,6 +177,27 @@ void LEBcMultiPhaseField::setNeighborsSubSquarePeriodic() {
 	}
 }
 
+/*void LEBcMultiPhaseField::updateNeighborsSubSquarePeriodic() {
+	int x,y,xx,yy,site,ss;
+	for(int i =0; i<subSize; i++) {
+		y=i/LsubX;
+		x=i-y*LsubX;
+		ss=0;
+		for(int j=-1; j<=1; j++){
+			for(int k=-1; k<=1; k++){
+				xx=x+k;
+				yy=y+j;
+				if(x==0 && k==-1)xx=LsubX-1;
+				else if(x==LsubX-1 && k==1)xx=0;
+				if(y==0 && j==-1)yy=LsubY-1;
+				else if(y==LsubY-1 && j==1)yy=0;
+				site=xx+yy*LsubX;
+				neighbors_sub[ss+i*9]=site;
+				ss++;
+			}
+		}
+	}
+}*/
 
 void LEBcMultiPhaseField::set_positions_initial(BaseBox *box) {
 	int x=CoM[0];
@@ -192,34 +214,63 @@ void LEBcMultiPhaseField::set_positions_initial(BaseBox *box) {
 void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 
 	if(index>=0){
-		int siteCoM = box->getElement(sub_corner_bottom_left, int(CoM[0]), int(CoM[1]));
-		CoM[1] = int(siteCoM / box->getXsize()) + (CoM[1]-int(CoM[1]));
-		CoM[0] = int(siteCoM - int(siteCoM / box->getXsize()) * box->getXsize()) + (CoM[0]-int(CoM[0]));
 
-		int new_sub_corner_bottom_left = box->getElement(siteCoM, (int)-LsubX/2, (int)-LsubY/2);
+		sub_corner_bottom_left_old = sub_corner_bottom_left;
+		std::vector<int> displacement = std::vector<int> {(int)CoM[0]-(int)LsubX/2 , (int)CoM[1]-(int)LsubY/2};
+		int new_sub_corner_bottom_left = box->getElement(sub_corner_bottom_left, displacement[0], displacement[1]);
+		//int new_sub_corner_bottom_left = box->getElement(sub_corner_bottom_left, (int)(CoM[0]-LsubX/2), (int)(CoM[1]-LsubY/2));
+
+		//if(abs((int)CoM[0]-(int)LsubX/2)>3 || abs((int)CoM[1]-(int)LsubY/2)>3)std::cout<<"Error: "<<index<<" "<<CoM[0]<<" "<<CoM[1]  <<std::endl;
+		//if(index==10)std::cout<<"Before: "<< CoM_old[0]<<" "<<CoM_old[1]<<" "<<CoM[0]<<" "<<CoM[1]<<" "<< LsubX/2<<" "<<LsubY/2<<" "<<(int)CoM[0]-(int)LsubX/2  <<" "<< (int)CoM[1]-(int)LsubY/2 << " "<<new_sub_corner_bottom_left <<" "<< sub_corner_bottom_left<<" "<<sub_corner_bottom_left/box->getXsize()  <<std::endl;
+		//if(index==36)std::cout<<"After: "<< CoM[0]<<" "<<CoM[1]<<std::endl;
+
+		//int siteCoM = box->getElement(CoM_old[0] + CoM_old[1] * box->getXsize(), int(CoM[0]), int(CoM[1]));
+		//CoM[1] = int(siteCoM / box->getXsize()) + (CoM[1]-int(CoM[1]));
+		//CoM[0] = int(siteCoM - int(siteCoM / box->getXsize()) * box->getXsize()) + (CoM[0]-int(CoM[0]));
+
+		if(new_sub_corner_bottom_left == sub_corner_bottom_left){
+			CoM[0]=CoM_old[0];
+			CoM[1]=CoM_old[1];
+			return;
+		}
+		else{
+			int siteCoM = box->getElement(((int)CoM_old[0] + (int)CoM_old[1] * box->getXsize()), (int)CoM[0]-(int)LsubX/2, (int)CoM[1]-(int)LsubY/2);
+			CoM[1] = int(siteCoM / box->getXsize()) + (CoM[1]-int(CoM[1]));
+			CoM[0] = int(siteCoM - int(siteCoM / box->getXsize()) * box->getXsize()) + (CoM[0]-int(CoM[0]));
+		}
+
+
 		int new_y = new_sub_corner_bottom_left / box->getXsize();
 		int new_x = new_sub_corner_bottom_left - new_y * box->getXsize();
 		int old_y = sub_corner_bottom_left / box->getXsize();
 		int old_x = sub_corner_bottom_left - old_y * box->getXsize();
 		std::vector<number> new_field_scalar(subSize, 0.);
+		std::vector<int> new_map_sub_to_box(subSize, 0);
+		std::vector<int> new_map_sub_to_box_x(subSize, 0);
+		std::vector<int> new_map_sub_to_box_y(subSize, 0);
 
 		//do mapping between old and new fieldScalars (due to the way the code is written all other variables will be overwritten so a simple resize is enough)
-		int yy, xx, site;
-		std::vector<number> displacement = std::vector<number> { 0., 0.};
+		int yy, xx, site, new_box_site;
+		//std::vector<number> displacement = std::vector<number> { 0., 0.};
+
+		std::vector<number> displacement_corner = box->min_image(std::vector<number> { (number)old_x , (number)old_y } , std::vector<number> { (number)new_x , (number)new_y} );
+		unrap_sub_corner_bottom_left_x += displacement_corner[0];
+		unrap_sub_corner_bottom_left_y += displacement_corner[1];
 
 		for(int i=0; i<LsubY; i++){
 			for(int j=0; j<LsubX; j++){
 				site = j + i * LsubX;
 
-				yy = map_sub_to_box_y[site];
-				xx = map_sub_to_box_x[site];
-				displacement = box->min_image(std::vector<number> {(number)new_x, (number)new_y}, std::vector<number> {(number)xx, (number)yy});
+				//yy = map_sub_to_box_y[site];
+				//xx = map_sub_to_box_x[site];
+				//displacement = box->min_image(std::vector<number> {(number)new_x, (number)new_y}, std::vector<number> {(number)xx, (number)yy});
+
 				//xx = int(LsubX + displacement[0])%LsubX;
 				//yy = int(LsubY + displacement[1])%LsubY;
 
 				//if(index==1)std::cout<<"mid: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<new_x <<" "<<new_y <<" "<<sub_corner_bottom_left<<" "<<new_sub_corner_bottom_left<<std::endl;
 
-				if(displacement[0]>=0)
+				/*if(displacement[0]>=0)
 					xx = abs(int(displacement[0]))%LsubX;
 				else
 					xx = int(box->getXsize() + displacement[0])%LsubX;
@@ -227,27 +278,69 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 				if(displacement[1]>=0)
 					yy = abs(int(displacement[1]))%LsubY;
 				else
-					yy = int(box->getYsize() + displacement[1])%LsubY;
+					yy = int(box->getYsize() + displacement[1])%LsubY;*/
 
 
 				//if(i==LsubY-1 && j==LsubX-1)std::cout<<"mid: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
 				//if(i==LsubY-1 && j==0)std::cout<<"mid: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
-				//if(index==1)std::cout<<"mult: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
+				//if(index==5)std::cout<<"mult: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
 
-				new_field_scalar[xx+yy*LsubX]=fieldScalar[site];
+				new_box_site = box->getElement(map_sub_to_box[site], displacement[0], displacement[1]);
+				new_map_sub_to_box[site] = new_box_site; 
+				new_map_sub_to_box_x[site] = box->getElementX(new_box_site, 0);
+				new_map_sub_to_box_y[site] = box->getElementY(new_box_site, 0);
+
+				xx = (j - displacement[0]);//%LsubX;
+				yy = (i - displacement[1]);//%LsubY;
+				while(yy<0){yy+=LsubY;}
+				while(yy>=LsubY){yy-=LsubY;}
+				while(xx<0){xx+=LsubX;}
+				while(xx>=LsubX){xx-=LsubX;}
+
+				if(new_map_sub_to_box_y[site]-map_sub_to_box_y[site]>=box->getXsize()/2){
+					xx = int(xx + (int)box->get_shear_displacement());
+					while(xx>=LsubX)xx-=LsubX;
+					shear_velocity_sign[xx+yy*LsubX] = 1;
+				}
+				else if(new_map_sub_to_box_y[site]-map_sub_to_box_y[site]<=-box->getXsize()/2){
+					xx = int(xx - (int)box->get_shear_displacement());
+					while(xx<0)xx+=LsubX;
+					shear_velocity_sign[xx+yy*LsubX] = -1;
+				}
+				else{
+					shear_velocity_sign[xx+yy*LsubX] = 0;
+				}
+
+
+				/*if(old_y + yy + displacement_corner[1] >= box->getYsize() && old_y + i < box->getYsize()){
+					shear_velocity_sign[xx+yy*LsubX] = -1;
+					//std::cout<<"here0: "<<index<<std::endl;
+				}
+				else if(old_y + yy + displacement_corner[1] < box->getYsize() && old_y + i >= box->getYsize()){
+					shear_velocity_sign[xx+yy*LsubX] = 1;
+					//std::cout<<"here1: "<<index<<std::endl;
+				}
+				else if(old_y + yy + displacement_corner[1] < 0 && old_y + i >= 0){
+					shear_velocity_sign[xx+yy*LsubX] = 1;
+					//std::cout<<"here2: "<<index<<std::endl;
+				}
+				else{
+					shear_velocity_sign[xx+yy*LsubX] = 0;
+					//new_box_site = map_sub_to_box[site];
+				}*/
+
+				new_field_scalar[xx + yy * LsubX] = fieldScalar[site];
 			}
 		}
-
-		displacement = box->min_image(std::vector<number> { (number)old_x , (number)old_y } , std::vector<number> { (number)new_x , (number)new_y} );
-		unrap_sub_corner_bottom_left_x += displacement[0];
-		unrap_sub_corner_bottom_left_y += displacement[1];
 
 		//std::cout<<"here-------"<<new_x<<" "<<new_y<<" "<<old_x<<" "<<old_y<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<new_field_scalar[subSize-1]<<" "<<fieldScalar[subSize-1]<<" "<<new_field_scalar[subSize-1]  <<" "<<CoM[0]<<" "<<CoM[1]<<" "<<unrap_sub_corner_bottom_left_x<<" "<<unrap_sub_corner_bottom_left_y<<" "<<offset[0]<<" "<<offset[1]  <<std::endl;
 		//std::cout<<"here-------"<<new_x<<" "<<new_y<<" "<<old_x<<" "<<old_y<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<new_field_scalar[26]<<" "<<fieldScalar[0]<<" "<<new_field_scalar[0]<<" "<<fieldScalar[0]  <<" "<<CoM[0]<<" "<<CoM[1]<<" "<<unrap_sub_corner_bottom_left_x<<" "<<unrap_sub_corner_bottom_left_y<<" "<<offset[0]<<" "<<offset[1]  <<std::endl;
 
-		sub_corner_bottom_left_old = sub_corner_bottom_left;
 		sub_corner_bottom_left = new_sub_corner_bottom_left;
 		fieldScalar = new_field_scalar;
+		map_sub_to_box = new_map_sub_to_box;
+		map_sub_to_box_x = new_map_sub_to_box_x;
+		map_sub_to_box_y = new_map_sub_to_box_y;
 	}
 }
 

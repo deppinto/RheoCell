@@ -272,6 +272,7 @@ bool SimBackend::read_next_configuration(bool binary) {
 
 		p->init((int)spl_line[0], (int)spl_line[1]);
 		p->CoM = std::vector<number> {spl_line[2], spl_line[3]};
+		p->CoM_old = std::vector<number> {spl_line[2], spl_line[3]};
 		p->set_positions((int)spl_line[4], (int)spl_line[5], (int)spl_line[6], (int)spl_line[7], (int)spl_line[8], Lx);
 
 		p->nemQ = {spl_line[9], spl_line[10]};
@@ -280,6 +281,9 @@ bool SimBackend::read_next_configuration(bool binary) {
 		p->Q01 = p->nemQ[0] * p->nemQ[1];
 
 		for(k=0; k<p->subSize; k+=1){
+			p->map_sub_to_box[k]=int(spl_line[conf_initial_line+(2*k)]);
+			p->map_sub_to_box_y[k]=int(p->map_sub_to_box[k] / Lx);
+			p->map_sub_to_box_x[k]=int(p->map_sub_to_box[k]) - int(p->map_sub_to_box_y[k]) * Lx;
 			p->fieldScalar[k]=spl_line[conf_initial_line+(2*k)+1];
 			p->area+=spl_line[conf_initial_line+(2*k)+1]*spl_line[conf_initial_line+(2*k)+1];
 			p->sumF+=spl_line[conf_initial_line+(2*k)+1];

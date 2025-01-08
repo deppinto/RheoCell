@@ -34,6 +34,7 @@ public:
 	std::vector<number> get_abs_pos(BaseField *p);
         virtual void shift_particle(BaseField *p, std::vector<number> &amount);
 	virtual void setNeighborsPeriodic(int Lx, int Ly);
+	virtual number get_shear_displacement(){return delta_x;};
 };
 
 #endif /* LEESEDWARDSBOX_H_ */

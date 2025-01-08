@@ -34,6 +34,8 @@ void LeesEdwardsBox::init(int Lx, int Ly) {
 	neighbors_next.resize(Lx*Ly*9);
 	weight_site.resize(Lx*Ly*9);
 	weight_site_next.resize(Lx*Ly*9);
+
+	//BaseBox::setNeighborsPeriodic(Lx, Ly);
 	setNeighborsPeriodic(Lx, Ly);
 }
 
@@ -54,11 +56,11 @@ int LeesEdwardsBox::getElementY(int site, int distY){
 int LeesEdwardsBox::getElement(int site, int distX, int distY){
 
 	int cross=0;
-	int x = (site-(int(site/sidex)*sidex))+distX;
+	int x = int(site-(int(site/sidex)*sidex))+distX;
 	while(x<0)x+=sidex;
 	while(x>=sidex)x-=sidex;
 
-	int y = (site/sidex)+distY;
+	int y = int(site/sidex)+distY;
         while(y<0){y+=sidey;cross=1;}
         while(y>=sidey){y-=sidey;cross=2;}
 

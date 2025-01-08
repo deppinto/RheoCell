@@ -112,7 +112,7 @@ for line in cfile:
 
     levels = np.arange(0.0, m, step) + step
     cmap=cm.winter
-    if pt_num==1:
+    if pt_num==97:
         cset1 = plt.contour(X, Y, Z, levels, cmap=cmap, alpha=0.5)
     else:
         cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cmap, alpha=0.5)

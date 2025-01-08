@@ -31,6 +31,7 @@ public:
 	virtual void copy_from(const BaseField &p);
 	virtual void get_interaction_values(int R);
 	virtual void check_borders(int q) {};
+	//virtual void updateNeighborsSubSquarePeriodic(){return};
 
 	virtual void init();
 	virtual void init(int Lx, int Ly) {}
@@ -84,6 +85,7 @@ public:
 
 	/// Positions of all interaction centers. This array must be initialized by child classes
 	std::vector<number> CoM;
+	std::vector<number> CoM_old;
 
 	/// Velocity of the particle
 	std::vector<number> velocityX;
@@ -125,6 +127,7 @@ public:
         int LsubY;
 	int subSize;
 	std::vector<int> offset;
+	std::vector<int> shear_velocity_sign;
         int sub_corner_bottom_left;
         number unrap_sub_corner_bottom_left_x;
         number unrap_sub_corner_bottom_left_y;

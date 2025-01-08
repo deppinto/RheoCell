@@ -21,6 +21,7 @@ void FD_CPUBackend::init() {
 	FDBackend::init();
 
 	interaction->begin_energy_computation();
+	compute_forces();
 	if(analysis){compute_forces();}
 
 	int sizeX = box->getXsize();
@@ -43,11 +44,15 @@ void FD_CPUBackend::init() {
 void FD_CPUBackend::first_step(bool store) {
 
 	for(auto p : fields) {
-		com_old[0]=p->CoM[0];
-		com_old[1]=p->CoM[1];
 		temp[0]=0; temp[1]=0; temp[2]=0; temp[3]=0;
 		number area = p->area;
 		number sumF = p->sumF;
+		if(store){
+			p->CoM_old[0]=p->CoM[0];
+			p->CoM_old[1]=p->CoM[1];
+			p->area_old = area;
+			p->sumF_old = sumF;
+		}
 		p->set_properties_to_zero();
 
 		for(int q=0; q<p->subSize; q++) { 
@@ -65,8 +70,6 @@ void FD_CPUBackend::first_step(bool store) {
 			if(store) {
 				p->fieldScalar_old[q]=p->fieldScalar[q];
 				p->dfield_old[q]=dphi;
-				p->area_old = area;
-				p->sumF_old = sumF;
 			}
 
 			phi = p->fieldScalar_old[q] + dt*.5*(dphi + p->dfield_old[q]);
@@ -100,7 +103,11 @@ void FD_CPUBackend::first_step(bool store) {
 		//if(p->index==1)std::cout<<"backend 0: "<<p->fieldScalar[0]<<" "<<p->freeEnergy[0]<<" "<<interaction->get_velocity_x(p,0) <<" "<<interaction->get_velocity_y(p,0) <<" "<<p->fieldDX[0]<<" "<<p->fieldDY[0]<<" "<<p->CoM[0]<<" "<<p->CoM[1]<<" " << p->index << " "<<p->sub_corner_bottom_left/box->getXsize()<<" "<<p->area<<" Time: "<<config_info->curr_step <<std::endl;
 
 		interaction->updateDirectedActiveForces(dt, p, store);
-		if(!store)p->set_positions(config_info->box);
+		if(!store){
+			//std::cout<<"start: "<<p->index<<std::endl;
+			p->set_positions(config_info->box);
+			//std::cout<<"end: "<<p->index<<std::endl;
+		}
 		//std::cout<<"done"<<std::endl;
 	}
 }
@@ -120,13 +127,17 @@ void FD_CPUBackend::second_step() {
 void FD_CPUBackend::sim_step() {
 	mytimer->resume();
 
+        timer_first_step->resume();
+        first_step(true);
+        timer_first_step->pause();
+
 	timer_forces->resume();
 	compute_forces();
 	second_step();
 	timer_forces->pause();
 
 	timer_first_step->resume();
-	first_step(true);
+	first_step(false);
 	timer_first_step->pause();
 
         timer_forces->resume();
@@ -134,9 +145,9 @@ void FD_CPUBackend::sim_step() {
         second_step();
         timer_forces->pause();
 
-        timer_first_step->resume();
+        /*timer_first_step->resume();
         first_step(false);
-        timer_first_step->pause();
+        timer_first_step->pause();*/
 
 	mytimer->pause();
 }

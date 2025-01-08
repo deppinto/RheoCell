@@ -48,7 +48,8 @@ string Configuration::field(BaseField *p) {
 	conf.precision(15);
 	
 	conf << p->LsubX<< " "<< p->LsubY<< " "<< p->CoM[0] << " " << p->CoM[1] << " " << p->offset[0] << " " << p->offset[1] << " " << p->sub_corner_bottom_left << " " << p->unrap_sub_corner_bottom_left_x << " " << p->unrap_sub_corner_bottom_left_y << " " << p->nemQ[0] << " "<< p->nemQ[1] << " ";
-	for(int i=0;i<p->subSize; i++)conf << p->GetSubIndex(i, config_info->box) << " " << p->fieldScalar[i] << " ";
+	//for(int i=0;i<p->subSize; i++)conf << p->GetSubIndex(i, config_info->box) << " " << p->fieldScalar[i] << " ";
+	for(int i=0;i<p->subSize; i++)conf << p->map_sub_to_box[i] << " " << p->fieldScalar[i] << " ";
 	//conf << endl;
 
 	return conf.str();

@@ -33,6 +33,7 @@ class BaseBox {
 		virtual void shift_particle(BaseField *p, std::vector<number> &amount) = 0;
 
 		virtual number getWalls(int k){return 0;};
+		virtual number get_shear_displacement(){return 0;};
 		virtual void setNeighborsPeriodic(int Lx, int Ly);
 		std::vector<int> neighbors;
 		std::vector<int> neighbors_next;
