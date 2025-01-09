@@ -174,11 +174,8 @@ number LEBcActiveNematic::f_interaction(BaseField *p, int q) {
 
 	number ytop, ybottom;
 	if(ky==box->getYsize()-1){
-		/*int dist = ((box->neighbors[7+k*9] - int(box->neighbors[7+k*9]/box->getXsize()) * box->getXsize()) - (p->map_sub_to_box_x[q]));
-		if(dist>=box->getXsize()/2)dist-=box->getXsize();
-		if(dist<=-box->getXsize()/2)dist+=box->getXsize();*/
 
-		int qx = (int(q - int(q/p->LsubX) * p->LsubX) - (int)box->get_shear_displacement());
+		int qx = (int(q - int(q/p->LsubX) * p->LsubX) - int(box->get_shear_displacement()));
 		int qy = (int(q/p->LsubX) + 1);
 		while(qx<0)qx+=p->LsubX;
 		if(qy>=p->LsubY)qy-=p->LsubY;
@@ -187,15 +184,12 @@ number LEBcActiveNematic::f_interaction(BaseField *p, int q) {
 		ytop=(box->weight_site[7+k*9]*p->fieldScalar[delta_q]+box->weight_site_next[7+k*9]*p->fieldScalar[p->neighbors_sub[3+delta_q*9]]);
 		ybottom=p->fieldScalar[p->neighbors_sub[1+q*9]];
 		
-		//if(p->index==97 && k - ky * box->getXsize() == 75)std::cout<<"Free Energy-----TOP: "<< box->weight_site[7+k*9] << " "<<box->neighbors[7+k*9] - int(box->neighbors[7+k*9]/box->getXsize()) * box->getXsize()<<" "<<box->weight_site_next[7+k*9]<<" "<<box->neighbors[8+k*9] - int(box->neighbors[8+k*9]/box->getXsize()) * box->getXsize()<<" "<<box->neighbors[7+k*9]/box->getXsize()<<" "<<box->get_shear_displacement()  <<std::endl;
+		//if(p->index==97 && k - ky * box->getXsize() == 75)std::cout<<"Free Energy-----TOP: "<< k<<" "<<box->weight_site[7+k*9] << " "<<box->neighbors[7+k*9] - int(box->neighbors[7+k*9]/box->getXsize()) * box->getXsize()<<" "<<box->weight_site_next[7+k*9]<<" "<<box->neighbors[6+k*9] - int(box->neighbors[6+k*9]/box->getXsize()) * box->getXsize()<<" "<<box->neighbors[7+k*9]/box->getXsize()<<" "<<box->get_shear_displacement()  <<std::endl;
 
 	}
 	else if(ky==0){
-		/*int dist = ((box->neighbors[1+k*9] - int(box->neighbors[1+k*9]/box->getXsize()) * box->getXsize()) - (p->map_sub_to_box_x[q]));
-		if(dist>=box->getXsize()/2)dist-=box->getXsize();
-		if(dist<=-box->getXsize()/2)dist+=box->getXsize();*/
 
-		int qx = (int(q - int(q/p->LsubX) * p->LsubX) + (int)box->get_shear_displacement());
+		int qx = (int(q - int(q/p->LsubX) * p->LsubX) + int(box->get_shear_displacement()));
 		int qy = (int(q/p->LsubX) - 1);
 		while(qx>=p->LsubX)qx-=p->LsubX;
 		if(qy<0)qy+=p->LsubY;
@@ -203,6 +197,8 @@ number LEBcActiveNematic::f_interaction(BaseField *p, int q) {
 		int delta_q = qx + qy * p->LsubX;
 		ytop=p->fieldScalar[p->neighbors_sub[7+q*9]];
 		ybottom=(box->weight_site[1+k*9]*p->fieldScalar[delta_q]+box->weight_site_next[1+k*9]*p->fieldScalar[p->neighbors_sub[5+delta_q*9]]);
+
+		//if(p->index==97 && k - ky * box->getXsize() == 75)std::cout<<"Free Energy-----BOTTOM: "<< k<< " "<< box->weight_site[1+k*9] << " "<<box->neighbors[1+k*9] - int(box->neighbors[1+k*9]/box->getXsize()) * box->getXsize()<<" "<<box->weight_site_next[1+k*9]<<" "<<box->neighbors[3+k*9] - int(box->neighbors[3+k*9]/box->getXsize()) * box->getXsize()<<" "<<box->neighbors[1+k*9]/box->getXsize()<<" "<<box->get_shear_displacement()  <<std::endl;
 	}
 	else{
 		ytop=p->fieldScalar[p->neighbors_sub[7+q*9]];
@@ -278,12 +274,22 @@ void LEBcActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	p->Fpassive[1] += p->freeEnergy[q]*p->fieldDY[q];
 
 	//active inter cells (active force)
-	number fQ_self_x = -(p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
-	number fQ_self_y = -(p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
+	number fQ_self_x = 0.;
+	number fQ_self_y = 0.;
 
-	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( (box->weight_site[7+k*9]*sumQ01[box->neighbors[7+q*9]]+box->weight_site_next[7+k*9]*sumQ01[box->neighbors[6+q*9]]) - (box->weight_site[1+k*9]*sumQ01[box->neighbors[1+q*9]]+box->weight_site_next[1+k*9]*sumQ01[box->neighbors[2+q*9]]) ) ) - fQ_self_x;
+	if(zetaQ_self!=0){
+		fQ_self_x = -(p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
+		fQ_self_y = -(p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
+	}
 
-	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( (box->weight_site[7+k*9]*sumQ00[box->neighbors[7+q*9]]+box->weight_site_next[7+k*9]*sumQ00[box->neighbors[6+q*9]]) - (box->weight_site[1+k*9]*sumQ00[box->neighbors[1+q*9]]+box->weight_site_next[1+k*9]*sumQ00[box->neighbors[2+q*9]]) ) ) - fQ_self_y;
+	number fQ_inter_x = 0.;
+	number fQ_inter_y = 0.;
+
+	if(zetaQ_inter!=0){
+		fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( (box->weight_site[7+k*9]*sumQ01[box->neighbors[7+q*9]]+box->weight_site_next[7+k*9]*sumQ01[box->neighbors[6+q*9]]) - (box->weight_site[1+k*9]*sumQ01[box->neighbors[1+q*9]]+box->weight_site_next[1+k*9]*sumQ01[box->neighbors[2+q*9]]) ) ) - fQ_self_x;
+
+		fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( (box->weight_site[7+k*9]*sumQ00[box->neighbors[7+q*9]]+box->weight_site_next[7+k*9]*sumQ00[box->neighbors[6+q*9]]) - (box->weight_site[1+k*9]*sumQ00[box->neighbors[1+q*9]]+box->weight_site_next[1+k*9]*sumQ00[box->neighbors[2+q*9]]) ) ) - fQ_self_y;
+	}
 
 	p->Factive[0] += zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
 	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
@@ -294,6 +300,8 @@ void LEBcActiveNematic::calc_internal_forces(BaseField *p, int q) {
 
 
 void LEBcActiveNematic::updateDirectedActiveForces(number dt, BaseField*p, bool store){
+
+	if(J_Q==0)return;
 
 	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
 	
@@ -346,7 +354,7 @@ number LEBcActiveNematic::get_velocity_x(BaseField *p, int q){
 	}*/
 
 	//return p->velocityX[q] + p->shear_velocity_sign[q] * shear_rate * box->getYsize();
-	return p->velocityX[q] + p->shear_velocity_sign[q] * shear_rate * box->getYsize() + shear_rate * (p->map_sub_to_box_y[q] - 0.5 * box->getYsize());
+	return p->velocityX[q] + p->shear_velocity_sign[q] * shear_rate * box->getYsize() + shear_rate * (((double)p->map_sub_to_box_y[q] + 0.5) - 0.5 * (double)box->getYsize());
 }
 
 number LEBcActiveNematic::get_velocity_y(BaseField *p, int q){return p->velocityY[q];}

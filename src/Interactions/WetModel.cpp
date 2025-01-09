@@ -45,7 +45,6 @@ void WetModel::get_settings(input_file &inp) {
 void WetModel::init() {
         a0=PI*R*R;
 	store_max_size=20;
-	//solverCG.setTolerance(0.000000001);
 	if(tolerance>0)
 		solverCG.setTolerance(tolerance);
         set_omp_tasks(omp_thread_num);
@@ -238,7 +237,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	vec_v_y = solverLU.solve(vec_f_y);
 	*/
 
-	//std::cout<<Eigen::nbThreads( )<<std::endl;
+	//std::cout<<Eigen::nbThreads()<<std::endl;
 	//std::cout<<"start solver: "<<size_rows/2 <<std::endl;
 	mat_m_x.setFromTriplets(tri_t_x.begin(), tri_t_x.end());
 	solverCG.compute(mat_m_x);
@@ -246,10 +245,10 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	vec_v_x = solverCG.solve(vec_f_x);
 	vec_v_y = solverCG.solve(vec_f_y);
 	//}
-	/*else{
-		vec_v_x = solverCG.solveWithGuess(vec_f_x, vec_v_x);
-		vec_v_y = solverCG.solveWithGuess(vec_f_y, vec_v_y);
-	}*/
+	//else{
+	//	vec_v_x = solverCG.solveWithGuess(vec_f_x, vec_v_x);
+	//	vec_v_y = solverCG.solveWithGuess(vec_f_y, vec_v_y);
+	//}
 	//std::cout << "#iterations:     " << solverCG.iterations() << std::endl;
 	//std::cout << "estimated error: " << solverCG.error()      << std::endl;	
 	//std::cout<<"end solver"<<std::endl;

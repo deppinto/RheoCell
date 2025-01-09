@@ -263,7 +263,7 @@ void MultiPhaseField::set_positions(BaseBox *box) {
 		unrap_sub_corner_bottom_left_y += displacement[1];
 
 		LsubX = new_LsubX;
-		LsubY=new_LsubY;
+		LsubY = new_LsubY;
 		sub_corner_bottom_left_old = sub_corner_bottom_left;
 		sub_corner_bottom_left = new_sub_corner_bottom_left;
 		offset[0] = 0; offset[1] = 0;	

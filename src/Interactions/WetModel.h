@@ -51,13 +51,14 @@ protected:
 	Eigen::VectorXd vec_f_y;
         void set_omp_tasks(int num_threads){Eigen::setNbThreads(num_threads);std::cout<<"TESTING: Set eigen openMP threads: "<<num_threads<<std::endl;};
 
-	Eigen::SparseLU<Eigen::SparseMatrix<double>, Eigen::COLAMDOrdering<int> >  solverLU;
+	//Eigen::SparseLU<Eigen::SparseMatrix<double>, Eigen::COLAMDOrdering<int> >  solverLU;
 	Eigen::BiCGSTAB<Eigen::SparseMatrix<double, Eigen::RowMajor> > solverCG;
 	//Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solverCG;
 	int size_rows = 0;
 	int size_rows_old = 0;
 	int index, sub_q, other_site_patch, other_site_box;
 	std::vector<int> neigh_values = std::vector<int> {0,1,2,3,5,6,7,8};
+	//std::vector<int> neigh_values = std::vector<int> {1,3,5,7};
 	std::vector<int> size_store_site_velocity_index;
 	std::vector<int> store_site_velocity_index;
 	std::vector<number> store_site_field;
