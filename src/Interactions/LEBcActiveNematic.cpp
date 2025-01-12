@@ -131,6 +131,12 @@ void LEBcActiveNematic::begin_energy_computation(std::vector<BaseField *> &field
 
 	box->setNeighborsPeriodic(box->getXsize(), box->getYsize());
 	for(auto p : fields) {
+
+		p->velocityX_CoM = 0.;
+		p->phi_CoM = 0.;
+		std::fill(p->velocityX_correction.begin(), p->velocityX_correction.end(), 0);
+		std::fill(p->phi_correction.begin(), p->phi_correction.end(), 0);
+
 		for(int q=0; q<p->subSize;q++)
 			computeGlobalSums(p, q, false);
 	}
@@ -296,6 +302,12 @@ void LEBcActiveNematic::calc_internal_forces(BaseField *p, int q) {
 
 	p->velocityX[q] = (p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
 	p->velocityY[q] = (p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction; 
+
+	p->velocityX_correction[int(q/p->LsubX)] += p->velocityX[q] + shear_rate * (((double)p->map_sub_to_box_y[q] + 0.5) - 0.5 * (double)box->getYsize());
+	p->phi_correction[int(q/p->LsubX)] += p->fieldScalar[q];
+	p->velocityX_CoM += p->velocityX[q] + shear_rate * (((double)p->map_sub_to_box_y[q] + 0.5) - 0.5 * (double)box->getYsize());
+	p->phi_CoM += p->fieldScalar[q];
+;
 }
 
 
@@ -337,24 +349,12 @@ void LEBcActiveNematic::updateAnchoring(BaseField*p){
 }
 
 number LEBcActiveNematic::get_velocity_x(BaseField *p, int q){
-	/*int y = p->map_sub_to_box_y[q];
-	int y_sub = p->sub_corner_bottom_left / box->getXsize();
-	int unrap_number = p->unrap_sub_corner_bottom_left_y / box->getYsize();
 
-	if(p->unrap_sub_corner_bottom_left_y>=0){
-		//if(q==0)std::cout<<"velocity 1: "<<unrap_number<<" "<< p->velocityX[q] << " " << unrap_number * shear_rate * box->getYsize() << " "<< p->velocityX[q] - unrap_number * shear_rate * box->getYsize() << " "<< y << " "<< box->getYsize()-y_sub  << std::endl;
-		if(y<box->getYsize() && y>=y_sub)return p->velocityX[q] - unrap_number * shear_rate * box->getYsize();
-		else return p->velocityX[q] - (unrap_number+1) * shear_rate * box->getYsize();
-	}
-	else{
-		unrap_number-=1;
-		//if(q==0)std::cout<<"velocity 2: "<<unrap_number<<" "<< p->velocityX[q] << " " << (number)unrap_number * shear_rate * box->getYsize() << " "<< p->velocityX[q] - unrap_number * shear_rate * box->getYsize() << " "<< y << " "<< box->getYsize() <<" "<<y_sub << std::endl;
-		if(y<box->getYsize() && y>=y_sub)return p->velocityX[q] - unrap_number * shear_rate * box->getYsize();
-		else return p->velocityX[q] - (unrap_number+1) * shear_rate * box->getYsize();
-	}*/
+	if(p->index==36 && int(q - int(q/p->LsubX)*p->LsubX)==0)std::cout<<"average velocity along line: "<< p->map_sub_to_box_y[q]<<" "<< p->velocityX_correction[int(q/p->LsubX)] / p->phi_correction[int(q/p->LsubX)] <<" "<<shear_rate * (((double)p->map_sub_to_box_y[q] + 0.5) - 0.5 * (double)box->getYsize())<<" "<< p->velocityX[q]  <<" "<< p->velocityX_CoM / p->phi_CoM <<std::endl;
 
 	//return p->velocityX[q] + p->shear_velocity_sign[q] * shear_rate * box->getYsize();
-	return p->velocityX[q] + p->shear_velocity_sign[q] * shear_rate * box->getYsize() + shear_rate * (((double)p->map_sub_to_box_y[q] + 0.5) - 0.5 * (double)box->getYsize());
+	return p->velocityX[q] + shear_rate * (((double)p->map_sub_to_box_y[q] + 0.5) - 0.5 * (double)box->getYsize());
+	//return p->velocityX[q] + p->shear_velocity_sign[q] * shear_rate * box->getYsize() + shear_rate * (((double)p->map_sub_to_box_y[q] + 0.5) - 0.5 * (double)box->getYsize());
 }
 
 number LEBcActiveNematic::get_velocity_y(BaseField *p, int q){return p->velocityY[q];}

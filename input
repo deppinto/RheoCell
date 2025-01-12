@@ -2,57 +2,56 @@
 ####  PROGRAM PARAMETERS  ####
 ##############################
 backend = CPU
-debug = 1
+debug = 0
 seed = 4982
+omp_thread_num = 1
 
 ##############################
 ####    SIM PARAMETERS    ####
 ##############################
-box = orthogonal
-equilibration_steps = 1000
+box = lees_edwards
+lees_edwards_shear_rate=0.0001
+equilibration_steps = 0
 steps = 10000
+print_conf_interval = 100
+print_energy_every = 1000
+time_scale = linear
 dt = 0.2
-R = 8
 restart_step_counter = 1
 
 ##############################
 ####     INTERACTIONS     ####
 ##############################
-interaction_type = activefield
-J0 = 1
-zetaS = 0.003
-gamma = 0.02
-mu = 5
-lambda = 3
-kappa = 0.2
+interaction_type = lebcactivenematic
+R = 8
+J0 = 0.005
+gamma = 0.055
+mu = 6
+lambda = 2.0
+kappa = 0.4
 friction = 1
+omega = 0.01
+
+friction_cell = 0
+
+J_Q = 0
+anchoring = 0
+
+zetaQ_self = 0
+zetaQ_inter = 0
 
 ##############################
 ####    EXTERNAL FORCE    ####
 ##############################
-external_forces = 1
-external_forces_file = external.conf 
-type = channel_walls
-lambda_wall = 3
-kappa_wall = 4
+external_forces = 0
+#external_forces_file = external.conf 
+#type = channel_walls
+#lambda_wall = 6
 
 ##############################
 ####    INPUT / OUTPUT    ####
 ##############################
 topology = test.top
-conf_file = start.conf
+conf_file = start_conf.dat
 trajectory_file = trajectory.dat
-print_conf_interval = 10
-print_energy_every = 1000
-time_scale = linear
 T=0.1
-
-
-#analysis = 1
-#data_output_1 = {
-# name = velocity_field.txt
-# print_every = 1
-# col_1 = {
-#   type = velocity_field
-# }
-#}

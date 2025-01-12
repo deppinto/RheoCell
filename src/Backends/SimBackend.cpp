@@ -309,6 +309,12 @@ bool SimBackend::read_next_configuration(bool binary) {
 
 void SimBackend::apply_simulation_changes_after_equilibration(){
 	interaction->apply_changes_after_equilibration();
+	int i = 0;
+	while(i < N()) {
+		BaseField *p = fields[i];
+		p->set_sub_border();
+		i++;
+	}
 }
 
 void SimBackend::apply_simulation_data_changes() {
