@@ -201,6 +201,7 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 	else if(x_sub_left<=2*border && LsubX==box->getXsize())choose_condition=1;
 	else choose_condition=2;
 
+	std::cout<<"here: "<<choose_condition<<" "<<fieldScalar[734]<<std::endl;
 
 	switch(choose_condition){
 	case 0:
@@ -251,9 +252,10 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 				//if(i==LsubY-1 && j==LsubX-1)std::cout<<"mid: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
 
 				new_box_site = box->getElement(map_sub_to_box[site], displacement[0], displacement[1]);
+				//new_box_site = box->getElementX(map_sub_to_box[site], displacement[0]) + box->getElementY(map_sub_to_box[site], displacement[1]) * box->getXsize();
 
-				xx = (j - displacement[0]);
-				yy = (i - displacement[1]);
+				xx = (j + displacement[0]);
+				yy = (i + displacement[1]);
 				while(yy<0){yy+=LsubY;}
 				while(yy>=LsubY){yy-=LsubY;}
 				while(xx<0){xx+=LsubX;}
@@ -273,8 +275,10 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 					shear_velocity_sign[xx+yy*LsubX] = 0;
 				}
 
-
-				new_field_scalar[xx + yy * LsubX] = fieldScalar[site];
+				if(box->getElementX(new_box_site, 0) == 47 && box->getElementY(new_box_site, 0) == 0)std::cout<<"maybe "<<site<<" "<<xx+yy*LsubX<<" "<<xx<<" "<<yy<<" "<<  shear_velocity_sign[xx+yy*LsubX]<<" "<<displacement[0]<<" "<<displacement[1]<<" "<< j <<" "<<i <<std::endl;
+				if(box->getElementX(new_box_site, 0) == 58 && box->getElementY(new_box_site, 0) == 99)std::cout<<"maybe "<<site<<" "<<xx+yy*LsubX<<" "<<xx<<" "<<yy<<" "<<  shear_velocity_sign[xx+yy*LsubX]<<" "<<displacement[0]<<" "<<displacement[1]<<" "<< j <<" "<<i <<std::endl;
+				//new_field_scalar[xx + yy * LsubX] = fieldScalar[site];
+				new_field_scalar[site] = fieldScalar[xx + yy * LsubX];
 				map_sub_to_box[site] = new_box_site; 
 				map_sub_to_box_x[site] = box->getElementX(new_box_site, 0);
 				map_sub_to_box_y[site] = box->getElementY(new_box_site, 0);
@@ -329,7 +333,7 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 					new_map_sub_to_box[site] = new_box_site; 
 					new_map_sub_to_box_x[site] = box->getElementX(new_box_site, 0);
 					new_map_sub_to_box_y[site] = box->getElementY(new_box_site, 0);
-					if(j+start_site_x>=0 && j<LsubX){
+					if(j+start_site_x>=0 && j+start_site_x<LsubX){
 						site_old = (j+start_site_x) + i * LsubX;
 						new_field_scalar[site] = fieldScalar[site_old];
 						area += new_field_scalar[site] * new_field_scalar[site];
@@ -397,7 +401,8 @@ void LEBcMultiPhaseField::check_borders(int q) {
 	x = (x + offset[0])%LsubX;
 	y = (y + offset[1])%LsubY;
 
-	if(x < x_sub_left)x_sub_left= x;
+	if(x < x_sub_left)x_sub_left = x;
+	if(LsubX - x < x_sub_left)x_sub_left = LsubX - x;
 	if(y < y_sub_bottom)y_sub_bottom=y;
 }
 

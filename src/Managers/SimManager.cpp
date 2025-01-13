@@ -146,7 +146,8 @@ void SimManager::run() {
 	// main loop
 	OX_LOG(Logger::LOG_INFO, "Starting main loop...");
 	for(steps_run = 0; steps_run < steps && !SimManager::stop; steps_run++) {
-		if(backend->current_step() == time_scale_manager.next_step) {
+		//if(backend->current_step() == time_scale_manager.next_step) {
+		if(backend->current_step()>5600 && backend->current_step()<5800) {
 			if(steps_run > 0) {
 				backend->print_conf();
 			}

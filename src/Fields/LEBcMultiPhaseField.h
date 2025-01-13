@@ -35,6 +35,8 @@ public:
 	int GetSubIndex(int site, BaseBox *box);
 	int GetSubXIndex(int site, BaseBox *box);
 	int GetSubYIndex(int site, BaseBox *box);
+
+	virtual void set_sub_border(){border=6;};
 };
 
 #endif /* LEBCMULTIPHASEFIELD_H_ */

@@ -334,7 +334,7 @@ for line in cfile:
         levels = np.arange(0.0, m, step) + step
 
         if variable==1 or variable==2:
-            if pt_num==36:
+            if pt_num==0:
                 cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
             else:
                 cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)
@@ -485,6 +485,8 @@ for line in cfile:
                 elif frame_num<100:
                     plt.savefig('./Video/frame_0'+str(frame_num)+'.png')
                 elif frame_num<1000:
+                    plt.savefig('./Video/frame_'+str(frame_num)+'.png')
+                else:
                     plt.savefig('./Video/frame_'+str(frame_num)+'.png')
             if variable==2 or variable==4:
                 plt.show()

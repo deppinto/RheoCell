@@ -89,7 +89,7 @@ void FD_CPUBackend::first_step(bool store) {
 			temp[3] += phi * p->sin_y_table[y];//sin_y_table[p->map_sub_to_box_y[q]];//GetSubYIndex(q, config_info->box)]; //sin(2*PI*p->GetSubYIndex(q, config_info->box)/box->getYsize());
 			//timer_testing->pause();
 
-			if(!store && phi<0.2 && phi>0.1)p->check_borders(q);
+			if(!store && phi<0.09 && phi>0.01)p->check_borders(q);
 			interaction->resetSums(k);
 			interaction->updateFieldProperties(p, q, k);
 		}
