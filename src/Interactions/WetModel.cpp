@@ -12,7 +12,7 @@ WetModel::WetModel() :
 				zetaQ_self(0),
 				zetaQ_inter(0),
 				J_Q(1),
-				friction_cell(1.),
+				friction_cell(0.),
 				tolerance(0.0001),
 				wall_slip(0.5){
 	a0=PI*R*R;
@@ -89,6 +89,8 @@ void WetModel::set_box(BaseBox *boxArg) {
 	sumQ00.resize(Lx*Ly);
 	sumQ01.resize(Lx*Ly);
 	sum_phi.resize(Lx*Ly);
+	grad_free_energy_x.resize(Lx*Ly);
+	grad_free_energy_y.resize(Lx*Ly);
 	size_store_site_velocity_index.resize(Lx*Ly);
 	store_site_velocity_index.resize(Lx*Ly*store_max_size);
 	store_site_field.resize(Lx*Ly*store_max_size);
@@ -100,6 +102,8 @@ void WetModel::resetSums(int k) {
         sumQ00[k]=0;
         sumQ01[k]=0;
         sum_phi[k]=0;
+	grad_free_energy_x[k]=0.;
+	grad_free_energy_y[k]=0.;
 }
 
 void WetModel::initFieldProperties(BaseField *p) {
@@ -161,21 +165,42 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 		mat_m_x.setZero();
 
 
+	//F_total_x = 0.;
+	//F_total_y = 0.;
+	//number grad_x = 0.;
+	//number grad_y = 0.;
         U = (number) 0;
         for(auto p : fields) {
                 for(int q=0; q<p->subSize;q++)
 			U += f_interaction(p, q);
+
+                /*for(int q=0; q<p->subSize;q++){
+        		grad_free_energy_x[p->map_sub_to_box[q]] += (-1) * 0.5 * p->fieldScalar[q] * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] );
+        		grad_free_energy_y[p->map_sub_to_box[q]] += (-1) * 0.5 * p->fieldScalar[q] * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] );
+        		grad_x += (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] );
+        		grad_y += (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] );
+		}*/
         }
+	//for(int q=0; q<box->getXsize()*box->getYsize();q++){grad_x+=grad_free_energy_x[q];grad_y+=grad_free_energy_y[q];}
+	//std::cout<<"Passive Forces: "<<F_total_x<<" "<<F_total_y<<" "<<grad_x<<" "<<grad_y<<" "<<grad_free_energy_x[0]<<" "<<grad_free_energy_y[0] <<std::endl;
 
 
         K = (number) 0;
 	std::vector<Eigen::Triplet<double>> tri_t_x;
+	//F_total_x = 0.;
+	//F_total_y = 0.;
 	//mat_m_x.setZero();
         for(auto p : fields) {
                 p->Factive = std::vector<number> {0., 0.};
                 p->Fpassive = std::vector<number> {0., 0.};
                 for(int q=0; q<p->subSize;q++){
 			calc_internal_forces(p, q);
+
+			if(friction_cell==0){
+				vec_v_x[q+field_start_index[p->index]] = vec_f_x[q+field_start_index[p->index]]/friction;
+				vec_v_y[q+field_start_index[p->index]] = vec_f_y[q+field_start_index[p->index]]/friction;
+				continue;
+			}
 
 			//populate sparse matrix
 			if(box->getWalls(p->map_sub_to_box[q])<wall_slip)
@@ -225,6 +250,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			}
 		}
         }
+	//std::cout<<"Active Forces: "<<F_total_x<<" "<<F_total_y<<std::endl;
 
 	/*
 	//std::cout<<"start solver: "<<size_rows/2 <<std::endl;
@@ -237,6 +263,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	vec_v_y = solverLU.solve(vec_f_y);
 	*/
 
+	if(friction_cell!=0){
 	//std::cout<<Eigen::nbThreads()<<std::endl;
 	//std::cout<<"start solver: "<<size_rows/2 <<std::endl;
 	mat_m_x.setFromTriplets(tri_t_x.begin(), tri_t_x.end());
@@ -244,6 +271,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	//if(size_rows != size_rows_old){
 	vec_v_x = solverCG.solve(vec_f_x);
 	vec_v_y = solverCG.solve(vec_f_y);
+	}
 	//}
 	//else{
 	//	vec_v_x = solverCG.solveWithGuess(vec_f_x, vec_v_x);
@@ -252,6 +280,39 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	//std::cout << "#iterations:     " << solverCG.iterations() << std::endl;
 	//std::cout << "estimated error: " << solverCG.error()      << std::endl;	
 	//std::cout<<"end solver"<<std::endl;
+
+	/*number V_total_x = 0.;
+	number V_total_y = 0.;
+	F_total_x = 0.;
+	F_total_y = 0.;
+	for(int z=0; z<size_rows;z++){
+		F_total_x += vec_v_x[z];
+		F_total_y += vec_v_y[z];
+	}
+        for(auto p : fields) {
+                for(int q=0; q<p->subSize;q++){
+			//F_total_x += friction * vec_v_x[q+field_start_index[p->index]] + 8 * vec_v_x[q+field_start_index[p->index]];
+			//F_total_y += friction * vec_v_y[q+field_start_index[p->index]] + 8 * vec_v_y[q+field_start_index[p->index]];
+			V_total_x += friction * vec_v_x[q+field_start_index[p->index]];
+			V_total_y += friction * vec_v_y[q+field_start_index[p->index]];
+
+			F_total_x += vec_f_x[q+field_start_index[p->index]];
+			F_total_y += vec_f_y[q+field_start_index[p->index]];
+			for(auto j : neigh_values){
+				other_site_box = box->neighbors[j+p->map_sub_to_box[q]*9];
+				for(int i=0; i<size_store_site_velocity_index[other_site_box]; i++){
+					//F_total_x += (double)(-friction_cell*p->fieldScalar[q]/sum_phi[p->map_sub_to_box[q]]) * vec_v_x[q+store_site_velocity_index[i+other_site_box*store_max_size]];
+					//F_total_y += (double)(-friction_cell*p->fieldScalar[q]/sum_phi[p->map_sub_to_box[q]]) * vec_v_y[q+store_site_velocity_index[i+other_site_box*store_max_size]];
+					V_total_x += (double)(-friction_cell) * vec_v_x[store_site_velocity_index[i+other_site_box*store_max_size]];
+					V_total_y += (double)(-friction_cell) * vec_v_y[store_site_velocity_index[i+other_site_box*store_max_size]];
+					V_total_x += (double)(friction_cell) * vec_v_x[q+field_start_index[p->index]];
+					V_total_y += (double)(friction_cell) * vec_v_y[q+field_start_index[p->index]];
+				}
+			}
+		}
+	}
+	std::cout<<"velocities: "<<V_total_x<<" "<<V_total_y<<" "<< F_total_x<<" "<<F_total_y <<std::endl;*/
+
 }
 
 void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
@@ -292,13 +353,14 @@ number WetModel::f_interaction(BaseField *p, int q) {
 	number laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[7+k*9]] + phi2[box->neighbors[3+k*9]] +  phi2[box->neighbors[1+k*9]] - 4.*phi2[k];
 
 	// CH term coupled to chemical
-	number CH =+ gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*laplacianPhi);
+	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*laplacianPhi);
+	//number CH = gamma*(8*p->fieldScalar[q]*(p->fieldScalar[q]-1)*(2*p->fieldScalar[q]-1)/lambda - 2*lambda*laplacianPhi);
    
 	// area conservation term
-	number A = - 4*mu/a0*(1-p->area/a0)*p->fieldScalar[q];
+	number A = - 4*(mu/a0)*(1-p->area/a0)*p->fieldScalar[q];
 
 	// repulsion term
-	number Rep = + 4*kappa/lambda*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
+	number Rep = 4*(kappa/lambda)*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
 
 	// adhesion term
 	number lsquare = 2 * p->fieldScalar[q] * laplacianPhi + 2 * (dx * dx + dy * dy);
@@ -307,7 +369,9 @@ number WetModel::f_interaction(BaseField *p, int q) {
 
 	// delta F / delta phi_i
 	number V = CH + A + Rep + Adh;
+	//if(p->index==0 && q==0)std::cout<<p->freeEnergy[q]<<" "<<p->LsubX<<" "<<p->LsubY<<" "<< p->neighbors_sub[5+q*9]<<" "<< p->neighbors_sub[3+q*9]<<" "<< p->neighbors_sub[7+q*9]<<" "<<p->neighbors_sub[1+q*9]<<" "<<CH<<" "<<A<<" "<<Rep<<std::endl;
 	p->freeEnergy[q] += V;
+	//if(p->index==0 && q==0)std::cout<<"Free energy: "<<p->freeEnergy[q]<<" "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<<dx<<" "<<dy <<std::endl;
 
 	return V;
 }
@@ -317,6 +381,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 
         //int  k  = p->GetSubIndex(q, box);
 	int k = p->map_sub_to_box[q];
+
+	//if(p->index==0 && q==0)std::cout<<"Forces: "<< p->freeEnergy[q]*p->fieldDX[q] <<" "<< p->freeEnergy[q]*p->fieldDY[q]<<" "<<  0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] )  << " "<< 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] ) <<std::endl;
 
 	//passive (passive force)
 	p->Fpassive[0] += p->freeEnergy[q]*p->fieldDX[q];
@@ -342,8 +408,25 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	else v0*=-1;*/
 
 	if(box->getWalls(k)<wall_slip){
-		vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
-		vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		//if(p->index==0){
+		//F_total_x += p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		//F_total_y += p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		//F_total_x += p->fieldScalar[q] * grad_free_energy_x[k] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		//F_total_y += p->fieldScalar[q] * grad_free_energy_y[k] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+        	//F_total_x += (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] ) + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+        	//F_total_y += (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] ) + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		//}
+		//F_total_x += p->freeEnergy[q] * p->fieldDX[q];
+		//F_total_y += p->freeEnergy[q] * p->fieldDY[q];
+		//if(abs(fQ_self_x * zetaQ_self)>F_total_x) F_total_x = fQ_self_x * zetaQ_self;
+		//if(abs(fQ_self_y * zetaQ_self)>F_total_y) F_total_y = fQ_self_y * zetaQ_self;
+		//F_total_x += fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		//F_total_y += fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+
+		//vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		//vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		vec_f_x[q+field_start_index[p->index]] = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] ) + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		vec_f_y[q+field_start_index[p->index]] = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] ) + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 	}
 	else{
 		vec_f_x[q+field_start_index[p->index]] = 0.;

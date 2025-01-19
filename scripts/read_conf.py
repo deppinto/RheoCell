@@ -105,14 +105,14 @@ for line in cfile:
     X, Y = np.meshgrid(x, y)
     #axs = _axs.flatten()
 
-    step = 0.01
+    step = 0.001
     m = np.amax(Z)
     #if m<0.000001:
         #continue
 
     levels = np.arange(0.0, m, step) + step
     cmap=cm.winter
-    if pt_num==0:
+    if pt_num==29:
         cset1 = plt.contour(X, Y, Z, levels, cmap=cmap, alpha=0.5)
     else:
         cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cmap, alpha=0.5)

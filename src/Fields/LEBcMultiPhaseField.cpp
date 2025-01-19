@@ -181,6 +181,58 @@ void LEBcMultiPhaseField::setNeighborsSubSquarePeriodic() {
 	}
 }
 
+void LEBcMultiPhaseField::update_positions(BaseBox *box) {
+	int x,y,xx,yy,ss;
+	for(int i =0; i<subSize; i++) {
+		if(map_sub_to_box_y[i]!=0 && map_sub_to_box_y[i]!=box->getYsize()-1)continue;
+		y=i/LsubX;
+		x=i-y*LsubX;
+		ss=0;
+		for(int j=-1; j<=1; j++){
+			for(int k=-1; k<=1; k++){
+				xx=x+k;
+				yy=y+j;
+
+				if(x==0 && k==-1)xx=LsubX-1;
+				else if(x==LsubX-1 && k==1)xx=0;
+				if(y==0 && j==-1)yy=LsubY-1;
+				else if(y==LsubY-1 && j==1)yy=0;
+
+				if(map_sub_to_box_y[i]==0 && j==-1){
+					xx = xx + (int)box->get_shear_displacement();
+					while(xx>=LsubX)xx-=LsubX;
+				}
+				else if(map_sub_to_box_y[i]==box->getYsize()-1 && j==1){
+					xx = xx - (int)box->get_shear_displacement();
+					while(xx<0)xx+=LsubX;
+				}
+
+				neighbors_sub[ss+i*9]=xx+yy*LsubX;
+				ss++;
+			}
+		}
+	}
+
+
+	/*int x, y, xx, yy;
+	for(int i =0; i<subSize; i++) {
+		y = i/LsubX;
+		x = i - y * LsubX;
+		if(int(sub_corner_bottom_left/box->getXsize())+y<box->getYsize())continue;
+
+		yy = sub_corner_bottom_left / box->getXsize();
+		xx = sub_corner_bottom_left - yy * box->getXsize();
+		xx += x;
+		if(xx>=box->getXsize())xx-=box->getXsize();
+		map_sub_to_box_x[i] = xx - int(box->get_shear_displacement());
+		
+		if(map_sub_to_box_x[i]<0)map_sub_to_box_x[i]+=box->getXsize();
+		map_sub_to_box[i] = map_sub_to_box_x[i] + map_sub_to_box_y[i] * box->getXsize();
+		//if(i==subSize-1){std::cout<<"here--------------"<<map_sub_to_box[i]<<" "<<map_sub_to_box_x[i]<<" "<<map_sub_to_box_x[0]<<std::endl;}
+	}*/
+
+}
+
 void LEBcMultiPhaseField::set_positions_initial(BaseBox *box) {
 	int x=CoM[0];
 	int y=CoM[1];
@@ -201,7 +253,7 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 	else if(x_sub_left<=2*border && LsubX==box->getXsize())choose_condition=1;
 	else choose_condition=2;
 
-	std::cout<<"here: "<<choose_condition<<" "<<fieldScalar[734]<<std::endl;
+	//std::cout<<"here: "<<choose_condition<<" "<<fieldScalar[734]<<std::endl;
 
 	switch(choose_condition){
 	case 0:
@@ -213,7 +265,8 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 		{
 		sub_corner_bottom_left_old = sub_corner_bottom_left;
 		std::vector<int> displacement = std::vector<int> {int(CoM[0])-int(LsubX/2) , int(CoM[1])-int(LsubY/2)};
-		int new_sub_corner_bottom_left = box->getElement(sub_corner_bottom_left, displacement[0], displacement[1]);
+		//int new_sub_corner_bottom_left = box->getElement(sub_corner_bottom_left, displacement[0], displacement[1]);
+		int new_sub_corner_bottom_left = box->getElementX(sub_corner_bottom_left, displacement[0]) + box->getElementY(sub_corner_bottom_left, displacement[1]) * box->getXsize();
 
 		//if(index==10)std::cout<<"Before: "<< CoM_old[0]<<" "<<CoM_old[1]<<" "<<CoM[0]<<" "<<CoM[1]<<" "<< LsubX/2<<" "<<LsubY/2<<" "<<(int)CoM[0]-(int)LsubX/2  <<" "<< (int)CoM[1]-(int)LsubY/2 << " "<<new_sub_corner_bottom_left <<" "<< sub_corner_bottom_left<<" "<<sub_corner_bottom_left/box->getXsize()  <<std::endl;
 
@@ -223,12 +276,13 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 			return;
 		}
 		else{
-			int siteCoM = box->getElement(((int)CoM_old[0] + (int)CoM_old[1] * box->getXsize()), (int)CoM[0]-(int)LsubX/2, (int)CoM[1]-(int)LsubY/2);
+			//int siteCoM = box->getElement(((int)CoM_old[0] + (int)CoM_old[1] * box->getXsize()), (int)CoM[0]-(int)LsubX/2, (int)CoM[1]-(int)LsubY/2);
+			int siteCoM = box->getElementX(((int)CoM_old[0] + (int)CoM_old[1] * box->getXsize()) , displacement[0]) + box->getElementY(((int)CoM_old[0] + (int)CoM_old[1] * box->getXsize()) , displacement[1]) * box->getXsize();
 			CoM[1] = int(siteCoM / box->getXsize()) + (CoM[1]-int(CoM[1]));
 			CoM[0] = int(siteCoM - int(siteCoM / box->getXsize()) * box->getXsize()) + (CoM[0]-int(CoM[0]));
 		}
 
-		//if(index==36)std::cout<<"First: "<< CoM_old[0]<<" "<<CoM_old[1]<<" "<<CoM[0]<<" "<<CoM[1]<<" "<< LsubX/2<<" "<<LsubY/2<<" "<<(int)CoM[0]-(int)LsubX/2  <<" "<< (int)CoM[1]-(int)LsubY/2 << " "<<new_sub_corner_bottom_left <<" "<< sub_corner_bottom_left<<" "<<sub_corner_bottom_left/box->getXsize()<<" "<< new_sub_corner_bottom_left - new_sub_corner_bottom_left/box->getXsize() * box->getXsize() <<" "<< sub_corner_bottom_left - sub_corner_bottom_left/box->getXsize() * box->getXsize()  <<std::endl;
+		//if(index==0)std::cout<<"First: "<< CoM_old[0]<<" "<<CoM_old[1]<<" "<<CoM[0]<<" "<<CoM[1]<<" "<< LsubX/2<<" "<<LsubY/2<<" "<<(int)CoM[0]-(int)LsubX/2  <<" "<< (int)CoM[1]-(int)LsubY/2 << " "<<new_sub_corner_bottom_left <<" "<< sub_corner_bottom_left<<" "<<sub_corner_bottom_left/box->getXsize()<<" "<< new_sub_corner_bottom_left - new_sub_corner_bottom_left/box->getXsize() * box->getXsize() <<" "<< sub_corner_bottom_left - sub_corner_bottom_left/box->getXsize() * box->getXsize()<<" "<<displacement[0]<<" "<<displacement[1]  <<std::endl;
 
 		//if(index==36 && sub_corner_bottom_left - sub_corner_bottom_left/box->getXsize() * box->getXsize()==107)exit (911);
 
@@ -251,8 +305,8 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 
 				//if(i==LsubY-1 && j==LsubX-1)std::cout<<"mid: "<<xx+yy*LsubX<<" "<<site<<" "<<displacement[0]<<" "<<displacement[1]<<" "<<xx<<" "<<yy<<" "<< map_sub_to_box_x[site]<<" "<<map_sub_to_box_y[site] <<" "<<j<<" "<<i<<std::endl;
 
-				new_box_site = box->getElement(map_sub_to_box[site], displacement[0], displacement[1]);
-				//new_box_site = box->getElementX(map_sub_to_box[site], displacement[0]) + box->getElementY(map_sub_to_box[site], displacement[1]) * box->getXsize();
+				//new_box_site = box->getElement(map_sub_to_box[site], displacement[0], displacement[1]);
+				new_box_site = box->getElementX(map_sub_to_box[site], displacement[0]) + box->getElementY(map_sub_to_box[site], displacement[1]) * box->getXsize();
 
 				xx = (j + displacement[0]);
 				yy = (i + displacement[1]);
@@ -261,7 +315,7 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 				while(xx<0){xx+=LsubX;}
 				while(xx>=LsubX){xx-=LsubX;}
 
-				if(box->getElementY(new_box_site, 0)-map_sub_to_box_y[site]>=box->getYsize()/2){
+				/*if(box->getElementY(new_box_site, 0)-map_sub_to_box_y[site]>=box->getYsize()/2){
 					xx = int(xx + int(box->get_shear_displacement()));
 					while(xx>=LsubX)xx-=LsubX;
 					shear_velocity_sign[xx+yy*LsubX] = 1;
@@ -273,10 +327,10 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 				}
 				else{
 					shear_velocity_sign[xx+yy*LsubX] = 0;
-				}
+				}*/
 
-				if(box->getElementX(new_box_site, 0) == 47 && box->getElementY(new_box_site, 0) == 0)std::cout<<"maybe "<<site<<" "<<xx+yy*LsubX<<" "<<xx<<" "<<yy<<" "<<  shear_velocity_sign[xx+yy*LsubX]<<" "<<displacement[0]<<" "<<displacement[1]<<" "<< j <<" "<<i <<std::endl;
-				if(box->getElementX(new_box_site, 0) == 58 && box->getElementY(new_box_site, 0) == 99)std::cout<<"maybe "<<site<<" "<<xx+yy*LsubX<<" "<<xx<<" "<<yy<<" "<<  shear_velocity_sign[xx+yy*LsubX]<<" "<<displacement[0]<<" "<<displacement[1]<<" "<< j <<" "<<i <<std::endl;
+				//if(box->getElementX(new_box_site, 0) == 47 && box->getElementY(new_box_site, 0) == 0)std::cout<<"maybe "<<site<<" "<<xx+yy*LsubX<<" "<<xx<<" "<<yy<<" "<<  shear_velocity_sign[xx+yy*LsubX]<<" "<<displacement[0]<<" "<<displacement[1]<<" "<< j <<" "<<i <<std::endl;
+				//if(box->getElementX(new_box_site, 0) == 58 && box->getElementY(new_box_site, 0) == 99)std::cout<<"maybe "<<site<<" "<<xx+yy*LsubX<<" "<<xx<<" "<<yy<<" "<<  shear_velocity_sign[xx+yy*LsubX]<<" "<<displacement[0]<<" "<<displacement[1]<<" "<< j <<" "<<i <<std::endl;
 				//new_field_scalar[xx + yy * LsubX] = fieldScalar[site];
 				new_field_scalar[site] = fieldScalar[xx + yy * LsubX];
 				map_sub_to_box[site] = new_box_site; 
@@ -289,6 +343,7 @@ void LEBcMultiPhaseField::set_positions(BaseBox *box) {
 
 		sub_corner_bottom_left = new_sub_corner_bottom_left;
 		fieldScalar = new_field_scalar;
+		setNeighborsSub();
 		break;
 		}
 	case 2:

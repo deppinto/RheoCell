@@ -25,6 +25,7 @@ public:
 
 	void set_positions_initial(BaseBox *box);
 	void set_positions(BaseBox *box);
+	void update_positions(BaseBox *box);
 	void set_positions(int offsetx, int offsety, int corner, int corner_x, int corner_y, int size_x);
 	void set_properties_to_zero();
 	void init();

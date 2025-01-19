@@ -106,7 +106,7 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 		bool inserted = false;
 		do {
 			p->CoM = std::vector<number> {drand48() * box->getXsize(), drand48() * box->getYsize()};
-			if(i==0)p->CoM = std::vector<number> {50, 3};
+			//if(i==0)p->CoM = std::vector<number> {50, 3};
 			//if(i==1)p->CoM = std::vector<number> {75, 53};
 
 			p->set_positions_initial(box);
