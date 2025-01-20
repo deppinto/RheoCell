@@ -238,11 +238,11 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 					
 					if(box->getWalls(p->map_sub_to_box[q])<wall_slip){
 						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction_cell)));
-						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell)));
+						tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell)));
 						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction_cell)*weight));
 						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell)*weight));
 						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*store_site_field[i+other_site_box*store_max_size]/sum_phi[other_site_box])));
-						tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*p->fieldScalar[q]/sum_phi[p->map_sub_to_box[q]])));
+						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*p->fieldScalar[q]/sum_phi[p->map_sub_to_box[q]])));
 					}
 
 					//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(friction_cell*p->fieldScalar[other_site_patch]/sum_phi[other_site_box])));
@@ -423,10 +423,10 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 		//F_total_x += fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//F_total_y += fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 
-		//vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
-		//vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
-		vec_f_x[q+field_start_index[p->index]] = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] ) + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
-		vec_f_y[q+field_start_index[p->index]] = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] ) + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		//vec_f_x[q+field_start_index[p->index]] = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] ) + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		//vec_f_y[q+field_start_index[p->index]] = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] ) + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 	}
 	else{
 		vec_f_x[q+field_start_index[p->index]] = 0.;
