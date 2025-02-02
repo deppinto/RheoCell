@@ -54,7 +54,7 @@ void BaseInteraction::resetSums(int k){
 }
 
 void BaseInteraction::updateFieldProperties(BaseField *p, int q, int k){
-	p->freeEnergy[q] = p->set_F_ext(k, p->fieldScalar[q], box->getWalls(k));
+	p->freeEnergy[q] = p->set_F_ext(q, box->getWalls(k), box->getLaplacianWalls(k));
 }
 
 void BaseInteraction::update_sub_to_box_map(BaseField *p, int q, int sub_site, int sub_site_x, int sub_site_y){

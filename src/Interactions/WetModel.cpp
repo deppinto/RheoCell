@@ -11,7 +11,7 @@ WetModel::WetModel() :
 				friction(1.),
 				zetaQ_self(0),
 				zetaQ_inter(0),
-				J_Q(1),
+				J_Q(0.1),
 				friction_cell(0.),
 				tolerance(0.0001),
 				wall_slip(0.5){
@@ -34,7 +34,7 @@ void WetModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "kappa", &kappa, 0);
 	getInputNumber(&inp, "zetaQ_self", &zetaQ_self_active, 0);
 	getInputNumber(&inp, "zetaQ_inter", &zetaQ_inter_active, 0);
-	getInputNumber(&inp, "J_Q", &J_Q, 0);
+	getInputNumber(&inp, "J_Q", &J_Q_active, 0);
 	getInputBool(&inp, "anchoring", &anchoring, 0);
 	getInputNumber(&inp, "friction_cell", &friction_cell_active, 0);
 	getInputNumber(&inp, "friction", &friction_active, 0);
@@ -76,6 +76,7 @@ void WetModel::allocate_fields(std::vector<BaseField *> &fields) {
 void WetModel::apply_changes_after_equilibration(){
 	zetaQ_self=zetaQ_self_active;
 	zetaQ_inter=zetaQ_inter_active;
+	J_Q=J_Q_active;
 	friction=friction_active;
 	friction_cell=friction_cell_active;
 }
@@ -108,9 +109,30 @@ void WetModel::resetSums(int k) {
 
 void WetModel::initFieldProperties(BaseField *p) {
 
+	//number ytop, ybottom, xleft, xright;
 	for(int q=0; q<p->subSize;q++) {
 		int k = p->GetSubIndex(q, box);
 		BaseInteraction::updateFieldProperties(p, q, k);
+
+		/*if(p->neighbors_sub[5+q*9]==-1)xright=p->fieldScalar[q];
+		else xright=p->fieldScalar[p->neighbors_sub[5+q*9]];
+		if(p->neighbors_sub[3+q*9]==-1)xleft=p->fieldScalar[q];
+		else xleft=p->fieldScalar[p->neighbors_sub[3+q*9]];
+		if(p->neighbors_sub[7+q*9]==-1)ytop=p->fieldScalar[q];
+		else ytop=p->fieldScalar[p->neighbors_sub[7+q*9]];
+		if(p->neighbors_sub[1+q*9]==-1)ybottom=p->fieldScalar[q];
+		else ybottom=p->fieldScalar[p->neighbors_sub[1+q*9]];
+		if(p->neighbors_sub[5+q*9]==-1)xright=0;
+		else xright=p->fieldScalar[p->neighbors_sub[5+q*9]];
+		if(p->neighbors_sub[3+q*9]==-1)xleft=0;
+		else xleft=p->fieldScalar[p->neighbors_sub[3+q*9]];
+		if(p->neighbors_sub[7+q*9]==-1)ytop=0;
+		else ytop=p->fieldScalar[p->neighbors_sub[7+q*9]];
+		if(p->neighbors_sub[1+q*9]==-1)ybottom=0;
+		else ybottom=p->fieldScalar[p->neighbors_sub[1+q*9]];
+	        number dx = .5*( xright - xleft );
+	        number dy = .5*( ytop - ybottom );*/
+
 	        number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
 	        number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
 	        p->fieldDX[q] = dx;
@@ -123,11 +145,14 @@ void WetModel::initFieldProperties(BaseField *p) {
 
 
 void WetModel::updateFieldProperties(BaseField *p, int q, int k) {
-	BaseInteraction::updateFieldProperties(p, q, k);
+	/*BaseInteraction::updateFieldProperties(p, q, k);
 	number dx = p->fieldDX[q]; 
 	number dy = p->fieldDY[q]; 
 	p->S00 += -0.5*(dx*dx-dy*dy);
-	p->S01 += -dx*dy;
+	p->S01 += -dx*dy;*/
+
+	p->S00 += -0.5*(p->fieldDX[q]*p->fieldDX[q]-p->fieldDY[q]*p->fieldDY[q]);
+	p->S01 += -p->fieldDX[q]*p->fieldDY[q];
 }
 
 
@@ -226,6 +251,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 			for(auto j : neigh_values){
 				//other_site_patch = p->neighbors_sub[j+q*9];
+				//other_site_box = p->map_sub_to_box[other_site_patch];
 				other_site_box = box->neighbors[j+p->map_sub_to_box[q]*9];
 				//if(sum_phi[p->map_sub_to_box[q]]==0)continue;
 				//if(sum_phi[other_site_box]==0)continue;
@@ -284,23 +310,44 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	//std::cout << "estimated error: " << solverCG.error()      << std::endl;	
 	//std::cout<<"end solver"<<std::endl;
 
-	/*number V_total_x = 0.;
+	/*number V_All_x=0.;
+	number V_All_y=0.;
+	number V_CoM_x=0.;
+	number V_CoM_y=0.;
+	number F_CoM_x=0.;
+	number F_CoM_y=0.;
+	number V_total_x = 0.;
 	number V_total_y = 0.;
+	number V_phi_x=0.;
+	number V_phi_y=0.;
+	number F_phi_x=0.;
+	number F_phi_y=0.;
 	F_total_x = 0.;
 	F_total_y = 0.;
-	for(int z=0; z<size_rows;z++){
-		F_total_x += vec_v_x[z];
-		F_total_y += vec_v_y[z];
-	}
+	//for(int z=0; z<size_rows;z++){
+	//	F_total_x += vec_v_x[z];
+	//	F_total_y += vec_v_y[z];
+	//}
         for(auto p : fields) {
                 for(int q=0; q<p->subSize;q++){
 			//F_total_x += friction * vec_v_x[q+field_start_index[p->index]] + 8 * vec_v_x[q+field_start_index[p->index]];
 			//F_total_y += friction * vec_v_y[q+field_start_index[p->index]] + 8 * vec_v_y[q+field_start_index[p->index]];
 			V_total_x += friction * vec_v_x[q+field_start_index[p->index]];
 			V_total_y += friction * vec_v_y[q+field_start_index[p->index]];
+			V_All_x += vec_v_x[q+field_start_index[p->index]];
+			V_All_y += vec_v_y[q+field_start_index[p->index]];
+			V_phi_x += p->fieldScalar[q] * vec_v_x[q+field_start_index[p->index]];
+			V_phi_y += p->fieldScalar[q] * vec_v_y[q+field_start_index[p->index]];
 
 			F_total_x += vec_f_x[q+field_start_index[p->index]];
 			F_total_y += vec_f_y[q+field_start_index[p->index]];
+			F_phi_x += p->fieldScalar[q] * vec_f_x[q+field_start_index[p->index]];
+			F_phi_y += p->fieldScalar[q] * vec_f_y[q+field_start_index[p->index]];
+
+			V_CoM_x += p->fieldScalar[q] * vec_v_x[q+field_start_index[p->index]] / p->area;
+			V_CoM_y += p->fieldScalar[q] * vec_v_y[q+field_start_index[p->index]] / p->area;
+			F_CoM_x += p->fieldScalar[q] * vec_f_x[q+field_start_index[p->index]] / p->area;
+			F_CoM_y += p->fieldScalar[q] * vec_f_y[q+field_start_index[p->index]] / p->area;
 			for(auto j : neigh_values){
 				other_site_box = box->neighbors[j+p->map_sub_to_box[q]*9];
 				for(int i=0; i<size_store_site_velocity_index[other_site_box]; i++){
@@ -314,7 +361,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			}
 		}
 	}
-	std::cout<<"velocities: "<<V_total_x<<" "<<V_total_y<<" "<< F_total_x<<" "<<F_total_y <<std::endl;*/
+	std::cout<<"velocities: "<<V_total_x<<" "<<V_total_y<<" "<< F_total_x<<" "<<F_total_y <<" "<<V_CoM_x<<" "<<V_CoM_y<<" "<<F_CoM_x<<" "<<F_CoM_y<<" "<<V_All_x<<" "<<V_All_y<<" "<<V_phi_x<<" "<<V_phi_y<<" "<<F_phi_x<<" "<<F_phi_y <<" " << vec_f_x[450]<<" "<< vec_f_y[450] << std::endl;*/
 
 }
 
@@ -328,13 +375,26 @@ void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 
 	BaseInteraction::update_sub_to_box_map(p, q, k, p->GetSubXIndex(q, box), p->GetSubYIndex(q, box));
 
+        p->fieldDX[q] = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
+	if(box->getWalls(k)<wall_slip){
+        	p->fieldDY[q] = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+		p->laplacianPhi[q] = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] - 4.*p->fieldScalar[q];
+	}
+	else{
+        	p->fieldDY[q] = 0.;
+		p->laplacianPhi[q] = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + - 4.*p->fieldScalar[q];
+	}
+
+	BaseInteraction::updateFieldProperties(p, q, k);
+
+
 	if(size_store_site_velocity_index[k]>=store_max_size){
 		for(int m=0; m<size_store_site_velocity_index[k];m++){
 			std::cout<<"Too many fields list: "<<store_site_velocity_index[m+k*store_max_size]<<std::endl;
 		}	
 		throw RCexception("Too many field patches overlap: %d, %d, %d, %d, %d, %d", p->index, k, q, p->sub_corner_bottom_left, p->GetSubXIndex(q, box), p->GetSubYIndex(q, box));
 	}
-	//store_site_velocity_index[size_store_site_velocity_index[k]+k*store_max_size]=q+p->index*p->subSize;
+
 	store_site_velocity_index[size_store_site_velocity_index[k]+k*store_max_size]=q+field_start_index[p->index];
 	store_site_field[size_store_site_velocity_index[k]+k*store_max_size]=p->fieldScalar[q];
 	size_store_site_velocity_index[k]++;
@@ -344,19 +404,52 @@ number WetModel::f_interaction(BaseField *p, int q) {
 
 	//int  k  = p->GetSubIndex(q, box);
 	int k = p->map_sub_to_box[q];
-        number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
-        number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
-        p->fieldDX[q] = dx;
-        p->fieldDY[q] = dy;
+
+
+        //number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
+        //number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+
+	//number ytop, ybottom, xleft, xright;
+	/*if(p->neighbors_sub[5+q*9]==-1)xright=p->fieldScalar[q];
+	else xright=p->fieldScalar[p->neighbors_sub[5+q*9]];
+	if(p->neighbors_sub[3+q*9]==-1)xleft=p->fieldScalar[q];
+	else xleft=p->fieldScalar[p->neighbors_sub[3+q*9]];
+	if(p->neighbors_sub[7+q*9]==-1)ytop=p->fieldScalar[q];
+	else ytop=p->fieldScalar[p->neighbors_sub[7+q*9]];
+	if(p->neighbors_sub[1+q*9]==-1)ybottom=p->fieldScalar[q];
+	else ybottom=p->fieldScalar[p->neighbors_sub[1+q*9]];
+	if(p->neighbors_sub[5+q*9]==-1)xright=0;
+	else xright=p->fieldScalar[p->neighbors_sub[5+q*9]];
+	if(p->neighbors_sub[3+q*9]==-1)xleft=0;
+	else xleft=p->fieldScalar[p->neighbors_sub[3+q*9]];
+	if(p->neighbors_sub[7+q*9]==-1)ytop=0;
+	else ytop=p->fieldScalar[p->neighbors_sub[7+q*9]];
+	if(p->neighbors_sub[1+q*9]==-1)ybottom=0;
+	else ybottom=p->fieldScalar[p->neighbors_sub[1+q*9]];
+	number dx = .5*( xright - xleft );
+	number dy = .5*( ytop - ybottom );*/
+
+
+        //p->fieldDX[q] = dx;
+        //p->fieldDY[q] = dy;
 
 	//this part gets the field values in teh respective directions from q;
 	//It is hardcoded so take care, the relvant part is that the lattice is square;
 	//The neighbors start form the top and rotate couterclockwise.
-	number laplacianPhi = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] - 4.*p->fieldScalar[q];
-	number laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[7+k*9]] + phi2[box->neighbors[3+k*9]] +  phi2[box->neighbors[1+k*9]] - 4.*phi2[k];
+
+	//number laplacianPhi = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] - 4.*p->fieldScalar[q];
+	//number laplacianPhi = xright + ytop + xleft + ybottom - 4.*p->fieldScalar[q];
+
+	number laplacianSquare;
+	if(box->getWalls(k)<wall_slip){
+		laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[7+k*9]] + phi2[box->neighbors[3+k*9]] +  phi2[box->neighbors[1+k*9]] - 4.*phi2[k];
+	}
+	else{
+		laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[3+k*9]] - 4.*phi2[k];
+	}
 
 	// CH term coupled to chemical
-	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*laplacianPhi);
+	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*p->laplacianPhi[q]);
 	//number CH = gamma*(8*p->fieldScalar[q]*(p->fieldScalar[q]-1)*(2*p->fieldScalar[q]-1)/lambda - 2*lambda*laplacianPhi);
    
 	// area conservation term
@@ -366,7 +459,7 @@ number WetModel::f_interaction(BaseField *p, int q) {
 	number Rep = 4*(kappa/lambda)*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
 
 	// adhesion term
-	number lsquare = 2 * p->fieldScalar[q] * laplacianPhi + 2 * (dx * dx + dy * dy);
+	number lsquare = 2 * p->fieldScalar[q] * p->laplacianPhi[q] + 2 * (p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q]);
 	number suppress = (laplacianSquare-lsquare)/sqrt(1+(laplacianSquare-lsquare)*(laplacianSquare-lsquare));
 	number Adh = - 4*lambda*omega*suppress*p->fieldScalar[q];
 
@@ -457,7 +550,34 @@ void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
 void WetModel::update_anchoring(BaseField*p){
 
-	number delta = -PI/12;
+	number walls_length = 8;
+	number dist1 = ((double)p->CoM_old[1] - walls_length);
+	number dist2 = ((double)box->getYsize() - walls_length) - (double)p->CoM_old[1];
+	number theta;
+	if(dist1<dist2) theta = (PI/2) - (PI/2) * dist1 / (((double)box->getYsize() - 2 * walls_length)/2);
+	else theta = (PI/2) + ((PI/2) * dist2 / (((double)box->getYsize() - 2 * walls_length)/2));
+
+	//std::cout<<"values: "<<p->index<<" "<<p->CoM[1]<<" "<<theta<<std::endl;
+
+	/*p->Q00=0.5*cos(2*theta);
+	p->Q01=0.5*sin(2*theta);
+    	number nemQ_mod = sqrt(p->Q00 * p->Q00 + p->Q01 * p->Q01);
+    	number nx = sqrt((1 + p->Q00/nemQ_mod)/2);
+	number sgn;
+	if(p->Q01>0)sgn=1;
+	else if(p->Q01<0) sgn=-1;
+	else sgn=0;
+    	number ny = sgn*sqrt((1 - p->Q00/nemQ_mod)/2);
+	p->nemQ[0]=nx;
+	p->nemQ[1]=ny;*/
+
+	p->nemQ[0]=cos(theta);
+	p->nemQ[1]=sin(theta);
+	p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
+	p->Q01 = p->nemQ[0] * p->nemQ[1];
+
+
+	/*number delta = -PI/12;
 	number theta = 0;
 	number S = 0.5;
 
@@ -470,5 +590,5 @@ void WetModel::update_anchoring(BaseField*p){
 		theta = -(PI/2 + delta);
 		p->Q00 = S * cos(2*theta);
 		p->Q01 = S * sin(2*theta);
-	}
+	}*/
 }

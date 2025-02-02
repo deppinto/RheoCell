@@ -22,6 +22,43 @@ def set_walls(lx,ly, walls):
         for x in range(lx):
             k = x + y * lx
             walls[k] = exp(-float(y)/5) + exp(-float(ly-y-1)/5)
+            
+def rotate(n,p):
+    '''
+    takes as arguments a vector n and an integer p
+    rotates v by 2pi/p and returns the result
+    '''
+
+    t = 2*np.pi/p
+    nx = cos(t)*n[0] - sin(t)*n[1]
+    ny = sin(t)*n[0] + sin(t)*n[1]
+    return [nx,ny]
+
+def wang(a, b):
+    """Infamous chinese function"""
+    p = 2.
+    ang = atan2(abs(a[0]*b[1]-a[1]*b[0]), a[0]*b[0]+a[1]*b[1])
+    while(abs(ang) > np.pi/p + 1e-3):
+        b = rotate(b,p)
+        ang = atan2(abs(a[0]*b[1]-a[1]*b[0]), a[0]*b[0]+a[1]*b[1])
+
+    m = a[0]*b[1]-a[1]*b[0]
+    return -np.sign(m)*atan2(abs(m), a[0]*b[0]+a[1]*b[1])
+
+def collapse(i, j, s, LX, LY, w, x=0, y=0, n=0,rng = [0.4,0.6]):
+    if (s*w[i][j] > rng[0]) and (s*w[i][j] < rng[1]):
+        w[i][j] = 0
+        x1,y1,n1 = collapse((i+1) % LY, j, s, LX, LY, w, x, y, n,rng)
+        x2,y2,n2 = collapse((i-1+LY) % LY, j, s, LX, LY, w, x, y, n, rng)
+        x3,y3,n3 = collapse(i, (j+1) % LX, s, LX, LY, w, x, y, n, rng)
+        x4,y4,n4 = collapse(i, (j-1+LX) % LX, s, LX, LY, w, x, y, n, rng)
+        x = j + x1 + x2 +x3 +x4
+        y = i + y1 + y2 +y3 +y4
+        n = 1 + n1 + n2 +n3 +n4
+        return x,y,n
+    else:
+        return 0,0,0
+
 
 seed=4982
 eq_steps=0
@@ -162,6 +199,14 @@ timeavg_nematic_grid_coarse_01=[[0. for j in range(0, sizex_coarse)] for i in ra
 timeavg_n_coarse=[[0. for j in range(0, sizex_coarse)] for i in range(0,sizey_coarse)]
 
 
+Q00_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+Q01_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+n_grid=[[0. for j in range(0, lx)] for i in range(0, ly)]
+Q00_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+Q01_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+size_grid = 2*R
+
+
 lambda_wall+=2
 lambda_wall=0
 
@@ -208,6 +253,9 @@ for line in cfile:
         nematic_grid_coarse_00=[[0. for j in range(0, sizex_coarse)] for i in range(0,sizey_coarse)]
         nematic_grid_coarse_01=[[0. for j in range(0, sizex_coarse)] for i in range(0,sizey_coarse)]
         n_coarse=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
+        Q00_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+        Q01_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+        n_grid=[[0. for j in range(0, lx)] for i in range(0, ly)]
         #walls = [0. for i in range(lx*ly)]
         #set_walls(lx,ly,walls)
 
@@ -238,10 +286,13 @@ for line in cfile:
             Z[yy][xx]=value
             area[pt_num]+=value*value
 
-            if cont_line>N+2 and yy>=int(ceil(2*lambda_wall)/2) and yy<ly-int(ceil(2*lambda_wall)/2):
-                n_coarse[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value
-                nematic_grid_coarse_00[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value*Q00[pt_num]
-                nematic_grid_coarse_01[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value*Q01[pt_num]
+            Q00_grid[yy][xx] += value * Q00[pt_num]
+            Q01_grid[yy][xx] += value * Q01[pt_num]
+            n_grid[yy][xx] += value
+
+            n_coarse[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value
+            nematic_grid_coarse_00[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value*Q00[pt_num]
+            nematic_grid_coarse_01[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value*Q01[pt_num]
 
         X, Y = np.meshgrid(x, y)
         step = 0.01
@@ -265,18 +316,28 @@ for line in cfile:
 
     if cont_line%(N+2)==0:
 
-
-            for p in range(0,sizey_coarse):
-                for q in range(0,sizex_coarse):
+            LLX = sizex_coarse
+            LLY = sizey_coarse
+            vecfield_nx = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            vecfield_ny = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            vecfield_Q00 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            vecfield_Q01 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            for p in range(0, LLY):
+                for q in range(0, LLX):
                     S = 0.
                     nx = 0.
                     ny = 0.
                     if n_coarse[p][q]>0:
-                        Q00=nematic_grid_coarse_00[p][q]/n_coarse[p][q]
-                        Q01=nematic_grid_coarse_01[p][q]/n_coarse[p][q]
+                        Q00=nematic_grid_coarse_00[p][q]#/n_coarse[p][q]
+                        Q01=nematic_grid_coarse_01[p][q]#/n_coarse[p][q]
                         S = sqrt(Q00**2 + Q01**2)
-                        nx = sqrt((1 + Q00/S)/2)
-                        ny = np.sign(Q01)*sqrt((1 - Q00/S)/2)
+                        nx = sqrt(2*S)*sqrt((1 + Q00/S)/2)
+                        ny = sqrt(2*S)*np.sign(Q01)*sqrt((1 - Q00/S)/2)
+
+                        vecfield_nx[p][q] = nx
+                        vecfield_ny[p][q] = ny
+                        vecfield_Q00[p][q] = Q00
+                        vecfield_Q01[p][q] = Q01
 
                         timeavg_nematic_grid_coarse_00[p][q]+=Q00
                         timeavg_nematic_grid_coarse_01[p][q]+=Q01
@@ -292,9 +353,134 @@ for line in cfile:
                             cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, -0.4*deltax_coarse*nx, -0.4*deltay_coarse*ny, width=deltax_coarse/15, color="k", head_width=0)
                     else:
                         if variable==3 or variable==4:
-                            cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.4*deltax_coarse*nx, 0.4*deltay_coarse*ny, width=deltax_coarse/15, color="k", head_width=0)
-                            cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, -0.4*deltax_coarse*nx, -0.4*deltay_coarse*ny, width=deltax_coarse/15, color="k", head_width=0)
-                    
+                            cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.4*deltax_coarse*nx, 0.4*deltay_coarse*ny, width=deltax_coarse/15, color="w", head_width=0)
+                            cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, -0.4*deltax_coarse*nx, -0.4*deltay_coarse*ny, width=deltax_coarse/15, color="w", head_width=0)
+
+
+            '''
+            LLX = lx
+            LLY = ly
+            vecfield_nx = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            vecfield_ny = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            vecfield_Q00 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            vecfield_Q01 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            for p in range(0, LLY):
+                for q in range(0, LLX):
+                    if n_grid[p][q]>1e-5:
+                        for k in range(0, size_grid):
+                            for l in range(0, size_grid):
+                                pp = (((p - int(size_grid/2) + LLY) % LLY) + k) % LLY
+                                qq = (((q - int(size_grid/2) + LLX) % LLX) + l) % LLX
+                                if n_grid[pp][qq]>1e-5:
+                                    Q00_avg_grid[p][q] += (Q00_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
+                                    Q01_avg_grid[p][q] += (Q01_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
+
+                    S = 0.
+                    nx = 0.
+                    ny = 0.
+                    if n_grid[p][q]>0:
+                        Q00=Q00_avg_grid[p][q]
+                        Q01=Q01_avg_grid[p][q]
+                        S = sqrt(Q00**2 + Q01**2)
+                        nx = sqrt((1 + Q00/S)/2)
+                        ny = np.sign(Q01)*sqrt((1 - Q00/S)/2)
+
+                        vecfield_nx[p][q] = nx
+                        vecfield_ny[p][q] = ny
+                        vecfield_Q00[p][q] = Q00
+                        vecfield_Q01[p][q] = Q01
+
+                        if variable==3 or variable==4:
+                            cset1 = plt.arrow(q+1/2, p+1/2, 0.4*nx, 0.4*ny, width=1/15, color="k", head_width=0)
+                            cset1 = plt.arrow(q+1/2, p+1/2, -0.4*nx, -0.4*ny, width=1/15, color="k", head_width=0)
+                    else:
+                        if variable==3 or variable==4:
+                            cset1 = plt.arrow(q+1/2, p+1/2, 0.4*nx, 0.4*ny, width=1/15, color="w", head_width=0)
+                            cset1 = plt.arrow(q+1/2, p+1/2, -0.4*nx, -0.4*ny, width=1/15, color="w", head_width=0)
+            '''
+
+
+            winding_number = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            for p in range(0, LLY):
+                for q in range(0, LLX):
+                    ax1 = [vecfield_nx[p][(q+1) % LLX], vecfield_ny[p][(q+1) % LLX]]
+                    ax2 = [vecfield_nx[p][(q-1+LLX) % LLX], vecfield_ny[p][(q-1+LLX) % LLX]]
+                    ax3 = [vecfield_nx[(p+1) % LLY][q], vecfield_ny[(p+1) % LLY][q]]
+                    ax4 = [vecfield_nx[(p-1+LLY) % LLY][q], vecfield_ny[(p-1+LLY) % LLY][q]]
+                    ax5 = [vecfield_nx[(p-1+LLY) % LLY][(q+1) % LLX], vecfield_ny[(p-1+LLY) % LLY][(q+1) % LLX]]
+                    ax6 = [vecfield_nx[(p-1+LLY) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p-1+LLY)%LLY][(q-1+LLX)%LLX]]
+                    ax7 = [vecfield_nx[(p+1) % LLY][(q+1) % LLX], vecfield_ny[(p+1) % LLY][(q+1) % LLX]]
+                    ax8 = [vecfield_nx[(p+1) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p+1) % LLY][(q-1+LLX) % LLX]]
+
+                    winding_number[p][q] = wang(ax1, ax5)
+                    winding_number[p][q] += wang(ax5, ax3)
+                    winding_number[p][q] += wang(ax3, ax6)
+                    winding_number[p][q] += wang(ax6, ax2)
+                    winding_number[p][q] += wang(ax2, ax8)
+                    winding_number[p][q] += wang(ax8, ax4)
+                    winding_number[p][q] += wang(ax4, ax7)
+                    winding_number[p][q] += wang(ax7, ax1)
+                    winding_number[p][q] /= 2.*pi
+
+            charge = 1.0/2.0
+            thresh = 0.1
+            for p in range(0,LLY):
+                for q in range(0,LLX):
+                    plotted_flag=0
+                    # detect simplest charge 1/p defects
+                    if  (abs(winding_number[p][q]) > charge - thresh) and (abs(winding_number[p][q])< charge + thresh):
+                        # charge sign
+                        s = np.sign(winding_number[p][q])
+                        # bfs
+                        sum_x, sum_y, n = collapse(p, q, s, sizex_coarse, sizey_coarse, winding_number, rng = [charge - thresh, charge + thresh])
+                        x,y = sum_x/n,sum_y/n
+                        # compute angle, see doi:10.1039/c6sm01146b
+                        '''
+                        num = 0
+                        den = 0
+                        for (dx, dy) in [(0, 0), (0, 1), (1, 1), (1, 0)]:
+                            # coordinates of nodes around the defect
+                            kk = (int(x) + sizex_coarse + dx) % sizex_coarse
+                            ll = (int(y) + sizey_coarse + dy) % sizey_coarse
+                            # derivative at these points
+                            dxQxx = .5*(vecfield_Q00[(kk+1) % sizex_coarse, ll] - vecfield_Q00[(kk-1+sizex_coarse) % sizex_coarse, ll])
+                            dxQxy = .5*(vecfield_Q01[(kk+1) % sizex_coarse, ll] - vecfield_Q01[(kk-1+sizex_coarse) % sizex_coarse, ll])
+                            dyQxx = .5*(vecfield_Q00[kk, (ll+1) % sizey_coarse] - vecfield_Q00[kk, (ll-1+sizey_coarse) % sizey_coarse])
+                            dyQxy = .5*(vecfield_Q01[kk, (ll+1) % sizey_coarse] - vecfield_Q01[kk, (ll-1+sizey_coarse) % sizey_coarse])
+                            # accumulate numerator and denominator
+                            num += s*dxQxy - dyQxx
+                            den += dxQxx + s*dyQxy
+                        psi = s/(2.-s)*atan2(num, den)
+                        '''
+                        if variable==3 or variable==4:
+                            if s==1:
+                                cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'go', markersize=10)
+                                #cset1 = plt.arrow(x, y, -0.4*deltax_coarse*cos(psi), -0.4*deltay_coarse*sin(psi), width=deltax_coarse/15, color="r")
+                                plotted_flag=1
+                            elif s==-1:
+                                cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'b^', markersize=10)
+                                plotted_flag=1
+
+                    # keep this just in case our other symmetries give us integer defects
+                    elif (abs(winding_number[p][q]) > 0.9) and (abs(winding_number[p][q])<1.1):
+                        # charge sign
+                        s = np.sign(winding_number[p][q])
+                        # bfs
+                        sum_x, sum_y, n = collapse(p, q, s, sizex_coarse, sizey_coarse, winding_number, rng = [0.9,1.1])
+                        x,y = sum_x/n,sum_y/n
+                        # add defect to list
+                        if variable==3 or variable==4:
+                            if s==1:
+                                cset1 = plt.plot(x*sizex_coarse, y*sizey_coarse, 'r*', markersize=10)
+                                plotted_flag=1
+                            elif s==-1:
+                                cset1 = plt.plot(x*sizex_coarse, y*sizey_coarse, 'kX', markersize=10)
+                                plotted_flag=1
+
+                    #if plotted_flag==0 and abs(winding_number[p][q]) > 0.1:
+                        #print("Defect topology: ", q, p, winding_number[p][q])
+
+
 
             frame_num=int(t/print_conf_interval)-1
             #if frame_num%1==0:

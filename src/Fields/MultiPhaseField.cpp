@@ -28,6 +28,7 @@ void MultiPhaseField::resizing() {
 	fieldScalar.resize(subSize);
 	fieldDX.resize(subSize);
 	fieldDY.resize(subSize);	
+	laplacianPhi.resize(subSize);	
 	freeEnergy.resize(subSize);
 	fieldScalar_old.resize(subSize);
 	dfield_old.resize(subSize);
@@ -64,12 +65,19 @@ void MultiPhaseField::init(int Lx, int Ly) {
         S01=0.;
 
 	thetaQ = thetaQ_old = PI * (1-2*drand48());
-	Q00=cos(2*thetaQ);
-	Q01=sin(2*thetaQ);
+	Q00=0.5*cos(2*thetaQ);
+	Q01=0.5*sin(2*thetaQ);
 	nemQ.resize(2);
 	nemQ_old.resize(2);
-	nemQ = {0., 0.};
-	nemQ_old = {0., 0.};
+    	number nemQ_mod = sqrt(Q00 * Q00 + Q01 * Q01);
+    	number nx = sqrt((1 + Q00/nemQ_mod)/2);
+	number sgn;
+	if(Q01>0)sgn=1;
+	else if(Q01<0) sgn=-1;
+	else sgn=0;
+    	number ny = sgn*sqrt((1 - Q00/nemQ_mod)/2);
+	nemQ = {nx, ny};
+	nemQ_old = {nx, ny};
 	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
 	Q01 = nemQ[0] * nemQ[1];
 
@@ -97,12 +105,19 @@ void MultiPhaseField::init() {
 
 	//nematic part
 	thetaQ = thetaQ_old = PI * (1-2*drand48());
-	Q00=cos(2*thetaQ);
-	Q01=sin(2*thetaQ);
+	Q00=0.5*cos(2*thetaQ);
+	Q01=0.5*sin(2*thetaQ);
 	nemQ.resize(2);
 	nemQ_old.resize(2);
-	nemQ = {0., 0.};
-	nemQ_old = {0., 0.};
+    	number nemQ_mod = sqrt(Q00 * Q00 + Q01 * Q01);
+    	number nx = sqrt((1 + Q00/nemQ_mod)/2);
+	number sgn;
+	if(Q01>0)sgn=1;
+	else if(Q01<0) sgn=-1;
+	else sgn=0;
+    	number ny = sgn*sqrt((1 - Q00/nemQ_mod)/2);
+	nemQ = {nx, ny};
+	nemQ_old = {nx, ny};
 	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
 	Q01 = nemQ[0] * nemQ[1];
 
@@ -140,11 +155,11 @@ void MultiPhaseField::setNeighborsSubSquareDirichlet() {
 			for(int k=-1; k<=1; k++){
 				xx=x+k;
 				yy=y+j;
+				site=xx+yy*LsubX;
 				if(x==0 && k==-1)site=-1;
 				else if(x==LsubX-1 && k==1)site=-1;
 				if(y==0 && j==-1)site=-1;
 				else if(y==LsubY-1 && j==1)site=-1;
-				if(site!=-1)site=xx+yy*LsubX;
 				neighbors_sub[ss+i*9]=site;
 				ss++;
 			}
@@ -190,9 +205,7 @@ void MultiPhaseField::set_positions_initial(BaseBox *box) {
 void MultiPhaseField::set_positions(BaseBox *box) {
 
 	if(x_sub_left>=border && y_sub_bottom>=border){
-		//int x=map_sub_to_box_x[int(CoM[0])];
-		//int y=map_sub_to_box_y[int(CoM[1])];
-		//int site=x+y*box->getXsize();
+
 		int site = box->getElement(sub_corner_bottom_left, int(CoM[0]), int(CoM[1]));
 		CoM[1] = int(site / box->getXsize()) + (CoM[1]-int(CoM[1]));
 		CoM[0] = int(site - int(site / box->getXsize()) * box->getXsize()) + (CoM[0]-int(CoM[0]));
@@ -275,6 +288,7 @@ void MultiPhaseField::set_positions(BaseBox *box) {
 		CoM[1] = int(site / box->getXsize());
 		CoM[0] = int(site - int(site / box->getXsize()) * box->getXsize());
 	}
+
 }
 
 void MultiPhaseField::set_positions(int offsetx, int offsety, int corner, int corner_x, int corner_y, int size_x) {

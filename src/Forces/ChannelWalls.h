@@ -8,6 +8,7 @@ private:
 	bool generate_inside;
 	//number lambda_wall;
 	number kappa_wall;
+	number omega_wall;
 	//std::vector<double> walls;
 	number lambda;
 
@@ -18,7 +19,7 @@ public:
 
 	std::tuple<std::vector<int>, std::string> init(input_file &inp) override;
 
-	virtual number free_energy(int k, number phi, number walls);
+	virtual number free_energy(number phi, number walls, number laplacianSquare);
 	virtual number potential(int k, number walls);
 };
 

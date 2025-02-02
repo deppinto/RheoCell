@@ -51,11 +51,11 @@ public:
 	 */
 	bool add_ext_force(BaseForce *f);
 	number F_ext = 0;
-	inline number set_F_ext(int k, number phi, number walls) {
+	inline number set_F_ext(int q, number walls, number laplacian_walls) {
 		if(ext_forces.size() > 0) {
 			F_ext = 0.;
 			for(auto ext_force : ext_forces) {
-				F_ext += ext_force->free_energy(k, phi, walls);
+				F_ext += ext_force->free_energy(fieldScalar[q], walls, laplacian_walls);
 			}
 		}
 		return F_ext;
@@ -98,6 +98,7 @@ public:
 	//derivatives of the field
 	std::vector<number> fieldDX;
 	std::vector<number> fieldDY;
+	std::vector<number> laplacianPhi;
 
 	//shape tensor
 	number S01;

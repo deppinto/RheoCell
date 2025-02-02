@@ -31,6 +31,7 @@ protected:
 	number zetaQ_self_active;
 	number zetaQ_inter_active;
 	number J_Q;
+	number J_Q_active;
 	bool anchoring = false;
 	number friction_cell;
 	number friction_cell_active;
@@ -62,8 +63,8 @@ protected:
 	int size_rows = 0;
 	int size_rows_old = 0;
 	int index, sub_q, other_site_patch, other_site_box;
-	std::vector<int> neigh_values = std::vector<int> {0,1,2,3,5,6,7,8};
-	//std::vector<int> neigh_values = std::vector<int> {1,3,5,7};
+	//std::vector<int> neigh_values = std::vector<int> {0,1,2,3,5,6,7,8};
+	std::vector<int> neigh_values = std::vector<int> {1,3,5,7};
 	//std::vector<int> neigh_values = std::vector<int> {4};
 	std::vector<int> size_store_site_velocity_index;
 	std::vector<int> store_site_velocity_index;

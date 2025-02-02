@@ -102,12 +102,12 @@ void FD_CPUBackend::first_step(bool store) {
 		//if(p->index==1)std::cout<<"backend S: "<<p->fieldScalar[p->subSize-1]<<" "<<p->freeEnergy[p->subSize-1]<<" "<<interaction->get_velocity_x(p,p->subSize-1) <<" "<<interaction->get_velocity_y(p,p->subSize-1) <<" "<<p->fieldDX[p->subSize-1]<<" "<<p->fieldDY[p->subSize-1]<<" "<<p->CoM[0]<<" "<<p->CoM[1]<<" " << p->index << " "<<p->sub_corner_bottom_left/box->getXsize()<<" "<<p->area<<" Time: "<<config_info->curr_step <<std::endl;
 		//if(p->index==1)std::cout<<"backend 0: "<<p->fieldScalar[0]<<" "<<p->freeEnergy[0]<<" "<<interaction->get_velocity_x(p,0) <<" "<<interaction->get_velocity_y(p,0) <<" "<<p->fieldDX[0]<<" "<<p->fieldDY[0]<<" "<<p->CoM[0]<<" "<<p->CoM[1]<<" " << p->index << " "<<p->sub_corner_bottom_left/box->getXsize()<<" "<<p->area<<" Time: "<<config_info->curr_step <<std::endl;
 
-		interaction->updateDirectedActiveForces(dt, p, store);
 		if(!store){
 			//std::cout<<"start: "<<p->index<<std::endl;
 			p->set_positions(config_info->box);
 			//std::cout<<"end: "<<p->index<<std::endl;
 		}
+		interaction->updateDirectedActiveForces(dt, p, store);
 		//std::cout<<"done"<<std::endl;
 	}
 }

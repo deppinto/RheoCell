@@ -290,6 +290,12 @@ void LEBcActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	//passive (passive force)
 	p->Fpassive[0] += p->freeEnergy[q]*p->fieldDX[q];
 	p->Fpassive[1] += p->freeEnergy[q]*p->fieldDY[q];
+	number f_passive_x = 0.;
+	number f_passive_y = 0.;
+	//f_passive_x = p->freeEnergy[q]*p->fieldDX[q];
+	//f_passive_y = p->freeEnergy[q]*p->fieldDY[q];
+	f_passive_x = (-1) * 0.5 * (p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]]);
+	f_passive_y = (-1) * 0.5 * ( (box->weight_site[7+k*9]*p->freeEnergy[p->neighbors_sub[7+q*9]]+box->weight_site_next[7+k*9]*p->freeEnergy[p->neighbors_sub[6+q*9]]) - (box->weight_site[1+k*9]*p->freeEnergy[p->neighbors_sub[1+q*9]]+box->weight_site_next[1+k*9]*p->freeEnergy[p->neighbors_sub[2+q*9]]) );
 
 	//active inter cells (active force)
 	number fQ_self_x = 0.;
@@ -312,8 +318,8 @@ void LEBcActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	p->Factive[0] += zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
 	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
 
-	p->velocityX[q] = (p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
-	p->velocityY[q] = (p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction; // - 0.1; 
+	p->velocityX[q] = (f_passive_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
+	p->velocityY[q] = (f_passive_y + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction; // - 0.1; 
 
 	p->velocityX_correction[int(q/p->LsubX)] += p->velocityX[q] + shear_rate * (((double)p->map_sub_to_box_y[q] + 0.5) - 0.5 * (double)box->getYsize());
 	p->phi_correction[int(q/p->LsubX)] += p->fieldScalar[q];

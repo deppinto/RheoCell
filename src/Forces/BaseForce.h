@@ -82,7 +82,7 @@ public:
 	 * @param step useful for forces that depend on time
 	 * @param pos position of the particle
 	 */
-	virtual number free_energy(int k, number phi, number walls) = 0;
+	virtual number free_energy(number phi, number walls, number laplacianSquare){return 0;};
 
 	/**
 	 * @brief returns value of the potential associated to the force (a number)
@@ -90,7 +90,7 @@ public:
 	 * @param step useful for forces that depend on time
 	 * @param pos position of the particle
 	 */
-	virtual number potential(int k, number walls) = 0;
+	virtual number potential(int k, number walls){return 0;};
 };
 
 using ForcePtr = std::shared_ptr<BaseForce>;

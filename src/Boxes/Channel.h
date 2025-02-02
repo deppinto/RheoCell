@@ -12,6 +12,7 @@ protected:
         int sidex, sidey;
         std::vector<int> sides;
         std::vector<double> walls;
+        std::vector<double> laplacian_walls;
 	number lambda_wall;
 
 public:
@@ -36,6 +37,7 @@ public:
         virtual void shift_particle(BaseField *p, std::vector<number> &amount);
 
 	virtual number getWalls(int k);
+	virtual number getLaplacianWalls(int k);
 };
 
 #endif /* CHANNEL_H_ */

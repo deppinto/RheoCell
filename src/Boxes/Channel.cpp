@@ -38,10 +38,19 @@ void Channel::init(int Lx, int Ly) {
 
 	neighbors.resize(Lx*Ly*9);
 	BaseBox::setNeighborsPeriodic(Lx, Ly);
+
+	laplacian_walls.resize(Lx*Ly);
+	for(int y=0; y<Ly; y++){
+		for(int x=0; x<Lx; x++){
+			int k=x+y*Lx;
+			laplacian_walls[k] = walls[neighbors[5+k*9]] + walls[neighbors[7+k*9]] + walls[neighbors[3+k*9]] + walls[neighbors[1+k*9]] - 4.*walls[k];
+		}
+	}
 }
 
 
 number Channel::getWalls(int k) {return walls[k];}
+number Channel::getLaplacianWalls(int k) {return laplacian_walls[k];}
 
 
 int Channel::getElementX(int site, int distX){
