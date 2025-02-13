@@ -150,12 +150,11 @@ void LEBcActiveNematic::begin_energy_computation(std::vector<BaseField *> &field
 
         K = (number) 0;
         for(auto p : fields) {
-                p->Factive = std::vector<number> {0., 0.};
-                p->Fpassive = std::vector<number> {0., 0.};
-                for(int q=0; q<p->subSize;q++)
+                for(int q=0; q<p->subSize;q++){
 			calc_internal_forces(p, q);
-                velX = p->Fpassive[0] + p->Factive[0];
-                velY = p->Fpassive[1] + p->Factive[1];
+                	velX = p->Fpassive_x[q] + p->Factive_x[q];
+                	velY = p->Fpassive_y[q] + p->Factive_y[q];
+		}
                 K += .5 * (velX * velX + velY * velY);
         }
 
@@ -288,14 +287,15 @@ void LEBcActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	int k = p->map_sub_to_box[q];
 
 	//passive (passive force)
-	p->Fpassive[0] += p->freeEnergy[q]*p->fieldDX[q];
-	p->Fpassive[1] += p->freeEnergy[q]*p->fieldDY[q];
 	number f_passive_x = 0.;
 	number f_passive_y = 0.;
 	//f_passive_x = p->freeEnergy[q]*p->fieldDX[q];
 	//f_passive_y = p->freeEnergy[q]*p->fieldDY[q];
 	f_passive_x = (-1) * 0.5 * (p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]]);
 	f_passive_y = (-1) * 0.5 * ( (box->weight_site[7+k*9]*p->freeEnergy[p->neighbors_sub[7+q*9]]+box->weight_site_next[7+k*9]*p->freeEnergy[p->neighbors_sub[6+q*9]]) - (box->weight_site[1+k*9]*p->freeEnergy[p->neighbors_sub[1+q*9]]+box->weight_site_next[1+k*9]*p->freeEnergy[p->neighbors_sub[2+q*9]]) );
+
+	p->Fpassive_x[q] = f_passive_x;
+	p->Fpassive_y[q] = f_passive_y;
 
 	//active inter cells (active force)
 	number fQ_self_x = 0.;
@@ -315,8 +315,8 @@ void LEBcActiveNematic::calc_internal_forces(BaseField *p, int q) {
 		fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( (box->weight_site[7+k*9]*sumQ00[box->neighbors[7+q*9]]+box->weight_site_next[7+k*9]*sumQ00[box->neighbors[6+q*9]]) - (box->weight_site[1+k*9]*sumQ00[box->neighbors[1+q*9]]+box->weight_site_next[1+k*9]*sumQ00[box->neighbors[2+q*9]]) ) ) - fQ_self_y;
 	}
 
-	p->Factive[0] += zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
-	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
+	p->Factive_x[q] = zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
+	p->Factive_y[q] = zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
 
 	p->velocityX[q] = (f_passive_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
 	p->velocityY[q] = (f_passive_y + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction; // - 0.1; 

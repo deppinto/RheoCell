@@ -46,3 +46,12 @@ print_conf_interval = 10
 print_energy_every = 1000
 time_scale = linear
 T=0.1
+
+
+data_output_1 = {
+ name = force_field.txt
+ print_every = 1
+ col_1 = {
+   type = ForceField
+ }
+}

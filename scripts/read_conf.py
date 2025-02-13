@@ -119,8 +119,10 @@ for line in cfile:
 
     if pt_num==-1:
         cset1 = plt.arrow(CoMX, CoMY, 3*nemX, 3*nemY, color='r')
+        cset1 = plt.arrow(CoMX, CoMY, -3*nemX, -3*nemY, color='r')
     else:
         cset1 = plt.arrow(CoMX, CoMY, 3*nemX, 3*nemY, color='k')
+        cset1 = plt.arrow(CoMX, CoMY, -3*nemX, -3*nemY, color='k')
 
     print(pt_num, area)
     pt_num+=1

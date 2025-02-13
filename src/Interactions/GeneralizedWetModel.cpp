@@ -163,8 +163,6 @@ void GeneralizedWetModel::begin_energy_computation(std::vector<BaseField *> &fie
 	std::vector<Eigen::Triplet<double>> tri_t_x;
 	std::vector<Eigen::Triplet<double>> tri_t_y;
         for(auto p : fields) {
-                p->Factive = std::vector<number> {0., 0.};
-                p->Fpassive = std::vector<number> {0., 0.};
                 for(int q=0; q<p->subSize;q++){
 			calc_internal_forces(p, q);
 
@@ -309,8 +307,8 @@ void GeneralizedWetModel::calc_internal_forces(BaseField *p, int q) {
 	number Fpas_y = - 0.5 * ( p->freeEnergy[p->neighbors_sub[1+q*9]] - p->freeEnergy[p->neighbors_sub[7+q*9]]  ) * p->fieldScalar[q];
 	//number Fpas_x = p->freeEnergy[q]*p->fieldDX[q];
 	//number Fpas_y = p->freeEnergy[q]*p->fieldDY[q];
-	p->Fpassive[0] += Fpas_x;
-	p->Fpassive[1] += Fpas_y;
+	p->Fpassive_x[q] = Fpas_x;
+	p->Fpassive_y[q] = Fpas_y;
 
 
 	//active inter cells (active force)
@@ -322,8 +320,8 @@ void GeneralizedWetModel::calc_internal_forces(BaseField *p, int q) {
 	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[1+k*9]] - sumQ00[box->neighbors[7+k*9]] ) ) - fQ_self_y;
 
 
-	p->Factive[0] += zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
-	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
+	p->Factive_x[q] = zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
+	p->Factive_y[q] = zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
 
 
 	vec_f_x[0+q+field_start_index[p->index]] = Fpas_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;

@@ -22,6 +22,10 @@ protected:
 	number omega;
 	number mu;
 	//int R;
+	number R1;
+	number R2;
+	number R_term;
+	number Kg;
 	number kappa;
 	number a0;
 	number friction;
@@ -92,6 +96,8 @@ public:
 	number get_velocity_y(BaseField *p, int q){return vec_v_y[q+field_start_index[p->index]];}
 	//number get_velocity_x(BaseField *p, int q){return vec_v_x[q+p->index*p->subSize];}
 	//number get_velocity_y(BaseField *p, int q){return vec_v_y[q+p->index*p->subSize];}
+	number get_total_force_x(BaseField *p, int q){return vec_v_x[q+field_start_index[p->index]] * friction;}
+	number get_total_force_y(BaseField *p, int q){return vec_v_y[q+field_start_index[p->index]] * friction;}
 
 	void begin_energy_computation() override;
 	void begin_energy_computation(std::vector<BaseField *> &fields) override;

@@ -135,14 +135,15 @@ void ActiveNematic::begin_energy_computation(std::vector<BaseField *> &fields) {
 			U += f_interaction(p, q);
         }
 
-        K = (number) 0;
+        K =0.;
+	velX=0.;
+	velY=0.;
         for(auto p : fields) {
-                p->Factive = std::vector<number> {0., 0.};
-                p->Fpassive = std::vector<number> {0., 0.};
-                for(int q=0; q<p->subSize;q++)
+                for(int q=0; q<p->subSize;q++){
 			calc_internal_forces(p, q);
-                velX = p->Fpassive[0] + p->Factive[0];
-                velY = p->Fpassive[1] + p->Factive[1];
+                	velX += p->Fpassive_x[q] + p->Factive_x[q];
+                	velY += p->Fpassive_y[q] + p->Factive_y[q];
+		}
                 K += .5 * (velX * velX + velY * velY);
         }
 	//std::cout<<U<<" "<<K<<std::endl;
@@ -220,8 +221,8 @@ void ActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	int k = p->map_sub_to_box[q];
 
 	//passive (passive force)
-	p->Fpassive[0] += p->freeEnergy[q]*p->fieldDX[q];
-	p->Fpassive[1] += p->freeEnergy[q]*p->fieldDY[q];
+	p->Fpassive_x[q] = p->freeEnergy[q]*p->fieldDX[q];
+	p->Fpassive_y[q] = p->freeEnergy[q]*p->fieldDY[q];
 
 	//active inter cells (active force)
 	number fQ_self_x = -(p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
@@ -230,8 +231,8 @@ void ActiveNematic::calc_internal_forces(BaseField *p, int q) {
 	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[7+k*9]] - sumQ01[box->neighbors[1+k*9]] ) ) - fQ_self_x;
 	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[7+k*9]] - sumQ00[box->neighbors[1+k*9]] ) ) - fQ_self_y;
 
-	p->Factive[0] += zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
-	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
+	p->Factive_x[q] = zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
+	p->Factive_y[q] = zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
 
 	p->velocityX[q] = (p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
 	p->velocityY[q] = (p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction;

@@ -127,14 +127,15 @@ void ActiveMultiField::begin_energy_computation(std::vector<BaseField *> &fields
 			U += f_interaction(p, q);
         }
 
-        K = (number) 0;
+        K =0.;
+	velX=0.;
+	velY=0.;
         for(auto p : fields) {
-                p->Factive = std::vector<number> {0., 0.};
-                p->Fpassive = std::vector<number> {0., 0.};
-                for(int q=0; q<p->subSize;q++)
+                for(int q=0; q<p->subSize;q++){
 			calc_internal_forces(p, q);
-                velX = p->Fpassive[0] + p->Factive[0];
-                velY = p->Fpassive[1] + p->Factive[1];
+                	velX = p->Fpassive_x[q] + p->Factive_x[q];
+                	velY = p->Fpassive_y[q] + p->Factive_y[q];
+		}
                 K += .5 * (velX * velX + velY * velY);
         }
 
@@ -193,12 +194,12 @@ void ActiveMultiField::calc_internal_forces(BaseField *p, int q) {
         p->fieldDY[q] = dy;
 
 	//passive (passive force)
-	p->Fpassive[0] += p->freeEnergy[q]*dx;
-	p->Fpassive[1] += p->freeEnergy[q]*dy;
+	p->Fpassive_x[q] = p->freeEnergy[q]*dx;
+	p->Fpassive_y[q] = p->freeEnergy[q]*dy;
 
 	//active inter cells (active force)
-	p->Factive[0] += zetaS*sumS00[k]*dx + zetaS*sumS01[k]*dy;
-	p->Factive[1] += zetaS*sumS01[k]*dx - zetaS*sumS00[k]*dy;
+	p->Factive_x[q] = zetaS*sumS00[k]*dx + zetaS*sumS01[k]*dy;
+	p->Factive_y[q] = zetaS*sumS01[k]*dx - zetaS*sumS00[k]*dy;
 
 	p->velocityX[q] = (p->freeEnergy[q]*dx - zetaS*sumS00[k]*dx - zetaS*sumS01[k]*dy)/friction;
 	p->velocityY[q] = (p->freeEnergy[q]*dy - zetaS*sumS01[k]*dx + zetaS*sumS00[k]*dy)/friction;

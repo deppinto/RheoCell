@@ -7,6 +7,7 @@ WetModel::WetModel() :
 				lambda(2.5),
 				omega(0.004),
 				mu(3.),
+				Kg(0.025),
 				kappa(0.1),
 				friction(1.),
 				zetaQ_self(0),
@@ -44,6 +45,10 @@ void WetModel::get_settings(input_file &inp) {
 
 void WetModel::init() {
         a0=PI*R*R;
+	number R_eff = R;
+	R1 = (R_eff * sqrt(3)) * (R_eff * sqrt(3));
+	R2 = (R_eff / sqrt(3)) * (R_eff / sqrt(3));
+	R_term = (1/R1) - (1/R2);
 	store_max_size=20;
 	if(tolerance>0)
 		solverCG.setTolerance(tolerance);
@@ -216,8 +221,6 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	//F_total_y = 0.;
 	//mat_m_x.setZero();
         for(auto p : fields) {
-                p->Factive = std::vector<number> {0., 0.};
-                p->Fpassive = std::vector<number> {0., 0.};
                 for(int q=0; q<p->subSize;q++){
 			calc_internal_forces(p, q);
 
@@ -463,8 +466,20 @@ number WetModel::f_interaction(BaseField *p, int q) {
 	number suppress = (laplacianSquare-lsquare)/sqrt(1+(laplacianSquare-lsquare)*(laplacianSquare-lsquare));
 	number Adh = - 4*lambda*omega*suppress*p->fieldScalar[q];
 
+
+	//shape term
+	number x_x_com = p->map_sub_to_box_x[q] - p->CoM[0];
+	number y_y_com = p->map_sub_to_box_y[q] - p->CoM[1];
+	if(x_x_com >= box->getXsize()/2)x_x_com -= box->getXsize();
+	if(x_x_com <= -box->getXsize()/2)x_x_com += box->getXsize();
+	if(y_y_com >= box->getYsize()/2)y_y_com -= box->getYsize();
+	if(y_y_com <= -box->getYsize()/2)y_y_com += box->getYsize();
+
+	number Shape = 2 * Kg * ( p->fieldScalar[q] - exp( - ((x_x_com * x_x_com / R1 + y_y_com * y_y_com / R2) * (1 + p->Q00) + (x_x_com * x_x_com / R2 + y_y_com * y_y_com / R1) * (1 - p->Q00) + 2 * x_x_com * y_y_com * p->Q01 * R_term) ) );
+
+
 	// delta F / delta phi_i
-	number V = CH + A + Rep + Adh;
+	number V = CH + A + Rep + Adh + Shape;
 	//if(p->index==0 && q==0)std::cout<<p->freeEnergy[q]<<" "<<p->LsubX<<" "<<p->LsubY<<" "<< p->neighbors_sub[5+q*9]<<" "<< p->neighbors_sub[3+q*9]<<" "<< p->neighbors_sub[7+q*9]<<" "<<p->neighbors_sub[1+q*9]<<" "<<CH<<" "<<A<<" "<<Rep<<std::endl;
 	p->freeEnergy[q] += V;
 	//if(p->index==0 && q==0)std::cout<<"Free energy: "<<p->freeEnergy[q]<<" "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<<dx<<" "<<dy <<std::endl;
@@ -481,8 +496,10 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	//if(p->index==0 && q==0)std::cout<<"Forces: "<< p->freeEnergy[q]*p->fieldDX[q] <<" "<< p->freeEnergy[q]*p->fieldDY[q]<<" "<<  0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] )  << " "<< 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] ) <<std::endl;
 
 	//passive (passive force)
-	p->Fpassive[0] += p->freeEnergy[q]*p->fieldDX[q];
-	p->Fpassive[1] += p->freeEnergy[q]*p->fieldDY[q];
+	number f_passive_x = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] );
+	number f_passive_y = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] );
+	p->Fpassive_x[q] = f_passive_x;
+	p->Fpassive_y[q] = f_passive_y;
 
 	//active inter cells (active force)
 	number fQ_self_x = -(p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
@@ -491,8 +508,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[7+k*9]] - sumQ01[box->neighbors[1+k*9]] ) ) - fQ_self_x;
 	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[7+k*9]] - sumQ00[box->neighbors[1+k*9]] ) ) - fQ_self_y;
 
-	p->Factive[0] += zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
-	p->Factive[1] += zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
+	p->Factive_x[q] = zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
+	p->Factive_y[q] = zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
 
 	//p->velocityX[q] = (p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
 	//p->velocityY[q] = (p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction;
@@ -521,8 +538,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 
 		//vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
-		vec_f_x[q+field_start_index[p->index]] = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] ) + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
-		vec_f_y[q+field_start_index[p->index]] = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] ) + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		vec_f_x[q+field_start_index[p->index]] = f_passive_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		vec_f_y[q+field_start_index[p->index]] = f_passive_y + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 	}
 	else{
 		vec_f_x[q+field_start_index[p->index]] = 0.;

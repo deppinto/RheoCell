@@ -25,6 +25,7 @@ protected:
 	BaseBox *box;
 
 	int R;
+	number friction = 1.0;
         number rcut, sqr_rcut;
 	/// This is useful for "hard" potentials
 	bool is_infinite;
@@ -46,8 +47,6 @@ public:
 	 */
 	BaseInteraction();
 	virtual ~BaseInteraction();
-
-	number friction;
 
 	virtual void set_box(BaseBox *boxArg) {
 		box = boxArg;
@@ -182,6 +181,8 @@ public:
 	virtual void update_sub_to_box_map(BaseField *p, int q, int sub_site, int sub_site_x, int sub_site_y);
 	virtual number get_velocity_x(BaseField *p, int q){return p->velocityX[q];}
 	virtual number get_velocity_y(BaseField *p, int q){return p->velocityY[q];}
+	virtual number get_total_force_x(BaseField *p, int q){return p->velocityX[q] * friction;}
+	virtual number get_total_force_y(BaseField *p, int q){return p->velocityY[q] * friction;}
 
 	virtual void get_settings(input_file &inp);
 	number K;

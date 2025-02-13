@@ -43,6 +43,11 @@ void LEBcMultiPhaseField::resizing() {
 	map_sub_to_box_x.resize(subSize);
 	map_sub_to_box_y.resize(subSize);
 
+	Fpassive_x.resize(subSize);
+	Fpassive_y.resize(subSize);
+	Factive_x.resize(subSize);
+	Factive_y.resize(subSize);
+
 	cos_x_table.resize(LsubX);
 	cos_y_table.resize(LsubY);
 	sin_x_table.resize(LsubX);
@@ -78,8 +83,6 @@ void LEBcMultiPhaseField::init(int Lx, int Ly) {
 	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
 	Q01 = nemQ[0] * nemQ[1];
 
-	Fpassive= std::vector<number> {0.,0.};
-	Factive= std::vector<number> {0.,0.};
 	area=0;
 	sumF=0;
 
@@ -114,8 +117,6 @@ void LEBcMultiPhaseField::init() {
 	Q01 = nemQ[0] * nemQ[1];
 
 	//minor bookkeeping
-	Fpassive = std::vector<number> {0.,0.};
-        Factive = std::vector<number> {0.,0.};
 	offset.resize(2);
 	offset=std::vector<int>(2, 0);
 	area=0;

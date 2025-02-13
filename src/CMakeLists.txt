@@ -16,6 +16,7 @@ SET(observables_SOURCES
 	Observables/ObservableOutput.cpp
 	Observables/Configuration.cpp
 	Observables/VelocityField.cpp
+	Observables/ForceField.cpp
 )
 
 SET(backends_SOURCES

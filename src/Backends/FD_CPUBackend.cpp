@@ -22,7 +22,7 @@ void FD_CPUBackend::init() {
 
 	interaction->begin_energy_computation();
 	compute_forces();
-	if(analysis){compute_forces();}
+	//if(analysis){compute_forces();}
 
 	int sizeX = box->getXsize();
 	int sizeY = box->getYsize();

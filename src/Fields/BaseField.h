@@ -113,8 +113,10 @@ public:
 	std::vector<number> nemQ_old;
 
 	//passive and active forces
-	std::vector<number> Fpassive;
-	std::vector<number> Factive;
+	std::vector<number> Fpassive_x;
+	std::vector<number> Factive_x;
+	std::vector<number> Fpassive_y;
+	std::vector<number> Factive_y;
 
 	//child functions need to initialize everything below
 	virtual int GetSubIndex(int site, BaseBox *box) = 0;
