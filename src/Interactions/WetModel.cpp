@@ -468,18 +468,18 @@ number WetModel::f_interaction(BaseField *p, int q) {
 
 
 	//shape term
-	number x_x_com = p->map_sub_to_box_x[q] - p->CoM[0];
+	/*number x_x_com = p->map_sub_to_box_x[q] - p->CoM[0];
 	number y_y_com = p->map_sub_to_box_y[q] - p->CoM[1];
 	if(x_x_com >= box->getXsize()/2)x_x_com -= box->getXsize();
 	if(x_x_com <= -box->getXsize()/2)x_x_com += box->getXsize();
 	if(y_y_com >= box->getYsize()/2)y_y_com -= box->getYsize();
 	if(y_y_com <= -box->getYsize()/2)y_y_com += box->getYsize();
 
-	number Shape = 2 * Kg * ( p->fieldScalar[q] - exp( - ((x_x_com * x_x_com / R1 + y_y_com * y_y_com / R2) * (1 + p->Q00) + (x_x_com * x_x_com / R2 + y_y_com * y_y_com / R1) * (1 - p->Q00) + 2 * x_x_com * y_y_com * p->Q01 * R_term) ) );
+	number Shape = 2 * Kg * ( p->fieldScalar[q] - exp( - ((x_x_com * x_x_com / R1 + y_y_com * y_y_com / R2) * (1 + p->Q00) + (x_x_com * x_x_com / R2 + y_y_com * y_y_com / R1) * (1 - p->Q00) + 2 * x_x_com * y_y_com * p->Q01 * R_term) ) );*/
 
 
 	// delta F / delta phi_i
-	number V = CH + A + Rep + Adh + Shape;
+	number V = CH + A + Rep + Adh; // + Shape;
 	//if(p->index==0 && q==0)std::cout<<p->freeEnergy[q]<<" "<<p->LsubX<<" "<<p->LsubY<<" "<< p->neighbors_sub[5+q*9]<<" "<< p->neighbors_sub[3+q*9]<<" "<< p->neighbors_sub[7+q*9]<<" "<<p->neighbors_sub[1+q*9]<<" "<<CH<<" "<<A<<" "<<Rep<<std::endl;
 	p->freeEnergy[q] += V;
 	//if(p->index==0 && q==0)std::cout<<"Free energy: "<<p->freeEnergy[q]<<" "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<<dx<<" "<<dy <<std::endl;
