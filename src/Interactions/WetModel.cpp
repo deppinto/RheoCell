@@ -415,9 +415,10 @@ number WetModel::f_interaction(BaseField *p, int q) {
 
 	//int  k  = p->GetSubIndex(q, box);
 	int k = p->map_sub_to_box[q];
-	p->NQ00 += (p->fieldScalar[q] / p->area) * (sumQ00[k] - p->fieldScalar[q] * p->Q00) / (sum_phi[k] - p->fieldScalar[q]);
-	p->NQ01 += (p->fieldScalar[q] / p->area) * (sumQ01[k] - p->fieldScalar[q] * p->Q01) / (sum_phi[k] - p->fieldScalar[q]);
-
+	if(sum_phi[k] - p->fieldScalar[q] > 0){
+		p->NQ00 += (p->fieldScalar[q] / p->area) * (sumQ00[k] - p->fieldScalar[q] * p->Q00) / (sum_phi[k] - p->fieldScalar[q]);
+		p->NQ01 += (p->fieldScalar[q] / p->area) * (sumQ01[k] - p->fieldScalar[q] * p->Q01) / (sum_phi[k] - p->fieldScalar[q]);
+	}
 
         //number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
         //number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
