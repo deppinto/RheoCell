@@ -107,6 +107,8 @@ public:
 	//nematic tensor
 	number Q00;
 	number Q01;
+	number NQ00;
+	number NQ01;
 	number thetaQ;
 	number thetaQ_old;
 	std::vector<number> nemQ;

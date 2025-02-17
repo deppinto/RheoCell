@@ -145,6 +145,8 @@ void WetModel::initFieldProperties(BaseField *p) {
 
 		p->S00 += -0.5*(dx*dx-dy*dy);
 		p->S01 += -dx*dy;
+		p->NQ00 = 0.;
+		p->NQ01 = 0.;
 	}
 }
 
@@ -158,6 +160,8 @@ void WetModel::updateFieldProperties(BaseField *p, int q, int k) {
 
 	p->S00 += -0.5*(p->fieldDX[q]*p->fieldDX[q]-p->fieldDY[q]*p->fieldDY[q]);
 	p->S01 += -p->fieldDX[q]*p->fieldDY[q];
+	p->NQ00 = 0.;
+	p->NQ01 = 0.;
 }
 
 
@@ -317,6 +321,8 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	number V_All_y=0.;
 	number V_CoM_x=0.;
 	number V_CoM_y=0.;
+	number V_gammaphi_x=0.;
+	number V_gammaphi_y=0.;
 	number F_CoM_x=0.;
 	number F_CoM_y=0.;
 	number V_total_x = 0.;
@@ -339,6 +345,8 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			V_total_y += friction * vec_v_y[q+field_start_index[p->index]];
 			V_All_x += vec_v_x[q+field_start_index[p->index]];
 			V_All_y += vec_v_y[q+field_start_index[p->index]];
+			V_gammaphi_x += vec_v_x[q+field_start_index[p->index]] * p->fieldDX[q];
+			V_gammaphi_y += vec_v_y[q+field_start_index[p->index]] * p->fieldDY[q];
 			V_phi_x += p->fieldScalar[q] * vec_v_x[q+field_start_index[p->index]];
 			V_phi_y += p->fieldScalar[q] * vec_v_y[q+field_start_index[p->index]];
 
@@ -364,7 +372,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			}
 		}
 	}
-	std::cout<<"velocities: "<<V_total_x<<" "<<V_total_y<<" "<< F_total_x<<" "<<F_total_y <<" "<<V_CoM_x<<" "<<V_CoM_y<<" "<<F_CoM_x<<" "<<F_CoM_y<<" "<<V_All_x<<" "<<V_All_y<<" "<<V_phi_x<<" "<<V_phi_y<<" "<<F_phi_x<<" "<<F_phi_y <<" " << vec_f_x[450]<<" "<< vec_f_y[450] << std::endl;*/
+	std::cout<<"velocities: "<<V_total_x<<" "<<V_total_y<<" "<< F_total_x<<" "<<F_total_y <<" "<<V_CoM_x<<" "<<V_CoM_y<<" "<<F_CoM_x<<" "<<F_CoM_y<<" "<<V_All_x<<" "<<V_All_y<<" "<<V_phi_x<<" "<<V_phi_y<<" "<<F_phi_x<<" "<<F_phi_y <<" " << vec_f_x[450]<<" "<< vec_f_y[450] << " "<< V_gammaphi_x<< " "<< V_gammaphi_y  <<std::endl;*/
 
 }
 
@@ -407,6 +415,8 @@ number WetModel::f_interaction(BaseField *p, int q) {
 
 	//int  k  = p->GetSubIndex(q, box);
 	int k = p->map_sub_to_box[q];
+	p->NQ00 += (p->fieldScalar[q] / p->area) * (sumQ00[k] - p->fieldScalar[q] * p->Q00) / (sum_phi[k] - p->fieldScalar[q]);
+	p->NQ01 += (p->fieldScalar[q] / p->area) * (sumQ01[k] - p->fieldScalar[q] * p->Q01) / (sum_phi[k] - p->fieldScalar[q]);
 
 
         //number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
@@ -502,14 +512,23 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	p->Fpassive_y[q] = f_passive_y;
 
 	//active inter cells (active force)
-	number fQ_self_x = -(p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
-	number fQ_self_y = -(p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
+	number fQ_self_x = - (p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
+	number fQ_self_y = - (p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
 
-	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[7+k*9]] - sumQ01[box->neighbors[1+k*9]] ) ) - fQ_self_x;
-	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[7+k*9]] - sumQ00[box->neighbors[1+k*9]] ) ) - fQ_self_y;
+	//number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[7+k*9]] - sumQ01[box->neighbors[1+k*9]] ) ) - fQ_self_x;
+	//number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[7+k*9]] - sumQ00[box->neighbors[1+k*9]] ) ) - fQ_self_y;
+	//number fQ_inter_x = - ( sumQ00[k] - (p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]));
+	//number fQ_inter_y = - ( sumQ01[k] - (p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]));
+	//number fQ_inter_x = - ( sumQ00[k] );
+	//number fQ_inter_y = - ( sumQ01[k] );
+	//number fQ_inter_x = - (sumQ00[k]*p->fieldDX[q] + sumQ01[k]*p->fieldDY[q]);
+	//number fQ_inter_y = - (sumQ01[k]*p->fieldDX[q] - sumQ00[k]*p->fieldDY[q]);
+	number fQ_inter_x = - (p->NQ00 * p->fieldDX[q] + p->NQ01 * p->fieldDY[q]);
+	number fQ_inter_y = - (p->NQ01 * p->fieldDX[q] - p->NQ00 * p->fieldDY[q]);
 
 	p->Factive_x[q] = zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
 	p->Factive_y[q] = zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
+
 
 	//p->velocityX[q] = (p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter)/friction;
 	//p->velocityY[q] = (p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter)/friction;
@@ -528,6 +547,7 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 		//F_total_y += p->fieldScalar[q] * grad_free_energy_y[k] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
         	//F_total_x += (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] ) + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
         	//F_total_y += (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] ) + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		//std::cout<< fQ_self_x * zetaQ_self<<" "<<fQ_self_y * zetaQ_self<<" "<< fQ_inter_x * zetaQ_inter  <<" "<< fQ_inter_y * zetaQ_inter  <<std::endl;
 		//}
 		//F_total_x += p->freeEnergy[q] * p->fieldDX[q];
 		//F_total_y += p->freeEnergy[q] * p->fieldDY[q];
@@ -535,6 +555,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 		//if(abs(fQ_self_y * zetaQ_self)>F_total_y) F_total_y = fQ_self_y * zetaQ_self;
 		//F_total_x += fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//F_total_y += fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		//F_total_x += f_passive_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		//F_total_y += f_passive_y + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 
 		//vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
