@@ -9,6 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -34,18 +35,25 @@ def rotate(n,p):
     ny = sin(t)*n[0] + sin(t)*n[1]
     return [nx,ny]
 
+
 def wang(a, b):
     """Infamous chinese function"""
     p = 2.
     ang = atan2(abs(a[0]*b[1]-a[1]*b[0]), a[0]*b[0]+a[1]*b[1])
-    while(abs(ang) > np.pi/p + 1e-3):
-        b = rotate(b,p)
-        ang = atan2(abs(a[0]*b[1]-a[1]*b[0]), a[0]*b[0]+a[1]*b[1])
+
+    if(ang > pi/2.):
+        b = [-i for i in b]
+
+    #while(abs(ang) > np.pi/p + 1e-3):
+        #b = rotate(b,p)
+        #ang = atan2(abs(a[0]*b[1]-a[1]*b[0]), a[0]*b[0]+a[1]*b[1])
 
     m = a[0]*b[1]-a[1]*b[0]
     return -np.sign(m)*atan2(abs(m), a[0]*b[0]+a[1]*b[1])
 
+
 def collapse(i, j, s, LX, LY, w, x=0, y=0, n=0,rng = [0.4,0.6]):
+
     if (s*w[i][j] > rng[0]) and (s*w[i][j] < rng[1]):
         w[i][j] = 0
         x1,y1,n1 = collapse((i+1) % LY, j, s, LX, LY, w, x, y, n,rng)
@@ -204,7 +212,7 @@ Q01_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
 n_grid=[[0. for j in range(0, lx)] for i in range(0, ly)]
 Q00_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
 Q01_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
-size_grid = 2*R
+size_grid = 3*R+1
 
 
 lambda_wall+=2
@@ -255,6 +263,8 @@ for line in cfile:
         n_coarse=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
         Q00_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
         Q01_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+        Q00_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+        Q01_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
         n_grid=[[0. for j in range(0, lx)] for i in range(0, ly)]
         #walls = [0. for i in range(lx*ly)]
         #set_walls(lx,ly,walls)
@@ -335,14 +345,14 @@ for line in cfile:
 
         levels = np.arange(0.0, m, step) + step
 
-        if variable==1 or variable==2:
+        if variable==1 or variable==2 or variable==3 or variable==4:
             if pt_num==0:
                 cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
             else:
                 cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)
 
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*nemX, -3*nemY, width=0.5, head_width=0, color='k')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*nemX, -3*nemY, width=0.5, head_width=0, color='r')
 
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*D_major_axis_vec_x, 3*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*D_major_axis_vec_x, -3*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
@@ -353,6 +363,7 @@ for line in cfile:
 
     if cont_line%(N+2)==0:
 
+            '''
             LLX = sizex_coarse
             LLY = sizey_coarse
             vecfield_nx = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
@@ -392,132 +403,140 @@ for line in cfile:
                         if variable==3 or variable==4:
                             cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.4*deltax_coarse*nx, 0.4*deltay_coarse*ny, width=deltax_coarse/15, color="w", head_width=0)
                             cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, -0.4*deltax_coarse*nx, -0.4*deltay_coarse*ny, width=deltax_coarse/15, color="w", head_width=0)
-
-
             '''
+
             LLX = lx
             LLY = ly
             vecfield_nx = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
             vecfield_ny = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
             vecfield_Q00 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
             vecfield_Q01 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
-            for p in range(0, LLY):
-                for q in range(0, LLX):
-                    if n_grid[p][q]>1e-5:
-                        for k in range(0, size_grid):
-                            for l in range(0, size_grid):
-                                pp = (((p - int(size_grid/2) + LLY) % LLY) + k) % LLY
-                                qq = (((q - int(size_grid/2) + LLX) % LLX) + l) % LLX
-                                if n_grid[pp][qq]>1e-5:
-                                    Q00_avg_grid[p][q] += (Q00_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
-                                    Q01_avg_grid[p][q] += (Q01_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
 
-                    S = 0.
-                    nx = 0.
-                    ny = 0.
-                    if n_grid[p][q]>0:
-                        Q00=Q00_avg_grid[p][q]
-                        Q01=Q01_avg_grid[p][q]
-                        S = sqrt(Q00**2 + Q01**2)
-                        nx = sqrt((1 + Q00/S)/2)
-                        ny = np.sign(Q01)*sqrt((1 - Q00/S)/2)
+            if variable==3 or variable==4:
+                for p in range(0, LLY):
+                    for q in range(0, LLX):
+                        if n_grid[p][q]>1e-1:
+                            for k in range(0, size_grid):
+                                for l in range(0, size_grid):
+                                    pp = (((p - int(size_grid/2) + LLY) % LLY) + k) % LLY
+                                    qq = (((q - int(size_grid/2) + LLX) % LLX) + l) % LLX
+                                    if n_grid[pp][qq]>1e-1:
+                                        Q00_avg_grid[p][q] += (Q00_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
+                                        Q01_avg_grid[p][q] += (Q01_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
 
-                        vecfield_nx[p][q] = nx
-                        vecfield_ny[p][q] = ny
-                        vecfield_Q00[p][q] = Q00
-                        vecfield_Q01[p][q] = Q01
+                        S = 0.
+                        nx = 0.
+                        ny = 0.
+                        if n_grid[p][q]>1e-1:
+                            Q00=Q00_avg_grid[p][q]
+                            Q01=Q01_avg_grid[p][q]
+                            S = sqrt(Q00**2 + Q01**2)
+                            nx = sqrt(2*S) * sqrt((1 + Q00/S)/2)
+                            ny = sqrt(2*S) * np.sign(Q01) * sqrt((1 - Q00/S)/2)
 
-                        if variable==3 or variable==4:
-                            cset1 = plt.arrow(q+1/2, p+1/2, 0.4*nx, 0.4*ny, width=1/15, color="k", head_width=0)
-                            cset1 = plt.arrow(q+1/2, p+1/2, -0.4*nx, -0.4*ny, width=1/15, color="k", head_width=0)
-                    else:
-                        if variable==3 or variable==4:
-                            cset1 = plt.arrow(q+1/2, p+1/2, 0.4*nx, 0.4*ny, width=1/15, color="w", head_width=0)
-                            cset1 = plt.arrow(q+1/2, p+1/2, -0.4*nx, -0.4*ny, width=1/15, color="w", head_width=0)
-            '''
+                            vecfield_nx[p][q] = nx
+                            vecfield_ny[p][q] = ny
+                            vecfield_Q00[p][q] = Q00
+                            vecfield_Q01[p][q] = Q01
 
+                            if variable==3 or variable==4:
+                                if q%2==0 and p%2==0:
+                                    cset1 = plt.arrow(q+1/2, p+1/2, 0.5*nx, 0.5*ny, width=1/15, color="k", head_width=0)
+                                    cset1 = plt.arrow(q+1/2, p+1/2, -0.5*nx, -0.5*ny, width=1/15, color="k", head_width=0)
+                        else:
+                            if variable==3 or variable==4:
+                                if q%2==0 and p%2==0:
+                                    cset1 = plt.arrow(q+1/2, p+1/2, 0.5*nx, 0.5*ny, width=1/15, color="w", head_width=0)
+                                    cset1 = plt.arrow(q+1/2, p+1/2, -0.5*nx, -0.5*ny, width=1/15, color="w", head_width=0)
 
-            winding_number = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
-            for p in range(0, LLY):
-                for q in range(0, LLX):
-                    ax1 = [vecfield_nx[p][(q+1) % LLX], vecfield_ny[p][(q+1) % LLX]]
-                    ax2 = [vecfield_nx[p][(q-1+LLX) % LLX], vecfield_ny[p][(q-1+LLX) % LLX]]
-                    ax3 = [vecfield_nx[(p+1) % LLY][q], vecfield_ny[(p+1) % LLY][q]]
-                    ax4 = [vecfield_nx[(p-1+LLY) % LLY][q], vecfield_ny[(p-1+LLY) % LLY][q]]
-                    ax5 = [vecfield_nx[(p-1+LLY) % LLY][(q+1) % LLX], vecfield_ny[(p-1+LLY) % LLY][(q+1) % LLX]]
-                    ax6 = [vecfield_nx[(p-1+LLY) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p-1+LLY)%LLY][(q-1+LLX)%LLX]]
-                    ax7 = [vecfield_nx[(p+1) % LLY][(q+1) % LLX], vecfield_ny[(p+1) % LLY][(q+1) % LLX]]
-                    ax8 = [vecfield_nx[(p+1) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p+1) % LLY][(q-1+LLX) % LLX]]
+                winding_number = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+                for p in range(0, LLY):
+                    for q in range(0, LLX):
+                        ax1 = [vecfield_nx[p][(q+1) % LLX], vecfield_ny[p][(q+1) % LLX]]
+                        ax2 = [vecfield_nx[p][(q-1+LLX) % LLX], vecfield_ny[p][(q-1+LLX) % LLX]]
+                        ax3 = [vecfield_nx[(p+1) % LLY][q], vecfield_ny[(p+1) % LLY][q]]
+                        ax4 = [vecfield_nx[(p-1+LLY) % LLY][q], vecfield_ny[(p-1+LLY) % LLY][q]]
+                        ax5 = [vecfield_nx[(p-1+LLY) % LLY][(q+1) % LLX], vecfield_ny[(p-1+LLY) % LLY][(q+1) % LLX]]
+                        ax6 = [vecfield_nx[(p-1+LLY) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p-1+LLY)%LLY][(q-1+LLX)%LLX]]
+                        ax7 = [vecfield_nx[(p+1) % LLY][(q+1) % LLX], vecfield_ny[(p+1) % LLY][(q+1) % LLX]]
+                        ax8 = [vecfield_nx[(p+1) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p+1) % LLY][(q-1+LLX) % LLX]]
 
-                    winding_number[p][q] = wang(ax1, ax5)
-                    winding_number[p][q] += wang(ax5, ax3)
-                    winding_number[p][q] += wang(ax3, ax6)
-                    winding_number[p][q] += wang(ax6, ax2)
-                    winding_number[p][q] += wang(ax2, ax8)
-                    winding_number[p][q] += wang(ax8, ax4)
-                    winding_number[p][q] += wang(ax4, ax7)
-                    winding_number[p][q] += wang(ax7, ax1)
-                    winding_number[p][q] /= 2.*pi
+                        winding_number[p][q] = wang(ax1, ax5)
+                        winding_number[p][q] += wang(ax5, ax4)
+                        winding_number[p][q] += wang(ax4, ax6)
+                        winding_number[p][q] += wang(ax6, ax2)
+                        winding_number[p][q] += wang(ax2, ax8)
+                        winding_number[p][q] += wang(ax8, ax3)
+                        winding_number[p][q] += wang(ax3, ax7)
+                        winding_number[p][q] += wang(ax7, ax1)
+                        winding_number[p][q] /= 2. * pi
 
-            charge = 1.0/2.0
-            thresh = 0.1
-            for p in range(0,LLY):
-                for q in range(0,LLX):
-                    plotted_flag=0
-                    # detect simplest charge 1/p defects
-                    if  (abs(winding_number[p][q]) > charge - thresh) and (abs(winding_number[p][q])< charge + thresh):
-                        # charge sign
-                        s = np.sign(winding_number[p][q])
-                        # bfs
-                        sum_x, sum_y, n = collapse(p, q, s, sizex_coarse, sizey_coarse, winding_number, rng = [charge - thresh, charge + thresh])
-                        x,y = sum_x/n,sum_y/n
-                        # compute angle, see doi:10.1039/c6sm01146b
-                        '''
-                        num = 0
-                        den = 0
-                        for (dx, dy) in [(0, 0), (0, 1), (1, 1), (1, 0)]:
-                            # coordinates of nodes around the defect
-                            kk = (int(x) + sizex_coarse + dx) % sizex_coarse
-                            ll = (int(y) + sizey_coarse + dy) % sizey_coarse
-                            # derivative at these points
-                            dxQxx = .5*(vecfield_Q00[(kk+1) % sizex_coarse, ll] - vecfield_Q00[(kk-1+sizex_coarse) % sizex_coarse, ll])
-                            dxQxy = .5*(vecfield_Q01[(kk+1) % sizex_coarse, ll] - vecfield_Q01[(kk-1+sizex_coarse) % sizex_coarse, ll])
-                            dyQxx = .5*(vecfield_Q00[kk, (ll+1) % sizey_coarse] - vecfield_Q00[kk, (ll-1+sizey_coarse) % sizey_coarse])
-                            dyQxy = .5*(vecfield_Q01[kk, (ll+1) % sizey_coarse] - vecfield_Q01[kk, (ll-1+sizey_coarse) % sizey_coarse])
-                            # accumulate numerator and denominator
-                            num += s*dxQxy - dyQxx
-                            den += dxQxx + s*dyQxy
-                        psi = s/(2.-s)*atan2(num, den)
-                        '''
-                        if variable==3 or variable==4:
-                            if s==1:
-                                cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'go', markersize=10)
-                                #cset1 = plt.arrow(x, y, -0.4*deltax_coarse*cos(psi), -0.4*deltay_coarse*sin(psi), width=deltax_coarse/15, color="r")
-                                plotted_flag=1
-                            elif s==-1:
-                                cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'b^', markersize=10)
-                                plotted_flag=1
+                charge = 1.0/2.0
+                thresh = 0.05
+                for p in range(0,LLY):
+                    for q in range(0,LLX):
+                        plotted_flag=0
+                        # detect simplest charge 1/p defects
+                        if  (abs(winding_number[p][q]) > charge - thresh) and (abs(winding_number[p][q]) < charge + thresh):
+                            # charge sign
+                            s = np.sign(winding_number[p][q])
+                            # bfs
+                            sum_x, sum_y, n = collapse(p, q, s, LLX, LLY, winding_number, rng = [charge - thresh, charge + thresh])
+                            x,y = sum_x/n,sum_y/n
 
-                    # keep this just in case our other symmetries give us integer defects
-                    elif (abs(winding_number[p][q]) > 0.9) and (abs(winding_number[p][q])<1.1):
-                        # charge sign
-                        s = np.sign(winding_number[p][q])
-                        # bfs
-                        sum_x, sum_y, n = collapse(p, q, s, sizex_coarse, sizey_coarse, winding_number, rng = [0.9,1.1])
-                        x,y = sum_x/n,sum_y/n
-                        # add defect to list
-                        if variable==3 or variable==4:
-                            if s==1:
-                                cset1 = plt.plot(x*sizex_coarse, y*sizey_coarse, 'r*', markersize=10)
-                                plotted_flag=1
-                            elif s==-1:
-                                cset1 = plt.plot(x*sizex_coarse, y*sizey_coarse, 'kX', markersize=10)
-                                plotted_flag=1
+                            # compute angle, see doi:10.1039/c6sm01146b
+                            '''
+                            num = 0
+                            den = 0
+                            for (dx, dy) in [(0, 0), (0, 1), (1, 1), (1, 0)]:
+                                # coordinates of nodes around the defect
+                                kk = (int(x) + sizex_coarse + dx) % sizex_coarse
+                                ll = (int(y) + sizey_coarse + dy) % sizey_coarse
+                                # derivative at these points
+                                dxQxx = .5*(vecfield_Q00[(kk+1) % sizex_coarse, ll] - vecfield_Q00[(kk-1+sizex_coarse) % sizex_coarse, ll])
+                                dxQxy = .5*(vecfield_Q01[(kk+1) % sizex_coarse, ll] - vecfield_Q01[(kk-1+sizex_coarse) % sizex_coarse, ll])
+                                dyQxx = .5*(vecfield_Q00[kk, (ll+1) % sizey_coarse] - vecfield_Q00[kk, (ll-1+sizey_coarse) % sizey_coarse])
+                                dyQxy = .5*(vecfield_Q01[kk, (ll+1) % sizey_coarse] - vecfield_Q01[kk, (ll-1+sizey_coarse) % sizey_coarse])
+                                # accumulate numerator and denominator
+                                num += s*dxQxy - dyQxx
+                                den += dxQxx + s*dyQxy
+                            psi = s/(2.-s)*atan2(num, den)
+                            '''
+                            if variable==3 or variable==4:
+                                if s==1:
+                                    if n_grid[int(x)][int(y)]>1e-1:
+                                        cset1 = plt.plot(x, y, 'go', markersize=10)
+                                        #cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'go', markersize=10)
+                                        #cset1 = plt.arrow(x, y, -0.4*deltax_coarse*cos(psi), -0.4*deltay_coarse*sin(psi), width=deltax_coarse/15, color="r")
+                                        plotted_flag=1
+                                elif s==-1:
+                                    if n_grid[int(x)][int(y)]>1e-1:
+                                        cset1 = plt.plot(x, y, 'b^', markersize=10)
+                                        #cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'b^', markersize=10)
+                                        plotted_flag=1
 
-                    #if plotted_flag==0 and abs(winding_number[p][q]) > 0.1:
-                        #print("Defect topology: ", q, p, winding_number[p][q])
+                        # keep this just in case our other symmetries give us integer defects
+                        elif (abs(winding_number[p][q]) > 1 - thresh) and (abs(winding_number[p][q])< 1 + thresh):
+                            # charge sign
+                            s = np.sign(winding_number[p][q])
+                            # bfs
+                            sum_x, sum_y, n = collapse(p, q, s, sizex_coarse, sizey_coarse, winding_number, rng = [0.9,1.1])
+                            x,y = sum_x/n,sum_y/n
+                            # add defect to list
+                            if variable==3 or variable==4:
+                                if s==1:
+                                    if n_grid[int(x)][int(y)]>1e-1:
+                                        cset1 = plt.plot(x, y, 'r*', markersize=10)
+                                        #cset1 = plt.plot(x*sizex_coarse, y*sizey_coarse, 'r*', markersize=10)
+                                        plotted_flag=1
+                                elif s==-1:
+                                    if n_grid[int(x)][int(y)]>1e-1:
+                                        cset1 = plt.plot(x, y, 'kX', markersize=10)
+                                        #cset1 = plt.plot(x*sizex_coarse, y*sizey_coarse, 'kX', markersize=10)
+                                        plotted_flag=1
 
-
+                        #if plotted_flag==0 and abs(winding_number[p][q]) > 0.1:
+                            #print("Defect topology: ", q, p, winding_number[p][q])
 
             frame_num=int(t/print_conf_interval)-1
             #if frame_num%1==0:

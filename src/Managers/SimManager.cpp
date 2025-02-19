@@ -180,6 +180,7 @@ void SimManager::run() {
 
 void SimManager::analyse() {
 	backend->apply_simulation_changes_after_equilibration();
+	backend->sim_step();
 	backend->update_observables_data();
 	backend->print_observables();
 }

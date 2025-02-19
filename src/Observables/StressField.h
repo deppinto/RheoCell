@@ -1,5 +1,5 @@
-#ifndef FORCEFIELD_H_
-#define FORCEFIELD_H_
+#ifndef STRESSFIELD_H_
+#define STRESSFIELD_H_
 
 #include "BaseObservable.h"
 
@@ -9,7 +9,7 @@
  *
  */
 
-class ForceField: public BaseObservable {
+class StressField: public BaseObservable {
 protected:
 	int only_type;
 	std::set<int> visible_fields;
@@ -59,13 +59,13 @@ protected:
 	virtual std::string f_field(llint step);
 
 public:
-	ForceField();
-	virtual ~ForceField();
+	StressField();
+	virtual ~StressField();
 
 	virtual void get_settings(input_file &my_inp, input_file &sim_inp);
 	virtual void init();
 	std::string get_output_string(llint curr_step);
 };
 
-#endif /* FORCEFIELD_H_ */
+#endif /* STRESSFIELD_H_ */
 

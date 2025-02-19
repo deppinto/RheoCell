@@ -9,6 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
+matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -36,7 +37,7 @@ def rotate(n,p):
 
 def wang(a, b):
     """Infamous chinese function"""
-    p = 2.
+    p = 1.
     ang = atan2(abs(a[0]*b[1]-a[1]*b[0]), a[0]*b[0]+a[1]*b[1])
     while(abs(ang) > np.pi/p + 1e-3):
         b = rotate(b,p)
@@ -207,6 +208,15 @@ timeavg_velocity_grid_coarse_x=[[0. for j in range(0, sizex_coarse)] for i in ra
 timeavg_velocity_grid_coarse_y=[[0. for j in range(0, sizex_coarse)] for i in range(0,sizey_coarse)]
 timeavg_n_coarse=[[0. for j in range(0, sizex_coarse)] for i in range(0,sizey_coarse)]
 
+
+velocity_x_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+velocity_y_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+n_grid=[[0. for j in range(0, lx)] for i in range(0, ly)]
+velocity_x_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+velocity_y_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+size_grid = 3*R+1
+
+
 lambda_wall+=2
 lambda_wall=0
 avg_velocity_x=np.zeros(ly-ceil(2*lambda_wall))
@@ -267,6 +277,11 @@ for line in cfile:
         velocity_grid_coarse_y=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
         n_coarse=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
         sum_phi=[[0. for q in range(lx)] for k in range(ly)]
+        velocity_x_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+        velocity_y_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+        n_grid=[[0. for j in range(0, lx)] for i in range(0, ly)]
+        velocity_x_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+        velocity_y_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
         velmax=0.
         velmin=10000.
         #walls = [0. for i in range(lx*ly)]
@@ -337,6 +352,11 @@ for line in cfile:
                 velocity_grid_coarse_x[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value*com_velocity_x[pt_num]
                 velocity_grid_coarse_y[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value*com_velocity_y[pt_num]
                 n_coarse[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value
+
+                velocity_x_grid[int(yy)][int(xx)]+=value*com_velocity_x[pt_num]
+                velocity_y_grid[int(yy)][int(xx)]+=value*com_velocity_y[pt_num]
+                n_grid[int(yy)][int(xx)]+=value
+
                 avg_velocity_x[yy-int(ceil(2*lambda_wall)/2)]+=value*com_velocity_x[pt_num]
                 avg_velocity_y[yy-int(ceil(2*lambda_wall)/2)]+=value*com_velocity_y[pt_num]
 
@@ -385,19 +405,7 @@ for line in cfile:
 
     if cont_line%(N+2)==0:
 
-            #vx_max = max(map(max, velocity_grid_coarse_x))
-            #vy_max = max(map(max, velocity_grid_coarse_y))
-            vx_max = 0.2
-            vy_max = 0.2
-
-            vorticity=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
-            Q_criterion=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
-
-            LLX = sizex_coarse
-            LLY = sizey_coarse
-            vecfield_nx = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
-            vecfield_ny = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
-
+            '''
             for p in range(0,sizey_coarse):
                 ynext = p + 1
                 yprev = p - 1
@@ -469,19 +477,15 @@ for line in cfile:
                     vorticity[p][q] = dvydx - dvxdy
                     Q_criterion[p][q] = dvxdx * dvydy - dvxdy * dvydx
 
-                    '''
                     if Q_criterion[p][q]>0:
                         Q_criterion[p][q]=1
                     elif Q_criterion[p][q]<0:
                         Q_criterion[p][q]=-1
                     else:
                         Q_criterion[p][q]=0
-                    '''
 
-                    '''
                     if abs(Q_criterion[p][q])>2e-5:
                        print("max: ",Q_criterion[p][q])
-                    '''
 
                     if n_coarse[p][q]>0:
                         if variable==3 or variable==4:
@@ -489,78 +493,158 @@ for line in cfile:
                     else:
                         if variable==3 or variable==4:
                             cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.8*deltax_coarse*velocity_grid_coarse_x[p][q], 0.8*deltay_coarse*velocity_grid_coarse_y[p][q], width=deltax_coarse/15, color="w")
-                    
+            '''
 
-            winding_number = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
-            for p in range(0, LLY):
-                for q in range(0, LLX):
-                    ax1 = [vecfield_nx[p][(q+1) % LLX], vecfield_ny[p][(q+1) % LLX]]
-                    ax2 = [vecfield_nx[p][(q-1+LLX) % LLX], vecfield_ny[p][(q-1+LLX) % LLX]]
-                    ax3 = [vecfield_nx[(p+1) % LLY][q], vecfield_ny[(p+1) % LLY][q]]
-                    ax4 = [vecfield_nx[(p-1+LLY) % LLY][q], vecfield_ny[(p-1+LLY) % LLY][q]]
-                    ax5 = [vecfield_nx[(p-1+LLY) % LLY][(q+1) % LLX], vecfield_ny[(p-1+LLY) % LLY][(q+1) % LLX]]
-                    ax6 = [vecfield_nx[(p-1+LLY) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p-1+LLY)%LLY][(q-1+LLX)%LLX]]
-                    ax7 = [vecfield_nx[(p+1) % LLY][(q+1) % LLX], vecfield_ny[(p+1) % LLY][(q+1) % LLX]]
-                    ax8 = [vecfield_nx[(p+1) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p+1) % LLY][(q-1+LLX) % LLX]]
+            #vx_max = max(map(max, velocity_grid_coarse_x))
+            #vy_max = max(map(max, velocity_grid_coarse_y))
+            vx_max = 0.2
+            vy_max = 0.2
 
-                    winding_number[p][q] = wang(ax1, ax5)
-                    winding_number[p][q] += wang(ax5, ax3)
-                    winding_number[p][q] += wang(ax3, ax6)
-                    winding_number[p][q] += wang(ax6, ax2)
-                    winding_number[p][q] += wang(ax2, ax8)
-                    winding_number[p][q] += wang(ax8, ax4)
-                    winding_number[p][q] += wang(ax4, ax7)
-                    winding_number[p][q] += wang(ax7, ax1)
-                    winding_number[p][q] /= 2.*pi
+            vorticity=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
+            Q_criterion=[[0. for q in range(0, sizex_coarse)] for k in range(0,sizey_coarse)]
 
-            charge = 1.0/2.0
-            thresh = 0.1
-            for p in range(0,LLY):
-                for q in range(0,LLX):
-                    plotted_flag=0
-                    # detect simplest charge 1/p defects
-                    if  (abs(winding_number[p][q]) > charge - thresh) and (abs(winding_number[p][q])< charge + thresh):
-                        # charge sign
-                        s = np.sign(winding_number[p][q])
-                        # bfs
-                        sum_x, sum_y, n = collapse(p, q, s, sizex_coarse, sizey_coarse, winding_number, rng = [charge - thresh, charge + thresh])
-                        x,y = sum_x/n,sum_y/n
-                        # compute angle, see doi:10.1039/c6sm01146b
+            #LLX = sizex_coarse
+            #LLY = sizey_coarse
+            LLX = lx
+            LLY = ly
+            vecfield_nx = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            vecfield_ny = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
 
-                        if variable==3 or variable==4:
-                            if s==1:
-                                cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'go', markersize=10)
-                                #cset1 = plt.arrow(x, y, -0.4*deltax_coarse*cos(psi), -0.4*deltay_coarse*sin(psi), width=deltax_coarse/15, color="r")
-                                plotted_flag=1
-                            elif s==-1:
-                                cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'b^', markersize=10)
-                                plotted_flag=1
+            Y,X = np.mgrid[0:LLY:1, 0:LLX:1]
+            YY,XX = np.mgrid[0.:LLY:1., 0.:LLX:1.]
+            U, V = YY**2, XX**2
 
-                    # keep this just in case our other symmetries give us integer defects
-                    elif (abs(winding_number[p][q]) > 0.9) and (abs(winding_number[p][q])<1.1):
-                        # charge sign
-                        s = np.sign(winding_number[p][q])
-                        # bfs
-                        sum_x, sum_y, n = collapse(p, q, s, sizex_coarse, sizey_coarse, winding_number, rng = [0.9,1.1])
-                        x,y = sum_x/n,sum_y/n
-                        # add defect to list
-                        if variable==3 or variable==4:
-                            if s==1:
-                                cset1 = plt.plot(x*sizex_coarse, y*sizey_coarse, 'r*', markersize=10)
-                                plotted_flag=1
-                            elif s==-1:
-                                cset1 = plt.plot(x*sizex_coarse, y*sizey_coarse, 'kX', markersize=10)
-                                plotted_flag=1
+            if variable==3 or variable==4:
+                for p in range(0, LLY):
+                    for q in range(0, LLX):
+                        if n_grid[p][q]>1e-1:
+                            for k in range(0, size_grid):
+                                for l in range(0, size_grid):
+                                    pp = (((p - int(size_grid/2) + LLY) % LLY) + k) % LLY
+                                    qq = (((q - int(size_grid/2) + LLX) % LLX) + l) % LLX
+                                    if n_grid[pp][qq]>1e-1:
+                                        velocity_x_avg_grid[p][q] += (velocity_x_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
+                                        velocity_y_avg_grid[p][q] += (velocity_y_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
 
-                    #if plotted_flag==0 and abs(winding_number[p][q]) > 0.1:
-                        #print("Defect topology: ", q, p, winding_number[p][q])
+                        if n_grid[p][q]>1e-1:
+                            nx = velocity_x_avg_grid[p][q]
+                            ny = velocity_y_avg_grid[p][q]
+                            vecfield_nx[p][q] = nx
+                            vecfield_ny[p][q] = ny
+                            U[p, q] = nx
+                            V[p, q] = ny
+                            norm = sqrt(nx * nx + ny * ny)
+                        else:
+                            U[p, q] = 0.
+                            V[p, q] = 0.
 
+                            #if variable==3 or variable==4:
+                                #if q%2==0 and p%2==0:
+                                #cset1 = plt.arrow(q+1/2, p+1/2, nx/norm, ny/norm, width=1/10, color="k")
+
+                        #else:
+                            #if variable==3 or variable==4:
+                                #if q%2==0 and p%2==0:
+                                    #cset1 = plt.arrow(q+1/2, p+1/2, 0.5*nx, 0.5*ny, width=1/15, color="w")
+
+                #X, Y = np.meshgrid( np.arange(0, lx) , np.arange(0, ly) )
+                cset1 = plt.streamplot(X, Y, U, V, density = 2)#, broken_streamlines = False)
+
+                vorticity=[[0. for q in range(0, LLX)] for k in range(0, LLY)]
+                Q_criterion=[[0. for q in range(0, LLX)] for k in range(0, LLY)]
+                winding_number = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+                for p in range(0, LLY):
+                    ynext = (p + 1) % LLY
+                    yprev = (p - 1 + LLY) % LLY
+
+                    for q in range(0, LLX):
+                        xnext = (q + 1) % LLX
+                        xprev = (q - 1 + LLX) % LLX
+
+                        dvxdx = (vecfield_nx[p][xnext] - vecfield_nx[p][xprev])/2
+                        dvydx = (vecfield_ny[p][xnext] - vecfield_ny[p][xprev])/2
+                        dvxdy = (vecfield_nx[ynext][q] - vecfield_nx[yprev][q])/2
+                        dvydy = (vecfield_ny[ynext][q] - vecfield_ny[yprev][q])/2
+
+                        vorticity[p][q] = dvydx - dvxdy
+                        Q_criterion[p][q] = dvxdx * dvydy - dvxdy * dvydx
+
+                        ax1 = [vecfield_nx[p][(q+1) % LLX], vecfield_ny[p][(q+1) % LLX]]
+                        ax2 = [vecfield_nx[p][(q-1+LLX) % LLX], vecfield_ny[p][(q-1+LLX) % LLX]]
+                        ax3 = [vecfield_nx[(p+1) % LLY][q], vecfield_ny[(p+1) % LLY][q]]
+                        ax4 = [vecfield_nx[(p-1+LLY) % LLY][q], vecfield_ny[(p-1+LLY) % LLY][q]]
+                        ax5 = [vecfield_nx[(p-1+LLY) % LLY][(q+1) % LLX], vecfield_ny[(p-1+LLY) % LLY][(q+1) % LLX]]
+                        ax6 = [vecfield_nx[(p-1+LLY) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p-1+LLY)%LLY][(q-1+LLX)%LLX]]
+                        ax7 = [vecfield_nx[(p+1) % LLY][(q+1) % LLX], vecfield_ny[(p+1) % LLY][(q+1) % LLX]]
+                        ax8 = [vecfield_nx[(p+1) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p+1) % LLY][(q-1+LLX) % LLX]]
+
+                        winding_number[p][q] = wang(ax1, ax5)
+                        winding_number[p][q] += wang(ax5, ax4)
+                        winding_number[p][q] += wang(ax4, ax6)
+                        winding_number[p][q] += wang(ax6, ax2)
+                        winding_number[p][q] += wang(ax2, ax8)
+                        winding_number[p][q] += wang(ax8, ax3)
+                        winding_number[p][q] += wang(ax3, ax7)
+                        winding_number[p][q] += wang(ax7, ax1)
+                        winding_number[p][q] /= 2. * pi
+
+                charge = 1.0/2.0
+                thresh = 0.1
+                for p in range(0,LLY):
+                    for q in range(0,LLX):
+                        plotted_flag=0
+                        # detect simplest charge 1/p defects
+                        if  (abs(winding_number[p][q]) > charge - thresh) and (abs(winding_number[p][q])< charge + thresh):
+                            # charge sign
+                            s = np.sign(winding_number[p][q])
+                            # bfs
+                            sum_x, sum_y, n = collapse(p, q, s, LLX, LLY, winding_number, rng = [charge - thresh, charge + thresh])
+                            x,y = sum_x/n,sum_y/n
+                            # compute angle, see doi:10.1039/c6sm01146b
+                            if variable==3 or variable==4:
+                                if s==1:
+                                    if n_grid[int(x)][int(y)]>1e-1:
+                                        cset1 = plt.plot(x, y, 'go', markersize=10)
+                                        #cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'go', markersize=10)
+                                        #cset1 = plt.arrow(x, y, -0.4*deltax_coarse*cos(psi), -0.4*deltay_coarse*sin(psi), width=deltax_coarse/15, color="r")
+                                        plotted_flag=1
+                                elif s==-1:
+                                    if n_grid[int(x)][int(y)]>1e-1:
+                                        cset1 = plt.plot(x, y, 'b^', markersize=10)
+                                        #cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'b^', markersize=10)
+                                        plotted_flag=1
+
+                        # keep this just in case our other symmetries give us integer defects
+                        elif (abs(winding_number[p][q]) > 0.9) and (abs(winding_number[p][q])<1.1):
+                            # charge sign
+                            s = np.sign(winding_number[p][q])
+                            # bfs
+                            sum_x, sum_y, n = collapse(p, q, s, LLX, LLY, winding_number, rng = [0.9,1.1])
+                            x,y = sum_x/n,sum_y/n
+                            # add defect to list
+                            if variable==3 or variable==4:
+                                if s==1:
+                                    if n_grid[int(x)][int(y)]>1e-1:
+                                        cset1 = plt.plot(x, y, 'r*', markersize=10)
+                                        #cset1 = plt.plot(x*sizex_coarse, y*sizey_coarse, 'r*', markersize=10)
+                                        plotted_flag=1
+                                elif s==-1:
+                                    if n_grid[int(x)][int(y)]>1e-1:
+                                        cset1 = plt.plot(x, y, 'kX', markersize=10)
+                                        #cset1 = plt.plot(x*sizex_coarse, y*sizey_coarse, 'kX', markersize=10)
+                                        plotted_flag=1
+
+                        #if plotted_flag==0 and abs(winding_number[p][q]) > 0.1:
+                            #print("Defect topology: ", q, p, winding_number[p][q])
+
+                z_min, z_max = -np.abs(Q_criterion).max(), np.abs(Q_criterion).max()
+                cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos')
 
 
 
             #X, Y = np.meshgrid( np.arange(0+deltax_coarse/2, lx+deltax_coarse/2, deltax_coarse) , np.arange(0+deltay_coarse/2, ly+deltay_coarse/2, deltay_coarse) )
             #z_min, z_max = -np.abs(vorticity).max(), np.abs(vorticity).max()
-            z_min, z_max = -np.abs(Q_criterion).max(), np.abs(Q_criterion).max()
+            #z_min, z_max = -np.abs(Q_criterion).max(), np.abs(Q_criterion).max()
             #print(z_min, z_max)
 
             #z_min = -0.015
@@ -574,8 +658,8 @@ for line in cfile:
             #z_max = 3.5e-5
             #z_min = -2e-5
             #z_max = 2e-5
-            if variable==3 or variable==4:
-                cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos', extent=[0,lx,0,ly])
+            #if variable==3 or variable==4:
+                #cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos', extent=[0,lx,0,ly])
 
             frame_num=int(t/print_conf_interval)-1
             #if frame_num%1==0:

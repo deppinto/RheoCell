@@ -2,29 +2,29 @@
 #include <typeinfo>
 #include <map>
 
-#include "ForceField.h"
+#include "StressField.h"
 #include "../Fields/BaseField.h"
 #include "../Fields/MultiPhaseField.h"
 #include "../Fields/LEBcMultiPhaseField.h"
 
 using namespace std;
 
-ForceField::ForceField() {
+StressField::StressField() {
 	only_type = -1;
 }
 
-ForceField::~ForceField() {
+StressField::~StressField() {
 
 }
 
-void ForceField::get_settings(input_file &my_inp, input_file &sim_inp) {
+void StressField::get_settings(input_file &my_inp, input_file &sim_inp) {
 	BaseObservable::get_settings(my_inp, sim_inp);
 
 	getInputInt(&my_inp, "only_type", &only_type, 0);
 	getInputInt(&my_inp, "size_grid", &size_grid, 0);
 }
 
-void ForceField::init() {
+void StressField::init() {
 	BaseObservable::init();
 
 	Lx = config_info->box->getXsize();
@@ -55,7 +55,7 @@ void ForceField::init() {
         }
 }
 
-string ForceField::headers(llint step) {
+string StressField::headers(llint step) {
 	stringstream headers;
 	headers.precision(15);
 
@@ -65,7 +65,7 @@ string ForceField::headers(llint step) {
 	return headers.str();
 }
 
-string ForceField::field(BaseField *p) {
+string StressField::field(BaseField *p) {
 	stringstream conf;
 	conf.precision(15);
 	
@@ -74,7 +74,7 @@ string ForceField::field(BaseField *p) {
 	return conf.str();
 }
 
-void ForceField::calc_field(BaseField *p) {
+void StressField::calc_field(BaseField *p) {
 
 	//std::cout<<"begin-------------------------------------------------------------------- "<<p->index<<std::endl;
 	for(int q=0;q<p->subSize; q++){
@@ -107,7 +107,7 @@ void ForceField::calc_field(BaseField *p) {
 	//std::cout<<"cell-------------------------------------------------------------------- "<<p->index<<std::endl;
 }
 
-string ForceField::f_field(llint step) {
+string StressField::f_field(llint step) {
 	stringstream conf;
 	conf.precision(15);
 	std::fill(f_field_x.begin(), f_field_x.end(), 0.);
@@ -129,7 +129,7 @@ string ForceField::f_field(llint step) {
 		BaseField *p = config_info->fields()[p_idx];
 		bool visible = (only_type == -1 || p->type == only_type);
 		if(visible) {
-			calc_force_field(p);
+			calc_field(p);
 		}
 	}
 
