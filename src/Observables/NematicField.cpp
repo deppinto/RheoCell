@@ -2,29 +2,29 @@
 #include <typeinfo>
 #include <map>
 
-#include "VelocityField.h"
+#include "NematicField.h"
 #include "../Fields/BaseField.h"
 #include "../Fields/MultiPhaseField.h"
 #include "../Fields/LEBcMultiPhaseField.h"
 
 using namespace std;
 
-VelocityField::VelocityField() {
+NematicField::NematicField() {
 	only_type = -1;
 }
 
-VelocityField::~VelocityField() {
+NematicField::~NematicField() {
 
 }
 
-void VelocityField::get_settings(input_file &my_inp, input_file &sim_inp) {
+void NematicField::get_settings(input_file &my_inp, input_file &sim_inp) {
 	BaseObservable::get_settings(my_inp, sim_inp);
 
 	getInputInt(&my_inp, "only_type", &only_type, 0);
 	getInputInt(&my_inp, "size_grid", &size_grid, 0);
 }
 
-void VelocityField::init() {
+void NematicField::init() {
 	BaseObservable::init();
 
 	Lx = config_info->box->getXsize();
@@ -47,7 +47,7 @@ void VelocityField::init() {
         }
 }
 
-string VelocityField::headers(llint step) {
+string NematicField::headers(llint step) {
 	stringstream headers;
 	headers.precision(15);
 
@@ -57,7 +57,7 @@ string VelocityField::headers(llint step) {
 	return headers.str();
 }
 
-string VelocityField::field(BaseField *p) {
+string NematicField::field(BaseField *p) {
 	stringstream conf;
 	conf.precision(15);
 	
@@ -66,18 +66,18 @@ string VelocityField::field(BaseField *p) {
 	return conf.str();
 }
 
-void VelocityField::calc_field(BaseField *p) {
+void NematicField::calc_field(BaseField *p) {
 
 	for(int q=0;q<p->subSize; q++){
 		int k = p->map_sub_to_box[q];
 
-		f_field_x[k] += config_info->interaction->get_velocity_x(p, q) * p->fieldScalar[q];
-		f_field_y[k] += config_info->interaction->get_velocity_y(p, q) * p->fieldScalar[q];
+		f_field_x[k] += p->Q00 * p->fieldScalar[q];
+		f_field_y[k] += p->Q01 * p->fieldScalar[q];
 		phi_field[k] += p->fieldScalar[q];
 	}
 }
 
-string VelocityField::f_field(llint step) {
+string NematicField::f_field(llint step) {
 	stringstream conf;
 	conf.precision(15);
 	std::fill(f_field_x.begin(), f_field_x.end(), 0.);
@@ -116,7 +116,7 @@ string VelocityField::f_field(llint step) {
 
 					if(phi_field[ss]>1e-1){
 						f_field_coarse_x[site] += (f_field_x[ss] / phi_field[ss]) / (size_grid * size_grid);
-						f_field_coarse_y[site] += (f_field_y[ss] / phi_field[ss]) / (size_grid * size_grid);
+						f_field_coarse_y[site] += (f_field_y[ss] / phi_field[ss]) / (size_grid * size_grid) ;
 						phi_field_coarse[site] += 1.;				
 					}
 				}
@@ -132,6 +132,6 @@ string VelocityField::f_field(llint step) {
 	return conf.str();
 }
 
-string VelocityField::get_output_string(llint curr_step) {
+string NematicField::get_output_string(llint curr_step) {
 	return headers(curr_step) + f_field(curr_step);
 }

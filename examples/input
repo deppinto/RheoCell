@@ -55,3 +55,12 @@ data_output_1 = {
    type = ForceField
  }
 }
+
+data_output_1 = {
+ name = stress_field.txt
+ print_every = 1
+ col_1 = {
+   type = stress_field
+   size_grid = 25
+ }
+}

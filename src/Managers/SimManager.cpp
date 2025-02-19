@@ -183,4 +183,5 @@ void SimManager::analyse() {
 	backend->sim_step();
 	backend->update_observables_data();
 	backend->print_observables();
+	backend->print_conf(true);
 }

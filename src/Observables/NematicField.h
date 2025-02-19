@@ -1,5 +1,5 @@
-#ifndef VELOCITYFIELD_H_
-#define VELOCITYFIELD_H_
+#ifndef NEMATICFIELD_H_
+#define NEMATICFIELD_H_
 
 #include "BaseObservable.h"
 
@@ -9,7 +9,7 @@
  *
  */
 
-class VelocityField: public BaseObservable {
+class NematicField: public BaseObservable {
 protected:
 	int only_type;
 	std::set<int> visible_fields;
@@ -51,13 +51,13 @@ protected:
 	virtual std::string f_field(llint step);
 
 public:
-	VelocityField();
-	virtual ~VelocityField();
+	NematicField();
+	virtual ~NematicField();
 
 	virtual void get_settings(input_file &my_inp, input_file &sim_inp);
 	virtual void init();
 	std::string get_output_string(llint curr_step);
 };
 
-#endif /* VELOCITYFIELD_H_ */
+#endif /* NEMATICFIELD_H_ */
 

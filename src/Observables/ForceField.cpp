@@ -129,7 +129,7 @@ string ForceField::f_field(llint step) {
 		BaseField *p = config_info->fields()[p_idx];
 		bool visible = (only_type == -1 || p->type == only_type);
 		if(visible) {
-			calc_force_field(p);
+			calc_field(p);
 		}
 	}
 
@@ -175,5 +175,5 @@ string ForceField::f_field(llint step) {
 }
 
 string ForceField::get_output_string(llint curr_step) {
-	return headers(curr_step) + force_field(curr_step);
+	return headers(curr_step) + f_field(curr_step);
 }

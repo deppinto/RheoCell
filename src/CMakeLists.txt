@@ -17,6 +17,7 @@ SET(observables_SOURCES
 	Observables/Configuration.cpp
 	Observables/VelocityField.cpp
 	Observables/ForceField.cpp
+	Observables/NematicField.cpp
 	Observables/StressField.cpp
 )
 

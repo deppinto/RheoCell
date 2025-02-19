@@ -3,6 +3,7 @@
 #include "Configuration.h"
 #include "VelocityField.h"
 #include "ForceField.h"
+#include "NematicField.h"
 #include "StressField.h"
 
 #include <nlohmann/json.hpp>
@@ -18,6 +19,7 @@ ObservablePtr ObservableFactory::make_observable(input_file &obs_inp) {
 	else if(!strncasecmp(obs_type, "velocity_field", 512)) res = std::make_shared<VelocityField>();
 	else if(!strncasecmp(obs_type, "force_field", 512)) res = std::make_shared<ForceField>();
 	else if(!strncasecmp(obs_type, "stress_field", 512)) res = std::make_shared<StressField>();
+	else if(!strncasecmp(obs_type, "nematic_field", 512)) res = std::make_shared<NematicField>();
 	else {
 		if(res == NULL) throw RCexception("Observable '%s' not found. Aborting", obs_type);
 	}
