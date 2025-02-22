@@ -29,6 +29,8 @@ void MultiPhaseField::resizing() {
 	fieldDX.resize(subSize);
 	fieldDY.resize(subSize);	
 	laplacianPhi.resize(subSize);	
+	//Phi00.resize(subSize);	
+	//Phi01.resize(subSize);	
 	freeEnergy.resize(subSize);
 	fieldScalar_old.resize(subSize);
 	dfield_old.resize(subSize);

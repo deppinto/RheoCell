@@ -314,9 +314,7 @@ for line in cfile:
             ybottom = int((yy - 1 + LsubY[pt_num]) % LsubY[pt_num])
             xright = int((xx + 1) % LsubX[pt_num])
             ytop = int((yy + 1) % LsubY[pt_num])
-        '''
 
-        '''
         for k in range(lx*ly):
             yy = int(k/lx)
             xx = int(k - yy * lx)
@@ -334,8 +332,9 @@ for line in cfile:
         D_major_axis = 0.5 * np.atan2(S01, S00)
         D_major_axis_vec_x = np.cos(D_major_axis)
         D_major_axis_vec_y = np.sin(D_major_axis)
+        D_i = np.sqrt(S00 * S00 + S01 * S01)
+        print(2 * D_i)
         '''
-
 
         X, Y = np.meshgrid(x, y)
         step = 0.01
@@ -346,7 +345,7 @@ for line in cfile:
         levels = np.arange(0.0, m, step) + step
 
         if variable==1 or variable==2 or variable==3 or variable==4:
-            if pt_num==0:
+            if pt_num==44:
                 cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
             else:
                 cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)

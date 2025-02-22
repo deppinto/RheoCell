@@ -7,12 +7,12 @@ WetModel::WetModel() :
 				lambda(2.5),
 				omega(0.004),
 				mu(3.),
-				Kg(0.025),
+				Kg(0.1),
 				kappa(0.1),
 				friction(1.),
 				zetaQ_self(0),
 				zetaQ_inter(0),
-				J_Q(0.1),
+				J_Q(0),
 				friction_cell(0.),
 				tolerance(0.0001),
 				wall_slip(0.5){
@@ -41,14 +41,18 @@ void WetModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "friction", &friction_active, 0);
 	getInputNumber(&inp, "CGtolerance", &tolerance, 0);
 	getInputNumber(&inp, "wall_slip", &wall_slip, 0);
+	getInputNumber(&inp, "Kg", &Kg, 0);
 }
 
 void WetModel::init() {
         a0=PI*R*R;
-	number R_eff = R;
-	R1 = (R_eff * sqrt(3)) * (R_eff * sqrt(3));
-	R2 = (R_eff / sqrt(3)) * (R_eff / sqrt(3));
-	R_term = (1/R1) - (1/R2);
+	/*number R_eff = R;
+	number AR = 3.;
+	R1 = (R_eff * sqrt(AR)) * (R_eff * sqrt(AR));
+	R2 = (R_eff / sqrt(AR)) * (R_eff / sqrt(AR));
+	R_term = (1/R1) - (1/R2);*/
+	R1 = 1;
+	R2 = 0.1;
 	store_max_size=20;
 	if(tolerance>0)
 		solverCG.setTolerance(tolerance);
@@ -273,8 +277,10 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 					//if(store_site_velocity_index[i+other_site_box*store_max_size]>=field_start_index[p->index] && store_site_velocity_index[i+other_site_box*store_max_size]<field_start_index[p->index]+p->subSize)continue;
 
 					if(box->getWalls(p->map_sub_to_box[q])<wall_slip){
-						tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction_cell)));
-						tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell)));
+						tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction_cell * weight_values[j])));
+						tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell * weight_values[j])));
+						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction_cell)));
+						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell)));
 						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction_cell)*weight));
 						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell)*weight));
 						//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (double)(-friction_cell*store_site_field[i+other_site_box*store_max_size]/sum_phi[other_site_box])));
@@ -390,10 +396,16 @@ void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 	if(box->getWalls(k)<wall_slip){
         	p->fieldDY[q] = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
 		p->laplacianPhi[q] = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] - 4.*p->fieldScalar[q];
+
+		//p->Phi00[q] = (p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] - 2 * p->fieldScalar[q]) - (p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] - 2 * p->fieldScalar[q]);
+		//p->Phi01[q] = 0.25 * (p->fieldScalar[p->neighbors_sub[8+q*9]] - p->fieldScalar[p->neighbors_sub[6+q*9]] - p->fieldScalar[p->neighbors_sub[2+q*9]] + p->fieldScalar[p->neighbors_sub[0+q*9]]);
 	}
 	else{
         	p->fieldDY[q] = 0.;
-		p->laplacianPhi[q] = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + - 4.*p->fieldScalar[q];
+		p->laplacianPhi[q] = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + - 2.*p->fieldScalar[q];
+
+		//p->Phi00[q] = (p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] - 2 * p->fieldScalar[q]);
+		//p->Phi01[q] = 0.;
 	}
 
 	BaseInteraction::updateFieldProperties(p, q, k);
@@ -459,12 +471,26 @@ number WetModel::f_interaction(BaseField *p, int q) {
 		laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[7+k*9]] + phi2[box->neighbors[3+k*9]] +  phi2[box->neighbors[1+k*9]] - 4.*phi2[k];
 	}
 	else{
-		laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[3+k*9]] - 4.*phi2[k];
+		laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[3+k*9]] - 2.*phi2[k];
 	}
 
-	// CH term coupled to chemical
+	// CH term coupled to chemical (use first)
 	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*p->laplacianPhi[q]);
 	//number CH = gamma*(8*p->fieldScalar[q]*(p->fieldScalar[q]-1)*(2*p->fieldScalar[q]-1)/lambda - 2*lambda*laplacianPhi);
+	//CH term anisotropy
+	/*number phixx = (p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] - 2 * p->fieldScalar[q]);
+	number phiyy = (p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] - 2 * p->fieldScalar[q]);
+	number phixy = 0.25 * (p->fieldScalar[p->neighbors_sub[8+q*9]] - p->fieldScalar[p->neighbors_sub[6+q*9]] - p->fieldScalar[p->neighbors_sub[2+q*9]] + p->fieldScalar[p->neighbors_sub[0+q*9]]);
+	number norm = sqrt(p->nemQ[0]*p->nemQ[0] + p->nemQ[1]*p->nemQ[1]);
+	number v0 = p->nemQ[0] / norm;
+	number v1 = p->nemQ[1] / norm;	
+	number k00 = R1 * v0 * v0 + R2 * (1 - v0 * v0);
+	number k11 = R1 * v1 * v1 + R2 * (1 - v1 * v1);
+	number k01 = R1 * v1 * v0 - R2 * v1 * v0;
+	number anisotropy = k00 * phixx + 2 * k01 * phixy + k11 * phiyy;
+	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - lambda * anisotropy);*/
+	//if(p->index==0 && q==0)std::cout<<sqrt(p->nemQ[0]*p->nemQ[0] + p->nemQ[1]*p->nemQ[1])<<" "<<sqrt(v0*v0+v1*v1)  <<std::endl;
+	
    
 	// area conservation term
 	number A = - 4*(mu/a0)*(1-p->area/a0)*p->fieldScalar[q];
@@ -486,11 +512,26 @@ number WetModel::f_interaction(BaseField *p, int q) {
 	if(y_y_com >= box->getYsize()/2)y_y_com -= box->getYsize();
 	if(y_y_com <= -box->getYsize()/2)y_y_com += box->getYsize();
 
-	number Shape = 2 * Kg * ( p->fieldScalar[q] - exp( - ((x_x_com * x_x_com / R1 + y_y_com * y_y_com / R2) * (1 + p->Q00) + (x_x_com * x_x_com / R2 + y_y_com * y_y_com / R1) * (1 - p->Q00) + 2 * x_x_com * y_y_com * p->Q01 * R_term) ) );*/
+	number val1 = (x_x_com * x_x_com) * ( (1 + p->Q00) / R1 + (1 - p->Q00) / R2 );
+	number val2 = (2 * x_x_com * y_y_com) * ( p->Q01 / R1 + p->Q01 / R2 );
+	number val3 = (y_y_com * y_y_com) * ( (1 - p->Q00) / R1 + (1 + p->Q00) / R2 );
+
+	number Shape = 2 * Kg * (p->fieldScalar[q] - exp( -(val1 + val2 + val3) ) );*/
+	//number Shape = 2 * Kg * ( p->fieldScalar[q] - exp( - ((x_x_com * x_x_com / R1 + y_y_com * y_y_com / R2) * (1 + p->Q00) + (x_x_com * x_x_com / R2 + y_y_com * y_y_com / R1) * (1 - p->Q00) + 2 * x_x_com * y_y_com * p->Q01 * R_term) ) );
+
+	/*number D_i = sqrt(p->S00 * p->S00 + p->S01 * p->S01);
+	number dDidphi = 2 * p->S00 * p->Phi00[q] + 4 * p->S01 * p->Phi01[q];
+	//number Shape = - 2 * Kg * (2 * D_i - D_0) * dDidphi / (D_i * D_i * D_i);
+	number Shape;
+	if(D_i!=0)Shape = 2 * Kg * (2 * D_i - 3.) * dDidphi / (D_i);
+	else Shape = 0.;*/
+	//if(p->index==0 && q==0)std::cout<<Kg<<" "<<Shape<<" "<<D_i <<std::endl;
+
 
 
 	// delta F / delta phi_i
-	number V = CH + A + Rep + Adh; // + Shape;
+	number V = CH + A + Rep + Adh;
+	//number V = CH + A + Rep + Adh + Shape;
 	//if(p->index==0 && q==0)std::cout<<p->freeEnergy[q]<<" "<<p->LsubX<<" "<<p->LsubY<<" "<< p->neighbors_sub[5+q*9]<<" "<< p->neighbors_sub[3+q*9]<<" "<< p->neighbors_sub[7+q*9]<<" "<<p->neighbors_sub[1+q*9]<<" "<<CH<<" "<<A<<" "<<Rep<<std::endl;
 	p->freeEnergy[q] += V;
 	//if(p->index==0 && q==0)std::cout<<"Free energy: "<<p->freeEnergy[q]<<" "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<<dx<<" "<<dy <<std::endl;

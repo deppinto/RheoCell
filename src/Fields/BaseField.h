@@ -99,6 +99,9 @@ public:
 	std::vector<number> fieldDX;
 	std::vector<number> fieldDY;
 	std::vector<number> laplacianPhi;
+	//derivatives of the field for the shape free energy
+	std::vector<number> Phi00;
+	std::vector<number> Phi01;
 
 	//shape tensor
 	number S01;
