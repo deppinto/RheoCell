@@ -344,7 +344,7 @@ for line in cfile:
 
         levels = np.arange(0.0, m, step) + step
 
-        if variable==1 or variable==2 or variable==3 or variable==4:
+        if variable==1 or variable==2 or variable==3:
             if pt_num==44:
                 cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
             else:

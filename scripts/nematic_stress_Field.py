@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=5:
     print(sys.argv[0]," [topology file] [nematic file] [stress file] [1:save conf; 2:make plot]")
