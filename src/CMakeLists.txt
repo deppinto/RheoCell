@@ -36,6 +36,7 @@ SET(interactions_SOURCES
 	Interactions/ActiveNematic.cpp
 	Interactions/LEBcActiveNematic.cpp
 	Interactions/WetModel.cpp
+	Interactions/LEBcWetModel.cpp
 	Interactions/GeneralizedWetModel.cpp
 )
 

@@ -28,6 +28,7 @@ void LEBcMultiPhaseField::resizing() {
 	fieldScalar.resize(subSize);
 	fieldDX.resize(subSize);
 	fieldDY.resize(subSize);	
+	laplacianPhi.resize(subSize);	
 	freeEnergy.resize(subSize);
 	fieldScalar_old.resize(subSize);
 	dfield_old.resize(subSize);
@@ -37,8 +38,8 @@ void LEBcMultiPhaseField::resizing() {
 
 	velocityX_correction.resize(LsubY);
 	phi_correction.resize(LsubY);
-
         shear_velocity_sign.resize(subSize);
+
 	map_sub_to_box.resize(subSize);
 	map_sub_to_box_x.resize(subSize);
 	map_sub_to_box_y.resize(subSize);

@@ -6,6 +6,7 @@
 #include "WetModel.h"
 #include "GeneralizedWetModel.h"
 #include "LEBcActiveNematic.h"
+#include "LEBcWetModel.h"
 
 InteractionPtr InteractionFactory::make_interaction(input_file &inp) {
 	std::string inter_type("simplefield");
@@ -32,6 +33,10 @@ InteractionPtr InteractionFactory::make_interaction(input_file &inp) {
 	else if(inter_type.compare("lebcactivenematic") == 0){
                 if(backend.compare("CUDA") == 0) return std::make_shared<LEBcActiveNematic>();
                 else return std::make_shared<LEBcActiveNematic>();
+        }
+	else if(inter_type.compare("lebcwetmodel") == 0){
+                if(backend.compare("CUDA") == 0) return std::make_shared<LEBcWetModel>();
+                else return std::make_shared<LEBcWetModel>();
         }
 	else if(inter_type.compare("generalizedwetmodel") == 0){
                 if(backend.compare("CUDA") == 0) return std::make_shared<GeneralizedWetModel>();
