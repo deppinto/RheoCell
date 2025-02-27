@@ -23,6 +23,7 @@ protected:
 	std::vector<number> f_field_passive_y;
 	std::vector<number> f_field_active_x;
 	std::vector<number> f_field_active_y;
+	std::vector<number> f_field_pressure;
 	std::vector<number> phi_field;
 	int size_grid = 8;
 	std::vector<number> f_field_coarse_xx;
@@ -34,6 +35,8 @@ protected:
 	std::vector<number> f_field_active_coarse_xx;
 	std::vector<number> f_field_active_coarse_yy;
 	std::vector<number> f_field_active_coarse_xy;
+	std::vector<number> f_field_pressure_coarse_xx;
+	std::vector<number> f_field_pressure_coarse_yy;
 	std::vector<number> phi_field_coarse;
 	/**
 	 * @brief Returns the configuration header(s)

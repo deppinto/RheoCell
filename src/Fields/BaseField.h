@@ -122,6 +122,7 @@ public:
 	std::vector<number> Factive_x;
 	std::vector<number> Fpassive_y;
 	std::vector<number> Factive_y;
+	std::vector<number> Pressure;
 
 	//child functions need to initialize everything below
 	virtual int GetSubIndex(int site, BaseBox *box) = 0;

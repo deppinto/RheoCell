@@ -48,6 +48,7 @@ void LEBcMultiPhaseField::resizing() {
 	Fpassive_y.resize(subSize);
 	Factive_x.resize(subSize);
 	Factive_y.resize(subSize);
+	Pressure.resize(subSize);
 
 	cos_x_table.resize(LsubX);
 	cos_y_table.resize(LsubY);

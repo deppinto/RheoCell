@@ -35,6 +35,7 @@ void StressField::init() {
 	f_field_passive_y.resize(Lx * Ly);
 	f_field_active_x.resize(Lx * Ly);
 	f_field_active_y.resize(Lx * Ly);
+	f_field_pressure.resize(Lx * Ly);
 	phi_field.resize(Lx * Ly);
 
 
@@ -49,6 +50,8 @@ void StressField::init() {
 	f_field_active_coarse_xx.resize(Lx_coarse * Ly_coarse);
 	f_field_active_coarse_yy.resize(Ly_coarse * Ly_coarse);
 	f_field_active_coarse_xy.resize(Ly_coarse * Ly_coarse);
+	f_field_pressure_coarse_xx.resize(Ly_coarse * Ly_coarse);
+	f_field_pressure_coarse_yy.resize(Ly_coarse * Ly_coarse);
 	phi_field_coarse.resize(Lx_coarse * Ly_coarse);
 
 	if(visible_fields.size() == 0) {
@@ -92,6 +95,7 @@ void StressField::calc_field(BaseField *p) {
 		f_field_passive_y[k] += p->Fpassive_y[q] * p->fieldScalar[q];
 		f_field_active_x[k] += p->Factive_x[q] * p->fieldScalar[q];
 		f_field_active_y[k] += p->Factive_y[q] * p->fieldScalar[q];
+		f_field_pressure[k] += p->Pressure[q] * p->fieldScalar[q];
 		phi_field[k] += p->fieldScalar[q];
 
 		//int y = int(p->map_sub_to_box_y[q]/delta);
@@ -124,12 +128,15 @@ string StressField::f_field(llint step) {
 	std::fill(f_field_passive_y.begin(), f_field_passive_y.end(), 0.);
 	std::fill(f_field_active_x.begin(), f_field_active_x.end(), 0.);
 	std::fill(f_field_active_y.begin(), f_field_active_y.end(), 0.);
+	std::fill(f_field_pressure.begin(), f_field_pressure.end(), 0.);
 	std::fill(f_field_passive_coarse_xx.begin(), f_field_passive_coarse_xx.end(), 0.);
 	std::fill(f_field_passive_coarse_yy.begin(), f_field_passive_coarse_yy.end(), 0.);
 	std::fill(f_field_passive_coarse_xy.begin(), f_field_passive_coarse_xy.end(), 0.);
 	std::fill(f_field_active_coarse_xx.begin(), f_field_active_coarse_xx.end(), 0.);
 	std::fill(f_field_active_coarse_yy.begin(), f_field_active_coarse_yy.end(), 0.);
 	std::fill(f_field_active_coarse_xy.begin(), f_field_active_coarse_xy.end(), 0.);
+	std::fill(f_field_pressure_coarse_xx.begin(), f_field_pressure_coarse_xx.end(), 0.);
+	std::fill(f_field_pressure_coarse_yy.begin(), f_field_pressure_coarse_yy.end(), 0.);
 
 	for(auto p_idx : visible_fields) {
 		BaseField *p = config_info->fields()[p_idx];
@@ -182,6 +189,9 @@ string StressField::f_field(llint step) {
 							f_field_active_coarse_yy[site] += (f_field_active_y[ss] * ey / phi_field[ss]) / (size_grid * size_grid) ;
 							f_field_active_coarse_xy[site] += ((f_field_active_x[ss] * ey + f_field_active_y[ss] * ex) / phi_field[ss]) / (2 * size_grid * size_grid) ;
 
+							f_field_pressure_coarse_xx[site] += (f_field_pressure[ss] * ex / phi_field[ss]) / (size_grid * size_grid) ;
+							f_field_pressure_coarse_yy[site] += (f_field_pressure[ss] * ey / phi_field[ss]) / (size_grid * size_grid) ;
+
 							phi_field_coarse[site] += 1.;				
 						}
 					}
@@ -190,9 +200,9 @@ string StressField::f_field(llint step) {
 
 
 			if(phi_field[site]>1e-1)
-				conf << j + 0.5 <<" "<<  i + 0.5  << " " << f_field_coarse_xx[site] << " " << f_field_coarse_yy[site] << " "<< f_field_coarse_xy[site] << " "<<f_field_passive_coarse_xx[site]<<" "<<f_field_passive_coarse_yy[site]<<" "<< f_field_passive_coarse_xy[site]  <<" "<< f_field_active_coarse_xx[site]<<" "<<f_field_active_coarse_yy[site]<<" "<< f_field_active_coarse_xy[site]<<" ";
+				conf << j + 0.5 <<" "<<  i + 0.5  << " " << f_field_coarse_xx[site] << " " << f_field_coarse_yy[site] << " "<< f_field_coarse_xy[site] << " "<<f_field_passive_coarse_xx[site]<<" "<<f_field_passive_coarse_yy[site]<<" "<< f_field_passive_coarse_xy[site]  <<" "<< f_field_active_coarse_xx[site]<<" "<<f_field_active_coarse_yy[site]<<" "<< f_field_active_coarse_xy[site]<<" "<<" "<< f_field_pressure_coarse_xx[site]<<" "<<f_field_pressure_coarse_yy[site]<<" ";
 			else
-				conf << j + 0.5 <<" "<<  i + 0.5  << " " << 0 << " " << 0 << " "<< 0 <<" "<< 0 <<" "<< 0 <<" "<< 0 <<" "<< 0 <<" "<< 0 <<" "<< 0 <<" ";
+				conf << j + 0.5 <<" "<<  i + 0.5  << " " << 0 << " " << 0 << " "<< 0 <<" "<< 0 <<" "<< 0 <<" "<< 0 <<" "<< 0 <<" "<< 0 <<" "<< 0 <<" "<<0 <<" "<< 0<<" ";
 		}
 	}
 

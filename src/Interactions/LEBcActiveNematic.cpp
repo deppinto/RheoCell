@@ -272,6 +272,7 @@ number LEBcActiveNematic::f_interaction(BaseField *p, int q) {
 	// delta F / delta phi_i
 	number V = CH + A + Rep + Adh;
 	p->freeEnergy[q] += V;
+	p->Pressure[q] = Rep - CH - A;
 
 	//if(q==p->subSize-1 && p->index==1)std::cout<<"Free Energy S: "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<" "<<p->fieldScalar[q]<<" "<<dx<<" "<<dy<<" "<<k<<" "<<laplacianPhi<< std::endl;
 	//if(p->map_sub_to_box_y[q]==99 && p->map_sub_to_box_x[q]==58  && p->index==0)std::cout<<"Free Energy 0: "<<q<<" "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<" "<<p->fieldScalar[q]<<" "<<dx<<" "<<dy<<" "<<k<<" "<<laplacianPhi<< std::endl;

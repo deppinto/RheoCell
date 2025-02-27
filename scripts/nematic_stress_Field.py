@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 if len(sys.argv)!=5:
     print(sys.argv[0]," [topology file] [nematic file] [stress file] [1:save conf; 2:make plot]")
@@ -236,7 +236,7 @@ for line in cfile:
     Z_yy=[[0 for q in range(lx)] for k in range(ly)]
     Z_xy=[[0 for q in range(lx)] for k in range(ly)]
     Z_iso=[[0 for q in range(lx)] for k in range(ly)]
-    for i in range(start_value,len(words),11):
+    for i in range(start_value,len(words),13):
         xx=float(words[i])
         yy=float(words[i+1])
 
@@ -249,14 +249,39 @@ for line in cfile:
         value_act_xx=float(words[i+8])
         value_act_yy=float(words[i+9])
         value_act_xy=float(words[i+10])
+        value_pre_xx=float(words[i+11])
+        value_pre_yy=float(words[i+12])
 
         Z_xx[int(yy)][int(xx)] = value_field_xx
         Z_yy[int(yy)][int(xx)] = value_field_yy
         Z_xy[int(yy)][int(xx)] = value_field_xy
-        Z_iso[int(yy)][int(xx)] = (value_field_xx + value_field_yy) / 2
+        Z_iso[int(yy)][int(xx)] = (-1) * (Z_xx[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)]) / 2
+        #Z_iso[int(yy)][int(xx)] = Z_xy[int(yy)][int(xx)]
 
     z_min, z_max = 0., np.abs(Z_iso).max()
     cset1 = plt.imshow(Z_iso, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
+
+
+'''
+div_stress = 0.
+total_stress = 0.
+for p in range(ly):
+    ynext = (p + 1) % ly
+    yprev = (p - 1 + ly) % ly
+    for q in range(lx):
+        total_stress += Z_iso[p][q]
+
+        xnext = (q + 1) % lx
+        xprev = (q - 1 + lx) % lx
+
+        dvxdx = (Z_iso[p][xnext] - Z_iso[p][xprev])/2
+        dvydy = (Z_iso[ynext][q] - Z_iso[yprev][q])/2
+
+        div_stress += dvxdx + dvydy
+
+
+print("Stresses: ", total_stress, div_stress)
+'''
 
 
 ax = plt.gca()

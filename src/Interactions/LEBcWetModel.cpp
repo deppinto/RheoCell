@@ -313,6 +313,7 @@ number LEBcWetModel::f_interaction(BaseField *p, int q) {
 	// delta F / delta phi_i
 	number V = CH + A + Rep + Adh;
 	p->freeEnergy[q] += V;
+	p->Pressure[q] = Rep - CH - A;
 
 	return V;
 }

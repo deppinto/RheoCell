@@ -208,6 +208,7 @@ number ActiveNematic::f_interaction(BaseField *p, int q) {
 	// delta F / delta phi_i
 	number V = CH + A + Rep + Adh;
 	p->freeEnergy[q] += V;
+	p->Pressure[q] = Rep - CH - A;
 
 	//if(p->index==0 && q==0)std::cout<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<< laplacianSquare<<" "<< lsquare <<std::endl;
 
