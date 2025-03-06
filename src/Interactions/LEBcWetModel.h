@@ -55,7 +55,10 @@ protected:
 
 	//Eigen::SparseLU<Eigen::SparseMatrix<double>, Eigen::COLAMDOrdering<int> >  solverLU;
 	//Eigen::BiCGSTAB<Eigen::SparseMatrix<double, Eigen::RowMajor> > solverCG;
-	Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solverCG;
+	//Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solverCG;
+	//Eigen::ConjugateGradient<Eigen::SparseMatrix<double, Eigen::RowMajor>, Eigen::Lower|Eigen::Upper > solverCG;
+	Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Upper> solverCG;
+	int restart_solver;
 	int size_rows = 0;
 	int size_rows_old = 0;
 	int index, sub_q, other_site_patch, other_site_box, next_other_site_box;

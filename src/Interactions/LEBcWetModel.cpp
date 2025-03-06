@@ -50,6 +50,7 @@ void LEBcWetModel::init() {
 	if(tolerance>0)
 		solverCG.setTolerance(tolerance);
         set_omp_tasks(omp_thread_num);
+	restart_solver=0;
 	std::cout<<"TESTING: Running with tolerance (CG): "<<tolerance<<std::endl;
 }
 
@@ -150,7 +151,12 @@ void LEBcWetModel::begin_energy_computation() {
 void LEBcWetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 	std::fill(size_store_site_velocity_index.begin(), size_store_site_velocity_index.end(), 0);
-	size_rows_old = size_rows;
+	if(restart_solver<10)
+		size_rows_old = size_rows;
+	else{
+		size_rows_old = 0;
+		restart_solver = 0;
+	}
 	size_rows=0;
 	for(auto p : fields) {
 		field_start_index[p->index]=size_rows;
@@ -166,6 +172,7 @@ void LEBcWetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 		vec_v_y.resize(size_rows);
 		vec_f_y.resize(size_rows);
 		mat_m_x.resize(size_rows, size_rows);
+		mat_m_x.setZero();
 	}
 	else
 		mat_m_x.setZero();
@@ -236,13 +243,24 @@ void LEBcWetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
         }
 
 	if(friction_cell!=0){
+	//std::cout<<Eigen::nbThreads()<<std::endl;
 	//std::cout<<"start solver: "<<size_rows/2 <<std::endl;
-	mat_m_x.setFromTriplets(tri_t_x.begin(), tri_t_x.end());
-	solverCG.compute(mat_m_x);
-	//if(size_rows != size_rows_old){
-	vec_v_x = solverCG.solve(vec_f_x);
-	vec_v_y = solverCG.solve(vec_f_y);
+		mat_m_x.setFromTriplets(tri_t_x.begin(), tri_t_x.end());
+		solverCG.compute(mat_m_x);
+		if(size_rows != size_rows_old){
+			vec_v_x = solverCG.solve(vec_f_x);
+			vec_v_y = solverCG.solve(vec_f_y);
+			restart_solver = 0;
+		}
+		else{
+			vec_v_x = solverCG.solveWithGuess(vec_f_x, vec_v_x);
+			vec_v_y = solverCG.solveWithGuess(vec_f_y, vec_v_y);
+			restart_solver+=1;
+		}
 	}
+	//std::cout << "#iterations:     " << solverCG.iterations() << std::endl;
+	//std::cout << "estimated error: " << solverCG.error()      << std::endl;	
+	//std::cout<<"end solver"<<std::endl;
 }
 
 void LEBcWetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
