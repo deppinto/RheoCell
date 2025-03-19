@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=5:
     print(sys.argv[0]," [topology file] [nematic file] [stress file] [1:save conf; 2:make plot]")
@@ -55,8 +55,13 @@ Z_Q00=[[0 for q in range(lx)] for k in range(ly)]
 Z_Q01=[[0 for q in range(lx)] for k in range(ly)]
 fig = plt.figure(figsize=(6,6))
 start_value=0
+read_line=0 
 for line in cfile:
-    plt.clf()
+
+    if read_line==0:
+        read_line+=1
+        continue
+
     words=line.split()
     Z_x=[[0 for q in range(lx)] for k in range(ly)]
     Z_y=[[0 for q in range(lx)] for k in range(ly)]
@@ -81,9 +86,10 @@ for line in cfile:
         Z_Q00[int(yy)][int(xx)]=Q00
         Z_Q01[int(yy)][int(xx)]=Q01
 
-        if int(xx)%2==0 and int(yy)%2==0:
-            cset1 = plt.arrow(xx, yy, 0.5*nx, 0.5*ny, width=1/15, color="k", head_width=0)
-            cset1 = plt.arrow(xx, yy, -0.5*nx, -0.5*ny, width=1/15, color="k", head_width=0)
+        if int(xx)%4==0 and int(yy)%4==0:
+            cset1 = plt.arrow(xx, yy, 2*nx, 2*ny, width=0.1, color="k", head_width=0)
+            cset1 = plt.arrow(xx, yy, -2*nx, -2*ny, width=0.1, color="k", head_width=0)
+    read_line+=1
 
 
 def rotate(n,p):
@@ -203,7 +209,7 @@ for p in range(0,LLY):
             # charge sign
             s = np.sign(winding_number[p][q])
             # bfs
-            sum_x, sum_y, n = collapse(p, q, s, sizex_coarse, sizey_coarse, winding_number, rng = [0.9,1.1])
+            sum_x, sum_y, n = collapse(p, q, s, LLX, LLY, winding_number, rng = [1-thresh, 1+thresh])
             x,y = sum_x/n,sum_y/n
             # add defect to list
             if s==1:
@@ -288,6 +294,10 @@ ax = plt.gca()
 ax.set_aspect('equal', adjustable='box')
 ax.set_xlim([0, lx])
 ax.set_ylim([0, ly])
+ax.set_yticklabels([])
+ax.set_xticklabels([])
+ax.set_xticks([])
+ax.set_yticks([])
 #fig.tight_layout()
 if variable==1:
     plt.savefig('frame.png')

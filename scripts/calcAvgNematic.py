@@ -350,8 +350,8 @@ for line in cfile:
             else:
                 cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)
 
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='r')
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*nemX, -3*nemY, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*nemX, -3*nemY, width=0.5, head_width=0, color='k')
 
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*D_major_axis_vec_x, 3*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*D_major_axis_vec_x, -3*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
@@ -538,6 +538,7 @@ for line in cfile:
                             #print("Defect topology: ", q, p, winding_number[p][q])
 
             frame_num=int(t/print_conf_interval)-1
+            print(frame_num)
             #if frame_num%1==0:
                 #print(frame_num, cont_line, t)
             #if cont_line>N+2:
@@ -548,6 +549,10 @@ for line in cfile:
             ax.set_aspect('equal', adjustable='box')
             ax.set_xlim([0, lx])
             ax.set_ylim([0, ly])
+            ax.set_yticklabels([])
+            ax.set_xticklabels([])
+            ax.set_xticks([])
+            ax.set_yticks([])
             if variable==1 or variable==3:
                 if frame_num<10:
                     plt.savefig('./Video/frame_00'+str(frame_num)+'.png', transparent=True)

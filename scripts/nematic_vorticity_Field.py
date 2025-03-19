@@ -8,12 +8,14 @@ import numpy as np
 import scipy.ndimage
 
 from matplotlib import cm
+import matplotlib
+#matplotlib.use('Agg')
 
-if len(sys.argv)!=4:
-    print(sys.argv[0]," [topology file] [conf file] [1:save conf; 2:make plot]")
+if len(sys.argv)!=5:
+    print(sys.argv[0]," [topology file] [nematic file] [velocity file] [1:save conf; 2:make plot]")
     sys.exit(1)
 
-variable=int(float(sys.argv[3])) 
+variable=int(float(sys.argv[4])) 
 
 def set_walls(lx,ly, walls):
     for y in range(ly):
@@ -53,7 +55,7 @@ Z_Q00=[[0 for q in range(lx)] for k in range(ly)]
 Z_Q01=[[0 for q in range(lx)] for k in range(ly)]
 fig = plt.figure(figsize=(6,6))
 start_value=0
-read_line = 0
+read_line=0 
 for line in cfile:
 
     if read_line==0:
@@ -66,7 +68,6 @@ for line in cfile:
     Z_Q00=[[0 for q in range(lx)] for k in range(ly)]
     Z_Q01=[[0 for q in range(lx)] for k in range(ly)]
     for i in range(start_value,len(words),4):
-        #site=int(float(words[i]))
         xx=float(words[i])
         yy=float(words[i+1])
 
@@ -85,16 +86,11 @@ for line in cfile:
         Z_Q00[int(yy)][int(xx)]=Q00
         Z_Q01[int(yy)][int(xx)]=Q01
 
-        if int(xx)%2==0 and int(yy)%2==0:
-            cset1 = plt.arrow(xx, yy, 5*nx, 5*ny, width=0.1, color="k", head_width=0)
-            cset1 = plt.arrow(xx, yy, -5*nx, -5*ny, width=0.1, color="k", head_width=0)
-
-    #z_min, z_max = -np.abs(Z).max(), np.abs(Z).max()
-    #z_min, z_max = 0., np.abs(Z_field).max()
-    #X, Y = np.meshgrid(x, y)
-    #cset1 = plt.imshow(Z_field, cmap='hot', interpolation='nearest')
-    #cset1 = plt.pcolormesh(X, Y, Z, cmap='RdBu', vmin=z_min, vmax=z_max)
+        if int(xx)%4==0 and int(yy)%4==0:
+            cset1 = plt.arrow(xx, yy, 2*nx, 2*ny, width=0.1, color="k", head_width=0)
+            cset1 = plt.arrow(xx, yy, -2*nx, -2*ny, width=0.1, color="k", head_width=0)
     read_line+=1
+
 
 def rotate(n,p):
     '''
@@ -202,10 +198,10 @@ for p in range(0,LLY):
                 den += dxQxx + s*dyQxy
             psi = s/(2.-s)*atan2(num, den)
             if s==1:
-                cset1 = plt.plot(x, y, 'go', markersize=20)
+                cset1 = plt.plot(x, y, 'go', markersize=10)
                 cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='g', head_width=1.5, head_length=1.5, width=0.5)
             elif s==-1:
-                cset1 = plt.plot(x, y, 'b^', markersize=20)
+                cset1 = plt.plot(x, y, 'b^', markersize=10)
 
 
         # keep this just in case our other symmetries give us integer defects
@@ -213,7 +209,7 @@ for p in range(0,LLY):
             # charge sign
             s = np.sign(winding_number[p][q])
             # bfs
-            sum_x, sum_y, n = collapse(p, q, s, sizex_coarse, sizey_coarse, winding_number, rng = [0.9,1.1])
+            sum_x, sum_y, n = collapse(p, q, s, LLX, LLY, winding_number, rng = [1-thresh, 1+thresh])
             x,y = sum_x/n,sum_y/n
             # add defect to list
             if s==1:
@@ -222,20 +218,86 @@ for p in range(0,LLY):
                 cset1 = plt.plot(x, y, 'kX', markersize=10)
 
 
+
+
+cfile=open(sys.argv[3],"r")
+header=cfile.readline().split()
+t=int(header[2])
+
+header=cfile.readline().split()
+lx=int(float(header[2]))
+ly=int(float(header[3]))
+
+x=np.arange(0,lx,1)
+y=np.arange(0,ly,1)
+Z_x=[[0 for q in range(lx)] for k in range(ly)]
+Z_y=[[0 for q in range(lx)] for k in range(ly)]
+start_value=0
+read_line = 0
+for line in cfile:
+
+    if read_line==0:
+        read_line+=1
+        continue
+
+    words=line.split()
+    Z_x=[[0 for q in range(lx)] for k in range(ly)]
+    Z_y=[[0 for q in range(lx)] for k in range(ly)]
+    for i in range(start_value,len(words),4):
+        xx=float(words[i])
+        yy=float(words[i+1])
+        value_x=float(words[i+2])
+        value_y=float(words[i+3])
+
+        Z_x[int(yy)][int(xx)]=value_x
+        Z_y[int(yy)][int(xx)]=value_y
+
+    read_line += 1
+
+    
+    vorticity=[[0 for q in range(lx)] for k in range(ly)]
+    for i in range(0, lx*ly):
+        y1 = int(i/lx)
+        x1 = i - y1 * lx
+
+        xnext = (x1 + 1)
+        xprev = (x1 - 1) 
+        ynext = (y1 + 1) 
+        yprev = (y1 - 1)
+
+        if xnext>=lx:
+            xnext-=lx
+        if xprev<0:
+            xprev+=lx
+        if ynext>=lx:
+            ynext-=ly
+        if yprev<0:
+            yprev+=ly
+
+        dvydx = (Z_y[y1][xnext] - Z_y[y1][xprev])/2
+        dvxdy = (Z_x[ynext][x1] - Z_x[yprev][x1])/2
+        vorticity[y1][x1] = dvydx - dvxdy
+
+    #z_min, z_max = -np.abs(Z).max(), np.abs(Z).max()
+    z_min, z_max = -np.abs(vorticity).max(), np.abs(vorticity).max()
+    #z_min, z_max = 0., np.abs(Z).max()
+    X, Y = np.meshgrid(x, y)
+    #cset1 = plt.imshow(Z, cmap='hot', interpolation='nearest')
+    #cset1 = plt.pcolormesh(X, Y, vorticity, cmap='RdBu', vmin=z_min, vmax=z_max)
+    cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
+
+
 ax = plt.gca()
 ax.set_aspect('equal', adjustable='box')
-#ax.set_xlim([0, lx])
-#ax.set_ylim([0, ly])
-ax.set_xlim([38, 68])
-ax.set_ylim([75, 105])
-#ax.set_xlim([65, 95])
-#ax.set_ylim([60, 90])
+ax.set_xlim([0, lx])
+ax.set_ylim([0, ly])
 ax.set_yticklabels([])
 ax.set_xticklabels([])
 ax.set_xticks([])
 ax.set_yticks([])
 #fig.tight_layout()
 if variable==1:
-    plt.savefig('frame.png')
+    #plt.savefig('frame.png')
+    plt.savefig('/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts70/defect_dynamics_9.svg')
 if variable==2:
     plt.show()

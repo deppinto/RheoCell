@@ -2,14 +2,16 @@ import sys
 import numpy as np
 from math import *
 import matplotlib.pyplot as plt
+import os.path
 
 
-if len(sys.argv)!=3:
-        print(sys.argv[0]," [scripts] [variable]")
+if len(sys.argv)!=4:
+        print(sys.argv[0]," [scripts] [start] [end]")
         sys.exit(1)
 
 scripts=int(float(sys.argv[1]))
-variable=int(float(sys.argv[2]))
+start=int(float(sys.argv[2]))
+end=int(float(sys.argv[3]))
 
 '''
 #-------------------------------------optimization plot
@@ -60,6 +62,7 @@ for line in filedata:
 filedata.close()
 '''
 
+'''
 # read output file
 plt.figure(figsize=(5.452423529,4.089317647))
 avg_vel=[]
@@ -96,6 +99,7 @@ for job in range(1, 6, 2):
 
 xvals=[0.01, 0.1, 0.4]
 plt.plot(xvals, avg_vel, '--o')
+'''
 
 '''
 fitline2=[]
@@ -107,23 +111,214 @@ plt.plot(time, fitline2, '--', lw=2)
 plt.plot(time, fitline1, '--', lw=2)
 '''
 
+
+# read output file
+plt.figure(figsize=(5.452423529,4.089317647))
+avg_vel=[]
+for job in range(1, 6, 1):
+    #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time.txt","r")
+    if job==4:
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts50/Job_4/stress_time.txt","r")
+    else:
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time.txt","r")
+    time=[]
+    stress=[]
+    cont=0
+
+    for line in fileoutput:
+        if cont%3!=0:
+            cont+=1
+            continue
+        save=line.split()
+        time.append((float(save[0])) * 0.1 * 500)
+        stress.append((float(save[1])))
+        cont+=1
+
+    plt.plot(time, stress, '-o')
+
+
+plt.show()
+
+exit(1)
+
+
+#correlations below
+filedata=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/params","r")
+jobs = []
+jobs_seq = [0]
+lx = []
+N = []
+for line in filedata:
+    save=line.split()
+    if len(save) == 0:
+        break
+    jobs.append(float(save[0]))
+    jobs_seq.append(float(save[0])+jobs_seq[len(jobs_seq)-1])
+    N.append(float(save[1]))
+    lx.append(float(save[2]))
+filedata.close()
+
+
+plt.figure(figsize=(5.452423529,4.089317647))
+total_params = len(jobs)
+
+if start==0:
+    i=start
+    size_R = int(lx[i]/2)
+    corr_R = [i for i in range(size_R)]
+    corr_vel = [0. for i in range(size_R)]
+    avg_value = 0
+
+    for j in range(0 + 1, 3 + 1):
+        #fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts72/Job_"+str(j)+"/velocity_correlations.txt"
+        fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts72/Job_"+str(j)+"/nematic_correlations.txt"
+        if os.path.isfile(fname) == False:
+            continue
+
+        fileoutput=open(fname,"r")
+        #print(fname)
+
+        avg_value += 1
+        for line in fileoutput:
+            save=line.split()
+            index = int(float(save[0]))
+            value = float(save[1])
+            if index<size_R:
+                corr_vel[index] += value
+        fileoutput.close()
+
+    newList = [x/avg_value for x in corr_vel]
+    plt.plot(corr_R, newList, "-o")
+
+if start==8:
+    i=start
+    size_R = int(lx[i]/2)
+    corr_R = [i for i in range(size_R)]
+    corr_vel = [0. for i in range(size_R)]
+    avg_value = 0
+
+    for j in range(3 + 1, 6 + 1):
+        #fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts72/Job_"+str(j)+"/velocity_correlations.txt"
+        fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts72/Job_"+str(j)+"/nematic_correlations.txt"
+        if os.path.isfile(fname) == False:
+            continue
+
+        fileoutput=open(fname,"r")
+        #print(fname)
+
+        avg_value += 1
+        for line in fileoutput:
+            save=line.split()
+            index = int(float(save[0]))
+            value = float(save[1])
+            if index<size_R:
+                corr_vel[index] += value
+        fileoutput.close()
+
+    newList = [x/avg_value for x in corr_vel]
+    plt.plot(corr_R, newList, "-o")
+
+
+
+for i in range(start, end):
+    size_R = int(lx[i]/2)
+    corr_R = [i for i in range(size_R)]
+    corr_vel = [0. for i in range(size_R)]
+    avg_value = 0
+
+    for j in range(int(jobs_seq[i]) + 1, int(jobs_seq[i+1]) + 1):
+        #fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(j)+"/velocity_correlations.txt"
+        fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(j)+"/nematic_correlations.txt"
+        if os.path.isfile(fname) == False:
+            continue
+
+        fileoutput=open(fname,"r")
+        #print(fname)
+
+        avg_value += 1
+        for line in fileoutput:
+            save=line.split()
+            index = int(float(save[0]))
+            value = float(save[1])
+            if index<size_R:
+                corr_vel[index] += value
+        fileoutput.close()
+
+    newList = [x/avg_value for x in corr_vel]
+    plt.plot(corr_R, newList, "-o")
+
+    if i==1:
+        size_R = int(lx[i]/2)
+        corr_R = [i for i in range(size_R)]
+        corr_vel = [0. for i in range(size_R)]
+        avg_value = 0
+        for j in range(0 + 1, 3 + 1):
+            #fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts71/Job_"+str(j)+"/velocity_correlations.txt"
+            fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts71/Job_"+str(j)+"/nematic_correlations.txt"
+            if os.path.isfile(fname) == False:
+                continue
+
+            fileoutput=open(fname,"r")
+            #print(fname)
+
+            avg_value += 1
+            for line in fileoutput:
+                save=line.split()
+                index = int(float(save[0]))
+                value = float(save[1])
+                if index<size_R:
+                    corr_vel[index] += value
+            fileoutput.close()
+
+        newList = [x/avg_value for x in corr_vel]
+        plt.plot(corr_R, newList, "-o")
+
+    if i==9:
+        size_R = int(lx[i]/2)
+        corr_R = [i for i in range(size_R)]
+        corr_vel = [0. for i in range(size_R)]
+        avg_value = 0
+        for j in range(3 + 1, 6 + 1):
+            #fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts71/Job_"+str(j)+"/velocity_correlations.txt"
+            fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts71/Job_"+str(j)+"/nematic_correlations.txt"
+            if os.path.isfile(fname) == False:
+                continue
+
+            fileoutput=open(fname,"r")
+            #print(fname)
+
+            avg_value += 1
+            for line in fileoutput:
+                save=line.split()
+                index = int(float(save[0]))
+                value = float(save[1])
+                if index<size_R:
+                    corr_vel[index] += value
+            fileoutput.close()
+
+        newList = [x/avg_value for x in corr_vel]
+        plt.plot(corr_R, newList, "-o")
+
 #plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
 #plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-plt.xscale('log')
+#plt.xscale('log')
 #plt.yscale('log')
 #plt.ylabel('MSD', fontsize=18)
 #plt.xlabel('Time', fontsize=18)
 #plt.xlim(1e3, 1e4)
 #plt.ylabel('Velocity', fontsize=18)
 #plt.xlabel('Width', fontsize=18)
-plt.ylabel('Mean velocity', fontsize=18)
-plt.xlabel(r'$\omega$', fontsize=18)
+#plt.ylabel(r'$C_v$', fontsize=18)
+plt.ylabel(r'$C_Q$', fontsize=18)
+plt.xlabel('R', fontsize=18)
 plt.xticks(fontsize=18)
 plt.yticks(fontsize=18)
 #plt.legend([r'$\omega$=0.01',r'$\omega$=0.1',r'$\omega$=0.4'], fontsize=14, loc=(0.,0.65), frameon=False)
+plt.legend([r'$\xi_{cell}$=0', r'$\xi$=1',r'$\xi$=0.1',r'$\xi$=0.01', r'$\xi$=0.001',r'$\xi$=0.0001'], fontsize=14, loc=(0.575,0.32), frameon=False)
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/MSD_2.png", transparent=True)
-plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
+plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/C_Q_soft.png", transparent=True)
+plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/C_Q_soft.svg", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
 plt.show()
 
 exit(1)

@@ -662,6 +662,7 @@ for line in cfile:
                 #cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos', extent=[0,lx,0,ly])
 
             frame_num=int(t/print_conf_interval)-1
+            print(frame_num)
             #if frame_num%1==0:
                 #print(frame_num, cont_line, t)
             #if cont_line>N+2:
@@ -674,6 +675,10 @@ for line in cfile:
             ax.set_aspect('equal', adjustable='box')
             ax.set_xlim([0, lx])
             ax.set_ylim([0, ly])
+            ax.set_yticklabels([])
+            ax.set_xticklabels([])
+            ax.set_xticks([])
+            ax.set_yticks([])
             if variable==1 or variable==3:
                 if frame_num<10:
                     plt.savefig('./Video/frame_00'+str(frame_num)+'.png', transparent=True)

@@ -8,12 +8,14 @@ import numpy as np
 import scipy.ndimage
 
 from matplotlib import cm
+import matplotlib
+#matplotlib.use('Agg')
 
-if len(sys.argv)!=4:
-    print(sys.argv[0]," [topology file] [conf file] [1:save conf; 2:make plot]")
+if len(sys.argv)!=5:
+    print(sys.argv[0]," [topology file] [velocity file] [stress file] [1:save conf; 2:make plot]")
     sys.exit(1)
 
-variable=int(float(sys.argv[3])) 
+variable=int(float(sys.argv[4])) 
 
 def set_walls(lx,ly, walls):
     for y in range(ly):
@@ -49,11 +51,9 @@ x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
 Z_x=[[0 for q in range(lx)] for k in range(ly)]
 Z_y=[[0 for q in range(lx)] for k in range(ly)]
-Z_Q00=[[0 for q in range(lx)] for k in range(ly)]
-Z_Q01=[[0 for q in range(lx)] for k in range(ly)]
 fig = plt.figure(figsize=(6,6))
 start_value=0
-read_line = 0
+read_line=0 
 for line in cfile:
 
     if read_line==0:
@@ -63,38 +63,19 @@ for line in cfile:
     words=line.split()
     Z_x=[[0 for q in range(lx)] for k in range(ly)]
     Z_y=[[0 for q in range(lx)] for k in range(ly)]
-    Z_Q00=[[0 for q in range(lx)] for k in range(ly)]
-    Z_Q01=[[0 for q in range(lx)] for k in range(ly)]
     for i in range(start_value,len(words),4):
-        #site=int(float(words[i]))
         xx=float(words[i])
         yy=float(words[i+1])
 
-        Q00=float(words[i+2])
-        Q01=float(words[i+3])
-        if Q00 != 0 and Q01 != 0:
-            S = sqrt(Q00**2 + Q01**2)
-            nx = sqrt(2*S) * sqrt((1 + Q00/S)/2)
-            ny = sqrt(2*S) * np.sign(Q01) * sqrt((1 - Q00/S)/2)
-        else:
-            nx = 0.
-            ny = 0.
-
-        Z_x[int(yy)][int(xx)]=nx
-        Z_y[int(yy)][int(xx)]=ny
-        Z_Q00[int(yy)][int(xx)]=Q00
-        Z_Q01[int(yy)][int(xx)]=Q01
+        value_x=float(words[i+2])
+        value_y=float(words[i+3])
+        Z_x[int(yy)][int(xx)]=value_x
+        Z_y[int(yy)][int(xx)]=value_y
 
         if int(xx)%2==0 and int(yy)%2==0:
-            cset1 = plt.arrow(xx, yy, 5*nx, 5*ny, width=0.1, color="k", head_width=0)
-            cset1 = plt.arrow(xx, yy, -5*nx, -5*ny, width=0.1, color="k", head_width=0)
-
-    #z_min, z_max = -np.abs(Z).max(), np.abs(Z).max()
-    #z_min, z_max = 0., np.abs(Z_field).max()
-    #X, Y = np.meshgrid(x, y)
-    #cset1 = plt.imshow(Z_field, cmap='hot', interpolation='nearest')
-    #cset1 = plt.pcolormesh(X, Y, Z, cmap='RdBu', vmin=z_min, vmax=z_max)
+            cset1 = plt.arrow(xx, yy, 20*value_x, 20*value_y, width=0.075, color='k')
     read_line+=1
+
 
 def rotate(n,p):
     '''
@@ -110,15 +91,15 @@ def rotate(n,p):
 
 def wang(a, b):
     """Infamous chinese function"""
-    p = 2.
+    p = 1.
     ang = atan2(abs(a[0]*b[1]-a[1]*b[0]), a[0]*b[0]+a[1]*b[1])
 
-    if(ang > pi/2.):
-        b = [-i for i in b]
+    #if(ang > pi/2.):
+        #b = [-i for i in b]
 
-    #while(abs(ang) > np.pi/p + 1e-3):
-        #b = rotate(b,p)
-        #ang = atan2(abs(a[0]*b[1]-a[1]*b[0]), a[0]*b[0]+a[1]*b[1])
+    while(abs(ang) > np.pi/p + 1e-3):
+        b = rotate(b,p)
+        ang = atan2(abs(a[0]*b[1]-a[1]*b[0]), a[0]*b[0]+a[1]*b[1])
 
     m = a[0]*b[1]-a[1]*b[0]
     return -np.sign(m)*atan2(abs(m), a[0]*b[0]+a[1]*b[1])
@@ -144,13 +125,9 @@ LLX = lx
 LLY = ly
 vecfield_nx = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
 vecfield_ny = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
-vecfield_Q00 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
-vecfield_Q01 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
 
 vecfield_nx = Z_x
 vecfield_ny = Z_y
-vecfield_Q00 = Z_Q00
-vecfield_Q01 = Z_Q01
 
 winding_number = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
 for p in range(0, LLY):
@@ -188,6 +165,7 @@ for p in range(0,LLY):
             # compute angle, see doi:10.1039/c6sm01146b
             num = 0
             den = 0
+            '''
             for (dx, dy) in [(0, 0), (0, 1), (1, 1), (1, 0)]:
                 # coordinates of nodes around the defect
                 kk = (int(x) + LLX + dx) % LLX
@@ -201,11 +179,12 @@ for p in range(0,LLY):
                 num += s*dxQxy - dyQxx
                 den += dxQxx + s*dyQxy
             psi = s/(2.-s)*atan2(num, den)
+            '''
             if s==1:
-                cset1 = plt.plot(x, y, 'go', markersize=20)
-                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='g', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.plot(x, y, 'go', markersize=10)
+                #cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='g', head_width=1.5, head_length=1.5, width=0.5)
             elif s==-1:
-                cset1 = plt.plot(x, y, 'b^', markersize=20)
+                cset1 = plt.plot(x, y, 'b^', markersize=10)
 
 
         # keep this just in case our other symmetries give us integer defects
@@ -213,7 +192,7 @@ for p in range(0,LLY):
             # charge sign
             s = np.sign(winding_number[p][q])
             # bfs
-            sum_x, sum_y, n = collapse(p, q, s, sizex_coarse, sizey_coarse, winding_number, rng = [0.9,1.1])
+            sum_x, sum_y, n = collapse(p, q, s, LLX, LLY, winding_number, rng = [1-thresh, 1+thresh])
             x,y = sum_x/n,sum_y/n
             # add defect to list
             if s==1:
@@ -222,18 +201,82 @@ for p in range(0,LLY):
                 cset1 = plt.plot(x, y, 'kX', markersize=10)
 
 
+
+
+cfile=open(sys.argv[3],"r")
+header=cfile.readline().split()
+t=int(header[2])
+
+header=cfile.readline().split()
+lx=int(float(header[2]))
+ly=int(float(header[3]))
+
+x=np.arange(0,lx,1)
+y=np.arange(0,ly,1)
+Z_xx=[[0 for q in range(lx)] for k in range(ly)]
+Z_yy=[[0 for q in range(lx)] for k in range(ly)]
+Z_xy=[[0 for q in range(lx)] for k in range(ly)]
+Z_iso=[[0 for q in range(lx)] for k in range(ly)]
+start_value=0
+
+for line in cfile:
+    words=line.split()
+    Z_xx=[[0 for q in range(lx)] for k in range(ly)]
+    Z_yy=[[0 for q in range(lx)] for k in range(ly)]
+    Z_xy=[[0 for q in range(lx)] for k in range(ly)]
+    Z_iso=[[0 for q in range(lx)] for k in range(ly)]
+    for i in range(start_value,len(words),13):
+        xx=float(words[i])
+        yy=float(words[i+1])
+
+        value_field_xx=float(words[i+2])
+        value_field_yy=float(words[i+3])
+        value_field_xy=float(words[i+4])
+        value_pass_xx=float(words[i+5])
+        value_pass_yy=float(words[i+6])
+        value_pass_xy=float(words[i+7])
+        value_act_xx=float(words[i+8])
+        value_act_yy=float(words[i+9])
+        value_act_xy=float(words[i+10])
+        value_pre_xx=float(words[i+11])
+        value_pre_yy=float(words[i+12])
+
+        Z_xx[int(yy)][int(xx)] = value_field_xx
+        Z_yy[int(yy)][int(xx)] = value_field_yy
+        Z_xy[int(yy)][int(xx)] = value_field_xy
+        Z_iso[int(yy)][int(xx)] = (-1) * (Z_xx[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)]) / 2
+        #Z_iso[int(yy)][int(xx)] = Z_xy[int(yy)][int(xx)]
+
+    z_min, z_max = 0., np.abs(Z_iso).max()
+    cset1 = plt.imshow(Z_iso, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
+
+
+'''
+div_stress = 0.
+total_stress = 0.
+for p in range(ly):
+    ynext = (p + 1) % ly
+    yprev = (p - 1 + ly) % ly
+    for q in range(lx):
+        total_stress += Z_iso[p][q]
+
+        xnext = (q + 1) % lx
+        xprev = (q - 1 + lx) % lx
+
+        dvxdx = (Z_iso[p][xnext] - Z_iso[p][xprev])/2
+        dvydy = (Z_iso[ynext][q] - Z_iso[yprev][q])/2
+
+        div_stress += dvxdx + dvydy
+
+
+print("Stresses: ", total_stress, div_stress)
+'''
+
+
 ax = plt.gca()
 ax.set_aspect('equal', adjustable='box')
-#ax.set_xlim([0, lx])
-#ax.set_ylim([0, ly])
-ax.set_xlim([38, 68])
-ax.set_ylim([75, 105])
-#ax.set_xlim([65, 95])
-#ax.set_ylim([60, 90])
-ax.set_yticklabels([])
-ax.set_xticklabels([])
-ax.set_xticks([])
-ax.set_yticks([])
+ax.set_xlim([0, lx])
+ax.set_ylim([0, ly])
 #fig.tight_layout()
 if variable==1:
     plt.savefig('frame.png')
