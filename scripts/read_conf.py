@@ -53,6 +53,7 @@ Z=[[0 for q in range(lx)] for k in range(ly)]
 fig = plt.figure(figsize=(6,6))
 start_value = 11
 totphi=[0. for i in range(lx*ly)]
+totarea = 0
 for line in cfile:
     area=0
     out_area=0
@@ -76,6 +77,7 @@ for line in cfile:
         sim_grid[site+pt_num*lx*ly]=value
         yy=int(site/lx)
         xx=site-int(yy*lx)
+        totarea += value / (lx * ly)
 
         if value>=0.:
             Z[yy][xx]=value
@@ -127,6 +129,7 @@ for line in cfile:
     print(pt_num, area)
     pt_num+=1
 
+print('Packing fraction: ', totarea)
 
 ax = plt.gca()
 ax.set_aspect('equal', adjustable='box')

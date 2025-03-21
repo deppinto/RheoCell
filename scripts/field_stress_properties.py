@@ -90,7 +90,7 @@ for i in range(start_frame, end_frame, 1):
             Z_x[int(yy)][int(xx)]=value_x
             Z_y[int(yy)][int(xx)]=value_y
             if value_x == 0 and value_y == 0:
-                v_area+=1
+                v_area+= 1 / (lx * ly)
 
             stress_iso = (value_x + value_y) / 2 
             values_iso_stress.append(stress_iso)
@@ -108,66 +108,6 @@ for i in range(start_frame, end_frame, 1):
 
 
 
-#-------------------------------------------------------------
-
-avg_stress_2 = []
-void_area_2 = []
-time_2 = []
-
-for i in range(start_frame, end_frame, 1):
-
-    if i%10 != 0:
-        continue
-
-    if i<10:
-        file = "/scratch/pinto/Phase_Field/RheoCell/Work/Results/scripts49/Job_1/Analysis/Results/stress_field_00" + str(i) + ".txt"
-    elif i<100:
-        file = "/scratch/pinto/Phase_Field/RheoCell/Work/Results/scripts49/Job_1/Analysis/Results/stress_field_0" + str(i) + ".txt"
-    else:
-        file = "/scratch/pinto/Phase_Field/RheoCell/Work/Results/scripts49/Job_1/Analysis/Results/stress_field_" + str(i) + ".txt"
-
-    cfile=open(file,"r")
-    header=cfile.readline().split()
-    t=int(header[2])
-    time_2.append(i)
-    avg_stress_2.append(0.)
-    size_s = len(avg_stress_2)-1
-
-    header=cfile.readline().split()
-    lx=int(float(header[2]))
-    ly=int(float(header[3]))
-
-    Z_x=[[0 for q in range(lx)] for k in range(ly)]
-    Z_y=[[0 for q in range(lx)] for k in range(ly)]
-    start_value=0
-    read_line = 0
-    for line in cfile:
-
-        if read_line==1:
-            read_line+=1
-            continue
-
-        words=line.split()
-        Z_x=[[0 for q in range(lx)] for k in range(ly)]
-        Z_y=[[0 for q in range(lx)] for k in range(ly)]
-        v_area=0
-        for i in range(start_value,len(words),13):
-            xx=float(words[i])
-            yy=float(words[i+1])
-            value_x=float(words[i+2])
-            value_y=float(words[i+3])
-
-            Z_x[int(yy)][int(xx)]=value_x
-            Z_y[int(yy)][int(xx)]=value_y
-            if value_x == 0 and value_y == 0:
-                v_area+=1
-
-            stress_iso = (value_x + value_y) / 2 
-            avg_stress_2[size_s] += stress_iso / (lx * ly)
-        void_area_2.append(v_area)
-        read_line += 1
-#-------------------------------------------------------------
-
 if variable==1:
     for i in range(end_frame):
         print(time[i], avg_stress[i], variance_stress[i], avg_stress_var[i])
@@ -180,10 +120,8 @@ if variable==2:
     plt.yticks(fontsize=18)
     #ax1 = fig1.add_subplot()
     ax1.plot(time, avg_stress, '--o', color='firebrick')
-    ax1.plot(time_2, avg_stress_2, '--s', color='firebrick')
     ax2 = ax1.twinx()
     ax2.plot(time, void_area, '--o', color='forestgreen')
-    ax2.plot(time_2, void_area_2, '--s', color='forestgreen')
     ax1.set_xlabel('Time', fontsize=18)
     ax1.set_ylabel(r'$\langle \sigma_{iso} \rangle$', fontsize=18)
     ax2.set_ylabel('Voids area', fontsize=18)

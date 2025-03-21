@@ -1,4 +1,5 @@
 High priority:
+- Add sorting algorithm for Wet model
 
 Medium Priority:
 - Fix coupling between channel box and external channel walls force (the implementation should be improved)

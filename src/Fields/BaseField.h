@@ -87,6 +87,8 @@ public:
 	/// Positions of all interaction centers. This array must be initialized by child classes
 	std::vector<number> CoM;
 	std::vector<number> CoM_old;
+	//std::vector<number> tracer_particle;
+	//std::vector<number> tracer_particle_old;
 
 	/// Velocity of the particle
 	std::vector<number> velocityX;

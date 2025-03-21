@@ -90,6 +90,11 @@ void LEBcMultiPhaseField::init(int Lx, int Ly) {
 
 	offset.resize(2);
 	offset=std::vector<int>(2, 0);
+	/*trace_particle.resize(2);
+	tracer_particle=std::vector<number>(2, 0);
+	trace_particle_old.resize(2);
+	tracer_particle_old=std::vector<number>(2, 0);*/
+
 
 	setNeighborsSub();
 }
@@ -121,6 +126,11 @@ void LEBcMultiPhaseField::init() {
 	//minor bookkeeping
 	offset.resize(2);
 	offset=std::vector<int>(2, 0);
+	/*trace_particle.resize(2);
+	tracer_particle=std::vector<number>(2, 0);
+	trace_particle_old.resize(2);
+	tracer_particle_old=std::vector<number>(2, 0);*/
+
 	area=0;
 	int x,y;
 	for(int i=0; i<subSize; i++){
