@@ -1,10 +1,3 @@
-/*
- * cuda_device_info.h
- *
- *  Created on: 30/lug/2009
- *      Author: lorenzo
- */
-
 #ifndef CUDA_DEVICE_INFO_H_
 #define CUDA_DEVICE_INFO_H_
 

@@ -1,12 +1,3 @@
-/*
- * CUDA_lr_common.cuh
- *
- *  Created on: Jun 3, 2011
- *      Author: rovigatti
- *
- *      I put these functions in a different file to tidy things up
- */
-
 #ifndef CUDA_LR_COMMON
 #define CUDA_LR_COMMON
 

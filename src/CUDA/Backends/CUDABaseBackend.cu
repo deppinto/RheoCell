@@ -1,17 +1,9 @@
-/*
- * CUDABaseBackend.cpp
- *
- *  Created on: 25/nov/2010
- *      Author: lorenzo
- */
-
 #include <thrust/sort.h>
 #include <thrust/device_ptr.h>
 
 #include "CUDABaseBackend.h"
-#include "../Lists/CUDAListFactory.h"
 #include "../Interactions/CUDAInteractionFactory.h"
-#include "../../Utilities/oxDNAException.h"
+#include "../../Utilities/RCexception.h"
 #include "../../Utilities/ConfigInfo.h"
 
 using namespace std;
@@ -26,8 +18,6 @@ CUDABaseBackend::CUDABaseBackend() :
 	_particles_kernel_cfg.blocks = dim3(1, 1, 1);
 	_particles_kernel_cfg.threads_per_block = 0;
 	_particles_kernel_cfg.shared_mem = 0;
-
-	_sqr_verlet_skin = 0.f;
 
 	_cuda_lists = NULL;
 	_d_poss = NULL;
@@ -54,10 +44,6 @@ CUDABaseBackend::CUDABaseBackend() :
 }
 
 CUDABaseBackend::~CUDABaseBackend() {
-	if(_cuda_lists != NULL) {
-		_cuda_lists->clean();
-		delete _cuda_lists;
-	}
 
 	if(_d_poss != NULL) {
 		CUDA_SAFE_CALL(cudaFree(_d_poss));
@@ -122,21 +108,13 @@ void CUDABaseBackend::get_settings(input_file &inp) {
 
 	getInputInt(&inp, "threads_per_block", &_particles_kernel_cfg.threads_per_block, 0);
 
-	number verlet_skin;
-	if(getInputNumber(&inp, "verlet_skin", &verlet_skin, 0) == KEY_FOUND) {
-		_sqr_verlet_skin = SQR(verlet_skin);
-	}
-
 	_cuda_interaction = CUDAInteractionFactory::make_interaction(inp);
 	_cuda_interaction->get_settings(inp);
 	_cuda_interaction->get_cuda_settings(inp);
 
-	_cuda_lists = CUDAListFactory::make_list(inp);
-	_cuda_lists->get_settings(inp);
-
 	string reload_from;
 	if(getInputString(&inp, "reload_from", reload_from, 0) == KEY_FOUND) {
-		throw oxDNAException("The CUDA backend does not support reloading checkpoints, owing to its intrinsically stochastic nature");
+		throw RCexception("The CUDA backend does not support reloading checkpoints, owing to its intrinsically stochastic nature");
 	}
 }
 
@@ -191,7 +169,7 @@ void CUDABaseBackend::init_cuda() {
 
 	_device_prop = get_device_prop(_device_number);
 
-	c_number box_side = CONFIG_INFO->box->box_sides().x;
+	c_number box_side = CONFIG_INFO->box->getXsize();
 	int N = CONFIG_INFO->N();
 	_h_cuda_box.set_CUDA_from_CPU(CONFIG_INFO->box);
 
@@ -222,7 +200,7 @@ void CUDABaseBackend::init_cuda() {
 	_init_CUDA_kernel_cfgs();
 	_cuda_lists->init(N, _cuda_interaction->get_cuda_rcut(), &_h_cuda_box, _d_cuda_box);
 
-	if(_sort_every > 0) {
+	/*if(_sort_every > 0) {
 		int uns = 0;
 
 		// fixed value for depth (8): changing this value does not significantly affect performances
@@ -238,7 +216,7 @@ void CUDABaseBackend::init_cuda() {
 		reset_sorted_hindex
 		<<<_particles_kernel_cfg.blocks, _particles_kernel_cfg.threads_per_block>>>
 		(_d_sorted_hindex);
-	}
+	}*/
 }
 
 void CUDABaseBackend::_init_CUDA_kernel_cfgs() {
@@ -260,7 +238,7 @@ void CUDABaseBackend::_init_CUDA_kernel_cfgs() {
 	_particles_kernel_cfg.blocks.x, _particles_kernel_cfg.blocks.y, _particles_kernel_cfg.blocks.z);
 }
 
-void CUDABaseBackend::_sort_index() {
+/*void CUDABaseBackend::_sort_index() {
 	reset_sorted_hindex
 		<<<_particles_kernel_cfg.blocks, _particles_kernel_cfg.threads_per_block>>>
 		(_d_sorted_hindex);
@@ -278,6 +256,6 @@ void CUDABaseBackend::_sort_index() {
 	get_inverted_sorted_hindex
 		<<<_particles_kernel_cfg.blocks, _particles_kernel_cfg.threads_per_block>>>
 		(_d_sorted_hindex, _d_inv_sorted_hindex);
-}
+}*/
 
 #pragma GCC diagnostic pop

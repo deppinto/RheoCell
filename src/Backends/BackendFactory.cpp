@@ -40,7 +40,7 @@ std::shared_ptr<SimBackend> BackendFactory::make_backend(input_file &inp) {
 				backend_prec = "mixed";
 			}
 			if(backend_prec == "mixed") {
-				new_backend = new CUDAMixedBackend();
+				new_backend = new FD_CUDAMixedBackend();
 			}
 			else if(backend_prec == "float") {
 				new_backend = new FD_CUDABackend();

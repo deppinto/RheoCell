@@ -1,11 +1,3 @@
-/**
- * @file    CUDABaseBackend.h
- * @date    25/nov/2010
- * @author  lorenzo
- *
- *
- */
-
 #ifndef CUDABASEBACKEND_H_
 #define CUDABASEBACKEND_H_
 
@@ -39,9 +31,7 @@ protected:
 	int _device_number;
 	cudaDeviceProp _device_prop;
 	CUDA_kernel_cfg _particles_kernel_cfg;
-	CUDABaseList*_cuda_lists;
 	size_t _vec_size, _bonds_size, _orient_size;
-	c_number _sqr_verlet_skin;
 	CUDABox _h_cuda_box, *_d_cuda_box;
 
 	/// used for sorting
@@ -62,7 +52,7 @@ protected:
 	virtual void _host_to_gpu();
 	virtual void _gpu_to_host();
 
-	virtual void _sort_index();
+	//virtual void _sort_index();
 	virtual void _init_CUDA_kernel_cfgs();
 
 	/**

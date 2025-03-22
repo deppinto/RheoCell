@@ -1,4 +1,3 @@
-__constant__ float MD_sqr_verlet_skin[1];
 __constant__ float MD_dt[1];
 __constant__ int MD_N[1];
 

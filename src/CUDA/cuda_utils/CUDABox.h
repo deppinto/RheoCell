@@ -1,10 +1,3 @@
-/*
- * CUDABox.h
- *
- *  Created on: 30/mar/2016
- *      Author: lorenzo
- */
-
 #ifndef CUDABOX_H_
 #define CUDABOX_H_
 
@@ -16,22 +9,21 @@
 
 class CUDABox {
 protected:
-	c_number _Lx, _Ly, _Lz;
-	bool _cubic;
+	c_number _Lx, _Ly;
+	bool _square;
 
 public:
 	__host__ __device__
 	CUDABox() :
-					_cubic(false) {
+					_square(false) {
 
 	}
 
 	__host__ __device__
 	CUDABox(const CUDABox &b) {
-		_cubic = b._cubic;
+		_cubic = b._square;
 		_Lx = b._Lx;
 		_Ly = b._Ly;
-		_Lz = b._Lz;
 	}
 
 	~CUDABox() {

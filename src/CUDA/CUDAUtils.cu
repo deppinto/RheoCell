@@ -1,10 +1,3 @@
-/*
- * GpuUtils.cpp
- *
- *  Created on: 24/set/2010
- *      Author: lorenzo
- */
-
 #include "CUDAUtils.h"
 #include <curand_kernel.h>
 #include <thrust/reduce.h>

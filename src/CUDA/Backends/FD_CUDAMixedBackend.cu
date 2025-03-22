@@ -1,14 +1,8 @@
-/*
- * MD_CUDAMixedBackend.cu
- *
- *  Created on: 22/feb/2013
- *      Author: lorenzo */
-
-#include "MD_CUDAMixedBackend.h"
+#include "FD_CUDAMixedBackend.h"
 
 #include "CUDA_mixed.cuh"
 
-CUDAMixedBackend::CUDAMixedBackend() : MD_CUDABackend() {
+CUDAMixedBackend::CUDAMixedBackend() : FD_CUDABackend() {
 	_d_possd = nullptr;
 	_d_velsd = nullptr;
 	_d_Lsd = nullptr;
@@ -25,7 +19,7 @@ CUDAMixedBackend::~CUDAMixedBackend(){
 }
 
 void CUDAMixedBackend::init() {
-	MD_CUDABackend::init();
+	FD_CUDABackend::init();
 
 	_vec_sized = ((size_t) N()) * sizeof(LR_double4);
 	_orient_sized = ((size_t) N()) * sizeof(GPU_quat_double);
@@ -40,15 +34,13 @@ void CUDAMixedBackend::init() {
 	_float4_to_LR_double4(_d_Ls, _d_Lsd);
 }
 
-void CUDAMixedBackend::_init_CUDA_MD_symbols() {
-	MD_CUDABackend::_init_CUDA_MD_symbols();
+void CUDAMixedBackend::_init_CUDA_FD_symbols() {
+	FD_CUDABackend::_init_CUDA_FD_symbols();
 
-	float f_copy = _sqr_verlet_skin;
-	CUDA_SAFE_CALL( cudaMemcpyToSymbol(MD_sqr_verlet_skin, &f_copy, sizeof(float)) );
 	f_copy = _dt;
-	CUDA_SAFE_CALL( cudaMemcpyToSymbol(MD_dt, &f_copy, sizeof(float)) );
+	CUDA_SAFE_CALL( cudaMemcpyToSymbol(FD_dt, &f_copy, sizeof(float)) );
 	int myN = N();
-	CUDA_SAFE_CALL( cudaMemcpyToSymbol(MD_N, &myN, sizeof(int)) );
+	CUDA_SAFE_CALL( cudaMemcpyToSymbol(FD_N, &myN, sizeof(int)) );
 }
 
 void CUDAMixedBackend::_float4_to_LR_double4(float4 *src, LR_double4 *dest) {
@@ -86,21 +78,21 @@ void CUDAMixedBackend::_first_step() {
 }
 
 void CUDAMixedBackend::_rescale_positions(float4 new_Ls, float4 old_Ls) {
-	MD_CUDABackend::_rescale_positions(new_Ls, old_Ls);
+	FD_CUDABackend::_rescale_positions(new_Ls, old_Ls);
 	_float4_to_LR_double4(_d_poss, _d_possd);
 }
 
-void CUDAMixedBackend::_sort_particles() {
+/*void CUDAMixedBackend::_sort_particles() {
 	_LR_double4_to_float4(_d_possd, _d_poss);
 	_LR_double4_to_float4(_d_velsd, _d_vels);
 	_LR_double4_to_float4(_d_Lsd, _d_Ls);
 	_quat_double_to_quat_float(_d_orientationsd, _d_orientations);
-	MD_CUDABackend::_sort_particles();
+	FD_CUDABackend::_sort_particles();
 	_quat_float_to_quat_double(_d_orientations, _d_orientationsd);
 	_float4_to_LR_double4(_d_poss, _d_possd);
 	_float4_to_LR_double4(_d_vels, _d_velsd);
 	_float4_to_LR_double4(_d_Ls, _d_Lsd);
-}
+}*/
 
 void CUDAMixedBackend::_forces_second_step() {
 	this->_set_external_forces();
@@ -121,11 +113,11 @@ void CUDAMixedBackend::apply_simulation_data_changes() {
 		_LR_double4_to_float4(_d_Lsd, _d_Ls);
 	}
 
-	MD_CUDABackend::apply_simulation_data_changes();
+	FD_CUDABackend::apply_simulation_data_changes();
 }
 
 void CUDAMixedBackend::apply_changes_to_simulation_data() {
-	MD_CUDABackend::apply_changes_to_simulation_data();
+	FD_CUDABackend::apply_changes_to_simulation_data();
 
 	// the first time this method gets called all these arrays have not been
 	// allocated yet. It's a bit of a hack but it's needed
@@ -135,19 +127,4 @@ void CUDAMixedBackend::apply_changes_to_simulation_data() {
 		_float4_to_LR_double4(_d_vels, _d_velsd);
 		_float4_to_LR_double4(_d_Ls, _d_Lsd);
 	}
-}
-
-void CUDAMixedBackend::_thermalize() {
-	if(_cuda_thermostat->would_activate(current_step())) {
-		_LR_double4_to_float4(_d_velsd, _d_vels);
-		_LR_double4_to_float4(_d_Lsd, _d_Ls);
-		MD_CUDABackend::_thermalize();
-		_float4_to_LR_double4(_d_vels, _d_velsd);
-		_float4_to_LR_double4(_d_Ls, _d_Lsd);
-	}
-}
-
-void CUDAMixedBackend::_update_stress_tensor() {
-	_LR_double4_to_float4(_d_velsd, _d_vels);
-	MD_CUDABackend::_update_stress_tensor();
 }
