@@ -7,8 +7,6 @@
 #include "../cuda_utils/cuda_device_utils.h"
 #include "../cuda_utils/CUDABox.h"
 #include "../CUDAUtils.h"
-#include "../Lists/CUDABaseList.h"
-#include "../CUDA_sort.cuh"
 #include "../Interactions/CUDABaseInteraction.h"
 #include "../../Observables/BaseObservable.h"
 
@@ -27,7 +25,7 @@
 class CUDABaseBackend {
 protected:
 	/// if 0 then do not sort. If it's > 1 then sort particles every _sort_every updates
-	int _sort_every;
+	//int _sort_every;
 	int _device_number;
 	cudaDeviceProp _device_prop;
 	CUDA_kernel_cfg _particles_kernel_cfg;
@@ -35,17 +33,15 @@ protected:
 	CUDABox _h_cuda_box, *_d_cuda_box;
 
 	/// used for sorting
-	c_number4 *_d_buff_poss;
+	/*c_number4 *_d_buff_poss;
 	GPU_quat *_d_buff_orientations;
 	LR_bonds *_d_buff_bonds;
-	int *_d_hindex, *_d_sorted_hindex, *_d_inv_sorted_hindex;
+	int *_d_hindex, *_d_sorted_hindex, *_d_inv_sorted_hindex;*/
 
 	c_number4 *_d_poss, *_h_poss;
 	LR_bonds *_d_bonds, *_h_bonds;
 	GPU_quat *_d_orientations, *_h_orientations;
 	c_number4 *_d_list_poss;
-	/// It is stored in pinned memory, i.e. on the host but it can be accessed directly from the device
-	bool *_d_are_lists_old;
 
 	std::shared_ptr<CUDABaseInteraction> _cuda_interaction = nullptr;
 

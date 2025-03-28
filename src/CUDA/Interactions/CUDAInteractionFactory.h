@@ -1,10 +1,3 @@
-/*
- * CUDAInteractionFactory.h
- *
- *  Created on: 22/feb/2013
- *      Author: lorenzo
- */
-
 #ifndef CUDAINTERACTIONFACTORY_H_
 #define CUDAINTERACTIONFACTORY_H_
 

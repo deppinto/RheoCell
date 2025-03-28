@@ -3,7 +3,6 @@
 
 #include "../defs.h"
 #include "cuda_defs.h"
-
 #include "cuda_utils/helper_cuda.h"
 
 /**

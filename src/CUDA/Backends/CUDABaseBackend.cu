@@ -13,8 +13,7 @@ using namespace std;
 #pragma GCC diagnostic ignored "-Wvla"
 
 CUDABaseBackend::CUDABaseBackend() :
-  _device_number(-1),
-				_sort_every(0) {
+  _device_number(-1) {
 	_particles_kernel_cfg.blocks = dim3(1, 1, 1);
 	_particles_kernel_cfg.threads_per_block = 0;
 	_particles_kernel_cfg.shared_mem = 0;
@@ -24,13 +23,6 @@ CUDABaseBackend::CUDABaseBackend() :
 	_d_bonds = NULL;
 	_d_orientations = NULL;
 	_d_list_poss = NULL;
-	_d_are_lists_old = NULL;
-	_d_hindex = NULL;
-	_d_sorted_hindex = NULL;
-	_d_inv_sorted_hindex = NULL;
-	_d_buff_poss = NULL;
-	_d_buff_bonds = NULL;
-	_d_buff_orientations = NULL;
 	_d_cuda_box = NULL;
 	_h_poss = NULL;
 	_h_orientations = NULL;
@@ -49,11 +41,9 @@ CUDABaseBackend::~CUDABaseBackend() {
 		CUDA_SAFE_CALL(cudaFree(_d_poss));
 		CUDA_SAFE_CALL(cudaFree(_d_bonds));
 		CUDA_SAFE_CALL(cudaFree(_d_orientations));
-		CUDA_SAFE_CALL(cudaFree(_d_list_poss));
-		CUDA_SAFE_CALL(cudaFreeHost(_d_are_lists_old));
 	}
 
-	if(_sort_every > 0) {
+	/*if(_sort_every > 0) {
 		if(_d_hindex != NULL) {
 			CUDA_SAFE_CALL(cudaFree(_d_hindex));
 			CUDA_SAFE_CALL(cudaFree(_d_sorted_hindex));
@@ -62,7 +52,7 @@ CUDABaseBackend::~CUDABaseBackend() {
 			CUDA_SAFE_CALL(cudaFree(_d_buff_bonds));
 			CUDA_SAFE_CALL(cudaFree(_d_buff_orientations));
 		}
-	}
+	}*/
 
 	if(_h_poss != NULL) {
 		delete[] _h_poss;
@@ -102,9 +92,9 @@ void CUDABaseBackend::get_settings(input_file &inp) {
 		OX_LOG(Logger::LOG_INFO, "Using CUDA device %d", _device_number);
 	}
 
-	if(getInputInt(&inp, "CUDA_sort_every", &_sort_every, 0) == KEY_NOT_FOUND) {
+	/*if(getInputInt(&inp, "CUDA_sort_every", &_sort_every, 0) == KEY_NOT_FOUND) {
 		OX_LOG(Logger::LOG_INFO, "CUDA sort_every not specified, using 0");
-	}
+	}*/
 
 	getInputInt(&inp, "threads_per_block", &_particles_kernel_cfg.threads_per_block, 0);
 

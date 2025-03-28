@@ -73,21 +73,4 @@ using c_number = float;
 using GPU_quat = float4;
 #endif
 
-/**
- * @brief It keeps track of neighbours along 3" and 5" directions.
- */
-typedef struct
-__align__(8) {
-	int n3, n5;
-} LR_bonds;
-
-/**
- * @brief Used when use_edge = true. It stores information associated to a single bond.
- */
-typedef struct __align__(8) edge_bond {
-	int from;
-	int to;
-} edge_bond;
-
-
 #endif /* SRC_CUDA_CUDA_DEFS_H_ */

@@ -1,15 +1,7 @@
-/*
- * CUDABaseInteraction.h
- *
- *  Created on: 18/feb/2013
- *      Author: lorenzo
- */
-
 #ifndef CUDABASEINTERACTION_H_
 #define CUDABASEINTERACTION_H_
 
 #include "../CUDAUtils.h"
-#include "../Lists/CUDABaseList.h"
 #include "../cuda_utils/CUDABox.h"
 
 /**
@@ -17,8 +9,6 @@
  */
 class CUDABaseInteraction {
 protected:
-	bool _use_edge = false;
-	bool _edge_compatible = false;
 	/// c_number of force slots per particle. Used only if _use_edge == true.
 	int _n_forces = 1;
 	CUDA_kernel_cfg _launch_cfg;
@@ -27,16 +17,11 @@ protected:
 	CUDA_kernel_cfg _ffs_hb_eval_kernel_cfg;
 	CUDA_kernel_cfg _ffs_dist_eval_kernel_cfg;
 
-	bool _update_st = false;
-	CUDAStressTensor *_d_st = nullptr, *_h_st = nullptr;
-
 	int _N = -1;
 
 	c_number4 *_d_edge_forces = nullptr;
-	c_number4 *_d_edge_torques = nullptr;
 
 	virtual void _sum_edge_forces(c_number4 *d_forces);
-	virtual void _sum_edge_forces_torques(c_number4 *d_forces, c_number4 *d_torques);
 public:
 	CUDABaseInteraction();
 	virtual ~CUDABaseInteraction();
@@ -48,8 +33,6 @@ public:
 
 	virtual void sync_host() {}
 	virtual void sync_GPU() {}
-
-	virtual StressTensor CPU_stress_tensor(c_number4 *vels);
 
 	void set_launch_cfg(CUDA_kernel_cfg &launch_cfg);
 

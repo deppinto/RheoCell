@@ -34,33 +34,6 @@ __device__ void _particle_particle_interaction(c_number4 &ppos, c_number4 &qpos,
 	F.w += energy;
 }
 
-__global__ void lj_forces_edge(c_number4 *poss, c_number4 *forces, edge_bond *edge_list, int n_edges, CUDABox *box) {
-	if(IND >= n_edges) return;
-
-	c_number4 dF = make_c_number4(0.f, 0.f, 0.f, 0.f);
-
-	edge_bond b = edge_list[IND];
-
-	// get info for particle 1
-	c_number4 ppos = poss[b.from];
-
-	// get info for particle 2
-	c_number4 qpos = poss[b.to];
-
-	_particle_particle_interaction(ppos, qpos, dF, box);
-	dF.w *= (c_number) 0.5f;
-
-	int from_index = MD_N[0] * (IND % MD_n_forces[0]) + b.from;
-	if((dF.x * dF.x + dF.y * dF.y + dF.z * dF.z) > (c_number) 0.f) LR_atomicAddXYZ(forces + from_index, dF);
-
-	dF.x = -dF.x;
-	dF.y = -dF.y;
-	dF.z = -dF.z;
-
-	int to_index = MD_N[0] * (IND % MD_n_forces[0]) + b.to;
-	if((dF.x * dF.x + dF.y * dF.y + dF.z * dF.z) > (c_number) 0.f) LR_atomicAddXYZ(forces + to_index, dF);
-}
-
 __global__ void lj_forces(c_number4 *poss, c_number4 *forces, int *matrix_neighs, int *number_neighs, CUDABox *box) {
 	if(IND >= MD_N[0]) return;
 
