@@ -176,33 +176,28 @@ string StressField::f_field(llint step) {
 					if(r!=0){
 						number ex = -rx / r;
 						number ey = -ry / r;
-						if(phi_field[ss]>1e-1){
-							f_field_coarse_xx[site] += (f_field_x[ss] * ex / phi_field[ss]) / (size_grid * size_grid);
-							f_field_coarse_yy[site] += (f_field_y[ss] * ey / phi_field[ss]) / (size_grid * size_grid) ;
-							f_field_coarse_xy[site] += ((f_field_x[ss] * ey + f_field_y[ss] * ex) / phi_field[ss]) / (2 * size_grid * size_grid);
+						f_field_coarse_xx[site] += (f_field_x[ss] * ex) / (size_grid * size_grid);
+						f_field_coarse_yy[site] += (f_field_y[ss] * ey) / (size_grid * size_grid) ;
+						f_field_coarse_xy[site] += ((f_field_x[ss] * ey + f_field_y[ss] * ex)) / (2 * size_grid * size_grid);
 
-							f_field_passive_coarse_xx[site] += (f_field_passive_x[ss] * ex / phi_field[ss]) / (size_grid * size_grid) ;
-							f_field_passive_coarse_yy[site] += (f_field_passive_y[ss] * ey / phi_field[ss]) / (size_grid * size_grid) ;
-							f_field_passive_coarse_xy[site] += ((f_field_passive_x[ss] * ey + f_field_passive_y[ss] * ex) / phi_field[ss]) / (2 * size_grid * size_grid) ;
+						f_field_passive_coarse_xx[site] += (f_field_passive_x[ss] * ex) / (size_grid * size_grid) ;
+						f_field_passive_coarse_yy[site] += (f_field_passive_y[ss] * ey) / (size_grid * size_grid) ;
+						f_field_passive_coarse_xy[site] += ((f_field_passive_x[ss] * ey + f_field_passive_y[ss] * ex)) / (2 * size_grid * size_grid) ;
 
-							f_field_active_coarse_xx[site] += (f_field_active_x[ss] * ex / phi_field[ss]) / (size_grid * size_grid) ;
-							f_field_active_coarse_yy[site] += (f_field_active_y[ss] * ey / phi_field[ss]) / (size_grid * size_grid) ;
-							f_field_active_coarse_xy[site] += ((f_field_active_x[ss] * ey + f_field_active_y[ss] * ex) / phi_field[ss]) / (2 * size_grid * size_grid) ;
+						f_field_active_coarse_xx[site] += (f_field_active_x[ss] * ex) / (size_grid * size_grid) ;
+						f_field_active_coarse_yy[site] += (f_field_active_y[ss] * ey) / (size_grid * size_grid) ;
+						f_field_active_coarse_xy[site] += ((f_field_active_x[ss] * ey + f_field_active_y[ss] * ex)) / (2 * size_grid * size_grid) ;
 
-							f_field_pressure_coarse_xx[site] += (f_field_pressure[ss] * ex / phi_field[ss]) / (size_grid * size_grid) ;
-							f_field_pressure_coarse_yy[site] += (f_field_pressure[ss] * ey / phi_field[ss]) / (size_grid * size_grid) ;
+						f_field_pressure_coarse_xx[site] += (f_field_pressure[ss] * ex) / (size_grid * size_grid) ;
+						f_field_pressure_coarse_yy[site] += (f_field_pressure[ss] * ey) / (size_grid * size_grid) ;
 
-							phi_field_coarse[site] += 1.;				
-						}
+						phi_field_coarse[site] += 1.;				
 					}
 				}
 			}
 
 
-			if(phi_field[site]>1e-1)
-				conf << j + 0.5 <<" "<<  i + 0.5  << " " << f_field_coarse_xx[site] << " " << f_field_coarse_yy[site] << " "<< f_field_coarse_xy[site] << " "<<f_field_passive_coarse_xx[site]<<" "<<f_field_passive_coarse_yy[site]<<" "<< f_field_passive_coarse_xy[site]  <<" "<< f_field_active_coarse_xx[site]<<" "<<f_field_active_coarse_yy[site]<<" "<< f_field_active_coarse_xy[site]<<" "<<" "<< f_field_pressure_coarse_xx[site]<<" "<<f_field_pressure_coarse_yy[site]<<" ";
-			else
-				conf << j + 0.5 <<" "<<  i + 0.5  << " " << 0 << " " << 0 << " "<< 0 <<" "<< 0 <<" "<< 0 <<" "<< 0 <<" "<< 0 <<" "<< 0 <<" "<< 0 <<" "<<0 <<" "<< 0<<" ";
+			conf << j + 0.5 <<" "<<  i + 0.5  << " " << f_field_coarse_xx[site] << " " << f_field_coarse_yy[site] << " "<< f_field_coarse_xy[site] << " "<<f_field_passive_coarse_xx[site]<<" "<<f_field_passive_coarse_yy[site]<<" "<< f_field_passive_coarse_xy[site]  <<" "<< f_field_active_coarse_xx[site]<<" "<<f_field_active_coarse_yy[site]<<" "<< f_field_active_coarse_xy[site]<<" "<<" "<< f_field_pressure_coarse_xx[site]<<" "<<f_field_pressure_coarse_yy[site]<<" ";
 		}
 	}
 

@@ -40,8 +40,8 @@ time = []
 
 for i in range(start_frame, end_frame, 1):
 
-    if i%3 != 0:
-        continue
+    #if i%3 != 0:
+    #    continue
 
     if i<10:
         file = sys.argv[2] + "stress_field_00" + str(i) + ".txt"

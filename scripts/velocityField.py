@@ -72,7 +72,7 @@ for line in cfile:
         Z_y[int(yy)][int(xx)]=value_y
         Z[int(yy)][int(xx)]=sqrt(value_x*value_x+value_y*value_y)
         if int(xx)%2==0 and int(yy)%2==0:
-            cset1 = plt.arrow(xx, yy, 100*value_x, 100*value_y, width=0.1, color='k')
+            cset1 = plt.arrow(xx, yy, 10*value_x, 10*value_y, width=0.1, color='k')
             #cset1 = plt.arrow(xx, yy, 1000*value_x, 1000*value_y, width=0.2, color='k')
             #cset1 = plt.arrow(xx, yy, 75*value_x, 75*value_y, width=0.2, color='k')
 

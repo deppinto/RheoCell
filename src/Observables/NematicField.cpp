@@ -114,18 +114,13 @@ string NematicField::f_field(llint step) {
 					int yy = (((i - int(size_grid/2) + Ly) % Ly) + k) % Ly;
 					int ss = xx + yy * Lx;
 
-					if(phi_field[ss]>1e-1){
-						f_field_coarse_x[site] += (f_field_x[ss] / phi_field[ss]) / (size_grid * size_grid);
-						f_field_coarse_y[site] += (f_field_y[ss] / phi_field[ss]) / (size_grid * size_grid) ;
-						phi_field_coarse[site] += 1.;				
-					}
+					f_field_coarse_x[site] += f_field_x[ss] / (size_grid * size_grid);
+					f_field_coarse_y[site] += f_field_y[ss] / (size_grid * size_grid);
+					phi_field_coarse[site] += 1.;				
 				}
 			}
 
-			if(phi_field[site]>1e-1)
-				conf << j + 0.5 <<" "<<  i + 0.5  << " " << f_field_coarse_x[site] << " " << f_field_coarse_y[site] << " ";
-			else
-				conf << j + 0.5 <<" "<<  i + 0.5  << " " << 0 << " " << 0 << " ";
+			conf << j + 0.5 <<" "<<  i + 0.5  << " " << f_field_coarse_x[site] << " " << f_field_coarse_y[site] << " ";
 		}
 	}
 
