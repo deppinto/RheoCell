@@ -48,7 +48,7 @@ LLx = int(lx / delta_x)
 LLy = int(ly / delta_y)
 flow_map_x = [[q * delta_x for q in range(LLx)] for k in range(LLy)]
 flow_map_y = [[k * delta_y for q in range(LLx)] for k in range(LLy)]
-tstep = 500 * 0.1
+tstep = 1000 * 0.1
 time = (end_frame - start_frame) * tstep
 
 
@@ -77,7 +77,7 @@ for frame in range(start_frame, end_frame, 1):
     read_line = 0
     for line in cfile:
 
-        if read_line==1:
+        if read_line==0:
             read_line+=1
             continue
 

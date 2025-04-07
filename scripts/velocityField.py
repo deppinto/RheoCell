@@ -55,7 +55,7 @@ start_value=0
 read_line = 0
 for line in cfile:
 
-    if read_line==1:
+    if read_line==0:
         read_line+=1
         continue
 

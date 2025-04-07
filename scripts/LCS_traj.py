@@ -225,15 +225,15 @@ for i in range(0, NP):
 if variable==2:
 
     plt.figure(figsize=(6,6))
-    x=np.arange(0,lx,1)
-    y=np.arange(0,ly,1)
-    X, Y = np.meshgrid(x, y)
+    #x=np.arange(0,lx,1)
+    #y=np.arange(0,ly,1)
+    #X, Y = np.meshgrid(x, y)
 
     #z_min, z_max = -np.abs(FTLE).max(), np.abs(FTLE).max()
     #cset1 = plt.imshow(Z, cmap='hot', interpolation='nearest')
     #cset1 = plt.pcolormesh(X, Y, vorticity, cmap='RdBu', vmin=z_min, vmax=z_max)
     #cset1 = plt.imshow(FTLE, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
-    cset1 = plt.scatter(xP[:,-1], yP[:,-1], s=20, c=FTLE, cmap='RdBu', vmin=-z_max, vmax=z_max)
+    cset1 = plt.scatter(xP[:,0], yP[:,0], s=20, c=FTLE, cmap='RdBu', vmin=-z_max, vmax=z_max)
     #cset1 = plt.plot(FTLE_ridges_x, FTLE_ridges_y, 'o', color='k', markersize=6)
     #cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=-1, vmax=1)
 
