@@ -96,6 +96,7 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 
 	int N = fields.size();
 	number totalNodes=box->getXsize()*box->getYsize();
+	number total_area_cell_radius = R * R * N;
 	rcut= sqrt( (totalNodes/N)/PI );
 	rcut=(double)R-1;
 	sqr_rcut = SQR(rcut);
@@ -112,6 +113,10 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 			p->set_positions_initial(box);
 
 			inserted = true;
+			
+			if(box->sqr_min_image_distance(p->CoM, std::vector<number> {(double)box->getXsize()/2., (double)box->getYsize()/2.}) > total_area_cell_radius)inserted = false;
+
+
 			for(int n = 0; n < i; n++) {
 				BaseField *q = fields[n];
 				// particles with an index larger than p->index have not been inserted yet
@@ -129,7 +134,6 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 					int f = box->getElementX(start, x) + box->getElementY(start, y) * box->getXsize();
 					p->set_ext_potential(f, box->getWalls(f));	
 					ext_value += p->ext_potential;
-					//if(box->getElementX(start, x)==0)std::cout<<"print here: "<< f <<" "<<box->getWalls(f)<<" "<< p->ext_potential<<" "<<ext_value<<std::endl;
 				}	
 			}
 

@@ -275,6 +275,15 @@ for line in cfile:
         LsubY[pt_num]=int(float(words[1]))
         CoMX[pt_num]=float(words[2])
         CoMY[pt_num]=float(words[3])
+
+        CoMX[pt_num] += 65
+        CoMY[pt_num] += 70
+        if CoMY[pt_num] >= ly:
+            CoMY[pt_num] -= ly
+        if CoMX[pt_num] >= lx:
+            CoMX[pt_num] -= lx
+
+
         offsetX[pt_num]=int(float(words[4]))
         offsetY[pt_num]=int(float(words[5]))
         cornerSite[pt_num]=int(float(words[6]))
@@ -293,6 +302,14 @@ for line in cfile:
             value=float(words[i+1])
             yy=int(site/lx)
             xx=site-int(yy*lx)
+
+            xx = xx + 65
+            yy = yy + 70
+            if yy >= ly:
+                yy -= ly
+            if xx >= lx:
+                xx -= lx
+
             Z[yy][xx]=value
             area[pt_num]+=value*value
 

@@ -3,6 +3,7 @@ import numpy as np
 from math import *
 import matplotlib.pyplot as plt
 import os.path
+import matplotlib.cm as cm
 
 
 if len(sys.argv)!=5:
@@ -73,7 +74,7 @@ F = []
 cont_line=0
 for line in filedata:
     save=line.split()
-    if cont_line == end:
+    if len(save) == 0:
         break
 
     jobs.append(int(float(save[0])))
@@ -112,23 +113,35 @@ filedata.close()
 n_holes = np.zeros(end-start)
 lifetime_holes = np.zeros(end-start)
 max_area_holes = np.zeros(end-start)
+avg_FTLE = np.zeros(end-start)
 
 #voids_histogram_area.txt  voids_histogram_circularity.txt  voids_histogram_radius_speed_time.txt  voids_histogram_radius_speed.txt  voids_histogram_radius.txt  voids_stats.txt
 
 fig_histograms , ax = plt.subplots(2, 3, figsize=(10,4), constrained_layout=True)
 #fig_histograms.tight_layout()
 
+
+if scripts==74:
+    jobs[14] -= 1
+if scripts==75:
+    jobs[12] -= 1
+if scripts==76:
+    jobs[3] -= 1
+    jobs[4] -= 3
+
+
 for traj in range(start, end):
 
-    area_histogram = np.zeros(int(0.5 * time[traj] / deltat[traj]))
-    circularity_histogram = np.zeros(int(0.5 * time[traj] / deltat[traj]))
-    radius_speed_histogram = np.zeros(int(0.5 * time[traj] / deltat[traj]))
-    ani_histogram = np.zeros(int(0.5 * time[traj] / deltat[traj]))
+    area_histogram = np.zeros(int(0.25 * time[traj] / deltat[traj]))
+    circularity_histogram = np.zeros(int(0.25 * time[traj] / deltat[traj]))
+    radius_speed_histogram = np.zeros(int(0.25 * time[traj] / deltat[traj]))
+    ani_histogram = np.zeros(int(0.25 * time[traj] / deltat[traj]))
     rspeed_histogram = np.zeros(int(lx[traj]))
 
     avg_stress_histogram = np.zeros(10)
     max_stress_histogram = np.zeros(10)
-    #with open('voids_stress_histogram_tau10.txt', 'w') as f:
+
+    avg_distance_velocity_defects = np.zeros(10)
 
     l_bins = 0.1
     x_l = [i * l_bins for i in range(int(1./l_bins))]
@@ -138,12 +151,25 @@ for traj in range(start, end):
     max_area_hist = np.zeros(int(1. / a_bins))
     total_hist_counts = 0
 
+    sp_bins = 0.04
+    x_sp = [i * sp_bins for i in range(int(1./sp_bins))]
+    survival_probability_hist = np.zeros(int(1. / sp_bins))
+    #survival_probability_counts = np.zeros(int(1. / sp_bins))
+
     count_jobs = 0
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
 
         if job==144 and scripts==74:
             continue
         if job==125 and scripts==75:
+            continue
+        if job==39 and scripts==76:
+            continue
+        if job==43 and scripts==76:
+            continue
+        if job==49 and scripts==76:
+            continue
+        if job==50 and scripts==76:
             continue
 
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_stats.txt","r")
@@ -160,7 +186,9 @@ for traj in range(start, end):
             for i in range(nn):
                 hlife = (float(save[6+i]) / (time[traj] * dt[traj])) / l_bins
                 maxA = float(save[6+nn+i+1]) * pi * 8 * 8 / (lx[traj] * ly[traj] * a_bins)
+                sp = (float(save[6+i]) / (time[traj] * dt[traj])) / sp_bins
 
+                survival_probability_hist[0:int(sp)+1] += 1.
                 lifetime_hist[int(hlife)] += 1
                 max_area_hist[int(maxA)] += 1
                 total_hist_counts += 1
@@ -170,12 +198,17 @@ for traj in range(start, end):
             count_jobs += 1
 
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_area.txt","r")
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram.txt","r")
         for line in fileoutput:
             save=line.split()
-            area_histogram[int(float(save[0]) * 50.01)] += (float(save[1]) * pi * 8 * 8) / (lx[traj] * ly[traj])
+            hist_step=int(int(float(save[0]) * 50.01) * 0.5)
+            area_histogram[hist_step] += (float(save[1]) * pi * 8 * 8) / (lx[traj] * ly[traj]) * 0.5
+            circularity_histogram[hist_step] += float(save[2]) * 0.5
+            radius_speed_histogram[hist_step] += float(save[3]) * 0.5
+            ani_histogram[hist_step] += float(save[4]) * 0.5
         fileoutput.close()
 
+        '''
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_circularity.txt","r")
         for line in fileoutput:
             save=line.split()
@@ -193,13 +226,14 @@ for traj in range(start, end):
             save=line.split()
             ani_histogram[int(float(save[0]) * 50.01)] += float(save[1])
         fileoutput.close()
+        '''
 
+        '''
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_radius_speed.txt","r")
         for line in fileoutput:
             save=line.split()
             rspeed_histogram[int(float(save[0]))] += float(save[1])
         fileoutput.close()
-
 
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_stress_histogram_tau10.txt","r")
         for line in fileoutput:
@@ -207,6 +241,19 @@ for traj in range(start, end):
             avg_stress_histogram[int(float(save[0]))] += float(save[1])
             max_stress_histogram[int(float(save[0]))] += float(save[2])
         fileoutput.close()
+
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_velocity_histogram_tau10.txt","r")
+        for line in fileoutput:
+            save=line.split()
+            avg_distance_velocity_defects[int(float(save[0]))] += float(save[1])
+        fileoutput.close()
+
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_velocity_stats.txt","r")
+        for line in fileoutput:
+            save=line.split()
+            avg_FTLE[traj - start] += float(save[2]) / jobs[traj]
+        fileoutput.close()
+        '''
 
 
     if count_jobs > 0:
@@ -218,6 +265,8 @@ for traj in range(start, end):
 
         avg_stress_histogram[:] = avg_stress_histogram[:] / count_jobs
         max_stress_histogram[:] = max_stress_histogram[:] / count_jobs
+
+        avg_distance_velocity_defects[:] = avg_distance_velocity_defects[:] / count_jobs
 
     if variable == 1:
         if total_hist_counts>0:
@@ -231,12 +280,39 @@ for traj in range(start, end):
         ax[0,1].plot(circularity_histogram, '-s')
         ax[1,0].plot(radius_speed_histogram, '-^')
         ax[1,1].plot(rspeed_histogram, '-v')
-        ax[1,2].plot(ani_histogram, '-D', label=fric[traj])
+        ax[1,2].plot(ani_histogram, '-D', label=nemself[traj])
 
     if variable == 3:
-        ax[0,0].plot(avg_stress_histogram, '-o')
-        ax[0,1].plot(max_stress_histogram, '-s', label=omega[traj])
+        if total_hist_counts>0:
+            survival_probability_hist[:] = survival_probability_hist[:] / total_hist_counts
 
+        ax[0,0].plot(avg_stress_histogram, '-o')
+        ax[0,1].plot(max_stress_histogram, '-s')
+        ax[1,0].plot(avg_distance_velocity_defects, '-^', label=nemself[traj])
+        ax[1,2].plot(x_sp, survival_probability_hist, '-o')
+
+'''
+PD_Activity = []
+PD_Friction = []
+PD_Phase = []
+for i in range(len(lifetime_holes)):
+    if lifetime_holes[i]<0.01:
+        PD_Activity.append(nemself[i])
+        PD_Friction.append(fric[i])
+        PD_Phase.append(0)
+    elif lifetime_holes[i] < 0.5:
+        PD_Activity.append(nemself[i])
+        PD_Friction.append(fric[i])
+        PD_Phase.append(1)
+    else:
+        PD_Activity.append(nemself[i])
+        PD_Friction.append(fric[i])
+        PD_Phase.append(2)
+
+print(PD_Activity)
+print(PD_Friction)
+print(PD_Phase)
+'''
 
 if variable == 2:
     ax[0,0].set_ylabel('Area')
@@ -251,7 +327,7 @@ if variable == 2:
     ax[1,2].set_xlabel('Time')
 
     fig_histograms.delaxes(ax[0,2])
-    fig_histograms.legend(loc=(0.7, 0.6), ncols=2, frameon='false')
+    fig_histograms.legend(loc=(0.7, 0.6), ncols=2, frameon=False)
     #plt.legend(loc="upper right", frameon='false')
     plt.show()
     exit (1)
@@ -262,43 +338,58 @@ if variable==1:
     ax[0,1].set_ylabel('Max area')
     ax[1,0].set_ylabel('P(Lifetime)')
     ax[1,1].set_ylabel('P(Max area)')
-    ax[0,0].set_xlabel('X')
-    ax[0,1].set_xlabel('X')
+    ax[0,0].set_xlabel(r'$\gamma$')
+    ax[0,1].set_xlabel(r'$\gamma$')
     ax[1,0].set_xlabel('Normalized lifetime')
     ax[1,1].set_xlabel('Normalized max area')
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox='false', ncol=5)
     #fig.legend(loc=7)
-    #ax[0,0].plot(nemself[0:5], lifetime_holes[0:5], '--p')
+    ax[0,0].plot(nemself[0:5], lifetime_holes[0:5], '--p')
+    #ax[0,0].plot(nemself[5:10], lifetime_holes[5:10], '--p')
+    #ax[0,0].plot(nemself[10:15], lifetime_holes[10:15], '--p')
+    #ax[0,0].plot(lx[5:8], lifetime_holes[0:3], '--p')
     #ax[0,0].plot(mu[0:4], lifetime_holes[0:4], '--p')
     #ax[0,0].plot(gamma[4:8], lifetime_holes[0:4], '--p')
+    #ax[0,0].plot(omega[0:6], lifetime_holes[0:6], '--p')
+    #ax[0,0].plot(omega[7:13], lifetime_holes[7:13], '--p')
+    #ax[0,0].plot(fric, lifetime_holes, '--p')
+    #ax[0,0].set_xscale('log')
     #ax[0,0].plot(F[0:5], lifetime_holes[0:5], '--p')
     #ax[0,0].plot(F[5:10], lifetime_holes[5:10], '--p')
     #ax[0,0].plot(F[10:15], lifetime_holes[10:15], '--p')
 
-    #ax[0,1].plot(nemself[0:5], max_area_holes[0:5], '--v')
+    ax[0,1].plot(nemself[0:5], max_area_holes[0:5], '--v')
+    #ax[0,1].plot(nemself[5:10], max_area_holes[5:10], '--v')
+    #ax[0,1].plot(nemself[10:15], max_area_holes[10:15], '--v')
+    #ax[0,1].plot(lx[5:8], max_area_holes[0:3], '--v')
+    #ax[0,1].plot(omega[0:6], max_area_holes[0:6], '--v')
+    #ax[0,1].plot(omega[7:13], max_area_holes[7:13], '--v')
     #ax[0,1].plot(mu[0:4], max_area_holes[0:4], '--v')
     #ax[0,1].plot(gamma[4:8], max_area_holes[0:4], '--v')
     #ax[0,1].plot(F[0:5], max_area_holes[0:5], '--v')
     #ax[0,1].plot(F[5:10], max_area_holes[5:10], '--v')
     #ax[0,1].plot(F[10:15], max_area_holes[10:15], '--v')
-    ax[0,0].plot(fric, lifetime_holes, '--p')
-    ax[0,1].plot(fric, max_area_holes, '--v')
-    #ax[0,0].set_xscale('log')
+    #ax[0,1].plot(fric, max_area_holes, '--v')
     #ax[0,1].set_xscale('log')
 
-    #ax[0,2].plot(nemself[0:5], n_holes[0:5], '--^')
+    ax[0,2].plot(nemself[0:5], n_holes[0:5], '--^')
+    #ax[0,2].plot(nemself[5:10], n_holes[5:10], '--^')
+    #ax[0,2].plot(nemself[10:15], n_holes[10:15], '--^')
+    #ax[0,2].plot(lx[5:8], n_holes[0:3], '--^')
+    #ax[0,2].plot(omega[0:6], n_holes[0:6], '--^')
+    #ax[0,2].plot(omega[7:13], n_holes[7:13], '--^')
     #ax[0,2].plot(mu[0:4], n_holes[0:4], '--^')
     #ax[0,2].plot(gamma[4:8], n_holes[0:4], '--^')
     #ax[0,2].plot(F[0:5], n_holes[0:5], '--^')
     #ax[0,2].plot(F[5:10], n_holes[5:10], '--^')
     #ax[0,2].plot(F[10:15], n_holes[10:15], '--^')
-    ax[0,2].plot(fric, n_holes, '--^')
+    #ax[0,2].plot(fric, n_holes, '--^')
     #ax[0,2].set_xscale('log')
-    #ax[0,2].set_ylabel('# voids')
-    #ax[0,2].set_xlabel('X')
+    ax[0,2].set_ylabel('# voids')
+    ax[0,2].set_xlabel(r'$\gamma$')
 
     fig_histograms.delaxes(ax[1,2])
-    fig_histograms.legend(loc=(0.75,0.15), ncols=2, frameon='false')
+    fig_histograms.legend(loc=(0.75,0.15), ncols=3, frameon=False)
 
     #fig1 = plt.figure(figsize=(5.452423529,4.089317647))
     #plt.plot(nemself[0:5], n_holes[0:5], '--o')
@@ -315,15 +406,60 @@ if variable == 3:
     ax[0,1].set_ylabel('Max stress')
     ax[0,0].set_xlabel('Time')
     ax[0,1].set_xlabel('Time')
+    ax[1,0].set_ylabel('+1 defect distance')
+    ax[1,0].set_xlabel('Time')
+    ax[1,1].set_ylabel('Average FTLE')
+    ax[1,1].set_xlabel(r'$\zeta$')
+    ax[1,2].set_ylabel('Survival probability')
+    ax[1,2].set_xlabel('Time')
+
+    #ax[1,2].set_yscale('log')
+    #ax[1,2].set_xscale('log')
+
+
+    #ax[1,1].plot(nemself[0:5], avg_FTLE[0:5], '--p')
+    #ax[1,1].plot(nemself[5:10], avg_FTLE[5:10], '--p')
+    #ax[1,1].plot(nemself[10:15], avg_FTLE[10:15], '--p')
+    ax[1,1].plot(lx[5:8], avg_FTLE[0:3], '--p')
+    #ax[1,1].plot(fric, avg_FTLE, '--p')
+    #ax[1,1].set_xscale('log')
+    #ax[1,1].plot(omega[0:6], avg_FTLE[0:6], '--p')
+    #ax[1,1].plot(mu[0:4], avg_FTLE[0:4], '--p')
+    #ax[1,1].plot(gamma[4:8], avg_FTLE[0:4], '--p')
     fig_histograms.delaxes(ax[0,2])
-    fig_histograms.legend(loc=(0.7, 0.6), ncols=2, frameon='false')
+    fig_histograms.legend(loc=(0.7, 0.6), ncols=2, frameon=False)
     plt.show()
     exit(1)
 
+plt.close()
+
+if variable == 4:
+
+    fig = plt.figure(figsize=(5.452423529,4.089317647), constrained_layout=True)
+    PD_activity = [0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5]
+    PD_friction = [0.1, 0.1, 0.1, 0.1, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.001, 0.001, 0.001, 0.001, 0.001, 0.75, 0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01, 0.0075, 0.005, 0.0025, 0.001, 0.05, 0.05, 0.05, 0.05, 0.05, 0.025, 0.025, 0.025, 0.025, 0.025, 0.0075, 0.0075, 0.0075, 0.0075, 0.0075, 0.005, 0.005, 0.005, 0.005, 0.005, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025]
+    PD_phase = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 2, 2, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 2, 0, 0, 1, 1, 2, 0, 1, 1, 2, 2]
+
+    colors = cm.Set1(np.linspace(0, 1, 9))
+    for i in range(len(PD_friction)):
+        plt.scatter(PD_activity[i], PD_friction[i], color=colors[PD_phase[i]])
+
+    plt.ylabel(r'$\chi$', fontsize=18)
+    plt.xlabel(r'$\zeta$', fontsize=18)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.xticks(np.arange(0.1,0.6,0.1))
+    plt.yscale('log')
+    plt.ylim([0.0007, 0.15])
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results7/Phase_diagram_1.png", transparent=True)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results7/Phase_diagram_1.svg", transparent=True)
+    plt.show()
+
+    
 
 #first figure-----------------------------------------------------------------------------------------------
-fig1 = plt.figure(figsize=(5.452423529,4.089317647))
-plt.plot(nemself[0:5], n_holes[0:5], '--o')
+#fig1 = plt.figure(figsize=(5.452423529,4.089317647))
+#plt.plot(nemself[0:5], n_holes[0:5], '--o')
 #plt.plot(nemself[5:10], n_holes[5:10], '--s')
 #plt.plot(nemself[10:15], n_holes[10:15], '--^')
 #plt.legend([r'$\xi$=0.1',r'$\xi$=0.01',r'$\xi$=0.001'], fontsize=14, frameon=False)
@@ -336,8 +472,8 @@ plt.plot(nemself[0:5], n_holes[0:5], '--o')
 #plt.plot(omega[7:14], n_holes[7:14], '--s')
 #plt.legend([r'$\xi$=0.01',r'$\xi$=0.001'], fontsize=14, frameon=False)
 
-plt.ylabel('# voids', fontsize=18)
-plt.xlabel('P', fontsize=18)
+#plt.ylabel('# voids', fontsize=18)
+#plt.xlabel('P', fontsize=18)
 
 
 
@@ -394,7 +530,7 @@ plt.xlabel('P', fontsize=18)
 #plt.ylabel('Max Area', fontsize=18)
 #plt.xlabel('F', fontsize=18)
 
-plt.show()
+#plt.show()
 
 
 exit(1)

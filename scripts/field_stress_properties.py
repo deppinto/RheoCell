@@ -127,7 +127,7 @@ for i in range(start_frame+1, end_frame, 1):
                         temp[3] += sin(2*pi*k/ly);
             avg_x = lx * ( atan2(-temp[1]/voids_area, -temp[0]/voids_area) + pi ) / (2*pi); 
             avg_y = ly * ( atan2(-temp[3]/voids_area, -temp[2]/voids_area) + pi ) / (2*pi);
-            print(avg_x, avg_y)
+            #print(avg_x, avg_y, i)
             
             available_window = time_window
             if i - 1 < time_window:
@@ -170,10 +170,10 @@ for i in range(start_frame+1, end_frame, 1):
                 y1 = rescale_array(x1, time_window)
                 max_iso_stress_tau[:] += y1[:] / max(save_max_stress_lattice)
                 y2 = rescale_array(x2, time_window)
-                avg_iso_stress_tau[:] += y2[:] / y1[:]
+                avg_iso_stress_tau[:] += y2[:] #/ y1[:]
             else:
                 max_iso_stress_tau[:] += x1[:] / max(save_max_stress_lattice)
-                avg_iso_stress_tau[:] += x2[:] / x1[:]
+                avg_iso_stress_tau[:] += x2[:] #/ x1[:]
 
             #max_iso_stress_tau[:] += max_save_tau[:] / max(save_max_stress_lattice)
             #avg_iso_stress_tau[:] += avg_save_tau[:] / max_save_tau[:]
@@ -275,8 +275,9 @@ if hole_stats > 0:
 if variable==1:
     #for i in range(len(time)):
         #print(time[i], avg_stress[i], variance_stress[i], avg_stress_var[i])
-    #print("Final:", hole_stats, time_window, avg_iso_stress_tau, max_iso_stress_tau)
+    print("Final:", hole_stats, time_window, avg_iso_stress_tau, max_iso_stress_tau)
 
+    '''
     with open('voids_stress_time.txt', 'w') as f:
         for i in range(len(avg_stress)):
             print(i, void_area[i], avg_stress[i], max_stress[i], positive_iso[i], file=f)
@@ -284,6 +285,7 @@ if variable==1:
     with open('voids_stress_histogram_tau10.txt', 'w') as f:
         for i in range(len(avg_iso_stress_tau)):
             print(i, avg_iso_stress_tau[i], max_iso_stress_tau[i], file=f)
+    '''
 
 
 if variable==2:

@@ -80,6 +80,7 @@ for line in cfile:
 
     
     vorticity=[[0 for q in range(lx)] for k in range(ly)]
+    strain=[[0 for q in range(lx)] for k in range(ly)]
     for i in range(0, lx*ly):
         y1 = int(i/lx)
         x1 = i - y1 * lx
@@ -101,15 +102,22 @@ for line in cfile:
         dvydx = (Z_y[y1][xnext] - Z_y[y1][xprev])/2
         dvxdy = (Z_x[ynext][x1] - Z_x[yprev][x1])/2
         vorticity[y1][x1] = dvydx - dvxdy
+
+        dvxdx = (Z_x[y1][xnext] - Z_x[y1][xprev])/2
+        dvydy = (Z_y[ynext][x1] - Z_y[yprev][x1])/2
+        strain[y1][x1] = 0.5 * (dvxdx + dvydy)
+
         
     #z_min, z_max = -np.abs(Z).max(), np.abs(Z).max()
-    z_min, z_max = -np.abs(vorticity).max(), np.abs(vorticity).max()
+    #z_min, z_max = -np.abs(vorticity).max(), np.abs(vorticity).max()
     #z_min, z_max = 0., np.abs(Z).max()
+    z_min, z_max = -np.abs(strain).max(), np.abs(strain).max()
     X, Y = np.meshgrid(x, y)
     #cset1 = plt.imshow(Z, cmap='hot', interpolation='nearest')
     #cset1 = plt.pcolormesh(X, Y, vorticity, cmap='RdBu', vmin=z_min, vmax=z_max)
-    cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
+    #cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
     #cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=-1, vmax=1)
+    cset1 = plt.imshow(strain, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
 
 
 ax = plt.gca()

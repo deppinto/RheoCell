@@ -11,7 +11,7 @@ from itertools import combinations
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 
 if len(sys.argv)!=7:
@@ -128,7 +128,7 @@ number_holes = 0
 time_window = 10
 hole_stats = 0.
 
-maximum_defect_number = 10
+maximum_defect_number = 40
 total_frames = end_frame - start_frame
 number_defects_plusone = np.zeros(total_frames)
 defect_plusone_x = np.zeros(total_frames * maximum_defect_number)
@@ -213,6 +213,11 @@ for i in range(start_frame+1, end_frame+1, 1):
                 avg_distance_tau[q] = min_value
 
             small_array = avg_distance_tau[0:available_window]
+            if available_window == 1:
+                small_array = avg_distance_tau[0:available_window+1]
+                small_array[1] = small_array[0]
+                #print(small_array)
+
             if i - 2 < time_window:
                 new_array = rescale_array(small_array, time_window)
                 avg_distance[:] += new_array[:]
@@ -278,8 +283,30 @@ for i in range(start_frame+1, end_frame+1, 1):
     vecfield_nx = Z_x
     vecfield_ny = Z_y
     winding_number = [[0. for q in range(0, LLX)] for p in range(0, LLY)]
+    strain=[[0. for q in range(lx)] for k in range(ly)]
     for p in range(0, LLY):
         for q in range(0, LLX):
+            y1 = p
+            x1 = q
+
+            xnext = (x1 + 1)
+            xprev = (x1 - 1) 
+            ynext = (y1 + 1) 
+            yprev = (y1 - 1)
+
+            if xnext>=lx:
+                xnext-=lx
+            if xprev<0:
+                xprev+=lx
+            if ynext>=lx:
+                ynext-=ly
+            if yprev<0:
+                yprev+=ly
+
+            dvxdx = (vecfield_nx[y1][xnext] - vecfield_nx[y1][xprev])/2
+            dvydy = (vecfield_ny[ynext][x1] - vecfield_ny[yprev][x1])/2
+            strain[y1][x1] = 0.5 * (dvxdx + dvydy)
+
             ax1 = [vecfield_nx[p][(q+1) % LLX], vecfield_ny[p][(q+1) % LLX]]
             ax2 = [vecfield_nx[p][(q-1+LLX) % LLX], vecfield_ny[p][(q-1+LLX) % LLX]]
             ax3 = [vecfield_nx[(p+1) % LLY][q], vecfield_ny[(p+1) % LLY][q]]
@@ -311,14 +338,44 @@ for i in range(start_frame+1, end_frame+1, 1):
                 x,y = sum_x/n,sum_y/n
                 # add defect to list
                 if s==1:
+                    if number_defects_plusone[i - 1] >= maximum_defect_number:
+                        print("Too many defects", i)
                     defect_plusone_x[int(number_defects_plusone[i - 1]) + (i-1) * maximum_defect_number] = x
                     defect_plusone_y[int(number_defects_plusone[i - 1]) + (i-1) * maximum_defect_number] = y
                     number_defects_plusone[i - 1] += 1
-                #elif s==-1:
-                    #cset1 = plt.plot(x, y, 'kX', markersize=10)
+
+                    if start_hole_time<0:
+                        avg_x = x
+                        avg_y = y
+                        avg_strain = 0.
+                        for k in range(0, 2 * radius_stress):
+                            yy = int(avg_y - radius_stress + k)
+                            if yy < 0:
+                                yy += ly
+                            if yy >= ly:
+                                yy -= ly
+
+                            for l in range(0, 2 * radius_stress):
+                                xx = int(avg_x - radius_stress + l)
+                                if xx < 0:
+                                    xx += lx
+                                if xx >= lx:
+                                    xx -= lx
+
+                                distx = xx - avg_x
+                                if distx <= -lx/2:
+                                    distx += lx
+                                disty = yy - avg_y
+                                if disty <= -ly/2:
+                                    disty += ly
+
+                                if distx * distx + disty * disty < radius_stress * radius_stress:
+                                    avg_strain += strain[yy][xx] / (pi * radius_stress * radius_stress)
+                        print(avg_strain, voids_area, i)
+
 
 if hole_stats > 0:
-    avg_distance[:] = avg_distance[:] / (hole_stats)
+    avg_distance[:] = avg_distance[:] / hole_stats
 
 
 max_FTLE = 0.
@@ -444,7 +501,10 @@ if variable==1:
     #print("final:", hole_stats, time_window, avg_distance, avg_FTLE_area/FTLE_area_counts, max_FTLE/hole_stats)
 
     with open('voids_velocity_stats.txt', 'w') as f:
-        print(hole_stats, time_window, avg_FTLE_area/FTLE_area_counts, max_FTLE/hole_stats, file=f)
+        if hole_stats>0:
+            print(hole_stats, time_window, avg_FTLE_area/FTLE_area_counts, max_FTLE/hole_stats, file=f)
+        else:
+            print(hole_stats, time_window, 0, 0, file=f)
 
     with open('voids_velocity_histogram_tau10.txt', 'w') as f:
         for i in range(len(avg_distance)):

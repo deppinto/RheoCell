@@ -72,8 +72,8 @@ for line in cfile:
         Z_x[int(yy)][int(xx)]=value_x
         Z_y[int(yy)][int(xx)]=value_y
 
-        if int(xx)%2==0 and int(yy)%2==0:
-            cset1 = plt.arrow(xx, yy, 20*value_x, 20*value_y, width=0.075, color='k')
+        if int(xx)%4==0 and int(yy)%4==0:
+            cset1 = plt.arrow(xx, yy, 40*value_x, 40*value_y, width=0.25, color='k')
     read_line+=1
 
 
