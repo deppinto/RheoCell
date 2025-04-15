@@ -538,6 +538,11 @@ if variable==1:
         for i in range(len(histogram_hole_area)):
             print(i * 1./histogram_size, histogram_hole_area[i], histogram_hole_circularity[i], histogram_hole_radius_speed_time[i], histogram_hole_ani[i], file=f)
 
+
+    with open('voids_area_time.txt', 'w') as f:
+        for i in range(len(vv)):
+            print(i, vv[i] * area0, file=f)
+
     '''
     with open('voids_histogram_area.txt', 'w') as f:
         for i in range(len(histogram_hole_area)):

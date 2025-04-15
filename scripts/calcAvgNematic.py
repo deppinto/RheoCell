@@ -276,13 +276,14 @@ for line in cfile:
         CoMX[pt_num]=float(words[2])
         CoMY[pt_num]=float(words[3])
 
+        '''
         CoMX[pt_num] += 65
         CoMY[pt_num] += 70
         if CoMY[pt_num] >= ly:
             CoMY[pt_num] -= ly
         if CoMX[pt_num] >= lx:
             CoMX[pt_num] -= lx
-
+        '''
 
         offsetX[pt_num]=int(float(words[4]))
         offsetY[pt_num]=int(float(words[5]))
@@ -303,12 +304,14 @@ for line in cfile:
             yy=int(site/lx)
             xx=site-int(yy*lx)
 
+            '''
             xx = xx + 65
             yy = yy + 70
             if yy >= ly:
                 yy -= ly
             if xx >= lx:
                 xx -= lx
+            '''
 
             Z[yy][xx]=value
             area[pt_num]+=value*value
@@ -555,7 +558,7 @@ for line in cfile:
                             #print("Defect topology: ", q, p, winding_number[p][q])
 
             frame_num=int(t/print_conf_interval)-1
-            print(frame_num)
+            #print(frame_num)
             #if frame_num%1==0:
                 #print(frame_num, cont_line, t)
             #if cont_line>N+2:

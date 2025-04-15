@@ -20,6 +20,7 @@ protected:
 	number mu;
 	//int R;
 	number kappa;
+	number omega;
 	number a0;
 
 	/**

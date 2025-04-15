@@ -96,7 +96,6 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 
 	int N = fields.size();
 	number totalNodes=box->getXsize()*box->getYsize();
-	number total_area_cell_radius = R * R * N;
 	rcut= sqrt( (totalNodes/N)/PI );
 	rcut=(double)R-1;
 	sqr_rcut = SQR(rcut);
@@ -107,16 +106,9 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 		bool inserted = false;
 		do {
 			p->CoM = std::vector<number> {drand48() * box->getXsize(), drand48() * box->getYsize()};
-			//if(i==0)p->CoM = std::vector<number> {50, 3};
-			//if(i==1)p->CoM = std::vector<number> {75, 53};
-
 			p->set_positions_initial(box);
 
 			inserted = true;
-			
-			if(box->sqr_min_image_distance(p->CoM, std::vector<number> {(double)box->getXsize()/2., (double)box->getYsize()/2.}) > total_area_cell_radius)inserted = false;
-
-
 			for(int n = 0; n < i; n++) {
 				BaseField *q = fields[n];
 				// particles with an index larger than p->index have not been inserted yet
@@ -142,7 +134,35 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 				inserted = false;
 			}
 
+		} while(!inserted);
 
+		if(i > 0 && N > 5 && i % (N / 4) == 0) printf("Inserted %d%% of the particles (%d/%d)\n", i*100/N, i, N);
+	}
+	printf("Inserted %d%% of the particles (%d/%d)\n", 100, N, N);
+}
+
+
+void BaseInteraction::generate_lattice_configuration(std::vector<BaseField *> &fields) {
+
+	int N = fields.size();
+	//number totalNodes = box->getXsize() * box->getYsize();
+	int lattice_const = 12;
+	int n_rows = 10;
+	int n_columns = 10;
+	number start_x = box->getXsize()/2 - (n_rows/2) * lattice_const;
+	number start_y = box->getYsize()/2 + (n_columns/2) * lattice_const;
+	int lattice_row = 0;
+	int lattice_column = 0;
+	for(int i = 0; i < N; i++) {
+		BaseField *p = fields[i];
+
+		bool inserted = false;
+		do {
+			if(lattice_row % 2 == 0)p->CoM = std::vector<number> {start_x + lattice_column * lattice_const, start_y - (lattice_row%2) * lattice_const};
+			else p->CoM = std::vector<number> {start_x + lattice_column * lattice_const + lattice_const/2, start_y - int(lattice_row/2) * lattice_const};
+			p->set_positions_initial(box);
+
+			inserted = true;
 		} while(!inserted);
 
 		if(i > 0 && N > 5 && i % (N / 4) == 0) printf("Inserted %d%% of the particles (%d/%d)\n", i*100/N, i, N);

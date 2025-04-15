@@ -36,6 +36,7 @@ class BaseBox {
 		virtual number getLaplacianWalls(int k){return 0;};
 		virtual number get_shear_displacement(){return 0;};
 		virtual void setNeighborsPeriodic(int Lx, int Ly);
+		virtual void UpdateWalls(bool wallflag){};
 		std::vector<int> neighbors;
 		std::vector<int> neighbors_next;
 		std::vector<number> weight_site;

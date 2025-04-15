@@ -6,7 +6,8 @@ SimpleMultiField::SimpleMultiField() :
 				gamma(0.01),
 				lambda(2.5),
 				mu(3.),
-				kappa(0.1) {
+				kappa(0.1),
+				omega(0.) {
 	a0=PI*R*R;
 }
 
@@ -22,6 +23,7 @@ void SimpleMultiField::get_settings(input_file &inp) {
 	getInputNumber(&inp, "gamma", &gamma, 0);
 	getInputNumber(&inp, "mu", &mu, 0);
 	getInputNumber(&inp, "kappa", &kappa, 0);
+	getInputNumber(&inp, "omega", &omega, 0);
 }
 
 
@@ -76,6 +78,7 @@ void SimpleMultiField::computeGlobalSums(BaseField *p, int q, bool update_global
 
 void SimpleMultiField::begin_energy_computation(std::vector<BaseField *> &fields) {
 
+	box->UpdateWalls(false);
 	for(auto p : fields) {
 		for(int q=0; q<p->subSize;q++)
 			computeGlobalSums(p, q, false);
@@ -93,14 +96,12 @@ void SimpleMultiField::begin_energy_computation(std::vector<BaseField *> &fields
 
 number SimpleMultiField::f_interaction(BaseField *p, int q) {
 
-	number V;
-	//int Lx=p->LsubX;
-        //int Ly=p->LsubY;
-	number a = p->area;	
-	int  k  = p->GetSubIndex(q, box);
-	//std::vector<int> s = p->neighbors_sub;
-	//std::vector<number> f = p->fieldScalar;
-	number phi  = p->fieldScalar[q];
+	//int  k  = p->GetSubIndex(q, box);
+	int k = p->map_sub_to_box[q];
+        number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
+        number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+        p->fieldDX[q] = dx;
+        p->fieldDY[q] = dy;
 	number xleft, xright, ybottom, ytop;
 
 	//The part commented below serves for when the sublattice has dirichlet boundary conditions (e.g. zero at the boundaries)
@@ -126,21 +127,27 @@ number SimpleMultiField::f_interaction(BaseField *p, int q) {
 	ytop=p->fieldScalar[p->neighbors_sub[1+q*9]];
 
 	number laplacianPhi = xright + ybottom + xleft + ytop - 4.*p->fieldScalar[q];
-
-	// delta F / delta phi_i
-	V = (
+	number laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[7+k*9]] + phi2[box->neighbors[3+k*9]] +  phi2[box->neighbors[1+k*9]] - 4.*phi2[k];
 
 	// CH term coupled to chemical
-	+ gamma*(8*phi*(1-phi)*(1-2*phi)/lambda - 2*lambda*laplacianPhi)
+	number CH =+ gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*laplacianPhi);
    
 	// area conservation term
-	- 4*mu/a0*(1-a/a0)*phi
+	number A = - 4*mu/a0*(1-p->area/a0)*p->fieldScalar[q];
 
 	// repulsion term
-	+ 4*kappa/lambda*phi*(phi2[k]-phi*phi)
-	);
+	number Rep = + 4*kappa/lambda*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
 
-	p->freeEnergy[q] = V;
+	// adhesion term
+	number lsquare = 2 * p->fieldScalar[q] * laplacianPhi + 2 * (dx *dx + dy * dy);
+	number suppress = (laplacianSquare-lsquare)/sqrt(1+(laplacianSquare-lsquare)*(laplacianSquare-lsquare));
+	number Adh = - 4*lambda*omega*suppress*p->fieldScalar[q];
+
+	// delta F / delta phi_i
+	number V = CH + A + Rep + Adh;
+	p->freeEnergy[q] += V;
+	p->Pressure[q] = Rep - CH - A;
+
 	return V;
 }
 

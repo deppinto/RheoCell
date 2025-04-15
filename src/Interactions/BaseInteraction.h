@@ -141,6 +141,7 @@ public:
 	 * @param N
 	 */
 	virtual void generate_random_configuration(std::vector<BaseField *> &fields);
+	virtual void generate_lattice_configuration(std::vector<BaseField *> &fields);
 
 
 	/**

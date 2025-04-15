@@ -4,6 +4,7 @@ from math import *
 import matplotlib.pyplot as plt
 import os.path
 import matplotlib.cm as cm
+from scipy.stats import linregress
 
 
 if len(sys.argv)!=5:
@@ -156,6 +157,32 @@ for traj in range(start, end):
     survival_probability_hist = np.zeros(int(1. / sp_bins))
     #survival_probability_counts = np.zeros(int(1. / sp_bins))
 
+    strain_bins = 10
+    strain_min = 0.
+    strain_max = 0.004
+    strain_delta = strain_max - strain_min
+    delta_bin = strain_delta / strain_bins
+    x_st = [(i * delta_bin + strain_min + delta_bin/2) for i in range(strain_bins)]
+    strain_hist = np.zeros(strain_bins)
+    strain_count = np.zeros(strain_bins)
+
+
+    strain_bins_20 = 20
+    x_st_20 = np.zeros(strain_bins_20)
+    strain_hist_20 = np.zeros(strain_bins_20)
+    strain_count_20 = np.zeros(strain_bins_20)
+
+    strain_bins_30 = 30
+    x_st_30 = np.zeros(strain_bins_30)
+    strain_hist_30 = np.zeros(strain_bins_30)
+    strain_count_30 = np.zeros(strain_bins_30)
+
+    strain_bins_40 = 40
+    x_st_40 = np.zeros(strain_bins_40)
+    strain_hist_40 = np.zeros(strain_bins_40)
+    strain_count_40 = np.zeros(strain_bins_40)
+
+
     count_jobs = 0
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
 
@@ -228,7 +255,6 @@ for traj in range(start, end):
         fileoutput.close()
         '''
 
-        '''
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_radius_speed.txt","r")
         for line in fileoutput:
             save=line.split()
@@ -253,7 +279,77 @@ for traj in range(start, end):
             save=line.split()
             avg_FTLE[traj - start] += float(save[2]) / jobs[traj]
         fileoutput.close()
-        '''
+
+
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_histogram_20bins.txt","r")
+        cont_line = 0
+        for line in fileoutput:
+            save=line.split()
+            x_st_20[cont_line] = float(save[0])
+            strain_hist_20[cont_line] += float(save[1])
+            strain_count_20[cont_line] += float(save[2])
+            cont_line+=1
+        fileoutput.close()
+
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_histogram_30bins.txt","r")
+        cont_line = 0
+        for line in fileoutput:
+            save=line.split()
+            x_st_30[cont_line] = float(save[0])
+            strain_hist_30[cont_line] += float(save[1])
+            strain_count_30[cont_line] += float(save[2])
+            cont_line+=1
+        fileoutput.close()
+
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_histogram_40bins.txt","r")
+        cont_line = 0
+        for line in fileoutput:
+            save=line.split()
+            x_st_40[cont_line] = float(save[0])
+            strain_hist_40[cont_line] += float(save[1])
+            strain_count_40[cont_line] += float(save[2])
+            cont_line+=1
+        fileoutput.close()
+
+
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_defectsplusone.txt","r")
+        old_t = 0
+        stmax = 0.
+        old_index = 0
+        nh = 0
+        for line in fileoutput:
+            save=line.split()
+            if int(float(save[2])) > old_t + 3 and old_t > 0:
+                if old_index >= strain_bins:
+                    old_index = strain_bins - 1
+                #strain_hist[old_index] += 1.
+                strain_hist[old_index:strain_bins] += 1
+                nh += 1
+            '''
+            elif int(float(save[2])) == old_t + 1 and float(save[1])>0:
+                if old_index >= strain_bins:
+                    old_index = strain_bins - 1
+                #strain_hist[old_index] += 1.
+                strain_hist[old_index:strain_bins] += 1
+            '''
+
+            if float(save[0])>strain_min:
+                index = (float(save[0]) - strain_min)/delta_bin
+                if index >= strain_bins:
+                    index = strain_bins - 1
+                strain_count[int(index)] += 1.
+                if int(float(save[2])) > old_t:
+                    stmax = 0.
+                if float(save[0]) > stmax:
+                    old_index = int(index)
+                    stmax = float(save[0])
+            old_t = int(float(save[2]))
+        fileoutput.close()
+        if old_t < 100:
+            #strain_hist[old_index] += 1
+            strain_hist[old_index:strain_bins] += 1
+            nh += 1
+        #print(nn, nh)
 
 
     if count_jobs > 0:
@@ -268,6 +364,21 @@ for traj in range(start, end):
 
         avg_distance_velocity_defects[:] = avg_distance_velocity_defects[:] / count_jobs
 
+        '''
+        for q in range(len(strain_count_20)):
+            if strain_count_20[q]>0:
+                strain_hist_20[q] = strain_hist_20[q] / strain_count_20[q]
+
+        for q in range(len(strain_count_30)):
+            if strain_count_30[q]>0:
+                strain_hist_30[q] = strain_hist_30[q] / strain_count_30[q]
+
+        for q in range(len(strain_count_40)):
+            if strain_count_40[q]>0:
+                strain_hist_40[q] = strain_hist_40[q] / strain_count_40[q]
+        '''
+
+
     if variable == 1:
         if total_hist_counts>0:
             lifetime_hist[:] = lifetime_hist[:] / total_hist_counts
@@ -279,7 +390,30 @@ for traj in range(start, end):
         ax[0,0].plot(area_histogram, '-o')
         ax[0,1].plot(circularity_histogram, '-s')
         ax[1,0].plot(radius_speed_histogram, '-^')
-        ax[1,1].plot(rspeed_histogram, '-v')
+
+        #ax[1,1].plot(rspeed_histogram, '-v')
+
+        '''
+        for q in range(len(strain_hist)):
+            #if strain_count[q] > 0:
+                #strain_hist[q] /= strain_count[q]
+            if total_hist_counts>0:
+                strain_hist[q] /= total_hist_counts
+            if 1 - strain_hist[q] > 0:
+                strain_hist[q] = 1 - strain_hist[q]
+            else:
+                strain_hist[q] = 0
+            strain_hist[q] = 1 - strain_hist[q]
+        ax[1,1].plot(x_st, strain_hist, '-v')
+        '''
+
+        xx = x_st_40[0:]
+        yy = strain_hist_20[0:]
+        #for q in range(len(yy)):
+            #if yy[q] > 0:
+                #yy[q] = -log(yy[q])
+        ax[1,1].plot(xx, yy, '-v')
+
         ax[1,2].plot(ani_histogram, '-D', label=nemself[traj])
 
     if variable == 3:
@@ -290,6 +424,47 @@ for traj in range(start, end):
         ax[0,1].plot(max_stress_histogram, '-s')
         ax[1,0].plot(avg_distance_velocity_defects, '-^', label=nemself[traj])
         ax[1,2].plot(x_sp, survival_probability_hist, '-o')
+
+        xx = x_st_40[0:]
+        #yy = 1 - strain_hist_20[0:]
+
+        yy = np.zeros(strain_bins_40)
+        Ntotal = sum(strain_hist_40[:])
+        final_bin = -1
+        if Ntotal > 0:
+            for q in range(strain_bins_40):
+                yy[q] = (Ntotal - sum(strain_hist_40[0:q])) / Ntotal
+                if yy[q] < 0.065 and final_bin == -1:
+                    final_bin = q
+
+        
+        if final_bin > -2:
+            S_sigma = yy[1:final_bin]
+            S_sigma[S_sigma <= 1e-10] = 1e-10
+            lnlnS = np.log(-np.log(S_sigma))
+            lnsigma = xx[1:final_bin]
+            lnsigma = np.log(lnsigma)
+            mask = ~np.isnan(lnlnS)
+            #print(lnsigma[mask], lnlnS[mask])
+            slope, intercept, _, _, _ = linregress(lnsigma[mask], lnlnS[mask])
+            m = slope
+            sigma_0 = np.exp(-intercept / slope) 
+            print(f"Weibull shape (m): {m:.2f}")
+            print(f"Weibull scale (σ₀): {sigma_0:.5f}")
+
+            #for q in range(len(yy)):
+                #if yy[q] > 0:
+                    #yy[q] = -log(yy[q])
+
+            #ax[1,1].plot(xx, yy, '-v')
+            ax[1,1].plot(lnsigma, lnlnS, '-v')
+
+            line_plot = []
+            if traj == end - 1:
+                for q in range(len(lnsigma)):
+                    line_plot.append(m * lnsigma[q] + intercept - 1)
+                ax[1,1].plot(lnsigma, line_plot, '-')
+
 
 '''
 PD_Activity = []
@@ -318,13 +493,18 @@ if variable == 2:
     ax[0,0].set_ylabel('Area')
     ax[0,1].set_ylabel('Circularity')
     ax[1,0].set_ylabel('Radius speed')
-    ax[1,1].set_ylabel('Radius speed')
+    #ax[1,1].set_ylabel('Radius speed')
+    ax[1,1].set_ylabel(r'F($\varepsilon$)')
     ax[1,2].set_ylabel('Anisotropy ratio')
     ax[0,0].set_xlabel('Time')
     ax[0,1].set_xlabel('Time')
     ax[1,0].set_xlabel('Time')
-    ax[1,1].set_xlabel('Radius')
+    #ax[1,1].set_xlabel('Radius')
+    ax[1,1].set_xlabel(r'$\varepsilon$')
     ax[1,2].set_xlabel('Time')
+
+    ax[1,1].set_yscale('log')
+    #ax[1,1].set_xscale('log')
 
     fig_histograms.delaxes(ax[0,2])
     fig_histograms.legend(loc=(0.7, 0.6), ncols=2, frameon=False)
@@ -345,7 +525,7 @@ if variable==1:
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox='false', ncol=5)
     #fig.legend(loc=7)
     ax[0,0].plot(nemself[0:5], lifetime_holes[0:5], '--p')
-    #ax[0,0].plot(nemself[5:10], lifetime_holes[5:10], '--p')
+    ax[0,0].plot(nemself[5:10], lifetime_holes[5:10], '--p')
     #ax[0,0].plot(nemself[10:15], lifetime_holes[10:15], '--p')
     #ax[0,0].plot(lx[5:8], lifetime_holes[0:3], '--p')
     #ax[0,0].plot(mu[0:4], lifetime_holes[0:4], '--p')
@@ -359,7 +539,7 @@ if variable==1:
     #ax[0,0].plot(F[10:15], lifetime_holes[10:15], '--p')
 
     ax[0,1].plot(nemself[0:5], max_area_holes[0:5], '--v')
-    #ax[0,1].plot(nemself[5:10], max_area_holes[5:10], '--v')
+    ax[0,1].plot(nemself[5:10], max_area_holes[5:10], '--v')
     #ax[0,1].plot(nemself[10:15], max_area_holes[10:15], '--v')
     #ax[0,1].plot(lx[5:8], max_area_holes[0:3], '--v')
     #ax[0,1].plot(omega[0:6], max_area_holes[0:6], '--v')
@@ -373,7 +553,7 @@ if variable==1:
     #ax[0,1].set_xscale('log')
 
     ax[0,2].plot(nemself[0:5], n_holes[0:5], '--^')
-    #ax[0,2].plot(nemself[5:10], n_holes[5:10], '--^')
+    ax[0,2].plot(nemself[5:10], n_holes[5:10], '--^')
     #ax[0,2].plot(nemself[10:15], n_holes[10:15], '--^')
     #ax[0,2].plot(lx[5:8], n_holes[0:3], '--^')
     #ax[0,2].plot(omega[0:6], n_holes[0:6], '--^')
@@ -408,19 +588,23 @@ if variable == 3:
     ax[0,1].set_xlabel('Time')
     ax[1,0].set_ylabel('+1 defect distance')
     ax[1,0].set_xlabel('Time')
-    ax[1,1].set_ylabel('Average FTLE')
-    ax[1,1].set_xlabel(r'$\zeta$')
+    #ax[1,1].set_ylabel('Average FTLE')
+    #ax[1,1].set_xlabel(r'$\zeta$')
     ax[1,2].set_ylabel('Survival probability')
     ax[1,2].set_xlabel('Time')
+    ax[1,1].set_ylabel(r'S($\varepsilon$)')
+    ax[1,1].set_xlabel(r'$\varepsilon$')
 
     #ax[1,2].set_yscale('log')
     #ax[1,2].set_xscale('log')
 
+    #ax[1,1].set_yscale('log')
+    #ax[1,1].set_xscale('log')
 
     #ax[1,1].plot(nemself[0:5], avg_FTLE[0:5], '--p')
     #ax[1,1].plot(nemself[5:10], avg_FTLE[5:10], '--p')
     #ax[1,1].plot(nemself[10:15], avg_FTLE[10:15], '--p')
-    ax[1,1].plot(lx[5:8], avg_FTLE[0:3], '--p')
+    #ax[1,1].plot(lx[5:8], avg_FTLE[0:3], '--p')
     #ax[1,1].plot(fric, avg_FTLE, '--p')
     #ax[1,1].set_xscale('log')
     #ax[1,1].plot(omega[0:6], avg_FTLE[0:6], '--p')
@@ -456,7 +640,6 @@ if variable == 4:
     plt.show()
 
     
-
 #first figure-----------------------------------------------------------------------------------------------
 #fig1 = plt.figure(figsize=(5.452423529,4.089317647))
 #plt.plot(nemself[0:5], n_holes[0:5], '--o')
