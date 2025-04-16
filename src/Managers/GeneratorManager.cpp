@@ -122,6 +122,7 @@ void GeneratorManager::init() {
 
 void GeneratorManager::generate() {
 	interaction->generate_random_configuration(fields);
+	//interaction->generate_lattice_configuration(fields);
 
 	OX_LOG(Logger::LOG_INFO, "Generating random configuration of %d cells", N);
 

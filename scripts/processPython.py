@@ -155,7 +155,7 @@ for traj in range(start, end):
     sp_bins = 0.04
     x_sp = [i * sp_bins for i in range(int(1./sp_bins))]
     survival_probability_hist = np.zeros(int(1. / sp_bins))
-    #survival_probability_counts = np.zeros(int(1. / sp_bins))
+    survival_probability_counts = np.zeros(int(1. / sp_bins))
 
     strain_bins = 10
     strain_min = 0.
@@ -216,6 +216,7 @@ for traj in range(start, end):
                 sp = (float(save[6+i]) / (time[traj] * dt[traj])) / sp_bins
 
                 survival_probability_hist[0:int(sp)+1] += 1.
+                survival_probability_counts[int(sp)] += 1.
                 lifetime_hist[int(hlife)] += 1
                 max_area_hist[int(maxA)] += 1
                 total_hist_counts += 1
@@ -423,7 +424,41 @@ for traj in range(start, end):
         ax[0,0].plot(avg_stress_histogram, '-o')
         ax[0,1].plot(max_stress_histogram, '-s')
         ax[1,0].plot(avg_distance_velocity_defects, '-^', label=nemself[traj])
-        ax[1,2].plot(x_sp, survival_probability_hist, '-o')
+
+        xx = x_sp
+        yy = np.zeros(len(x_sp))
+        Ntotal = sum(survival_probability_counts[:])
+        final_bin = -1
+        if Ntotal > 0:
+            for q in range(len(x_sp)):
+                yy[q] = (Ntotal - sum(survival_probability_counts[0:q])) / Ntotal
+                if yy[q] < 0.065 and final_bin == -1:
+                    final_bin = q
+
+        '''
+        if final_bin > -2:
+            S_sigma = yy[1:final_bin]
+            S_sigma[S_sigma <= 1e-10] = 1e-10
+            lnlnS = np.log(-np.log(S_sigma))
+            lnsigma = xx[1:final_bin]
+            lnsigma = np.log(lnsigma)
+            mask = ~np.isnan(lnlnS)
+            #print(lnsigma[mask], lnlnS[mask])
+            slope, intercept, _, _, _ = linregress(lnsigma[mask], lnlnS[mask])
+            m = slope
+            sigma_0 = np.exp(-intercept / slope) 
+            print(f"First Weibull shape (m): {m:.2f}")
+            print(f"First Weibull scale (σ₀): {sigma_0:.5f}")
+
+            #for q in range(len(yy)):
+                #if yy[q] > 0:
+                    #yy[q] = -log(yy[q])
+
+            ax[1,2].plot(lnsigma, lnlnS, '-v')
+        '''
+        ax[1,2].plot(xx, yy, '-o')
+        #ax[1,2].plot(x_sp, survival_probability_hist, '-o')
+
 
         xx = x_st_40[0:]
         #yy = 1 - strain_hist_20[0:]
@@ -462,7 +497,7 @@ for traj in range(start, end):
             line_plot = []
             if traj == end - 1:
                 for q in range(len(lnsigma)):
-                    line_plot.append(m * lnsigma[q] + intercept - 1)
+                    line_plot.append(2 * lnsigma[q] + intercept - 3)
                 ax[1,1].plot(lnsigma, line_plot, '-')
 
 

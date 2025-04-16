@@ -7,7 +7,8 @@ SimpleMultiField::SimpleMultiField() :
 				lambda(2.5),
 				mu(3.),
 				kappa(0.1),
-				omega(0.) {
+				omega(0.),
+				strain_rate(0.) {
 	a0=PI*R*R;
 }
 
@@ -24,6 +25,7 @@ void SimpleMultiField::get_settings(input_file &inp) {
 	getInputNumber(&inp, "mu", &mu, 0);
 	getInputNumber(&inp, "kappa", &kappa, 0);
 	getInputNumber(&inp, "omega", &omega, 0);
+	getInputNumber(&inp, "lees_edwards_shear_rate", &strain_rate_active, 1);
 }
 
 
@@ -65,6 +67,10 @@ void SimpleMultiField::check_input_sanity(std::vector<BaseField *> &fields) {
 
 }
 
+void SimpleMultiField::apply_changes_after_equilibration(){
+	strain_rate = strain_rate_active;
+}
+
 void SimpleMultiField::resetSums(int k) {
 	phi2[k]=0;
 }
@@ -86,8 +92,16 @@ void SimpleMultiField::begin_energy_computation(std::vector<BaseField *> &fields
 
         U = (number) 0;
         for(auto p : fields) {
+		number velocity_value = 0.;
+		if(p->index % 10 == 0) velocity_value = -1.;
+		if((p->index + 1) % 10 == 0) velocity_value = 1.;
                 for(int q=0; q<p->subSize;q++) {
                         U += f_interaction(p, q);
+			if(velocity_value < -0.5 || velocity_value > 0.5){
+				int x = q - int(q/p->LsubX) * p->LsubX;			
+				if(velocity_value < -0.5 && x < p->LsubX/2.)p->velocityX[q] = -1. * strain_rate;
+				if(velocity_value > 0.5 && x > p->LsubX/2.)p->velocityX[q] = 1. * strain_rate;
+			}
                 }
         }
 

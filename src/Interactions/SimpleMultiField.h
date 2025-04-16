@@ -22,6 +22,8 @@ protected:
 	number kappa;
 	number omega;
 	number a0;
+	number strain_rate;
+	number strain_rate_active;
 
 	/**
 	 * @brief Patchy interaction between two particles.
@@ -53,6 +55,7 @@ public:
         void read_topology(std::vector<BaseField *> &fields) override;
 	void check_input_sanity(std::vector<BaseField *> &fields) override;
 	void get_settings(input_file &inp) override;
+	void apply_changes_after_equilibration() override;
 };
 
 #endif /* SIMPLEMULTIFIELD_H_ */
