@@ -176,3 +176,64 @@ void BaseInteraction::generate_lattice_configuration(std::vector<BaseField *> &f
 	}
 	printf("Inserted %d%% of the particles (%d/%d)\n", 100, N, N);
 }
+
+
+void BaseInteraction::generate_cluster_configuration(std::vector<BaseField *> &fields) {
+
+	for(auto p : fields) {
+		p->CoM = std::vector<number> {drand48() * box->getXsize(), drand48() * box->getYsize()};
+	}
+
+	int N = fields.size();
+	number totalNodes=box->getXsize()*box->getYsize();
+	number cluster_radius = R * R * N;
+	std::vector<number> reference_point = std::vector<number> {box->getXsize()/2., box->getYsize()/2.};
+	rcut= sqrt( (totalNodes/N)/PI );
+	rcut=(double)R-1;
+	sqr_rcut = SQR(rcut);
+	std::cout<<"This is rcut: " << rcut <<std::endl;
+	for(int i = 0; i < N; i++) {
+		BaseField *p = fields[i];
+
+		bool inserted = false;
+		do {
+			p->CoM = std::vector<number> {drand48() * box->getXsize(), drand48() * box->getYsize()};
+			p->set_positions_initial(box);
+
+			inserted = true;
+
+
+			if(box->sqr_min_image_distance(p->CoM, reference_point) > cluster_radius)inserted = false;
+
+
+			for(int n = 0; n < i; n++) {
+				BaseField *q = fields[n];
+				// particles with an index larger than p->index have not been inserted yet
+				if(generate_random_configuration_overlap(p, q)) inserted = false;
+			}
+
+			//we take into account the external potential
+			number ext_value=0.;
+			int start=int(p->CoM[0])+int(p->CoM[1])*box->getXsize();
+			int startX=box->getElementX(start, (int)rcut*(-1));
+			int startY=box->getElementY(start, (int)rcut*(-1));
+			start=startX+startY*box->getXsize();
+			for(int y=0; y<2*rcut; y++){
+				for(int x=0; x<2*rcut; x++){
+					int f = box->getElementX(start, x) + box->getElementY(start, y) * box->getXsize();
+					p->set_ext_potential(f, box->getWalls(f));	
+					ext_value += p->ext_potential;
+				}	
+			}
+
+			//std::cout<<"generator: "<<start<<" "<<ext_value<<std::endl;
+			if(std::isnan(ext_value) || ext_value > 20) {
+				inserted = false;
+			}
+
+		} while(!inserted);
+
+		if(i > 0 && N > 5 && i % (N / 4) == 0) printf("Inserted %d%% of the particles (%d/%d)\n", i*100/N, i, N);
+	}
+	printf("Inserted %d%% of the particles (%d/%d)\n", 100, N, N);
+}

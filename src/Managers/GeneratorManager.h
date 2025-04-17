@@ -14,6 +14,7 @@ protected:
 	input_file input;
 	char output_conf[256];
 	char trajectory[256];
+	std::string initial_configuration_type;
 
 	InteractionPtr interaction;
 

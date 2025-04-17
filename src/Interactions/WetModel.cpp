@@ -100,8 +100,8 @@ void WetModel::set_box(BaseBox *boxArg) {
 	sumQ00.resize(Lx*Ly);
 	sumQ01.resize(Lx*Ly);
 	sum_phi.resize(Lx*Ly);
-	grad_free_energy_x.resize(Lx*Ly);
-	grad_free_energy_y.resize(Lx*Ly);
+	//grad_free_energy_x.resize(Lx*Ly);
+	//grad_free_energy_y.resize(Lx*Ly);
 	size_store_site_velocity_index.resize(Lx*Ly);
 	store_site_velocity_index.resize(Lx*Ly*store_max_size);
 	store_site_field.resize(Lx*Ly*store_max_size);
@@ -113,8 +113,8 @@ void WetModel::resetSums(int k) {
         sumQ00[k]=0;
         sumQ01[k]=0;
         sum_phi[k]=0;
-	grad_free_energy_x[k]=0.;
-	grad_free_energy_y[k]=0.;
+	//grad_free_energy_x[k]=0.;
+	//grad_free_energy_y[k]=0.;
 }
 
 void WetModel::initFieldProperties(BaseField *p) {

@@ -409,7 +409,7 @@ for traj in range(start, end):
         '''
 
         xx = x_st_40[0:]
-        yy = strain_hist_20[0:]
+        yy = strain_hist_40[0:]
         #for q in range(len(yy)):
             #if yy[q] > 0:
                 #yy[q] = -log(yy[q])
@@ -473,6 +473,8 @@ for traj in range(start, end):
                     final_bin = q
 
         
+        #ax[1,1].plot(xx, yy, '-v')
+        #final_bin = -3
         if final_bin > -2:
             S_sigma = yy[1:final_bin]
             S_sigma[S_sigma <= 1e-10] = 1e-10

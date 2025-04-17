@@ -67,6 +67,7 @@ void FD_CPUBackend::first_step(bool store) {
                		// advection term
 	                - interaction->get_velocity_x(p,q) * p->fieldDX[q] - interaction->get_velocity_y(p,q) * p->fieldDY[q];
 
+
 			if(store) {
 				p->fieldScalar_old[q]=p->fieldScalar[q];
 				p->dfield_old[q]=dphi;

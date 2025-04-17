@@ -44,8 +44,8 @@ protected:
 
 	number F_total_x;
 	number F_total_y;
-	std::vector<number> grad_free_energy_x;
-	std::vector<number> grad_free_energy_y;
+	//std::vector<number> grad_free_energy_x;
+	//std::vector<number> grad_free_energy_y;
 
 	number f_interaction(BaseField *p, int q);
 	void calc_internal_forces(BaseField *p, int q);

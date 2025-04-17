@@ -62,6 +62,7 @@ void GeneratorManager::load_options() {
 
 	getInputString(&input, "trajectory_file", trajectory, 1);
 	getInputString(&input, "conf_file", output_conf, 1);
+	getInputString(&input, "initial_configuration_type", initial_configuration_type, 0);
 
 	// seed;
 	int seed;
@@ -121,8 +122,9 @@ void GeneratorManager::init() {
 }
 
 void GeneratorManager::generate() {
-	interaction->generate_random_configuration(fields);
-	//interaction->generate_lattice_configuration(fields);
+	if(initial_configuration_type.compare("lattice") == 0)interaction->generate_lattice_configuration(fields);
+	else if(initial_configuration_type.compare("cluster") == 0)interaction->generate_cluster_configuration(fields);
+	else interaction->generate_random_configuration(fields);
 
 	OX_LOG(Logger::LOG_INFO, "Generating random configuration of %d cells", N);
 
