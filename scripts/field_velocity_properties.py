@@ -68,7 +68,7 @@ for i in range(start_frame, end_frame, 1):
     read_line = 0
     for line in cfile:
 
-        if read_line==0:
+        if read_line==1:
             read_line+=1
             continue
 

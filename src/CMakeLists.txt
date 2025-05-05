@@ -19,6 +19,7 @@ SET(observables_SOURCES
 	Observables/ForceField.cpp
 	Observables/NematicField.cpp
 	Observables/StressField.cpp
+	Observables/ShapeField.cpp
 )
 
 SET(backends_SOURCES

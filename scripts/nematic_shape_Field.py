@@ -12,7 +12,7 @@ import matplotlib
 #matplotlib.use('Agg')
 
 if len(sys.argv)!=5:
-    print(sys.argv[0]," [topology file] [nematic file] [stress file] [1:save conf; 2:make plot]")
+    print(sys.argv[0]," [topology file] [nematic file] [shape file] [1:save conf; 2:make plot]")
     sys.exit(1)
 
 variable=int(float(sys.argv[4])) 
@@ -87,8 +87,8 @@ for line in cfile:
         Z_Q01[int(yy)][int(xx)]=Q01
 
         if int(xx)%4==0 and int(yy)%4==0:
-            cset1 = plt.arrow(xx, yy, 2*nx, 2*ny, width=0.25, color="k", head_width=0)
-            cset1 = plt.arrow(xx, yy, -2*nx, -2*ny, width=0.25, color="k", head_width=0)
+            cset1 = plt.arrow(xx, yy, 1*nx, 1*ny, width=0.1, color="k", head_width=0)
+            cset1 = plt.arrow(xx, yy, -1*nx, -1*ny, width=0.1, color="k", head_width=0)
     read_line+=1
 
 
@@ -198,10 +198,10 @@ for p in range(0,LLY):
                 den += dxQxx + s*dyQxy
             psi = s/(2.-s)*atan2(num, den)
             if s==1:
-                cset1 = plt.plot(x, y, 'go', markersize=10)
-                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='g', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.plot(x, y, 'ko', markersize=10)
+                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='k', head_width=1.5, head_length=1.5, width=0.5)
             elif s==-1:
-                cset1 = plt.plot(x, y, 'b^', markersize=10)
+                cset1 = plt.plot(x, y, 'k^', markersize=10)
 
 
         # keep this just in case our other symmetries give us integer defects
@@ -232,62 +232,143 @@ x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
 Z_xx=[[0 for q in range(lx)] for k in range(ly)]
 Z_yy=[[0 for q in range(lx)] for k in range(ly)]
-Z_xy=[[0 for q in range(lx)] for k in range(ly)]
-Z_iso=[[0 for q in range(lx)] for k in range(ly)]
+Z_S00=[[0 for q in range(lx)] for k in range(ly)]
+Z_S01=[[0 for q in range(lx)] for k in range(ly)]
+alignment=[[0 for q in range(lx)] for k in range(ly)]
 start_value=0
-
+read_line=0 
 for line in cfile:
+
+    if read_line==0:
+        read_line+=1
+        continue
+
     words=line.split()
     Z_xx=[[0 for q in range(lx)] for k in range(ly)]
     Z_yy=[[0 for q in range(lx)] for k in range(ly)]
-    Z_xy=[[0 for q in range(lx)] for k in range(ly)]
-    Z_iso=[[0 for q in range(lx)] for k in range(ly)]
-    for i in range(start_value,len(words),13):
+    Z_S00=[[0 for q in range(lx)] for k in range(ly)]
+    Z_S01=[[0 for q in range(lx)] for k in range(ly)]
+    for i in range(start_value,len(words),4):
         xx=float(words[i])
         yy=float(words[i+1])
 
-        value_field_xx=float(words[i+2])
-        value_field_yy=float(words[i+3])
-        value_field_xy=float(words[i+4])
-        value_pass_xx=float(words[i+5])
-        value_pass_yy=float(words[i+6])
-        value_pass_xy=float(words[i+7])
-        value_act_xx=float(words[i+8])
-        value_act_yy=float(words[i+9])
-        value_act_xy=float(words[i+10])
-        value_pre_xx=float(words[i+11])
-        value_pre_yy=float(words[i+12])
+        S00=float(words[i+2])
+        S01=float(words[i+3])
+        if S00 != 0 and S01 != 0:
+            S = sqrt(S00**2 + S01**2)
+            nx = sqrt(2*S) * sqrt((1 + S00/S)/2)
+            ny = sqrt(2*S) * np.sign(S01) * sqrt((1 - S00/S)/2)
+        else:
+            nx = 0.
+            ny = 0.
 
-        Z_xx[int(yy)][int(xx)] = value_field_xx
-        Z_yy[int(yy)][int(xx)] = value_field_yy
-        Z_xy[int(yy)][int(xx)] = value_field_xy
-        Z_iso[int(yy)][int(xx)] = (-1) * (Z_xx[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)]) / 2
-        #Z_iso[int(yy)][int(xx)] = Z_xy[int(yy)][int(xx)]
+        Z_xx[int(yy)][int(xx)]=nx
+        Z_yy[int(yy)][int(xx)]=ny
+        Z_S00[int(yy)][int(xx)]=S00
+        Z_S01[int(yy)][int(xx)]=S01
 
-    z_min, z_max = 0., np.abs(Z_iso).max()
-    cset1 = plt.imshow(Z_iso, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
+        dot_prod = Z_xx[int(yy)][int(xx)] * Z_x[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)] * Z_y[int(yy)][int(xx)]
+        norm1 = sqrt(Z_xx[int(yy)][int(xx)] * Z_xx[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)] * Z_yy[int(yy)][int(xx)])
+        norm2 = sqrt(Z_x[int(yy)][int(xx)] * Z_x[int(yy)][int(xx)] + Z_y[int(yy)][int(xx)] * Z_y[int(yy)][int(xx)])
+        ang1 = np.acos(dot_prod / (norm1 * norm2))
 
-
-'''
-div_stress = 0.
-total_stress = 0.
-for p in range(ly):
-    ynext = (p + 1) % ly
-    yprev = (p - 1 + ly) % ly
-    for q in range(lx):
-        total_stress += Z_iso[p][q]
-
-        xnext = (q + 1) % lx
-        xprev = (q - 1 + lx) % lx
-
-        dvxdx = (Z_iso[p][xnext] - Z_iso[p][xprev])/2
-        dvydy = (Z_iso[ynext][q] - Z_iso[yprev][q])/2
-
-        div_stress += dvxdx + dvydy
+        dot_prod = Z_xx[int(yy)][int(xx)] * (-1.) * Z_x[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)] * (-1.) * Z_y[int(yy)][int(xx)]
+        ang2 = np.acos(dot_prod / (norm1 * norm2))
 
 
-print("Stresses: ", total_stress, div_stress)
-'''
+        if abs(ang1) < abs(ang2):
+            alignment[int(yy)][int(xx)] = ang1
+            #if ang1 > pi/2 - 0.1 or ang1 < 0 + 0.15:
+                #alignment[int(yy)][int(xx)] = ang1
+            #else:
+                #alignment[int(yy)][int(xx)] = pi/4
+        else:
+            alignment[int(yy)][int(xx)] = ang2
+            #if ang2 > pi/2 - 0.1 or ang1< 0 + 0.15:
+                #alignment[int(yy)][int(xx)] = ang2
+            #else:
+                #alignment[int(yy)][int(xx)] = pi/4
+
+
+    z_min, z_max = 0., np.abs(alignment).max()
+    print(z_max)
+    cset1 = plt.imshow(alignment, cmap='RdBu', interpolation='nearest', vmin=0, vmax=z_max)
+    read_line+=1
+
+vecfield_nx = Z_xx
+vecfield_ny = Z_yy
+vecfield_Q00 = Z_S00
+vecfield_Q01 = Z_S01
+
+winding_number = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+for p in range(0, LLY):
+    for q in range(0, LLX):
+        ax1 = [vecfield_nx[p][(q+1) % LLX], vecfield_ny[p][(q+1) % LLX]]
+        ax2 = [vecfield_nx[p][(q-1+LLX) % LLX], vecfield_ny[p][(q-1+LLX) % LLX]]
+        ax3 = [vecfield_nx[(p+1) % LLY][q], vecfield_ny[(p+1) % LLY][q]]
+        ax4 = [vecfield_nx[(p-1+LLY) % LLY][q], vecfield_ny[(p-1+LLY) % LLY][q]]
+        ax5 = [vecfield_nx[(p-1+LLY) % LLY][(q+1) % LLX], vecfield_ny[(p-1+LLY) % LLY][(q+1) % LLX]]
+        ax6 = [vecfield_nx[(p-1+LLY) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p-1+LLY)%LLY][(q-1+LLX)%LLX]]
+        ax7 = [vecfield_nx[(p+1) % LLY][(q+1) % LLX], vecfield_ny[(p+1) % LLY][(q+1) % LLX]]
+        ax8 = [vecfield_nx[(p+1) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p+1) % LLY][(q-1+LLX) % LLX]]
+
+        winding_number[p][q] = wang(ax1, ax5)
+        winding_number[p][q] += wang(ax5, ax4)
+        winding_number[p][q] += wang(ax4, ax6)
+        winding_number[p][q] += wang(ax6, ax2)
+        winding_number[p][q] += wang(ax2, ax8)
+        winding_number[p][q] += wang(ax8, ax3)
+        winding_number[p][q] += wang(ax3, ax7)
+        winding_number[p][q] += wang(ax7, ax1)
+        winding_number[p][q] /= 2. * pi
+
+charge = 1.0/2.0
+thresh = 0.05
+for p in range(0,LLY):
+    for q in range(0,LLX):
+        # detect simplest charge 1/p defects
+        if  (abs(winding_number[p][q]) > charge - thresh) and (abs(winding_number[p][q]) < charge + thresh):
+            # charge sign
+            s = np.sign(winding_number[p][q])
+            # bfs
+            sum_x, sum_y, n = collapse(p, q, s, LLX, LLY, winding_number, rng = [charge - thresh, charge + thresh])
+            x,y = sum_x/n,sum_y/n
+            # compute angle, see doi:10.1039/c6sm01146b
+            num = 0
+            den = 0
+            for (dx, dy) in [(0, 0), (0, 1), (1, 1), (1, 0)]:
+                # coordinates of nodes around the defect
+                kk = (int(x) + LLX + dx) % LLX
+                ll = (int(y) + LLY + dy) % LLY
+                # derivative at these points
+                dxQxx = .5*(vecfield_Q00[ll][(kk+1) % LLX] - vecfield_Q00[ll][(kk-1+LLX) % LLX])
+                dxQxy = .5*(vecfield_Q01[ll][(kk+1) % LLX] - vecfield_Q01[ll][(kk-1+LLX) % LLX])
+                dyQxx = .5*(vecfield_Q00[(ll+1) % LLY][kk] - vecfield_Q00[(ll-1+LLY) % LLY][kk])
+                dyQxy = .5*(vecfield_Q01[(ll+1) % LLY][kk] - vecfield_Q01[(ll-1+LLY) % LLY][kk])
+                # accumulate numerator and denominator
+                num += s*dxQxy - dyQxx
+                den += dxQxx + s*dyQxy
+            psi = s/(2.-s)*atan2(num, den)
+            if s==1:
+                cset1 = plt.plot(x, y, 'ro', markersize=10)
+                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='r', head_width=1.5, head_length=1.5, width=0.5)
+            elif s==-1:
+                cset1 = plt.plot(x, y, 'r^', markersize=10)
+
+
+        # keep this just in case our other symmetries give us integer defects
+        elif (abs(winding_number[p][q]) > 1 - thresh) and (abs(winding_number[p][q])< 1 + thresh):
+            # charge sign
+            s = np.sign(winding_number[p][q])
+            # bfs
+            sum_x, sum_y, n = collapse(p, q, s, LLX, LLY, winding_number, rng = [1-thresh, 1+thresh])
+            x,y = sum_x/n,sum_y/n
+            # add defect to list
+            if s==1:
+                cset1 = plt.plot(x, y, 'r*', markersize=10)
+            elif s==-1:
+                cset1 = plt.plot(x, y, 'kX', markersize=10)
+
 
 
 ax = plt.gca()

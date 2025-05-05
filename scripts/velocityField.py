@@ -71,8 +71,8 @@ for line in cfile:
         Z_x[int(yy)][int(xx)]=value_x
         Z_y[int(yy)][int(xx)]=value_y
         Z[int(yy)][int(xx)]=sqrt(value_x*value_x+value_y*value_y)
-        if int(xx)%2==0 and int(yy)%2==0:
-            cset1 = plt.arrow(xx, yy, 10*value_x, 10*value_y, width=0.1, color='k')
+        if int(xx)%4==0 and int(yy)%4==0:
+            cset1 = plt.arrow(xx, yy, 100*value_x, 100*value_y, width=0.2, color='k')
             #cset1 = plt.arrow(xx, yy, 1000*value_x, 1000*value_y, width=0.2, color='k')
             #cset1 = plt.arrow(xx, yy, 75*value_x, 75*value_y, width=0.2, color='k')
 
@@ -102,6 +102,12 @@ for line in cfile:
         dvydx = (Z_y[y1][xnext] - Z_y[y1][xprev])/2
         dvxdy = (Z_x[ynext][x1] - Z_x[yprev][x1])/2
         vorticity[y1][x1] = dvydx - dvxdy
+
+        if vorticity[y1][x1] < 0 + 0.0001 and vorticity[y1][x1] > 0 - 0.0001:
+            vorticity[y1][x1] = 1
+        else:
+            vorticity[y1][x1] = 0
+
 
         dvxdx = (Z_x[y1][xnext] - Z_x[y1][xprev])/2
         dvydy = (Z_y[ynext][x1] - Z_y[yprev][x1])/2

@@ -73,7 +73,7 @@ for line in cfile:
         Z_y[int(yy)][int(xx)]=value_y
 
         if int(xx)%4==0 and int(yy)%4==0:
-            cset1 = plt.arrow(xx, yy, 40*value_x, 40*value_y, width=0.25, color='k')
+            cset1 = plt.arrow(xx, yy, 60*value_x, 60*value_y, width=0.5, color='k')
     read_line+=1
 
 
@@ -277,6 +277,10 @@ ax = plt.gca()
 ax.set_aspect('equal', adjustable='box')
 ax.set_xlim([0, lx])
 ax.set_ylim([0, ly])
+ax.set_yticklabels([])
+ax.set_xticklabels([])
+ax.set_xticks([])
+ax.set_yticks([])
 #fig.tight_layout()
 if variable==1:
     plt.savefig('frame.png')

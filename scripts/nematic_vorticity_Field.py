@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 if len(sys.argv)!=5:
     print(sys.argv[0]," [topology file] [nematic file] [velocity file] [1:save conf; 2:make plot]")
@@ -297,7 +297,7 @@ ax.set_xticks([])
 ax.set_yticks([])
 #fig.tight_layout()
 if variable==1:
-    #plt.savefig('frame.png')
-    plt.savefig('/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts70/defect_dynamics_9.svg')
+    plt.savefig('frame.png')
+    #plt.savefig('/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts70/defect_dynamics_9.svg')
 if variable==2:
     plt.show()

@@ -7,16 +7,16 @@ ITER=$((ITER+2))
 iii=$((START+ITER-1))
 CONT=1
 
-mkdir Analysis
-cp test.top Analysis
-cp input Analysis
-cp external.conf Analysis
-cd Analysis
+#mkdir Analysis
+#cp test.top Analysis
+#cp input Analysis
+#cp external.conf Analysis
+#cd Analysis
 mkdir Video
 
 cp '../equilibrated_conf.dat' 'start.conf'
 FILENAME='start.conf'
-/home/p/pinto/Phase_Field/RheoCell/build/bin/analyser input
+#/home/p/pinto/Phase_Field/RheoCell/build/bin/analyser input
 /home/p/pinto/PythonPackages/bin/python3 /home/p/pinto/Phase_Field/RheoCell/scripts/stressField.py "test.top" $FILENAME "1"
 mv "frame.png" Video/"frame_000.png" 
 

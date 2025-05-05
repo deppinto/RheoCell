@@ -16,6 +16,7 @@ start=int(float(sys.argv[2]))
 end=int(float(sys.argv[3]))
 variable=int(float(sys.argv[4]))
 
+
 '''
 #-------------------------------------optimization plot
 plt.figure(figsize=(5.452423529,4.089317647))
@@ -198,6 +199,12 @@ for traj in range(start, end):
             continue
         if job==50 and scripts==76:
             continue
+        if job==247 and scripts==85:
+            continue
+        if job==250 and scripts==85:
+            continue
+        if job==349 and scripts==85:
+            continue
 
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_stats.txt","r")
         nn = 0
@@ -326,13 +333,11 @@ for traj in range(start, end):
                 #strain_hist[old_index] += 1.
                 strain_hist[old_index:strain_bins] += 1
                 nh += 1
-            '''
-            elif int(float(save[2])) == old_t + 1 and float(save[1])>0:
-                if old_index >= strain_bins:
-                    old_index = strain_bins - 1
+            #elif int(float(save[2])) == old_t + 1 and float(save[1])>0:
+                #if old_index >= strain_bins:
+                    #old_index = strain_bins - 1
                 #strain_hist[old_index] += 1.
-                strain_hist[old_index:strain_bins] += 1
-            '''
+                #strain_hist[old_index:strain_bins] += 1
 
             if float(save[0])>strain_min:
                 index = (float(save[0]) - strain_min)/delta_bin
@@ -351,7 +356,6 @@ for traj in range(start, end):
             strain_hist[old_index:strain_bins] += 1
             nh += 1
         #print(nn, nh)
-
 
     if count_jobs > 0:
         area_histogram[:] = area_histogram[:] / count_jobs
@@ -388,9 +392,13 @@ for traj in range(start, end):
         ax[1,1].plot(x_a, max_area_hist, '-s', label=nemself[traj])
 
     if variable == 2:
-        ax[0,0].plot(area_histogram, '-o')
-        ax[0,1].plot(circularity_histogram, '-s')
-        ax[1,0].plot(radius_speed_histogram, '-^')
+        x_lt = []
+        for rr in range(len(area_histogram)):
+            x_lt.append(rr/len(area_histogram))
+
+        ax[0,0].plot(x_lt, area_histogram, '-o')
+        ax[0,1].plot(x_lt, circularity_histogram, '-s')
+        ax[1,0].plot(x_lt, radius_speed_histogram, '-^')
 
         #ax[1,1].plot(rspeed_histogram, '-v')
 
@@ -415,7 +423,16 @@ for traj in range(start, end):
                 #yy[q] = -log(yy[q])
         ax[1,1].plot(xx, yy, '-v')
 
-        ax[1,2].plot(ani_histogram, '-D', label=nemself[traj])
+        ax[1,2].plot(x_lt, ani_histogram, '-o', label=nemself[traj], color='firebrick')
+        ax2 = ax[1,2].twinx()
+        ax2.plot(x_lt, area_histogram, '--o', color='forestgreen')
+        ax2.set_ylabel('Normalized area')
+        ax[1,2].tick_params(axis='y', colors='firebrick')
+        ax2.tick_params(axis='y', colors='forestgreen')
+        ax[1,2].yaxis.label.set_color('firebrick')
+        ax2.yaxis.label.set_color('forestgreen')
+        ax2.spines['right'].set_color('forestgreen')
+        ax2.spines['left'].set_color('firebrick')
 
     if variable == 3:
         if total_hist_counts>0:
@@ -435,15 +452,16 @@ for traj in range(start, end):
                 if yy[q] < 0.065 and final_bin == -1:
                     final_bin = q
 
-        '''
+        ax[1,2].plot(xx, yy, '-o')
+        final_bin=-3
         if final_bin > -2:
             S_sigma = yy[1:final_bin]
             S_sigma[S_sigma <= 1e-10] = 1e-10
             lnlnS = np.log(-np.log(S_sigma))
+            #lnlnS = np.log(S_sigma)
             lnsigma = xx[1:final_bin]
             lnsigma = np.log(lnsigma)
             mask = ~np.isnan(lnlnS)
-            #print(lnsigma[mask], lnlnS[mask])
             slope, intercept, _, _, _ = linregress(lnsigma[mask], lnlnS[mask])
             m = slope
             sigma_0 = np.exp(-intercept / slope) 
@@ -455,8 +473,7 @@ for traj in range(start, end):
                     #yy[q] = -log(yy[q])
 
             ax[1,2].plot(lnsigma, lnlnS, '-v')
-        '''
-        ax[1,2].plot(xx, yy, '-o')
+        #ax[1,2].plot(xx, yy, '-o')
         #ax[1,2].plot(x_sp, survival_probability_hist, '-o')
 
 
@@ -478,9 +495,10 @@ for traj in range(start, end):
         if final_bin > -2:
             S_sigma = yy[1:final_bin]
             S_sigma[S_sigma <= 1e-10] = 1e-10
+            minuslnS = -np.log(S_sigma)
             lnlnS = np.log(-np.log(S_sigma))
-            lnsigma = xx[1:final_bin]
-            lnsigma = np.log(lnsigma)
+            sigma = xx[1:final_bin]
+            lnsigma = np.log(sigma)
             mask = ~np.isnan(lnlnS)
             #print(lnsigma[mask], lnlnS[mask])
             slope, intercept, _, _, _ = linregress(lnsigma[mask], lnlnS[mask])
@@ -494,13 +512,14 @@ for traj in range(start, end):
                     #yy[q] = -log(yy[q])
 
             #ax[1,1].plot(xx, yy, '-v')
-            ax[1,1].plot(lnsigma, lnlnS, '-v')
+            #ax[1,1].plot(lnsigma, lnlnS, '-v')
+            ax[1,1].plot(sigma, minuslnS, '-v')
 
             line_plot = []
             if traj == end - 1:
                 for q in range(len(lnsigma)):
-                    line_plot.append(2 * lnsigma[q] + intercept - 3)
-                ax[1,1].plot(lnsigma, line_plot, '-')
+                    line_plot.append(np.exp(2 * lnsigma[q] + intercept - 3))
+                ax[1,1].plot(sigma, line_plot, '-')
 
 
 '''
@@ -533,12 +552,12 @@ if variable == 2:
     #ax[1,1].set_ylabel('Radius speed')
     ax[1,1].set_ylabel(r'F($\varepsilon$)')
     ax[1,2].set_ylabel('Anisotropy ratio')
-    ax[0,0].set_xlabel('Time')
-    ax[0,1].set_xlabel('Time')
-    ax[1,0].set_xlabel('Time')
+    ax[0,0].set_xlabel('Lifetime')
+    ax[0,1].set_xlabel('Lifetime')
+    ax[1,0].set_xlabel('Lifetime')
     #ax[1,1].set_xlabel('Radius')
     ax[1,1].set_xlabel(r'$\varepsilon$')
-    ax[1,2].set_xlabel('Time')
+    ax[1,2].set_xlabel('Lifetime')
 
     ax[1,1].set_yscale('log')
     #ax[1,1].set_xscale('log')
@@ -620,23 +639,26 @@ if variable==1:
 
 if variable == 3:
     ax[0,0].set_ylabel('Avg stress')
-    ax[0,1].set_ylabel('Max stress')
-    ax[0,0].set_xlabel('Time')
-    ax[0,1].set_xlabel('Time')
-    ax[1,0].set_ylabel('+1 defect distance')
-    ax[1,0].set_xlabel('Time')
+    ax[0,1].set_ylabel('Normalized max strain')
+    ax[0,0].set_xlabel('-Time')
+    ax[0,1].set_xlabel('-Time')
+    ax[1,0].set_ylabel('Vortex distance')
+    ax[1,0].set_xlabel('-Time')
     #ax[1,1].set_ylabel('Average FTLE')
     #ax[1,1].set_xlabel(r'$\zeta$')
-    ax[1,2].set_ylabel('Survival probability')
-    ax[1,2].set_xlabel('Time')
-    ax[1,1].set_ylabel(r'S($\varepsilon$)')
+    ax[1,2].set_ylabel(r'S(t)')
+    ax[1,2].set_xlabel('t')
+    #ax[1,1].set_ylabel(r'S($\varepsilon$)')
+    #ax[1,1].set_xlabel(r'$\varepsilon$')
+    ax[1,1].set_ylabel(r'$-log(S(\varepsilon))$')
     ax[1,1].set_xlabel(r'$\varepsilon$')
 
     #ax[1,2].set_yscale('log')
     #ax[1,2].set_xscale('log')
 
-    #ax[1,1].set_yscale('log')
-    #ax[1,1].set_xscale('log')
+    ax[1,1].set_yscale('log')
+    ax[1,1].set_xscale('log')
+    ax[1,1].set_ylim([1e-3, 10])
 
     #ax[1,1].plot(nemself[0:5], avg_FTLE[0:5], '--p')
     #ax[1,1].plot(nemself[5:10], avg_FTLE[5:10], '--p')
