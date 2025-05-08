@@ -420,6 +420,8 @@ void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 
 	BaseInteraction::updateFieldProperties(p, q, k);
 
+	//sumQ00[k] += (p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
+	//sumQ01[k] += (p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
 
 	if(size_store_site_velocity_index[k]>=store_max_size){
 		for(int m=0; m<size_store_site_velocity_index[k];m++){
@@ -568,16 +570,16 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	number fQ_self_x = - (p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
 	number fQ_self_y = - (p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
 
-	//number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[7+k*9]] - sumQ01[box->neighbors[1+k*9]] ) ) - fQ_self_x;
-	//number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[7+k*9]] - sumQ00[box->neighbors[1+k*9]] ) ) - fQ_self_y;
+	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[7+k*9]] - sumQ01[box->neighbors[1+k*9]] ) ) - fQ_self_x;
+	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[7+k*9]] - sumQ00[box->neighbors[1+k*9]] ) ) - fQ_self_y;
 	//number fQ_inter_x = - ( sumQ00[k] - (p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]));
 	//number fQ_inter_y = - ( sumQ01[k] - (p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]));
-	//number fQ_inter_x = - ( sumQ00[k] );
-	//number fQ_inter_y = - ( sumQ01[k] );
+	//number fQ_inter_x = - ( sumQ00[k] + fQ_self_x);
+	//number fQ_inter_y = - ( sumQ01[k] + fQ_self_y);
 	//number fQ_inter_x = - (sumQ00[k]*p->fieldDX[q] + sumQ01[k]*p->fieldDY[q]);
 	//number fQ_inter_y = - (sumQ01[k]*p->fieldDX[q] - sumQ00[k]*p->fieldDY[q]);
-	number fQ_inter_x = - (p->NQ00 * p->fieldDX[q] + p->NQ01 * p->fieldDY[q]);
-	number fQ_inter_y = - (p->NQ01 * p->fieldDX[q] - p->NQ00 * p->fieldDY[q]);
+	//number fQ_inter_x = - (p->NQ00 * p->fieldDX[q] + p->NQ01 * p->fieldDY[q]);
+	//number fQ_inter_y = - (p->NQ01 * p->fieldDX[q] - p->NQ00 * p->fieldDY[q]);
 
 	p->Factive_x[q] = zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
 	p->Factive_y[q] = zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;

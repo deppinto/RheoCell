@@ -276,14 +276,12 @@ for line in cfile:
         CoMX[pt_num]=float(words[2])
         CoMY[pt_num]=float(words[3])
 
-        '''
-        CoMX[pt_num] += 65
-        CoMY[pt_num] += 70
-        if CoMY[pt_num] >= ly:
-            CoMY[pt_num] -= ly
+        CoMX[pt_num] += 35
+        CoMY[pt_num] -= 55
+        if CoMY[pt_num] < 0:
+            CoMY[pt_num] += ly
         if CoMX[pt_num] >= lx:
             CoMX[pt_num] -= lx
-        '''
 
         offsetX[pt_num]=int(float(words[4]))
         offsetY[pt_num]=int(float(words[5]))
@@ -304,14 +302,12 @@ for line in cfile:
             yy=int(site/lx)
             xx=site-int(yy*lx)
 
-            '''
-            xx = xx + 65
-            yy = yy + 70
-            if yy >= ly:
-                yy -= ly
+            xx = xx + 35
+            yy = yy - 55
+            if yy < 0:
+                yy += ly
             if xx >= lx:
                 xx -= lx
-            '''
 
             Z[yy][xx]=value
             area[pt_num]+=value*value
@@ -365,7 +361,7 @@ for line in cfile:
         levels = np.arange(0.0, m, step) + step
 
         if variable==1 or variable==2 or variable==3:
-            if pt_num==44:
+            if pt_num==-1:
                 cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
             else:
                 cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)

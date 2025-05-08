@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 if len(sys.argv)!=5:
     print(sys.argv[0]," [topology file] [nematic file] [shape file] [1:save conf; 2:make plot]")
@@ -87,8 +87,8 @@ for line in cfile:
         Z_Q01[int(yy)][int(xx)]=Q01
 
         if int(xx)%4==0 and int(yy)%4==0:
-            cset1 = plt.arrow(xx, yy, 1*nx, 1*ny, width=0.1, color="k", head_width=0)
-            cset1 = plt.arrow(xx, yy, -1*nx, -1*ny, width=0.1, color="k", head_width=0)
+            cset1 = plt.arrow(xx, yy, 1*nx, 1*ny, width=0.25, color="k", head_width=0)
+            cset1 = plt.arrow(xx, yy, -1*nx, -1*ny, width=0.25, color="k", head_width=0)
     read_line+=1
 
 
@@ -149,6 +149,9 @@ vecfield_Q00 = Z_Q00
 vecfield_Q01 = Z_Q01
 
 winding_number = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+norm_gradient_Q = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+splay_field = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+bend_field = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
 for p in range(0, LLY):
     for q in range(0, LLX):
         ax1 = [vecfield_nx[p][(q+1) % LLX], vecfield_ny[p][(q+1) % LLX]]
@@ -169,6 +172,28 @@ for p in range(0, LLY):
         winding_number[p][q] += wang(ax3, ax7)
         winding_number[p][q] += wang(ax7, ax1)
         winding_number[p][q] /= 2. * pi
+
+        dxQxx = .5*(vecfield_Q00[p][(q+1) % LLX] - vecfield_Q00[p][(q-1+LLX) % LLX])
+        dxQxy = .5*(vecfield_Q01[p][(q+1) % LLX] - vecfield_Q01[p][(q-1+LLX) % LLX])
+        dyQxx = .5*(vecfield_Q00[(p+1) % LLY][q] - vecfield_Q00[(p-1+LLY) % LLY][q])
+        dyQxy = .5*(vecfield_Q01[(p+1) % LLY][q] - vecfield_Q01[(p-1+LLY) % LLY][q])
+        norm_gradient_Q[p][q] = dxQxx * dxQxx + dyQxx * dyQxx + 2 * (dxQxy * dxQxy + dyQxy * dyQxy)
+
+        dxNx = .5*(vecfield_nx[p][(q+1) % LLX] - vecfield_nx[p][(q-1+LLX) % LLX])
+        dxNy = .5*(vecfield_ny[p][(q+1) % LLX] - vecfield_ny[p][(q-1+LLX) % LLX])
+        dyNx = .5*(vecfield_nx[(p+1) % LLY][q] - vecfield_nx[(p-1+LLY) % LLY][q])
+        dyNy = .5*(vecfield_ny[(p+1) % LLY][q] - vecfield_ny[(p-1+LLY) % LLY][q])
+        splay_field[p][q] = (dxNx + dyNy) * (dxNx + dyNy)
+        bend_field[p][q] = (vecfield_ny[p][q] * dxNy - vecfield_nx[p][q] * dxNx)**2 + (vecfield_ny[p][q] * dyNy - vecfield_nx[p][q] * dyNx)**2
+
+#z_min, z_max = 0., np.abs(norm_gradient_Q).max()
+#cset1 = plt.imshow(norm_gradient_Q, cmap='RdBu', interpolation='nearest', vmin=0, vmax=z_max)
+#z_min, z_max = 0., np.abs(splay_field).max()
+#cset1 = plt.imshow(splay_field, cmap='RdBu', interpolation='nearest', vmin=0, vmax=z_max)
+#z_min, z_max = 0., np.abs(bend_field).max()
+#cset1 = plt.imshow(bend_field, cmap='RdBu', interpolation='nearest', vmin=0, vmax=z_max)
+
+
 
 charge = 1.0/2.0
 thresh = 0.05
@@ -201,7 +226,10 @@ for p in range(0,LLY):
                 cset1 = plt.plot(x, y, 'ko', markersize=10)
                 cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='k', head_width=1.5, head_length=1.5, width=0.5)
             elif s==-1:
-                cset1 = plt.plot(x, y, 'k^', markersize=10)
+                cset1 = plt.plot(x, y, 'ko', markersize=5)
+                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='k', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, 4*cos(psi + 2.0944), 4*sin(psi + 2.0944), color='k', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, 4*cos(psi + 2 * 2.0944), 4*sin(psi + 2 * 2.0944), color='k', head_width=1.5, head_length=1.5, width=0.5)
 
 
         # keep this just in case our other symmetries give us integer defects
@@ -270,6 +298,10 @@ for line in cfile:
         dot_prod = Z_xx[int(yy)][int(xx)] * Z_x[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)] * Z_y[int(yy)][int(xx)]
         norm1 = sqrt(Z_xx[int(yy)][int(xx)] * Z_xx[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)] * Z_yy[int(yy)][int(xx)])
         norm2 = sqrt(Z_x[int(yy)][int(xx)] * Z_x[int(yy)][int(xx)] + Z_y[int(yy)][int(xx)] * Z_y[int(yy)][int(xx)])
+        if norm1 == 0:
+            norm1 = 1.
+        if norm2 == 0:
+            norm2 = 1.
         ang1 = np.acos(dot_prod / (norm1 * norm2))
 
         dot_prod = Z_xx[int(yy)][int(xx)] * (-1.) * Z_x[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)] * (-1.) * Z_y[int(yy)][int(xx)]
@@ -291,7 +323,7 @@ for line in cfile:
 
 
     z_min, z_max = 0., np.abs(alignment).max()
-    print(z_max)
+    #print(z_max)
     cset1 = plt.imshow(alignment, cmap='RdBu', interpolation='nearest', vmin=0, vmax=z_max)
     read_line+=1
 
@@ -353,7 +385,10 @@ for p in range(0,LLY):
                 cset1 = plt.plot(x, y, 'ro', markersize=10)
                 cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='r', head_width=1.5, head_length=1.5, width=0.5)
             elif s==-1:
-                cset1 = plt.plot(x, y, 'r^', markersize=10)
+                cset1 = plt.plot(x, y, 'ro', markersize=5)
+                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='r', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, 4*cos(psi + 2.0944), 4*sin(psi + 2.0944), color='r', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, 4*cos(psi + 2 * 2.0944), 4*sin(psi + 2 * 2.0944), color='r', head_width=1.5, head_length=1.5, width=0.5)
 
 
         # keep this just in case our other symmetries give us integer defects

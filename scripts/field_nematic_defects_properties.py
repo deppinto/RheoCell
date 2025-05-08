@@ -88,18 +88,18 @@ velocity_defects_plus = []
 
 for i in range(start_frame, end_frame, 1):
 
-    if i%10==0:
-        print(i)
+    #if i%10==0:
+        #print(i)
 
     if i<10:
-        file = sys.argv[2] + "nematic_field_00" + str(i) + ".txt"
-        #file = sys.argv[2] + "shape_field_00" + str(i) + ".txt"
+        #file = sys.argv[2] + "nematic_field_00" + str(i) + ".txt"
+        file = sys.argv[2] + "shape_field_00" + str(i) + ".txt"
     elif i<100:
-        file = sys.argv[2] + "nematic_field_0" + str(i) + ".txt"
-        #file = sys.argv[2] + "shape_field_0" + str(i) + ".txt"
+        #file = sys.argv[2] + "nematic_field_0" + str(i) + ".txt"
+        file = sys.argv[2] + "shape_field_0" + str(i) + ".txt"
     else:
-        file = sys.argv[2] + "nematic_field_" + str(i) + ".txt"
-        #file = sys.argv[2] + "shape_field_" + str(i) + ".txt"
+        #file = sys.argv[2] + "nematic_field_" + str(i) + ".txt"
+        file = sys.argv[2] + "shape_field_" + str(i) + ".txt"
 
     cfile=open(file,"r")
     header=cfile.readline().split()
@@ -261,7 +261,8 @@ for i in range(start_frame, end_frame, 1):
                     #cset1 = plt.plot(x, y, 'b^', markersize=10)
 
 if variable == 1:
-    print(velocity_defects_plus)
+    for j in range(len(velocity_defects_plus)):
+        print(velocity_defects_plus[j])
 
 if variable == 2:
     plt.figure(figsize=(5.452423529,4.089317647))

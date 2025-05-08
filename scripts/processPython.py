@@ -104,11 +104,42 @@ for line in filedata:
     wallslip.append(float(save[20]))
     shear_rate.append(float(save[21]))
 
-    F.append( sqrt( float(save[10])/( float(save[11]) )) ) 
+    #F.append( sqrt( float(save[10])/( float(save[11]) )) ) 
 
     cont_line+=1
-
 filedata.close()
+
+
+
+plt.figure(figsize=(5.452423529,4.089317647))
+for traj in range(start, end):
+    velocity_defects_plus = []
+    for job in range(jobs_seq[traj], jobs_seq[traj+1]):
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defect_velocity.txt","r")
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defect_velocity_shape.txt","r")
+        for line in fileoutput:
+            save=line.split()
+            velocity_defects_plus.append(float(save[0]))
+        fileoutput.close()
+
+    counts, bins = np.histogram(velocity_defects_plus)
+    bin_width = abs(bins[1] - bins[0]) / 2
+    bin_length = len(bins)
+    total_counts = sum(counts)
+    probability = []
+    for i in range(len(counts)):
+        probability.append(float(counts[i]) / float(total_counts))
+        bins[i] = bins[i] + bin_width
+    #plt.stairs(counts, bins)
+    plt.plot(bins[0:bin_length-1], probability, '--o', label=omega[traj])
+
+plt.ylabel(r'$P(v)$', fontsize=18)
+plt.xlabel(r'Velocity $+1/2$', fontsize=18)
+plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+plt.legend(loc=(0.5, 0.6), ncols=2, frameon=False)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
+plt.show()
+exit (1)
 
 
 # read output file
