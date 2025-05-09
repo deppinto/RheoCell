@@ -277,7 +277,7 @@ for line in cfile:
         CoMY[pt_num]=float(words[3])
 
         CoMX[pt_num] += 35
-        CoMY[pt_num] -= 55
+        CoMY[pt_num] -= 25
         if CoMY[pt_num] < 0:
             CoMY[pt_num] += ly
         if CoMX[pt_num] >= lx:
@@ -303,7 +303,7 @@ for line in cfile:
             xx=site-int(yy*lx)
 
             xx = xx + 35
-            yy = yy - 55
+            yy = yy - 25
             if yy < 0:
                 yy += ly
             if xx >= lx:

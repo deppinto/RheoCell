@@ -9,11 +9,11 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 
 if len(sys.argv)!=6:
-    print(sys.argv[0]," [topology file] [frames location] [start frame] [end frame] [1:save conf; 2:make plot]")
+    print(sys.argv[0]," [topology file] [frames location] [start frame] [end frame] [1 or 2:save conf; 3 or 4:make plot]")
     sys.exit(1)
 
 variable=int(float(sys.argv[5])) 
@@ -91,15 +91,20 @@ for i in range(start_frame, end_frame, 1):
     #if i%10==0:
         #print(i)
 
-    if i<10:
-        #file = sys.argv[2] + "nematic_field_00" + str(i) + ".txt"
-        file = sys.argv[2] + "shape_field_00" + str(i) + ".txt"
-    elif i<100:
-        #file = sys.argv[2] + "nematic_field_0" + str(i) + ".txt"
-        file = sys.argv[2] + "shape_field_0" + str(i) + ".txt"
-    else:
-        #file = sys.argv[2] + "nematic_field_" + str(i) + ".txt"
-        file = sys.argv[2] + "shape_field_" + str(i) + ".txt"
+    if variable == 1 or variable == 3:
+        if i<10:
+            file = sys.argv[2] + "shape_field_00" + str(i) + ".txt"
+        elif i<100:
+            file = sys.argv[2] + "shape_field_0" + str(i) + ".txt"
+        else:
+            file = sys.argv[2] + "shape_field_" + str(i) + ".txt"
+    else if variable == 2 or variable == 4:
+        if i<10:
+            file = sys.argv[2] + "nematic_field_00" + str(i) + ".txt"
+        elif i<100:
+            file = sys.argv[2] + "nematic_field_0" + str(i) + ".txt"
+        else:
+            file = sys.argv[2] + "nematic_field_" + str(i) + ".txt"
 
     cfile=open(file,"r")
     header=cfile.readline().split()
@@ -260,11 +265,11 @@ for i in range(start_frame, end_frame, 1):
 
                     #cset1 = plt.plot(x, y, 'b^', markersize=10)
 
-if variable == 1:
+if variable == 1 or variable == 2:
     for j in range(len(velocity_defects_plus)):
         print(velocity_defects_plus[j])
 
-if variable == 2:
+if variable == 3 or variable == 4:
     plt.figure(figsize=(5.452423529,4.089317647))
     counts, bins = np.histogram(velocity_defects_plus)
     bin_width = abs(bins[1] - bins[0]) / 2
