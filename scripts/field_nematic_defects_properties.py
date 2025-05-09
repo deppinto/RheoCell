@@ -98,7 +98,7 @@ for i in range(start_frame, end_frame, 1):
             file = sys.argv[2] + "shape_field_0" + str(i) + ".txt"
         else:
             file = sys.argv[2] + "shape_field_" + str(i) + ".txt"
-    else if variable == 2 or variable == 4:
+    elif variable == 2 or variable == 4:
         if i<10:
             file = sys.argv[2] + "nematic_field_00" + str(i) + ".txt"
         elif i<100:
