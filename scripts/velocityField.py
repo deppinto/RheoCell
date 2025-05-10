@@ -8,6 +8,8 @@ import numpy as np
 import scipy.ndimage
 
 from matplotlib import cm
+import matplotlib
+matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [topology file] [conf file] [1:save conf; 2:make plot]")
@@ -72,8 +74,8 @@ for line in cfile:
         Z_y[int(yy)][int(xx)]=value_y
         Z[int(yy)][int(xx)]=sqrt(value_x*value_x+value_y*value_y)
         if int(xx)%4==0 and int(yy)%4==0:
-            cset1 = plt.arrow(xx, yy, 100*value_x, 100*value_y, width=0.2, color='k')
-            #cset1 = plt.arrow(xx, yy, 1000*value_x, 1000*value_y, width=0.2, color='k')
+            #cset1 = plt.arrow(xx, yy, 100*value_x, 100*value_y, width=0.2, color='k')
+            cset1 = plt.arrow(xx, yy, 2000*value_x, 2000*value_y, width=0.3, color='k')
             #cset1 = plt.arrow(xx, yy, 75*value_x, 75*value_y, width=0.2, color='k')
 
     read_line += 1
@@ -103,11 +105,12 @@ for line in cfile:
         dvxdy = (Z_x[ynext][x1] - Z_x[yprev][x1])/2
         vorticity[y1][x1] = dvydx - dvxdy
 
+        '''
         if vorticity[y1][x1] < 0 + 0.0001 and vorticity[y1][x1] > 0 - 0.0001:
             vorticity[y1][x1] = 1
         else:
             vorticity[y1][x1] = 0
-
+        '''
 
         dvxdx = (Z_x[y1][xnext] - Z_x[y1][xprev])/2
         dvydy = (Z_y[ynext][x1] - Z_y[yprev][x1])/2
@@ -115,15 +118,15 @@ for line in cfile:
 
         
     #z_min, z_max = -np.abs(Z).max(), np.abs(Z).max()
-    #z_min, z_max = -np.abs(vorticity).max(), np.abs(vorticity).max()
+    z_min, z_max = -np.abs(vorticity).max(), np.abs(vorticity).max()
     #z_min, z_max = 0., np.abs(Z).max()
-    z_min, z_max = -np.abs(strain).max(), np.abs(strain).max()
+    #z_min, z_max = -np.abs(strain).max(), np.abs(strain).max()
     X, Y = np.meshgrid(x, y)
     #cset1 = plt.imshow(Z, cmap='hot', interpolation='nearest')
     #cset1 = plt.pcolormesh(X, Y, vorticity, cmap='RdBu', vmin=z_min, vmax=z_max)
-    #cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
+    cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=z_min, vmax=z_max)
     #cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=-1, vmax=1)
-    cset1 = plt.imshow(strain, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
+    #cset1 = plt.imshow(strain, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
 
 
 ax = plt.gca()

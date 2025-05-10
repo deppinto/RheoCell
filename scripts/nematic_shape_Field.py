@@ -46,6 +46,7 @@ ly=int(float(header[3]))
 
 walls = [0. for i in range(lx*ly)]
 set_walls(lx,ly,walls)
+defect_length = 10.
 
 x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
@@ -224,12 +225,12 @@ for p in range(0,LLY):
             psi = s/(2.-s)*atan2(num, den)
             if s==1:
                 cset1 = plt.plot(x, y, 'ko', markersize=10)
-                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='k', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='k', head_width=1.5, head_length=1.5, width=0.5)
             elif s==-1:
                 cset1 = plt.plot(x, y, 'ko', markersize=5)
-                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='k', head_width=1.5, head_length=1.5, width=0.5)
-                cset1 = plt.arrow(x, y, 4*cos(psi + 2.0944), 4*sin(psi + 2.0944), color='k', head_width=1.5, head_length=1.5, width=0.5)
-                cset1 = plt.arrow(x, y, 4*cos(psi + 2 * 2.0944), 4*sin(psi + 2 * 2.0944), color='k', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='k', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi + 2.0944), defect_length*sin(psi + 2.0944), color='k', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi + 2 * 2.0944), defect_length*sin(psi + 2 * 2.0944), color='k', head_width=1.5, head_length=1.5, width=0.5)
 
 
         # keep this just in case our other symmetries give us integer defects
@@ -383,12 +384,12 @@ for p in range(0,LLY):
             psi = s/(2.-s)*atan2(num, den)
             if s==1:
                 cset1 = plt.plot(x, y, 'ro', markersize=10)
-                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='r', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='r', head_width=1.5, head_length=1.5, width=0.5)
             elif s==-1:
                 cset1 = plt.plot(x, y, 'ro', markersize=5)
-                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='r', head_width=1.5, head_length=1.5, width=0.5)
-                cset1 = plt.arrow(x, y, 4*cos(psi + 2.0944), 4*sin(psi + 2.0944), color='r', head_width=1.5, head_length=1.5, width=0.5)
-                cset1 = plt.arrow(x, y, 4*cos(psi + 2 * 2.0944), 4*sin(psi + 2 * 2.0944), color='r', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='r', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi + 2.0944), defect_length*sin(psi + 2.0944), color='r', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi + 2 * 2.0944), defect_length*sin(psi + 2 * 2.0944), color='r', head_width=1.5, head_length=1.5, width=0.5)
 
 
         # keep this just in case our other symmetries give us integer defects

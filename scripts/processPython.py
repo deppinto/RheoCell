@@ -115,7 +115,7 @@ plt.figure(figsize=(5.452423529,4.089317647))
 for traj in range(start, end):
     velocity_defects_plus = []
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defect_velocity.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defect_velocity_nematic.txt","r")
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defect_velocity_shape.txt","r")
         for line in fileoutput:
             save=line.split()
