@@ -29,6 +29,7 @@ protected:
 	number zetaQ_self_active;
 	number zetaQ_inter_active;
 	number J_Q;
+	number J_Q_active;
 	bool anchoring = false;
 
 	number f_interaction(BaseField *p, int q);

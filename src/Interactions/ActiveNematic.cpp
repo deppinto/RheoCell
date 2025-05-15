@@ -11,7 +11,7 @@ ActiveNematic::ActiveNematic() :
 				friction(2.),
 				zetaQ_self(0),
 				zetaQ_inter(0),
-				J_Q(1) {
+				J_Q(0) {
 	a0=PI*R*R;
 }
 
@@ -32,7 +32,7 @@ void ActiveNematic::get_settings(input_file &inp) {
 	getInputNumber(&inp, "friction", &friction, 0);
 	getInputNumber(&inp, "zetaQ_self", &zetaQ_self_active, 0);
 	getInputNumber(&inp, "zetaQ_inter", &zetaQ_inter_active, 0);
-	getInputNumber(&inp, "J_Q", &J_Q, 0);
+	getInputNumber(&inp, "J_Q", &J_Q_active, 0);
 	getInputBool(&inp, "anchoring", &anchoring, 0);
 }
 
@@ -76,6 +76,7 @@ void ActiveNematic::allocate_fields(std::vector<BaseField *> &fields) {
 void ActiveNematic::apply_changes_after_equilibration(){
 	zetaQ_self=zetaQ_self_active;
 	zetaQ_inter=zetaQ_inter_active;
+	J_Q=J_Q_active;
 }
 
 void ActiveNematic::set_box(BaseBox *boxArg) {
