@@ -22,6 +22,7 @@ protected:
 	//int R;
 	number kappa;
 	number a0;
+	//std::vector<number> a0;
 	number friction;
 	number zetaQ_self;
 	number zetaQ_inter;

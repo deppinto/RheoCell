@@ -136,8 +136,10 @@ for traj in range(start, end):
 plt.ylabel(r'$P(v)$', fontsize=18)
 plt.xlabel(r'Velocity $+1/2$', fontsize=18)
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-plt.legend(loc=(0.5, 0.6), ncols=2, frameon=False)
+#plt.legend(loc=(0.5, 0.6), ncols=2, frameon=False)
 #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
+plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results9/defect_velocity_"+sys.argv[4]+".png", transparent=True)
+plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results9/defect_velocity_"+sys.argv[4]+".svg", transparent=True)
 plt.show()
 exit (1)
 

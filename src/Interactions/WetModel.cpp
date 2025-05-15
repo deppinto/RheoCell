@@ -561,10 +561,10 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	//if(p->index==0 && q==0)std::cout<<"Forces: "<< p->freeEnergy[q]*p->fieldDX[q] <<" "<< p->freeEnergy[q]*p->fieldDY[q]<<" "<<  0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] )  << " "<< 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] ) <<std::endl;
 
 	//passive (passive force)
-	//number f_passive_x = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] );
-	//number f_passive_y = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] );
-	number f_passive_x = p->freeEnergy[q]*p->fieldDX[q];
-	number f_passive_y = p->freeEnergy[q]*p->fieldDY[q];
+	number f_passive_x = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] );
+	number f_passive_y = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] );
+	//number f_passive_x = p->freeEnergy[q]*p->fieldDX[q];
+	//number f_passive_y = p->freeEnergy[q]*p->fieldDY[q];
 	p->Fpassive_x[q] = f_passive_x;
 	p->Fpassive_y[q] = f_passive_y;
 
@@ -628,8 +628,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 
 void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
-	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
-	
+	/*if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
+
 	number t = 0.5 * atan2(p->S01, p->S00);
 	std::vector<number> d = {cos(t) , sin(t)};
 	number sgn = (d[0] * p->nemQ[0] + d[1] * p->nemQ[1] > 0.0)? 1.0:-1.0;
@@ -637,7 +637,10 @@ void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 	p->nemQ[1] = p->nemQ_old[1] + dt * J_Q * (sgn * d[1] - p->nemQ[1]);
 
 	p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
-	p->Q01 = p->nemQ[0] * p->nemQ[1];
+	p->Q01 = p->nemQ[0] * p->nemQ[1];*/
+
+	p->Q00 += dt * J_Q * (p->S00 - p->Q00);
+	p->Q01 += dt * J_Q * (p->S01 - p->Q01);
 
 	if(anchoring) update_anchoring(p);
 }

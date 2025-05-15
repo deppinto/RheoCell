@@ -14,6 +14,8 @@
 #include <fstream>
 #include <set>
 #include <vector>
+#include <stdio.h>
+#include <string.h>
 
 /**
  * @brief Base class for managing particle-particle interactions. It is an abstract class.
