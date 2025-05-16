@@ -641,6 +641,21 @@ void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
 	p->Q00 += dt * J_Q * (p->S00 - p->Q00);
 	p->Q01 += dt * J_Q * (p->S01 - p->Q01);
+    	number nemQ_mod = sqrt(p->Q00 * p->Q00 + p->Q01 * p->Q01);
+	if(nemQ_mod>0.000000001){
+	    	number nx = sqrt((1 + p->Q00/nemQ_mod)/2);
+		number sgn;
+		if(p->Q01>0)sgn=1;
+		else if(p->Q01<0) sgn=-1;
+		else sgn=0;
+    		number ny = sgn*sqrt((1 - p->Q00/nemQ_mod)/2);
+		p->nemQ[0]=nx;
+		p->nemQ[1]=ny;
+	}
+	else{
+		p->nemQ[0]=0.;
+		p->nemQ[1]=0.;
+	}
 
 	if(anchoring) update_anchoring(p);
 }
