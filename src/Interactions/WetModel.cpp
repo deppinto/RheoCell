@@ -649,8 +649,8 @@ void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 		else if(p->Q01<0) sgn=-1;
 		else sgn=0;
     		number ny = sgn*sqrt((1 - p->Q00/nemQ_mod)/2);
-		p->nemQ[0]=nx;
-		p->nemQ[1]=ny;
+		p->nemQ[0]=nemQ_mod * nx;
+		p->nemQ[1]=nemQ_mod * ny;
 	}
 	else{
 		p->nemQ[0]=0.;
