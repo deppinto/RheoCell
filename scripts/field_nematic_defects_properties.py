@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 
 if len(sys.argv)!=6:
@@ -84,6 +84,7 @@ minus_defects_y = []
 
 r_thresh = 9
 velocity_defects_plus = []
+beta_tail_degree = []
 
 
 for i in range(start_frame, end_frame, 1):
@@ -93,11 +94,15 @@ for i in range(start_frame, end_frame, 1):
 
     if variable == 1 or variable == 3:
         if i<10:
-            file = sys.argv[2] + "shape_field_00" + str(i) + ".txt"
+            fileS = sys.argv[2] + "shape_field_00" + str(i) + ".txt"
+            fileQ = sys.argv[2] + "nematic_field_00" + str(i) + ".txt"
         elif i<100:
-            file = sys.argv[2] + "shape_field_0" + str(i) + ".txt"
+            fileS = sys.argv[2] + "shape_field_0" + str(i) + ".txt"
+            fileQ = sys.argv[2] + "nematic_field_0" + str(i) + ".txt"
         else:
-            file = sys.argv[2] + "shape_field_" + str(i) + ".txt"
+            fileS = sys.argv[2] + "shape_field_" + str(i) + ".txt"
+            fileQ = sys.argv[2] + "nematic_field_" + str(i) + ".txt"
+    '''
     elif variable == 2 or variable == 4:
         if i<10:
             file = sys.argv[2] + "nematic_field_00" + str(i) + ".txt"
@@ -105,30 +110,31 @@ for i in range(start_frame, end_frame, 1):
             file = sys.argv[2] + "nematic_field_0" + str(i) + ".txt"
         else:
             file = sys.argv[2] + "nematic_field_" + str(i) + ".txt"
+    '''
 
-    cfile=open(file,"r")
-    header=cfile.readline().split()
+    Qfile=open(fileQ,"r")
+    header=Qfile.readline().split()
     t=int(header[2])
 
-    header=cfile.readline().split()
+    header=Qfile.readline().split()
     lx=int(float(header[2]))
     ly=int(float(header[3]))
 
-    Z_x=[[0 for q in range(lx)] for k in range(ly)]
-    Z_y=[[0 for q in range(lx)] for k in range(ly)]
+    Z_Qx=[[0 for q in range(lx)] for k in range(ly)]
+    Z_Qy=[[0 for q in range(lx)] for k in range(ly)]
     Z_Q00=[[0 for q in range(lx)] for k in range(ly)]
     Z_Q01=[[0 for q in range(lx)] for k in range(ly)]
     start_value=0
     read_line = 0
-    for line in cfile:
+    for line in Qfile:
 
         if read_line==0:
             read_line+=1
             continue
 
         words=line.split()
-        Z_x=[[0 for q in range(lx)] for k in range(ly)]
-        Z_y=[[0 for q in range(lx)] for k in range(ly)]
+        Z_Qx=[[0 for q in range(lx)] for k in range(ly)]
+        Z_Qy=[[0 for q in range(lx)] for k in range(ly)]
         Z_Q00=[[0 for q in range(lx)] for k in range(ly)]
         Z_Q01=[[0 for q in range(lx)] for k in range(ly)]
         for i in range(start_value,len(words),4):
@@ -147,12 +153,63 @@ for i in range(start_frame, end_frame, 1):
                 nx = 0.
                 ny = 0.
 
-            Z_x[int(yy)][int(xx)]=nx
-            Z_y[int(yy)][int(xx)]=ny
+            Z_Qx[int(yy)][int(xx)]=nx
+            Z_Qy[int(yy)][int(xx)]=ny
             Z_Q00[int(yy)][int(xx)]=Q00
             Z_Q01[int(yy)][int(xx)]=Q01
 
         read_line += 1
+    Qfile.close()
+
+
+    Sfile=open(fileS,"r")
+    header=Sfile.readline().split()
+    t=int(header[2])
+
+    header=Sfile.readline().split()
+    lx=int(float(header[2]))
+    ly=int(float(header[3]))
+
+    Z_Sx=[[0 for q in range(lx)] for k in range(ly)]
+    Z_Sy=[[0 for q in range(lx)] for k in range(ly)]
+    Z_S00=[[0 for q in range(lx)] for k in range(ly)]
+    Z_S01=[[0 for q in range(lx)] for k in range(ly)]
+    start_value=0
+    read_line = 0
+    for line in Sfile:
+
+        if read_line==0:
+            read_line+=1
+            continue
+
+        words=line.split()
+        Z_Sx=[[0 for q in range(lx)] for k in range(ly)]
+        Z_Sy=[[0 for q in range(lx)] for k in range(ly)]
+        Z_S00=[[0 for q in range(lx)] for k in range(ly)]
+        Z_S01=[[0 for q in range(lx)] for k in range(ly)]
+        for i in range(start_value,len(words),4):
+            xx=float(words[i])
+            yy=float(words[i+1])
+            value_x=float(words[i+2])
+            value_y=float(words[i+3])
+
+            S00=float(words[i+2])
+            S01=float(words[i+3])
+            if S00 != 0 and S01 != 0:
+                S = sqrt(S00**2 + S01**2)
+                nx = sqrt(2*S) * sqrt((1 + S00/S)/2)
+                ny = sqrt(2*S) * np.sign(S01) * sqrt((1 - S00/S)/2)
+            else:
+                nx = 0.
+                ny = 0.
+
+            Z_Sx[int(yy)][int(xx)]=nx
+            Z_Sy[int(yy)][int(xx)]=ny
+            Z_S00[int(yy)][int(xx)]=S00
+            Z_S01[int(yy)][int(xx)]=S01
+
+        read_line += 1
+    Sfile.close()
 
 
     LLX = lx
@@ -160,13 +217,13 @@ for i in range(start_frame, end_frame, 1):
 
     vecfield_nx = [[0. for q in range(0, LLX)] for p in range(0, LLY)]
     vecfield_ny = [[0. for q in range(0, LLX)] for p in range(0, LLY)]
-    vecfield_nx = Z_x
-    vecfield_ny = Z_y
+    vecfield_nx = Z_Sx
+    vecfield_ny = Z_Sy
 
     vecfield_Q00 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
     vecfield_Q01 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
-    vecfield_Q00 = Z_Q00
-    vecfield_Q01 = Z_Q01
+    vecfield_Q00 = Z_S00
+    vecfield_Q01 = Z_S01
 
     winding_number = [[0. for q in range(0, LLX)] for p in range(0, LLY)]
     for p in range(0, LLY):
@@ -235,6 +292,38 @@ for i in range(start_frame, end_frame, 1):
                     plus_defects_x.append(x)
                     plus_defects_y.append(y)
 
+                    x_direction = cos(psi)
+                    y_direction = sin(psi)
+                    v = np.array([x_direction, y_direction])
+
+                    eps = 1.5
+                    for nn in range(1, 9):
+                        pp = np.array([x,y]) + nn * v
+                        x_min, x_max = int(np.floor(pp[0] - eps)), int(np.ceil(pp[0] + eps))
+                        y_min, y_max = int(np.floor(pp[1] - eps)), int(np.ceil(pp[1] + eps))
+                        for xi in range(x_min, x_max + 1):
+                            for yi in range(y_min, y_max + 1):
+                                # Compute perpendicular distance from lattice point to line point
+                                xxx = xi
+                                yyy = yi
+                                if xxx<0:
+                                    xxx += LLX
+                                if xxx>=LLX:
+                                    xxx -= LLX
+                                if yyy<0:
+                                    yyy += LLY
+                                if yyy>=LLY:
+                                    yyy -= LLY
+
+                                dd = np.linalg.norm(np.array([xxx, yyy]) - pp)
+                                if dd <= eps:
+                                    angle = np.acos((Z_Qx[yyy][xxx] * x_direction + Z_Qy[yyy][xxx] * y_direction))
+                                    #angle = np.acos((Z_Sx[yyy][xxx] * x_direction + Z_Sy[yyy][xxx] * y_direction))
+                                    #if angle>pi/2:
+                                        #angle -= pi/2
+                                    beta_tail_degree.append(angle)
+
+
                     if i > start_frame:
                         for zz in range(len(plus_defects_old_x)):
                             if matched_defects[zz] == 1:
@@ -253,7 +342,7 @@ for i in range(start_frame, end_frame, 1):
                                 matched_defects[zz] = 1
                                 norm = sqrt(dist)
                                 angle = np.acos((dist_x * cos(psi) + dist_y * sin(psi)) / norm)
-                                velocity_defects_plus.append(norm * cos(angle) / 100)
+                                velocity_defects_plus.append(norm * cos(angle))
                                 break
                             
 
@@ -270,8 +359,9 @@ if variable == 1 or variable == 2:
         print(velocity_defects_plus[j])
 
 if variable == 3 or variable == 4:
+    '''
     plt.figure(figsize=(5.452423529,4.089317647))
-    counts, bins = np.histogram(velocity_defects_plus)
+    counts, bins = np.histogram(velocity_defects_plus, bins=20)
     bin_width = abs(bins[1] - bins[0]) / 2
     bin_length = len(bins)
     total_counts = sum(counts)
@@ -289,3 +379,28 @@ if variable == 3 or variable == 4:
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
     #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
     plt.show()
+    '''
+
+    plt.figure(figsize=(5.452423529,4.089317647))
+    counts, bins = np.histogram(beta_tail_degree, bins=20)
+    bin_width = abs(bins[1] - bins[0]) / 2
+    bin_length = len(bins)
+    total_counts = sum(counts)
+    print(total_counts)
+    probability = []
+    for i in range(len(counts)):
+        probability.append(float(counts[i]) / float(total_counts))
+        bins[i] = bins[i] + bin_width
+    #plt.stairs(counts, bins)
+    plt.plot(bins[0:bin_length-1], probability, '--o')
+    plt.ylabel(r'$P(\beta)$', fontsize=18)
+    plt.xlabel(r'$\beta$', fontsize=18)
+    #plt.xticks(fontsize=18)
+    #plt.yticks(fontsize=18)
+    plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
+    plt.show()
+
+
+
+

@@ -276,12 +276,12 @@ for line in cfile:
         CoMX[pt_num]=float(words[2])
         CoMY[pt_num]=float(words[3])
 
-        CoMX[pt_num] += 35
-        CoMY[pt_num] -= 25
-        if CoMY[pt_num] < 0:
-            CoMY[pt_num] += ly
-        if CoMX[pt_num] >= lx:
-            CoMX[pt_num] -= lx
+        #CoMX[pt_num] += 35
+        #CoMY[pt_num] -= 25
+        #if CoMY[pt_num] < 0:
+            #CoMY[pt_num] += ly
+        #if CoMX[pt_num] >= lx:
+            #CoMX[pt_num] -= lx
 
         offsetX[pt_num]=int(float(words[4]))
         offsetY[pt_num]=int(float(words[5]))
@@ -292,7 +292,7 @@ for line in cfile:
         nemX=float(words[9])
         nemY=float(words[10])
         normNem = sqrt(nemX * nemX + nemY * nemY)
-        theta_nem[pt_num]=asin((nemX*nemY)/0.5)/2
+        #theta_nem[pt_num]=asin((nemX*nemY)/0.5)/2
         Q00[pt_num]= 0.5 * (nemX * nemX - nemY * nemY)
         Q01[pt_num]= nemX * nemY
 
@@ -302,12 +302,12 @@ for line in cfile:
             yy=int(site/lx)
             xx=site-int(yy*lx)
 
-            xx = xx + 35
-            yy = yy - 25
-            if yy < 0:
-                yy += ly
-            if xx >= lx:
-                xx -= lx
+            #xx = xx + 35
+            #yy = yy - 25
+            #if yy < 0:
+                #yy += ly
+            #if xx >= lx:
+                #xx -= lx
 
             Z[yy][xx]=value
             area[pt_num]+=value*value
