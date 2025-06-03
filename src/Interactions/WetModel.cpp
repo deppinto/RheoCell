@@ -628,7 +628,7 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 
 void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
-	/*if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
+	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
 
 	number t = 0.5 * atan2(p->S01, p->S00);
 	std::vector<number> d = {cos(t) , sin(t)};
@@ -637,9 +637,9 @@ void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 	p->nemQ[1] = p->nemQ_old[1] + dt * J_Q * (sgn * d[1] - p->nemQ[1]);
 
 	p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
-	p->Q01 = p->nemQ[0] * p->nemQ[1];*/
+	p->Q01 = p->nemQ[0] * p->nemQ[1];
 
-	p->Q00 += dt * J_Q * (p->S00 - p->Q00);
+	/*p->Q00 += dt * J_Q * (p->S00 - p->Q00);
 	p->Q01 += dt * J_Q * (p->S01 - p->Q01);
     	number nemQ_mod = sqrt(p->Q00 * p->Q00 + p->Q01 * p->Q01);
 	if(nemQ_mod>0.000000001){
@@ -655,7 +655,7 @@ void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 	else{
 		p->nemQ[0]=0.;
 		p->nemQ[1]=0.;
-	}
+	}*/
 
 	if(anchoring) update_anchoring(p);
 }

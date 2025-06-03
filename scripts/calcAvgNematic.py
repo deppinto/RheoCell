@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -320,7 +320,6 @@ for line in cfile:
             nematic_grid_coarse_00[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value*Q00[pt_num]
             nematic_grid_coarse_01[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value*Q01[pt_num]
 
-        '''
         S00 = 0
         S01 = 0
         for k in range(LsubX[pt_num]*LsubY[pt_num]):
@@ -345,12 +344,15 @@ for line in cfile:
             S00 += -0.5*(field_dx * field_dx - field_dy * field_dy)
             S01 += -field_dx * field_dy
 
-        D_major_axis = 0.5 * np.atan2(S01, S00)
-        D_major_axis_vec_x = np.cos(D_major_axis)
-        D_major_axis_vec_y = np.sin(D_major_axis)
+        #D_major_axis = 0.5 * np.atan2(S01, S00)
+        #D_major_axis_vec_x = np.cos(D_major_axis)
+        #D_major_axis_vec_y = np.sin(D_major_axis)
+        #D_i = np.sqrt(S00 * S00 + S01 * S01)
+
         D_i = np.sqrt(S00 * S00 + S01 * S01)
-        print(2 * D_i)
-        '''
+        D_major_axis_vec_x = D_i * sqrt((1 + S00/D_i)/2)
+        D_major_axis_vec_y = D_i * np.sign(S01) * sqrt((1 - S00/D_i)/2)
+        #print(2 * D_i)
 
         X, Y = np.meshgrid(x, y)
         step = 0.01
@@ -366,11 +368,11 @@ for line in cfile:
             else:
                 cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)
 
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*nemX, -3*nemY, width=0.5, head_width=0, color='k')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 10*nemX, 10*nemY, width=0.5, head_width=0, color='k')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -10*nemX, -10*nemY, width=0.5, head_width=0, color='k')
 
-            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*D_major_axis_vec_x, 3*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
-            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*D_major_axis_vec_x, -3*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 1*D_major_axis_vec_x, 1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -1*D_major_axis_vec_x, -1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
 
         #increment phase field index
         pt_num+=1

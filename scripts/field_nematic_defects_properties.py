@@ -390,7 +390,7 @@ if variable == 3 or variable == 4:
     probability = []
     for i in range(len(counts)):
         probability.append(float(counts[i]) / float(total_counts))
-        bins[i] = bins[i] + bin_width
+        bins[i] = (bins[i] + bin_width) * 180 / pi
     #plt.stairs(counts, bins)
     plt.plot(bins[0:bin_length-1], probability, '--o')
     plt.ylabel(r'$P(\beta)$', fontsize=18)
