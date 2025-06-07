@@ -628,16 +628,31 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 
 void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
+	if(store)p->thetaQ_old = p->thetaQ;
+
+	p->thetaQ = p->thetaQ_old - dt * J_Q * atan2(p->S00 * p->Q01 - p->S01 * p->Q00, p->S00 * p->Q00 + p->S01 * p->Q01);
+	p->Q00 = cos(2 * p->thetaQ);
+	p->Q01 = sin(2 * p->thetaQ);
+    	number nemQ_mod = sqrt(p->Q00 * p->Q00 + p->Q01 * p->Q01);
+    	p->nemQ[0] = sqrt((1 + p->Q00/nemQ_mod)/2);
+	number sgn;
+	if(p->Q01>0)sgn=1;
+	else if(p->Q01<0) sgn=-1;
+	else sgn=0;
+    	p->nemQ[1] = sgn*sqrt((1 - p->Q00/nemQ_mod)/2);
+
+    	/*number S_mod = sqrt(p->S00 * p->S00 + p->S01 * p->S01);
 	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
+	if(S_mod>0.00000001){
+		number t = 0.5 * atan2(p->S01, p->S00);
+		std::vector<number> d = {cos(t) , sin(t)};
+		number sgn = (d[0] * p->nemQ[0] + d[1] * p->nemQ[1] > 0.0)? 1.0:-1.0;
+		p->nemQ[0] = p->nemQ_old[0] + dt * J_Q * (sgn * d[0] - p->nemQ[0]);
+		p->nemQ[1] = p->nemQ_old[1] + dt * J_Q * (sgn * d[1] - p->nemQ[1]);
 
-	number t = 0.5 * atan2(p->S01, p->S00);
-	std::vector<number> d = {cos(t) , sin(t)};
-	number sgn = (d[0] * p->nemQ[0] + d[1] * p->nemQ[1] > 0.0)? 1.0:-1.0;
-	p->nemQ[0] = p->nemQ_old[0] + dt * J_Q * (sgn * d[0] - p->nemQ[0]);
-	p->nemQ[1] = p->nemQ_old[1] + dt * J_Q * (sgn * d[1] - p->nemQ[1]);
-
-	p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
-	p->Q01 = p->nemQ[0] * p->nemQ[1];
+		p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
+		p->Q01 = p->nemQ[0] * p->nemQ[1];
+	}*/
 
 	/*p->Q00 += dt * J_Q * (p->S00 - p->Q00);
 	p->Q01 += dt * J_Q * (p->S01 - p->Q01);

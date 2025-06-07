@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 
 if len(sys.argv)!=6:
@@ -82,7 +82,9 @@ minus_defects_x = []
 plus_defects_y = []
 minus_defects_y = []
 
-theta_degree = []
+theta_degree_QS = []
+theta_degree_QV = []
+theta_degree_SV = []
 
 for i in range(start_frame, end_frame, 1):
 
@@ -198,6 +200,7 @@ for i in range(start_frame, end_frame, 1):
             Z_Sx[int(yy)][int(xx)]=nx
             Z_Sy[int(yy)][int(xx)]=ny
             Z_S00[int(yy)][int(xx)]=S00
+            Z_S01[int(yy)][int(xx)]=S01
 
             Sx = Z_Qx[int(yy)][int(xx)]
             Sy = Z_Qy[int(yy)][int(xx)]
@@ -207,15 +210,15 @@ for i in range(start_frame, end_frame, 1):
             norm1 = sqrt(value_x * value_x + value_y * value_y)
             norm2 = sqrt(Sx * Sx + Sy * Sy)
 
+            if norm1<1e-8 or norm2<1e-8:
+                continue
+
             value_x = value_x / norm1
             value_y = value_y / norm1
             Sx = Sx / norm2
             Sy = Sy / norm2
             angle1 = 0
             angle2 = 0
-
-            if norm1<1e-8 or norm2<1e-8:
-                continue
 
             angle1 = np.acos(value_x * Sx + value_y * Sy)
             if isnan(angle1):
@@ -229,12 +232,11 @@ for i in range(start_frame, end_frame, 1):
                 angle2 = 0
 
             if angle1 < angle2:
-                theta_degree.append(angle1)
+                theta_degree_QS.append(angle1)
                 angle = angle1
             else:
-                theta_degree.append(angle2)
+                theta_degree_QS.append(angle2)
                 angle = angle2
-            Z_S01[int(yy)][int(xx)]=S01
 
         read_line += 1
     Sfile.close()
@@ -270,41 +272,73 @@ for i in range(start_frame, end_frame, 1):
             Z_Vx[int(yy)][int(xx)]=value_x
             Z_Vy[int(yy)][int(xx)]=value_y
 
-            '''
-            Sx = Z_Sx[int(yy)][int(xx)]
-            Sy = Z_Sy[int(yy)][int(xx)]
+            Sx = Z_Qx[int(yy)][int(xx)]
+            Sy = Z_Qy[int(yy)][int(xx)]
 
             norm1 = sqrt(value_x * value_x + value_y * value_y)
             norm2 = sqrt(Sx * Sx + Sy * Sy)
 
-            value_x = value_x / norm1
-            value_y = value_y / norm1
-            Sx = Sx / norm2
-            Sy = Sy / norm2
-            angle1 = 0
-            angle2 = 0
-
-            if norm1<1e-8 or norm2<1e-8:
-                continue
-
-            angle1 = np.acos(value_x * Sx + value_y * Sy)
-            if isnan(angle1):
+            if norm1>1e-8 and norm2>1e-8:
+                value_x = value_x / norm1
+                value_y = value_y / norm1
+                Sx = Sx / norm2
+                Sy = Sy / norm2
                 angle1 = 0
-
-            Sx = -Sx
-            Sy = -Sy
-
-            angle2 = np.acos(value_x * Sx + value_y * Sy)
-            if isnan(angle2):
                 angle2 = 0
 
-            if angle1 < angle2:
-                theta_degree.append(angle1)
-                angle = angle1
-            else:
-                theta_degree.append(angle2)
-                angle = angle2
-            '''
+                angle1 = np.acos(value_x * Sx + value_y * Sy)
+                if isnan(angle1):
+                    angle1 = 0
+
+                Sx = -Sx
+                Sy = -Sy
+
+                angle2 = np.acos(value_x * Sx + value_y * Sy)
+                if isnan(angle2):
+                    angle2 = 0
+
+                if angle1 < angle2:
+                    theta_degree_QV.append(angle1)
+                    angle = angle1
+                else:
+                    theta_degree_QV.append(angle2)
+                    angle = angle2
+
+
+            Sx = Z_Sx[int(yy)][int(xx)]
+            Sy = Z_Sy[int(yy)][int(xx)]
+
+            value_x = Z_Vx[int(yy)][int(xx)]
+            value_y = Z_Vy[int(yy)][int(xx)]
+
+            norm1 = sqrt(value_x * value_x + value_y * value_y)
+            norm2 = sqrt(Sx * Sx + Sy * Sy)
+
+            if norm1>1e-8 and norm2>1e-8:
+                value_x = value_x / norm1
+                value_y = value_y / norm1
+                Sx = Sx / norm2
+                Sy = Sy / norm2
+                angle1 = 0
+                angle2 = 0
+
+                angle1 = np.acos(value_x * Sx + value_y * Sy)
+                if isnan(angle1):
+                    angle1 = 0
+
+                Sx = -Sx
+                Sy = -Sy
+
+                angle2 = np.acos(value_x * Sx + value_y * Sy)
+                if isnan(angle2):
+                    angle2 = 0
+
+                if angle1 < angle2:
+                    theta_degree_SV.append(angle1)
+                    angle = angle1
+                else:
+                    theta_degree_SV.append(angle2)
+                    angle = angle2
 
         read_line += 1
     Vfile.close()
@@ -312,8 +346,20 @@ for i in range(start_frame, end_frame, 1):
 
 
 if variable == 1 or variable == 2:
-    for j in range(len(theta_degree)):
-        print(theta_degree[j])
+    with open('histogram_QS.txt', 'w') as f:
+        for i in range(len(theta_degree_QS)):
+            print(theta_degree_QS[i], file=f)
+
+    with open('histogram_QV.txt', 'w') as f:
+        for i in range(len(theta_degree_QV)):
+            print(theta_degree_QV[i], file=f)
+
+    with open('histogram_SV.txt', 'w') as f:
+        for i in range(len(theta_degree_SV)):
+            print(theta_degree_SV[i], file=f)
+
+    #for j in range(len(theta_degree)):
+        #print(theta_degree_QS[j], theta_degree_QV[j], theta_degree_SV[j])
 
 if variable == 3 or variable == 4:
     '''
@@ -350,7 +396,7 @@ if variable == 3 or variable == 4:
         bins[i] = (bins[i] + bin_width) * 180 / pi
     #plt.stairs(counts, bins)
     plt.plot(bins[0:bin_length-1], probability, '--o')
-    plt.ylabel(r'$P_{QS}(\theta)$', fontsize=18)
+    plt.ylabel(r'$P_{QV}(\theta)$', fontsize=18)
     plt.xlabel(r'$\theta$', fontsize=18)
     #plt.xticks(fontsize=18)
     #plt.yticks(fontsize=18)

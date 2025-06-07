@@ -295,6 +295,7 @@ for line in cfile:
         #theta_nem[pt_num]=asin((nemX*nemY)/0.5)/2
         Q00[pt_num]= 0.5 * (nemX * nemX - nemY * nemY)
         Q01[pt_num]= nemX * nemY
+        print(normNem)
 
         for i in range(start_value,len(words),2):
             site=int(float(words[i]))
@@ -350,8 +351,13 @@ for line in cfile:
         #D_i = np.sqrt(S00 * S00 + S01 * S01)
 
         D_i = np.sqrt(S00 * S00 + S01 * S01)
-        D_major_axis_vec_x = D_i * sqrt((1 + S00/D_i)/2)
-        D_major_axis_vec_y = D_i * np.sign(S01) * sqrt((1 - S00/D_i)/2)
+        if D_i > 0.000000001:
+            D_major_axis_vec_x = D_i * sqrt((1 + S00/D_i)/2)
+            D_major_axis_vec_y = D_i * np.sign(S01) * sqrt((1 - S00/D_i)/2)
+        else:
+            D_major_axis_vec_x = 0
+            D_major_axis_vec_y = 0
+
         #print(2 * D_i)
 
         X, Y = np.meshgrid(x, y)
@@ -368,8 +374,8 @@ for line in cfile:
             else:
                 cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)
 
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 10*nemX, 10*nemY, width=0.5, head_width=0, color='k')
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -10*nemX, -10*nemY, width=0.5, head_width=0, color='k')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*nemX, -3*nemY, width=0.5, head_width=0, color='k')
 
             cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 1*D_major_axis_vec_x, 1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
             cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -1*D_major_axis_vec_x, -1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
