@@ -275,10 +275,16 @@ bool SimBackend::read_next_configuration(bool binary) {
 		p->CoM_old = std::vector<number> {spl_line[2], spl_line[3]};
 		p->set_positions((int)spl_line[4], (int)spl_line[5], (int)spl_line[6], (int)spl_line[7], (int)spl_line[8], Lx);
 
-		p->nemQ = {spl_line[9], spl_line[10]};
-		p->nemQ_old = {p->nemQ[0], p->nemQ[1]};
-		p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
-		p->Q01 = p->nemQ[0] * p->nemQ[1];
+		//p->nemQ = {spl_line[9], spl_line[10]};
+		//p->nemQ_old = {p->nemQ[0], p->nemQ[1]};
+		//p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
+		//p->Q01 = p->nemQ[0] * p->nemQ[1];
+		
+		p->Q00 = spl_line[9];
+		p->Q01 = spl_line[10];
+		p->thetaQ = acos(p->Q00) / 2;
+		p->thetaQ_old = p->thetaQ;
+
 
 		for(k=0; k<p->subSize; k+=1){
 			p->map_sub_to_box[k]=int(spl_line[conf_initial_line+(2*k)]);

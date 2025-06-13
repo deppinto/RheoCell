@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -295,7 +295,7 @@ for line in cfile:
         #theta_nem[pt_num]=asin((nemX*nemY)/0.5)/2
         Q00[pt_num]= 0.5 * (nemX * nemX - nemY * nemY)
         Q01[pt_num]= nemX * nemY
-        print(normNem)
+        #print(normNem)
 
         for i in range(start_value,len(words),2):
             site=int(float(words[i]))

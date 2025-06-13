@@ -5,6 +5,35 @@ import matplotlib.pyplot as plt
 import os.path
 import matplotlib.cm as cm
 from scipy.stats import linregress
+from matplotlib import pyplot as plt
+
+from matplotlib.font_manager import FontProperties
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from matplotlib import font_manager, rcParams
+# Load font from file
+#font_path = "/home/p/pinto/Fonts/Times_New_Roman_Normal.ttf"
+font_path = "/home/p/pinto/Fonts/times.ttf"
+italic_font_path = "/home/p/pinto/Fonts/timesi.ttf"
+bold_font_path = "/home/p/pinto/Fonts/timesbd.ttf"
+
+custom_font = FontProperties(fname=font_path)
+legend_font = FontProperties(fname=font_path, size=12)
+font = font_manager.FontProperties(fname=font_path)
+fonti = font_manager.FontProperties(fname=italic_font_path)
+fontbd = font_manager.FontProperties(fname=bold_font_path)
+
+# Register font with a name
+font_manager.fontManager.addfont(font_path)
+font_manager.fontManager.addfont(italic_font_path)
+font_manager.fontManager.addfont(bold_font_path)
+
+# Set custom mathtext font to match your font
+rcParams['mathtext.fontset'] = 'custom'
+
+# Set roman (upright), italic, and bold versions (all Times New Roman if needed)
+rcParams['mathtext.rm'] = font.get_name()  # e.g. "Times New Roman"
+rcParams['mathtext.it'] = fonti.get_name()
+rcParams['mathtext.bf'] = fontbd.get_name()
 
 
 if len(sys.argv)!=5:
@@ -104,24 +133,24 @@ for line in filedata:
     cores.append(int(float(save[19])))
     wallslip.append(float(save[20]))
     shear_rate.append(float(save[21]))
-    J_Q.append(float(save[22]))
+    #J_Q.append(float(save[22]))
 
     #F.append( sqrt( float(save[10])/( float(save[11]) )) ) 
 
     cont_line+=1
 filedata.close()
 
-
-
+'''
 plt.figure(figsize=(5.452423529,4.089317647))
 for traj in range(start, end):
 #for traj in [5,9]:
     pdf_values = []
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defect_velocity_nematic.txt","r")
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defect_velocity_nematic.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defect_velocity_shape.txt","r")
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QS.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QS.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_SV.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QV.txt","r")
         for line in fileoutput:
             save=line.split()
             pdf_values.append(float(save[0]))
@@ -136,27 +165,39 @@ for traj in range(start, end):
         probability.append(float(counts[i]) / float(total_counts))
         bins[i] = (bins[i] + bin_width) * 180 / pi
     #plt.stairs(counts, bins)
-    #plt.plot(bins[0:bin_length-1], probability, '--o', label=J_Q[traj])
+    plt.plot(bins[0:bin_length-1], probability, '--o', label=J_Q[traj])
     #plt.plot(bins[0:bin_length-1], probability, '--o', label=gamma[traj])
-    plt.plot(bins[0:bin_length-1], probability, '--o', label=omega[traj])
+    #plt.plot(bins[0:bin_length-1], probability, '--o', label=omega[traj])
 
 plt.ylabel(r'$PDF$', fontsize=18)
 #plt.xlabel(r'Velocity $+1/2$', fontsize=18)
-plt.xlabel(r'$\theta_{SV}$', fontsize=18)
+plt.xlabel(r'$\theta_{QV}$', fontsize=18)
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-plt.legend(loc=(0.3, 0.5), ncols=1, frameon=False)
+#plt.legend(loc=(0.3, 0.6), ncols=1, frameon=False)
 #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_SV_JQ.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_SV_JQ.svg", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_VQ_JQ.png", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_VQ_JQ.svg", transparent=True)
 plt.show()
 exit (1)
-
+'''
 
 # read output file
 n_holes = np.zeros(end-start)
 lifetime_holes = np.zeros(end-start)
 max_area_holes = np.zeros(end-start)
 avg_FTLE = np.zeros(end-start)
+weibull_sigma_0 = []
+
+
+max_stress_all = []
+vortex_all = []
+survival_all_y = []
+survival_all_x = []
+logsurvival_all_y = []
+logsurvival_all_x = []
+
+st_all_x = []
+st_all_y = []
 
 #voids_histogram_area.txt  voids_histogram_circularity.txt  voids_histogram_radius_speed_time.txt  voids_histogram_radius_speed.txt  voids_histogram_radius.txt  voids_stats.txt
 
@@ -304,6 +345,7 @@ for traj in range(start, end):
         fileoutput.close()
         '''
 
+
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_radius_speed.txt","r")
         for line in fileoutput:
             save=line.split()
@@ -398,6 +440,7 @@ for traj in range(start, end):
             nh += 1
         #print(nn, nh)
 
+
     if count_jobs > 0:
         area_histogram[:] = area_histogram[:] / count_jobs
         circularity_histogram[:] = circularity_histogram[:] / count_jobs
@@ -481,7 +524,9 @@ for traj in range(start, end):
 
         ax[0,0].plot(avg_stress_histogram, '-o')
         ax[0,1].plot(max_stress_histogram, '-s')
+        max_stress_all.append(max_stress_histogram)
         ax[1,0].plot(avg_distance_velocity_defects, '-^', label=nemself[traj])
+        vortex_all.append(avg_distance_velocity_defects)
 
         xx = x_sp
         yy = np.zeros(len(x_sp))
@@ -493,15 +538,18 @@ for traj in range(start, end):
                 if yy[q] < 0.065 and final_bin == -1:
                     final_bin = q
 
-        ax[1,2].plot(xx, yy, '-o')
-        final_bin=-3
+        #ax[1,2].plot(xx, yy, '-o')
+        st_all_x.append(xx)
+        st_all_y.append(yy)
+        #final_bin=-3
         if final_bin > -2:
             S_sigma = yy[1:final_bin]
             S_sigma[S_sigma <= 1e-10] = 1e-10
-            lnlnS = np.log(-np.log(S_sigma))
-            #lnlnS = np.log(S_sigma)
+            #lnlnS = np.log(-np.log(S_sigma))
+            lnlnS = np.log(S_sigma)
             lnsigma = xx[1:final_bin]
-            lnsigma = np.log(lnsigma)
+            lnsigma = np.array(lnsigma)
+            #lnsigma = np.log(lnsigma)
             mask = ~np.isnan(lnlnS)
             slope, intercept, _, _, _ = linregress(lnsigma[mask], lnlnS[mask])
             m = slope
@@ -531,8 +579,10 @@ for traj in range(start, end):
                     final_bin = q
 
         
-        #ax[1,1].plot(xx, yy, '-v')
-        #final_bin = -3
+        ax[1,1].plot(xx, yy, '-v')
+        survival_all_y.append(yy)
+        survival_all_x.append(xx)
+        final_bin = -3
         if final_bin > -2:
             S_sigma = yy[1:final_bin]
             S_sigma[S_sigma <= 1e-10] = 1e-10
@@ -547,6 +597,7 @@ for traj in range(start, end):
             sigma_0 = np.exp(-intercept / slope) 
             print(f"Weibull shape (m): {m:.2f}")
             print(f"Weibull scale (σ₀): {sigma_0:.5f}")
+            weibull_sigma_0.append(sigma_0)
 
             #for q in range(len(yy)):
                 #if yy[q] > 0:
@@ -555,12 +606,17 @@ for traj in range(start, end):
             #ax[1,1].plot(xx, yy, '-v')
             #ax[1,1].plot(lnsigma, lnlnS, '-v')
             ax[1,1].plot(sigma, minuslnS, '-v')
+            logsurvival_all_y.append(minuslnS)
+            logsurvival_all_x.append(sigma)
+
 
             line_plot = []
             if traj == end - 1:
                 for q in range(len(lnsigma)):
                     line_plot.append(np.exp(2 * lnsigma[q] + intercept - 3))
                 ax[1,1].plot(sigma, line_plot, '-')
+                logsurvival_all_y.append(line_plot)
+                logsurvival_all_x.append(sigma)
 
 
 '''
@@ -675,7 +731,42 @@ if variable==1:
     #plt.xscale('log')
     #plt.ylabel('# voids', fontsize=18)
     #plt.xlabel('P', fontsize=18)
+    #plt.show()
+    plt.close()
+
+    '''
+    plt.figure(figsize=(3*40.179/25.4, 3*25.142/25.4))
+    plt.plot(nemself[0:5], max_area_holes[0:5], '--o', color='firebrick')
+    plt.plot(nemself[5:10], max_area_holes[5:10], '--^', color='green')
+    plt.plot(nemself[10:15], max_area_holes[10:15], '--s', color='royalblue')
+    plt.legend(['0.1', '0.01', '0.001'], prop={'family':'Times New Roman', 'size':'12'}, loc=(0.1, 0.6), ncols=1, frameon=False)
+    plt.ylabel(r'$A_{max}/L^2$', fontname='Times New Roman', fontsize=18)
+    plt.xlabel(r'$\zeta$', fontname='Times New Roman', fontsize=18)
+    plt.xticks(fontname='Times New Roman', fontsize=18)
+    plt.yticks(fontname='Times New Roman', fontsize=18)
+    plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3a.png", transparent=True)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3a.svg", transparent=True)
     plt.show()
+    '''
+
+    '''
+    plt.figure(figsize=(3*40.179/25.4, 3*25.142/25.4))
+    plt.plot(nemself[0:5], n_holes[0:5], '--o', color='firebrick')
+    plt.plot(nemself[5:10], n_holes[5:10], '--^', color='green')
+    plt.plot(nemself[10:15], n_holes[10:15], '--s', color='royalblue')
+    #plt.legend(['0.1', '0.01', '0.001'], prop={'family':'Times New Roman', 'size':'12'}, loc=(0.1, 0.6), ncols=1, frameon=False)
+    plt.ylabel(r'$N_{holes}$', fontname='Times New Roman', fontsize=18)
+    plt.xlabel(r'$\zeta$', fontname='Times New Roman', fontsize=18)
+    plt.xticks(fontname='Times New Roman', fontsize=18)
+    plt.yticks(fontname='Times New Roman', fontsize=18)
+    plt.ylim(-0.1,2.7)
+    plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3b.png", transparent=True)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3b.svg", transparent=True)
+    plt.show()
+    '''
+
     exit(1)
 
 if variable == 3:
@@ -713,6 +804,135 @@ if variable == 3:
     fig_histograms.delaxes(ax[0,2])
     fig_histograms.legend(loc=(0.7, 0.6), ncols=2, frameon=False)
     plt.show()
+    #plt.close()
+
+
+    #plt.figure(figsize=(5.452423529,4.089317647))
+    #plt.figure(figsize=(3*40.179/25.4, 3*25.142/25.4))
+    #y_values = [weibull_sigma_0[i] for i in range(len(weibull_sigma_0))] 
+    #x_values = [sqrt(1/nemself[i]) for i in range(start, end)] 
+    #x_values = [nemself[i] for i in range(start, end)] 
+    #plt.plot(x_values[0:5], y_values[0:5], '--o')
+    #plt.plot(x_values[5:10], y_values[5:10], '--s')
+
+    #y_values = [weibull_sigma_0[i] for i in range(len(weibull_sigma_0))] 
+    #x_values = [fric[i] for i in range(start, end)] 
+    #plt.plot(x_values, y_values, '--o')
+    #plt.xscale('log')
+
+    '''
+    plt.figure(figsize=(3*40.179/25.4, 3*25.142/25.4))
+    plt.plot(max_stress_all[11], '--o', color='firebrick')
+    plt.plot(max_stress_all[10], '--^', color='green')
+    plt.plot(max_stress_all[9], '--s', color='royalblue')
+    plt.plot(max_stress_all[8], '--p', color='goldenrod')
+    plt.plot(max_stress_all[7], '--h', color='peru')
+    plt.plot(max_stress_all[5], '--8', color='darkviolet')
+    plt.plot(max_stress_all[3], '--D', color='gray')
+    plt.legend(['0.001', '0.0025', '0.005', '0.0075', '0.01', '0.05', '0.1'], prop={'family':'Times New Roman', 'size':'12'}, loc=(0.02, 0.05), ncols=3, frameon=False)
+    plt.ylabel(r'$\dot{\varepsilon}_{hole}/\dot{\varepsilon}_{max}$', fontname='Times New Roman', fontsize=18)
+    plt.xlabel(r'$t_{hole}-t$', fontname='Times New Roman', fontsize=18)
+    plt.xticks(fontname='Times New Roman', fontsize=18)
+    plt.yticks(fontname='Times New Roman', fontsize=18)
+    plt.subplots_adjust(left=0.2, bottom=0.22, right=0.975, top=0.99)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig1d.png", transparent=True)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig1d.svg", transparent=True)
+    plt.show()
+    '''
+
+
+    '''
+    plt.figure(figsize=(3*40.179/25.4, 3*25.142/25.4))
+    plt.plot(vortex_all[11], '--o', color='firebrick')
+    plt.plot(vortex_all[10], '--^', color='green')
+    plt.plot(vortex_all[9], '--s', color='royalblue')
+    plt.plot(vortex_all[8], '--p', color='goldenrod')
+    plt.plot(vortex_all[7], '--h', color='peru')
+    plt.plot(vortex_all[5], '--8', color='purple')
+    plt.plot(vortex_all[3], '--D', color='gray')
+    #plt.legend(['0.001', '0.0025', '0.005', '0.0075', '0.01', '0.05', '0.1'], prop=legend_font, loc=(0.02, 0.05), ncols=3, frameon=False)
+    plt.ylabel(r'$r_{min}^{(+1 charge)}$', fontname='Times New Roman', fontsize=18)
+    plt.xlabel(r'$t_{hole}-t$', fontname='Times New Roman', fontsize=18)
+    plt.xticks(fontname='Times New Roman', fontsize=18)
+    plt.yticks(fontname='Times New Roman', fontsize=18)
+    plt.subplots_adjust(left=0.2, bottom=0.22, right=0.975, top=0.99)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig1c.png", transparent=True)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig1c.svg", transparent=True)
+    plt.show()
+    '''
+
+    '''
+    plt.figure(figsize=(5.452423529,4.089317647))
+    plt.plot(logsurvival_all_x[2], logsurvival_all_y[2], ':o', color='firebrick', markerfacecolor='none')
+    plt.plot(logsurvival_all_x[3], logsurvival_all_y[3], ':^', color='green', markerfacecolor='none')
+    plt.plot(logsurvival_all_x[4], logsurvival_all_y[4], ':s', color='royalblue', markerfacecolor='none')
+    plt.plot(logsurvival_all_x[5], logsurvival_all_y[5], '--p', color='goldenrod', label='0.1')
+    plt.plot(logsurvival_all_x[6], logsurvival_all_y[6], '--h', color='peru', label='0.2')
+    plt.plot(logsurvival_all_x[7], logsurvival_all_y[7], '--o', color='firebrick', label='0.3')
+    plt.plot(logsurvival_all_x[8], logsurvival_all_y[8], '--^', color='green', label='0.4')
+    plt.plot(logsurvival_all_x[9], logsurvival_all_y[9], '--s', color='royalblue', label='0.5')
+    plt.plot(logsurvival_all_x[10], logsurvival_all_y[10], '-', color='black')
+    plt.plot([0.00213482, 0.00248559], [0.122669, 0.122669], 'k-')  # horizontal
+    plt.plot([0.00248559, 0.00248559], [0.122669, 0.184225], 'k-')  # vertical
+    plt.text(0.00213482 + (0.00248559 - 0.00213482), 0.122669 -  (0.184225 - 0.122669), "2", fontsize=18, fontname='Times New Roman', ha='left', va='bottom')
+    #plt.plot(logsurvival_all_x[1], logsurvival_all_y[1], '--o', color='firebrick')
+    #plt.plot(logsurvival_all_x[0], logsurvival_all_y[0], '--o', color='firebrick')
+    plt.legend(prop={'family':'Times New Roman', 'size':'12'}, loc=(0.02, 0.7), ncols=2, frameon=False)
+    plt.ylabel(r'$-log(S(\dot{\varepsilon}))$', fontname='Times New Roman', fontsize=18)
+    plt.xlabel(r'$\dot{\varepsilon}$', fontname='Times New Roman', fontsize=18)
+    plt.xticks(fontname='Times New Roman', fontsize=18)
+    plt.yticks(fontname='Times New Roman',  fontsize=18)
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.ylim([1e-3, 5])
+    plt.subplots_adjust(left=0.2, bottom=0.20, right=0.975, top=0.97)
+    fig = plt.gcf()
+    ax = plt.gca()
+    inset_ax = fig.add_axes([0.675, 0.27, 0.28, 0.24])
+    inset_ax.plot(survival_all_x[2], survival_all_y[2], ':o', color='firebrick', ms=3, markerfacecolor='none')
+    inset_ax.plot(survival_all_x[3], survival_all_y[3], ':^', color='green', ms=3, markerfacecolor='none')
+    inset_ax.plot(survival_all_x[4], survival_all_y[4], ':s', color='royalblue', ms=3, markerfacecolor='none')
+    inset_ax.plot(survival_all_x[5], survival_all_y[5], '--p', color='goldenrod', ms=3)
+    inset_ax.plot(survival_all_x[6], survival_all_y[6], '--h', color='peru', ms=3)
+    inset_ax.plot(survival_all_x[7], survival_all_y[7], '--o', color='firebrick', ms=3)
+    inset_ax.plot(survival_all_x[8], survival_all_y[8], '--^', color='green', ms=3)
+    inset_ax.plot(survival_all_x[9], survival_all_y[9], '--s', color='royalblue', ms=3)
+    inset_ax.set_ylabel(r'$S(\dot{\varepsilon})$', fontname='Times New Roman', fontsize=12)
+    for label in inset_ax.get_xticklabels():
+        label.set_fontproperties('Times New Roman')
+        label.set_fontsize(12)
+    for label in inset_ax.get_yticklabels():
+        label.set_fontproperties('Times New Roman')
+        label.set_fontsize(12)
+
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig2.png", transparent=True)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig2.svg", transparent=True)
+    plt.show()
+    '''
+
+    '''
+    #plt.figure(figsize=(3*40.179/25.4, 3*25.142/25.4))
+    plt.figure(figsize=(2*86/25.4, 2*38.3/25.4))
+    plt.plot(st_all_x[0], st_all_y[0], ':o', color='firebrick', label='0.3')
+    plt.plot(st_all_x[1], st_all_y[1], ':^', color='green', label='0.4')
+    plt.plot(st_all_x[2], st_all_y[2], ':s', color='royalblue', label='0.5')
+    plt.plot(st_all_x[3], st_all_y[3], '--o', color='firebrick', markerfacecolor='none')
+    plt.plot(st_all_x[4], st_all_y[4], '--^', color='green', markerfacecolor='none')
+    plt.plot(st_all_x[5], st_all_y[5], '--s', color='royalblue', markerfacecolor='none')
+    #plt.plot(st_all_x[6], st_all_y[6], ':o', color='firebrick', label='0.3')
+    #plt.plot(st_all_x[7], st_all_y[7], ':^', color='green', label='0.4')
+    #plt.plot(st_all_x[8], st_all_y[8], ':s', color='royalblue', label='0.5')
+    plt.legend(prop={'family':'Times New Roman', 'size':'12'}, loc=(0.2, 0.85), ncols=3, frameon=False)
+    plt.ylabel(r'$S(\tau_{hole})$', fontname='Times New Roman', fontsize=18)
+    plt.xlabel(r'$\tau_{hole}/t_{total}$', fontname='Times New Roman', fontsize=18)
+    plt.xticks(fontname='Times New Roman', fontsize=18)
+    plt.yticks(fontname='Times New Roman', fontsize=18)
+    plt.subplots_adjust(left=0.15, bottom=0.22, right=0.965, top=0.99)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3c.png", transparent=True)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3c.svg", transparent=True)
+    plt.show()
+    '''
+
     exit(1)
 
 plt.close()
@@ -724,19 +944,24 @@ if variable == 4:
     PD_friction = [0.1, 0.1, 0.1, 0.1, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.001, 0.001, 0.001, 0.001, 0.001, 0.75, 0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01, 0.0075, 0.005, 0.0025, 0.001, 0.05, 0.05, 0.05, 0.05, 0.05, 0.025, 0.025, 0.025, 0.025, 0.025, 0.0075, 0.0075, 0.0075, 0.0075, 0.0075, 0.005, 0.005, 0.005, 0.005, 0.005, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025]
     PD_phase = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 2, 2, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 2, 0, 0, 1, 1, 2, 0, 1, 1, 2, 2]
 
-    colors = cm.Set1(np.linspace(0, 1, 9))
-    for i in range(len(PD_friction)):
-        plt.scatter(PD_activity[i], PD_friction[i], color=colors[PD_phase[i]])
+    #colors = cm.Set1(np.linspace(0, 1, 9))
+    colors = ['firebrick', 'royalblue', 'green']
+    markers = ['o', 's', '^']
 
-    plt.ylabel(r'$\chi$', fontsize=18)
-    plt.xlabel(r'$\zeta$', fontsize=18)
-    plt.xticks(fontsize=18)
-    plt.yticks(fontsize=18)
+    for i in range(len(PD_friction)):
+        plt.scatter(PD_activity[i], PD_friction[i], color=colors[PD_phase[i]], marker=markers[PD_phase[i]])
+
+    plt.ylabel(r'$\chi$', fontsize=18, fontname='Times New Roman')
+    plt.xlabel(r'$\zeta$', fontsize=18, fontname='Times New Roman')
+    plt.xticks(fontsize=18, fontname='Times New Roman')
+    plt.yticks(fontsize=18, fontname='Times New Roman')
     plt.xticks(np.arange(0.1,0.6,0.1))
     plt.yscale('log')
     plt.ylim([0.0007, 0.15])
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results7/Phase_diagram_1.png", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results7/Phase_diagram_1.svg", transparent=True)
+    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results7/Phase_diagram_1.png", transparent=True)
+    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results7/Phase_diagram_1.svg", transparent=True)
+    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3d.png", transparent=True)
+    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3d.svg", transparent=True)
     plt.show()
 
     

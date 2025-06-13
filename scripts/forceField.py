@@ -118,7 +118,7 @@ for line in cfile:
         dvydy = (Z_y[ynext][x1] - Z_y[yprev][x1])/2
         strain[y1][x1] = -0.5 * (dvxdx + dvydy)
 
-        modulus[y1][x1] = sqrt(Z_x[y1][x1] * Z_x[y1][x1] + Z_y[y1][x1] * Z_y[y1][x1])
+        modulus[y1][x1] = 0.02003622738483759 - sqrt(Z_x[y1][x1] * Z_x[y1][x1] + Z_y[y1][x1] * Z_y[y1][x1])
 
     #z_min, z_max = -np.abs(Z).max(), np.abs(Z).max()
     #z_min, z_max = -np.abs(vorticity).max(), np.abs(vorticity).max()

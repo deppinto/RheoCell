@@ -69,8 +69,13 @@ for line in cfile:
     corner=int(float(words[6]))
     corner_x=float(words[7])
     corner_y=float(words[8])
-    nemX=float(words[9])
-    nemY=float(words[10])
+
+    S = sqrt(float(words[9])**2 + float(words[10])**2)
+    nemX = sqrt((1 + float(words[9])/S)/2)
+    nemY = np.sign(float(words[10]))*sqrt((1 - float(words[9])/S)/2)
+    #nemX=float(words[9])
+    #nemY=float(words[10])
+
     for i in range(start_value,len(words),2):
         site=int(float(words[i]))
         value=float(words[i+1])

@@ -89,8 +89,8 @@ void MultiPhaseField::init(int Lx, int Ly) {
     	number ny = sgn*sqrt((1 - Q00/nemQ_mod)/2);
 	nemQ = {nx, ny};
 	nemQ_old = {nx, ny};
-	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
-	Q01 = nemQ[0] * nemQ[1];
+	//Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
+	//Q01 = nemQ[0] * nemQ[1];
 
 	//Fpassive= std::vector<number> {0.,0.};
 	//Factive= std::vector<number> {0.,0.};
@@ -132,8 +132,8 @@ void MultiPhaseField::init() {
     	number ny = sgn*sqrt((1 - Q00/nemQ_mod)/2);
 	nemQ = {nx, ny};
 	nemQ_old = {nx, ny};
-	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
-	Q01 = nemQ[0] * nemQ[1];
+	//Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
+	//Q01 = nemQ[0] * nemQ[1];
 
 	//minor bookkeeping
 	area=0;

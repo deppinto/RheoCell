@@ -217,13 +217,13 @@ for i in range(start_frame, end_frame, 1):
 
     vecfield_nx = [[0. for q in range(0, LLX)] for p in range(0, LLY)]
     vecfield_ny = [[0. for q in range(0, LLX)] for p in range(0, LLY)]
-    vecfield_nx = Z_Sx
-    vecfield_ny = Z_Sy
+    vecfield_nx = Z_Qx
+    vecfield_ny = Z_Qy
 
     vecfield_Q00 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
     vecfield_Q01 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
-    vecfield_Q00 = Z_S00
-    vecfield_Q01 = Z_S01
+    vecfield_Q00 = Z_Q00
+    vecfield_Q01 = Z_Q01
 
     winding_number = [[0. for q in range(0, LLX)] for p in range(0, LLY)]
     for p in range(0, LLY):
@@ -359,13 +359,13 @@ if variable == 1 or variable == 2:
         print(velocity_defects_plus[j])
 
 if variable == 3 or variable == 4:
-    '''
+
     plt.figure(figsize=(5.452423529,4.089317647))
     counts, bins = np.histogram(velocity_defects_plus, bins=20)
     bin_width = abs(bins[1] - bins[0]) / 2
     bin_length = len(bins)
     total_counts = sum(counts)
-    print(total_counts)
+    #print(total_counts)
     probability = []
     for i in range(len(counts)):
         probability.append(float(counts[i]) / float(total_counts))
@@ -379,8 +379,9 @@ if variable == 3 or variable == 4:
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
     #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
     plt.show()
-    '''
 
+
+    '''
     plt.figure(figsize=(5.452423529,4.089317647))
     counts, bins = np.histogram(beta_tail_degree, bins=20)
     bin_width = abs(bins[1] - bins[0]) / 2
@@ -400,7 +401,4 @@ if variable == 3 or variable == 4:
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
     #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
     plt.show()
-
-
-
-
+    '''
