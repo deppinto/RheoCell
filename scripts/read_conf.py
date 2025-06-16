@@ -75,6 +75,8 @@ for line in cfile:
     nemY = np.sign(float(words[10]))*sqrt((1 - float(words[9])/S)/2)
     #nemX=float(words[9])
     #nemY=float(words[10])
+    #nemX = cos(0.5 * acos(float(words[9])))
+    #nemY = sin(0.5 * acos(float(words[9])))
 
     for i in range(start_value,len(words),2):
         site=int(float(words[i]))

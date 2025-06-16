@@ -29,6 +29,10 @@ void LEBcMultiPhaseField::resizing() {
 	fieldDX.resize(subSize);
 	fieldDY.resize(subSize);	
 	laplacianPhi.resize(subSize);	
+
+	quarticPhi_x.resize(subSize);	
+	quarticPhi_y.resize(subSize);	
+
 	freeEnergy.resize(subSize);
 	fieldScalar_old.resize(subSize);
 	dfield_old.resize(subSize);
@@ -86,6 +90,7 @@ void LEBcMultiPhaseField::init(int Lx, int Ly) {
 	Q01 = nemQ[0] * nemQ[1];
 
 	area=0;
+	perimeter=0;
 	sumF=0;
 
 	offset.resize(2);
@@ -132,6 +137,7 @@ void LEBcMultiPhaseField::init() {
 	tracer_particle_old=std::vector<number>(2, 0);*/
 
 	area=0;
+	perimeter=0;
 	int x,y;
 	for(int i=0; i<subSize; i++){
 		y=LsubY/2-i/LsubX;
@@ -455,6 +461,7 @@ void LEBcMultiPhaseField::set_properties_to_zero() {
 	x_sub_left = LsubX;
 	y_sub_bottom = LsubY;
 	area=0;
+	perimeter=0;
 	sumF=0;
 	CoM[0] = 0.; 
 	CoM[1] = 0.;

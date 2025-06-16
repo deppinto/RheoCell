@@ -73,10 +73,10 @@ for line in cfile:
         value_passive_x=float(words[i+4])
         value_passive_y=float(words[i+5])
 
-        value_x = value_active_x
-        value_y = value_active_y
-        #value_x = value_passive_x
-        #value_y = value_passive_y
+        #value_x = value_active_x
+        #value_y = value_active_y
+        value_x = value_passive_x
+        value_y = value_passive_y
         #value_x = value_friction_x
         #value_y = value_friction_y
         Z_x[int(yy)][int(xx)]=value_x

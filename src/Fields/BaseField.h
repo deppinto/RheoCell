@@ -101,6 +101,8 @@ public:
 	std::vector<number> fieldDX;
 	std::vector<number> fieldDY;
 	std::vector<number> laplacianPhi;
+	std::vector<number> quarticPhi_x;
+	std::vector<number> quarticPhi_y;
 	//derivatives of the field for the shape free energy
 	std::vector<number> Phi00;
 	std::vector<number> Phi01;
@@ -163,6 +165,7 @@ public:
 	//general properties of fields
         number area;
         number area_old;
+        number perimeter;
         number sumF;
         number sumF_old;
 };

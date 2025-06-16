@@ -282,7 +282,7 @@ bool SimBackend::read_next_configuration(bool binary) {
 		
 		p->Q00 = spl_line[9];
 		p->Q01 = spl_line[10];
-		p->thetaQ = acos(p->Q00) / 2;
+		p->thetaQ = 0.5 * atan2(2 * p->Q01, 2 * p->Q00);
 		p->thetaQ_old = p->thetaQ;
 
 

@@ -228,6 +228,7 @@ void LEBcWetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 							tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], store_site_velocity_index[i+other_site_box*store_max_size], (-friction_cell * weight_values[j])));
 						}
 
+
 					}
 				}
 
@@ -286,6 +287,10 @@ void LEBcWetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sum
 	}
 	BaseInteraction::updateFieldProperties(p, q, k);
 
+	p->perimeter += p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q];
+	p->quarticPhi_x[q] = (p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q]) * p->fieldDX[q]; 
+	p->quarticPhi_y[q] = (p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q]) * p->fieldDY[q]; 
+
 
 	if(size_store_site_velocity_index[k]>=store_max_size){
 		for(int m=0; m<size_store_site_velocity_index[k];m++){
@@ -328,8 +333,20 @@ number LEBcWetModel::f_interaction(BaseField *p, int q) {
 	number suppress = (laplacianSquare-lsquare)/sqrt(1+(laplacianSquare-lsquare)*(laplacianSquare-lsquare));
 	number Adh = - 4*lambda*omega*suppress*p->fieldScalar[q];
 
+
+	//Perimeter term
+	number p0 = 5; //2 * PI * 8;
+	number beta = mu;
+	number P = 4*(beta/p0) * (1 - p->perimeter/p0) * p->laplacianPhi[q];
+	
+	//number beta = 2*lambda*gamma*100;
+	//number P = - beta * ( 0.5 * (p->quarticPhi_x[p->neighbors_sub[5+q*9]] - p->quarticPhi_x[p->neighbors_sub[3+q*9]]) + 0.5 * (p->quarticPhi_y[p->neighbors_sub[7+q*9]] - p->quarticPhi_y[p->neighbors_sub[1+q*9]]) );
+	//number P = 0;
+
+
+
 	// delta F / delta phi_i
-	number V = CH + A + Rep + Adh;
+	number V = CH + A + Rep + Adh + P;
 	p->freeEnergy[q] += V;
 	p->Pressure[q] = Rep - CH - A;
 
@@ -358,7 +375,7 @@ void LEBcWetModel::calc_internal_forces(BaseField *p, int q) {
 	p->Factive_y[q] = zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
 
 	if(box->getWalls(k)<wall_slip){
-		vec_f_x[q+field_start_index[p->index]] = f_passive_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		vec_f_x[q+field_start_index[p->index]] = f_passive_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter; //+ (1-p->fieldScalar[q]) * shear_rate * (((double)p->map_sub_to_box_y[q] + 0.5) - 0.5 * (double)box->getYsize());
 		vec_f_y[q+field_start_index[p->index]] = f_passive_y + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 	}
 	else{

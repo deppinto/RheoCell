@@ -289,12 +289,15 @@ for line in cfile:
         cornerSite_x[pt_num]=int(float(words[7]))
         cornerSite_y[pt_num]=int(float(words[8]))
 
-        nemX=float(words[9])
-        nemY=float(words[10])
-        normNem = sqrt(nemX * nemX + nemY * nemY)
+        nemQ_mod = sqrt(float(words[9])**2 + float(words[10])**2)
+        nemX = sqrt((1 + float(words[9])/nemQ_mod)/2)
+        nemY = np.sign(float(words[10]))*sqrt((1 - float(words[9])/nemQ_mod)/2)
+        Q00[pt_num]=float(words[9])
+        Q01[pt_num]=float(words[10])
+        #normNem = sqrt(nemX * nemX + nemY * nemY)
         #theta_nem[pt_num]=asin((nemX*nemY)/0.5)/2
-        Q00[pt_num]= 0.5 * (nemX * nemX - nemY * nemY)
-        Q01[pt_num]= nemX * nemY
+        #Q00[pt_num]= 0.5 * (nemX * nemX - nemY * nemY)
+        #Q01[pt_num]= nemX * nemY
         #print(normNem)
 
         for i in range(start_value,len(words),2):
@@ -377,8 +380,8 @@ for line in cfile:
             cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
             cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*nemX, -3*nemY, width=0.5, head_width=0, color='k')
 
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 1*D_major_axis_vec_x, 1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -1*D_major_axis_vec_x, -1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*D_major_axis_vec_x, 3*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*D_major_axis_vec_x, -3*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
 
         #increment phase field index
         pt_num+=1
