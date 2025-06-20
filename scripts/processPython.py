@@ -345,7 +345,7 @@ for traj in range(start, end):
         fileoutput.close()
         '''
 
-
+        '''
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_radius_speed.txt","r")
         for line in fileoutput:
             save=line.split()
@@ -439,7 +439,7 @@ for traj in range(start, end):
             strain_hist[old_index:strain_bins] += 1
             nh += 1
         #print(nn, nh)
-
+        '''
 
     if count_jobs > 0:
         area_histogram[:] = area_histogram[:] / count_jobs
@@ -579,7 +579,7 @@ for traj in range(start, end):
                     final_bin = q
 
         
-        ax[1,1].plot(xx, yy, '-v')
+        #ax[1,1].plot(xx, yy, '-v')
         survival_all_y.append(yy)
         survival_all_x.append(xx)
         final_bin = -3
@@ -739,7 +739,8 @@ if variable==1:
     plt.plot(nemself[0:5], max_area_holes[0:5], '--o', color='firebrick')
     plt.plot(nemself[5:10], max_area_holes[5:10], '--^', color='green')
     plt.plot(nemself[10:15], max_area_holes[10:15], '--s', color='royalblue')
-    plt.legend(['0.1', '0.01', '0.001'], prop={'family':'Times New Roman', 'size':'12'}, loc=(0.1, 0.6), ncols=1, frameon=False)
+    plt.legend(['0.1', '0.01', '0.001'], prop={'family':'Times New Roman', 'size':'12'}, loc=(0.05, 0.5), ncols=1, frameon=False)
+    plt.text(0.145, 0.185, r'$\chi$', fontsize=18, fontname="Times New Roman")
     plt.ylabel(r'$A_{max}/L^2$', fontname='Times New Roman', fontsize=18)
     plt.xlabel(r'$\zeta$', fontname='Times New Roman', fontsize=18)
     plt.xticks(fontname='Times New Roman', fontsize=18)
@@ -749,6 +750,7 @@ if variable==1:
     plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3a.svg", transparent=True)
     plt.show()
     '''
+
 
     '''
     plt.figure(figsize=(3*40.179/25.4, 3*25.142/25.4))
@@ -803,8 +805,8 @@ if variable == 3:
     #ax[1,1].plot(gamma[4:8], avg_FTLE[0:4], '--p')
     fig_histograms.delaxes(ax[0,2])
     fig_histograms.legend(loc=(0.7, 0.6), ncols=2, frameon=False)
-    plt.show()
-    #plt.close()
+    #plt.show()
+    plt.close()
 
 
     #plt.figure(figsize=(5.452423529,4.089317647))
@@ -829,7 +831,8 @@ if variable == 3:
     plt.plot(max_stress_all[7], '--h', color='peru')
     plt.plot(max_stress_all[5], '--8', color='darkviolet')
     plt.plot(max_stress_all[3], '--D', color='gray')
-    plt.legend(['0.001', '0.0025', '0.005', '0.0075', '0.01', '0.05', '0.1'], prop={'family':'Times New Roman', 'size':'12'}, loc=(0.02, 0.05), ncols=3, frameon=False)
+    plt.legend(['0.001', '0.0025', '0.005', '0.0075', '0.01', '0.05', '0.1'], prop={'family':'Times New Roman', 'size':'12'}, loc=(0.08, 0.05), ncols=3, frameon=False)
+    plt.text(-0.2, 0.185, r'$\chi$', fontsize=18, fontname="Times New Roman")
     plt.ylabel(r'$\dot{\varepsilon}_{hole}/\dot{\varepsilon}_{max}$', fontname='Times New Roman', fontsize=18)
     plt.xlabel(r'$t_{hole}-t$', fontname='Times New Roman', fontsize=18)
     plt.xticks(fontname='Times New Roman', fontsize=18)
@@ -839,7 +842,6 @@ if variable == 3:
     plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig1d.svg", transparent=True)
     plt.show()
     '''
-
 
     '''
     plt.figure(figsize=(3*40.179/25.4, 3*25.142/25.4))
@@ -877,7 +879,8 @@ if variable == 3:
     plt.text(0.00213482 + (0.00248559 - 0.00213482), 0.122669 -  (0.184225 - 0.122669), "2", fontsize=18, fontname='Times New Roman', ha='left', va='bottom')
     #plt.plot(logsurvival_all_x[1], logsurvival_all_y[1], '--o', color='firebrick')
     #plt.plot(logsurvival_all_x[0], logsurvival_all_y[0], '--o', color='firebrick')
-    plt.legend(prop={'family':'Times New Roman', 'size':'12'}, loc=(0.02, 0.7), ncols=2, frameon=False)
+    plt.text(0.00034, 2.20, r'$\zeta$', fontsize=18, fontname="Times New Roman")
+    plt.legend(prop={'family':'Times New Roman', 'size':'12'}, loc=(0.02, 0.65), ncols=2, frameon=False)
     plt.ylabel(r'$-log(S(\dot{\varepsilon}))$', fontname='Times New Roman', fontsize=18)
     plt.xlabel(r'$\dot{\varepsilon}$', fontname='Times New Roman', fontsize=18)
     plt.xticks(fontname='Times New Roman', fontsize=18)
@@ -922,7 +925,8 @@ if variable == 3:
     #plt.plot(st_all_x[6], st_all_y[6], ':o', color='firebrick', label='0.3')
     #plt.plot(st_all_x[7], st_all_y[7], ':^', color='green', label='0.4')
     #plt.plot(st_all_x[8], st_all_y[8], ':s', color='royalblue', label='0.5')
-    plt.legend(prop={'family':'Times New Roman', 'size':'12'}, loc=(0.2, 0.85), ncols=3, frameon=False)
+    plt.text(0.33, 0.875, r'$\zeta$', fontsize=18, fontname="Times New Roman")
+    plt.legend(prop={'family':'Times New Roman', 'size':'12'}, loc=(0.4, 0.8), ncols=3, frameon=False)
     plt.ylabel(r'$S(\tau_{hole})$', fontname='Times New Roman', fontsize=18)
     plt.xlabel(r'$\tau_{hole}/t_{total}$', fontname='Times New Roman', fontsize=18)
     plt.xticks(fontname='Times New Roman', fontsize=18)
@@ -947,15 +951,25 @@ if variable == 4:
     #colors = cm.Set1(np.linspace(0, 1, 9))
     colors = ['firebrick', 'royalblue', 'green']
     markers = ['o', 's', '^']
+    labnames = ['No holes', 'Short-lived', 'Long-lived']
 
     for i in range(len(PD_friction)):
-        plt.scatter(PD_activity[i], PD_friction[i], color=colors[PD_phase[i]], marker=markers[PD_phase[i]])
+        if i == 0:
+            plt.scatter(PD_activity[i], PD_friction[i], color=colors[PD_phase[i]], marker=markers[PD_phase[i]], label=labnames[0])
+        elif i == 7:
+            plt.scatter(PD_activity[i], PD_friction[i], color=colors[PD_phase[i]], marker=markers[PD_phase[i]], label=labnames[1])
+        elif i == 13:
+            plt.scatter(PD_activity[i], PD_friction[i], color=colors[PD_phase[i]], marker=markers[PD_phase[i]], label=labnames[2])
+        else:
+            plt.scatter(PD_activity[i], PD_friction[i], color=colors[PD_phase[i]], marker=markers[PD_phase[i]])
+
 
     plt.ylabel(r'$\chi$', fontsize=18, fontname='Times New Roman')
     plt.xlabel(r'$\zeta$', fontsize=18, fontname='Times New Roman')
     plt.xticks(fontsize=18, fontname='Times New Roman')
     plt.yticks(fontsize=18, fontname='Times New Roman')
     plt.xticks(np.arange(0.1,0.6,0.1))
+    plt.legend(prop={'family':'Times New Roman', 'size':'12'}, loc=(0.025, 0.72), ncols=1, frameon=True, facecolor='white', edgecolor='black', framealpha=1.0)
     plt.yscale('log')
     plt.ylim([0.0007, 0.15])
     #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results7/Phase_diagram_1.png", transparent=True)

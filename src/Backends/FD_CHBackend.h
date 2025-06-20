@@ -1,14 +1,14 @@
-#ifndef FD_CPUBACKEND_H_
-#define FD_CPUBACKEND_H_
+#ifndef FD_CHBACKEND_H_
+#define FD_CHBACKEND_H_
 
 #include "FDBackend.h"
 
 /**
- * @brief Manages a FD simulation on CPU. It supports Predictor Corrector integration.
- * This is the Allen-Cahn integration, i.e. does not conserve the total field.
+ * @brief Manages a FD simulation on CPU. It supports Predictor Corrector integration
+ * This is the Cahn-Hilliard integration, i.e. it conserves the total field.
  */
 
-class FD_CPUBackend: public FDBackend {
+class FD_CHBackend: public FDBackend {
 protected:
 
 	void first_step(bool store);
@@ -29,12 +29,12 @@ protected:
 	std::vector<number> temp = vector <number> {0., 0., 0., 0.};
 
 public:
-	FD_CPUBackend();
-	virtual ~FD_CPUBackend();
+	FD_CHBackend();
+	virtual ~FD_CHBackend();
 
 	void init();
 	void get_settings(input_file &inp);
 	void sim_step();
 };
 
-#endif /* FD_CPUBACKEND_H_ */
+#endif /* FD_CHBACKEND_H_ */

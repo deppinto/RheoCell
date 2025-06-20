@@ -101,11 +101,16 @@ public:
 	std::vector<number> fieldDX;
 	std::vector<number> fieldDY;
 	std::vector<number> laplacianPhi;
-	std::vector<number> quarticPhi_x;
-	std::vector<number> quarticPhi_y;
 	//derivatives of the field for the shape free energy
 	std::vector<number> Phi00;
 	std::vector<number> Phi01;
+
+	//anisotropic terms
+	std::vector<number> aniTerm1x;
+	std::vector<number> aniTerm2x;
+	std::vector<number> aniTerm1y;
+	std::vector<number> aniTerm2y;
+
 
 	//shape tensor
 	number S01;

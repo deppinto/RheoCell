@@ -29,16 +29,17 @@ void LEBcMultiPhaseField::resizing() {
 	fieldDX.resize(subSize);
 	fieldDY.resize(subSize);	
 	laplacianPhi.resize(subSize);	
-
-	quarticPhi_x.resize(subSize);	
-	quarticPhi_y.resize(subSize);	
-
 	freeEnergy.resize(subSize);
 	fieldScalar_old.resize(subSize);
 	dfield_old.resize(subSize);
 	neighbors_sub.resize(subSize*9);
 	velocityX.resize(subSize);
         velocityY.resize(subSize);
+
+	aniTerm1x.resize(subSize);
+	aniTerm1y.resize(subSize);
+	aniTerm2x.resize(subSize);
+	aniTerm2y.resize(subSize);
 
 	velocityX_correction.resize(LsubY);
 	phi_correction.resize(LsubY);
@@ -86,8 +87,8 @@ void LEBcMultiPhaseField::init(int Lx, int Ly) {
 	nemQ_old.resize(2);
 	nemQ = {0., 0.};
 	nemQ_old = {0., 0.};
-	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
-	Q01 = nemQ[0] * nemQ[1];
+	//Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
+	//Q01 = nemQ[0] * nemQ[1];
 
 	area=0;
 	perimeter=0;
@@ -125,8 +126,8 @@ void LEBcMultiPhaseField::init() {
 	nemQ_old.resize(2);
 	nemQ = {0., 0.};
 	nemQ_old = {0., 0.};
-	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
-	Q01 = nemQ[0] * nemQ[1];
+	//Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
+	//Q01 = nemQ[0] * nemQ[1];
 
 	//minor bookkeeping
 	offset.resize(2);

@@ -27,6 +27,7 @@ SET(backends_SOURCES
 	Backends/SimBackend.cpp
 	Backends/FDBackend.cpp
 	Backends/FD_CPUBackend.cpp 
+	Backends/FD_CHBackend.cpp 
 )
 
 SET(interactions_SOURCES

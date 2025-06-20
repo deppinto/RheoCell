@@ -288,8 +288,17 @@ void LEBcWetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sum
 	BaseInteraction::updateFieldProperties(p, q, k);
 
 	p->perimeter += p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q];
-	p->quarticPhi_x[q] = (p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q]) * p->fieldDX[q]; 
-	p->quarticPhi_y[q] = (p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q]) * p->fieldDY[q]; 
+
+
+	number a = 1.;
+	number b = 1.; 
+	number thetaAni = atan2(p->fieldDY[q], p->fieldDX[q] + 0.000001);
+	number gammaAni = 1/sqrt(cos(thetaAni) * cos(thetaAni) / (a * a) + sin(thetaAni) * sin(thetaAni) / (b * b));
+	number dgammadtheta = - cos(thetaAni) * sin(thetaAni) * (1/(b * b) - 1/(a * a)) * pow(cos(thetaAni) * cos(thetaAni) / (a * a) + sin(thetaAni) * sin(thetaAni) / (b * b), -3/2) ;
+	p->aniTerm1x[q] = gammaAni * p->fieldDX[q];
+	p->aniTerm1y[q] = gammaAni * p->fieldDX[q];
+	p->aniTerm2x[q] = -dgammadtheta * p->fieldDY[q];
+	p->aniTerm2y[q] = dgammadtheta * p->fieldDX[q];
 
 
 	if(size_store_site_velocity_index[k]>=store_max_size){
@@ -320,7 +329,8 @@ number LEBcWetModel::f_interaction(BaseField *p, int q) {
 	}
 
 	// CH term coupled to chemical
-	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*p->laplacianPhi[q]);
+	//number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*p->laplacianPhi[q]);
+	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2 * lambda * 0.5 * (p->aniTerm1x[p->neighbors_sub[5+q*9]] - p->aniTerm1x[p->neighbors_sub[3+q*9]] + p->aniTerm1y[p->neighbors_sub[7+q*9]] - p->aniTerm1y[p->neighbors_sub[1+q*9]]) - 2 * lambda * 0.5 * (p->aniTerm2x[p->neighbors_sub[5+q*9]] - p->aniTerm2x[p->neighbors_sub[3+q*9]] + p->aniTerm2y[p->neighbors_sub[7+q*9]] - p->aniTerm2y[p->neighbors_sub[1+q*9]]) - 0.5*2*lambda*p->laplacianPhi[q]);
 	
 	// area conservation term
 	number A = - 4*(mu/a0)*(1-p->area/a0)*p->fieldScalar[q];
@@ -335,13 +345,13 @@ number LEBcWetModel::f_interaction(BaseField *p, int q) {
 
 
 	//Perimeter term
-	number p0 = 5; //2 * PI * 8;
-	number beta = mu;
-	number P = 4*(beta/p0) * (1 - p->perimeter/p0) * p->laplacianPhi[q];
+	//number p0 = 5; //2 * PI * 8;
+	//number beta = mu;
+	//number P = 4*(beta/p0) * (1 - p->perimeter/p0) * p->laplacianPhi[q];
 	
 	//number beta = 2*lambda*gamma*100;
 	//number P = - beta * ( 0.5 * (p->quarticPhi_x[p->neighbors_sub[5+q*9]] - p->quarticPhi_x[p->neighbors_sub[3+q*9]]) + 0.5 * (p->quarticPhi_y[p->neighbors_sub[7+q*9]] - p->quarticPhi_y[p->neighbors_sub[1+q*9]]) );
-	//number P = 0;
+	number P = 0;
 
 
 
@@ -387,16 +397,11 @@ void LEBcWetModel::calc_internal_forces(BaseField *p, int q) {
 
 void LEBcWetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
-	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
-	
-	number t = 0.5 * atan2(p->S01, p->S00);
-	std::vector<number> d = {cos(t) , sin(t)};
-	number sgn = (d[0] * p->nemQ[0] + d[1] * p->nemQ[1] > 0.0)? 1.0:-1.0;
-	p->nemQ[0] = p->nemQ_old[0] + dt * J_Q * (sgn * d[0] - p->nemQ[0]);
-	p->nemQ[1] = p->nemQ_old[1] + dt * J_Q * (sgn * d[1] - p->nemQ[1]);
+	if(store)p->thetaQ_old = p->thetaQ;
 
-	p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
-	p->Q01 = p->nemQ[0] * p->nemQ[1];
+	p->thetaQ = p->thetaQ_old - dt * J_Q * atan2(p->S00 * p->Q01 - p->S01 * p->Q00, p->S00 * p->Q00 + p->S01 * p->Q01);
+	p->Q00 = cos(2 * p->thetaQ);
+	p->Q01 = sin(2 * p->thetaQ);
 
 	if(anchoring) update_anchoring(p);
 }
