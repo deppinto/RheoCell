@@ -67,7 +67,7 @@ void FD_CHBackend::first_step(bool store) {
 			// compute dphi
 	                dphi =
 	                // free energy
-	                - J0 * laplacian_chemical_potential 
+	                J0 * laplacian_chemical_potential 
                		// advection term
 	                - interaction->get_velocity_x(p,q) * p->fieldDX[q] - interaction->get_velocity_y(p,q) * p->fieldDY[q];
 

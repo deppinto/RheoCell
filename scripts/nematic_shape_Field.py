@@ -46,7 +46,7 @@ ly=int(float(header[3]))
 
 walls = [0. for i in range(lx*ly)]
 set_walls(lx,ly,walls)
-defect_length = 10.
+defect_length = 5.
 
 x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
