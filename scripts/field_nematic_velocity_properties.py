@@ -86,6 +86,13 @@ theta_degree_QS = []
 theta_degree_QV = []
 theta_degree_SV = []
 
+lx = 1
+ly = 1
+
+area_fraction_miss = 0.
+shape_aspect_ratio = 0.
+average_velocity = 0.
+
 for i in range(start_frame, end_frame, 1):
 
     #if i%10==0:
@@ -207,6 +214,10 @@ for i in range(start_frame, end_frame, 1):
             value_x = nx
             value_y = ny
 
+
+            shape_aspect_ratio += abs(S00 + S01) / abs(S00 - S01)
+
+
             norm1 = sqrt(value_x * value_x + value_y * value_y)
             norm2 = sqrt(Sx * Sx + Sy * Sy)
 
@@ -237,6 +248,9 @@ for i in range(start_frame, end_frame, 1):
             else:
                 theta_degree_QS.append(angle2)
                 angle = angle2
+
+            if angle > 0.5:
+                area_fraction_miss += 1
 
         read_line += 1
     Sfile.close()
@@ -276,7 +290,9 @@ for i in range(start_frame, end_frame, 1):
             Sy = Z_Qy[int(yy)][int(xx)]
 
             norm1 = sqrt(value_x * value_x + value_y * value_y)
+            average_velocity += norm1
             norm2 = sqrt(Sx * Sx + Sy * Sy)
+
 
             if norm1>1e-8 and norm2>1e-8:
                 value_x = value_x / norm1
@@ -344,7 +360,6 @@ for i in range(start_frame, end_frame, 1):
     Vfile.close()
 
 
-
 if variable == 1 or variable == 2:
     with open('histogram_QS.txt', 'w') as f:
         for i in range(len(theta_degree_QS)):
@@ -357,6 +372,10 @@ if variable == 1 or variable == 2:
     with open('histogram_SV.txt', 'w') as f:
         for i in range(len(theta_degree_SV)):
             print(theta_degree_SV[i], file=f)
+
+    with open('histogram_QSV_stats.txt', 'w') as f:
+        print(area_fraction_miss/((end_frame-start_frame) * lx * ly), shape_aspect_ratio/((end_frame-start_frame) * lx * ly), average_velocity/((end_frame-start_frame) * lx * ly), file=f)
+
 
     #for j in range(len(theta_degree)):
         #print(theta_degree_QS[j], theta_degree_QV[j], theta_degree_SV[j])

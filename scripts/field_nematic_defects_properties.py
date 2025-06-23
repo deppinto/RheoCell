@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 
 if len(sys.argv)!=6:
@@ -82,10 +82,11 @@ minus_defects_x = []
 plus_defects_y = []
 minus_defects_y = []
 
-r_thresh = 9
+r_thresh = 16
 velocity_defects_plus = []
 beta_tail_degree = []
 
+number_defects = 0
 
 for i in range(start_frame, end_frame, 1):
 
@@ -263,6 +264,8 @@ for i in range(start_frame, end_frame, 1):
     minus_defects_y = []
 
     defect_thresh = 0.05
+    matched_defects_frame = 0
+    new_defects_frame = 0
     for p in range(0,LLY):
         for q in range(0,LLX):
             # keep this just in case our other symmetries give us integer defects
@@ -295,6 +298,7 @@ for i in range(start_frame, end_frame, 1):
                     x_direction = cos(psi)
                     y_direction = sin(psi)
                     v = np.array([x_direction, y_direction])
+                    new_defects_frame += 1
 
                     eps = 1.5
                     for nn in range(1, 9):
@@ -340,6 +344,7 @@ for i in range(start_frame, end_frame, 1):
                             dist = dist_x * dist_x + dist_y * dist_y
                             if dist < r_thresh and dist>0:
                                 matched_defects[zz] = 1
+                                matched_defects_frame += 1
                                 norm = sqrt(dist)
                                 angle = np.acos((dist_x * cos(psi) + dist_y * sin(psi)) / norm)
                                 velocity_defects_plus.append(norm * cos(angle))
@@ -353,10 +358,17 @@ for i in range(start_frame, end_frame, 1):
                     minus_defects_y.append(y)
 
                     #cset1 = plt.plot(x, y, 'b^', markersize=10)
+    number_defects += new_defects_frame - matched_defects_frame
+
 
 if variable == 1 or variable == 2:
-    for j in range(len(velocity_defects_plus)):
-        print(velocity_defects_plus[j])
+    with open('defects_velocity.txt', 'w') as f:
+        for i in range(len(velocity_defects_plus)):
+            print(velocity_defects_plus[i], file=f)
+
+    with open('defects_stats.txt', 'w') as f:
+        print(number_defects, file=f)
+
 
 if variable == 3 or variable == 4:
 
