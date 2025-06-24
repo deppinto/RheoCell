@@ -365,9 +365,6 @@ for i in range(start_frame, end_frame, 1):
         read_line += 1
     Vfile.close()
 
-print(shape_aspect_ratio/((end_frame-start_frame) * lx * ly))
-exit(1)
-
 if variable == 1 or variable == 2:
     with open('histogram_QS.txt', 'w') as f:
         for i in range(len(theta_degree_QS)):
