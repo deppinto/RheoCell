@@ -198,8 +198,13 @@ for i in range(start_frame, end_frame, 1):
             S01=float(words[i+3])
             if S00 != 0 and S01 != 0:
                 S = sqrt(S00**2 + S01**2)
-                nx = sqrt(2*S) * sqrt((1 + S00/S)/2)
-                ny = sqrt(2*S) * np.sign(S01) * sqrt((1 - S00/S)/2)
+                thetaS = 0.5 * atan2(S01, S00)
+                #nx = 2*sqrt(S) * sqrt((1 + S00/S)/2)
+                #ny = 2*sqrt(S) * np.sign(S01) * sqrt((1 - S00/S)/2)
+                nx = 2 * S * cos(thetaS)
+                ny = 2 * S * sin(thetaS)
+                nnx = -2 * S * (-sin(thetaS))
+                nny = -2 * S * cos(thetaS)
             else:
                 nx = 0.
                 ny = 0.
@@ -215,11 +220,12 @@ for i in range(start_frame, end_frame, 1):
             value_y = ny
 
 
-            shape_aspect_ratio += abs(S00 + S01) / abs(S00 - S01)
+            shape_aspect_ratio += sqrt(2*(S00 * S00 + S01 * S01))
 
 
             norm1 = sqrt(value_x * value_x + value_y * value_y)
             norm2 = sqrt(Sx * Sx + Sy * Sy)
+
 
             if norm1<1e-8 or norm2<1e-8:
                 continue
@@ -359,6 +365,8 @@ for i in range(start_frame, end_frame, 1):
         read_line += 1
     Vfile.close()
 
+print(shape_aspect_ratio/((end_frame-start_frame) * lx * ly))
+exit(1)
 
 if variable == 1 or variable == 2:
     with open('histogram_QS.txt', 'w') as f:

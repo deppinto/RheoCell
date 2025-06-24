@@ -76,17 +76,19 @@ tfile.close()
 
 numspecies=len(set(species))
 
+r_thresh = 16
+
 
 plus_defects_x = []
 minus_defects_x = []
 plus_defects_y = []
 minus_defects_y = []
-
-r_thresh = 16
 velocity_defects_plus = []
 beta_tail_degree = []
-
 number_defects = 0
+
+
+field_string = 'shape'
 
 for i in range(start_frame, end_frame, 1):
 
@@ -94,6 +96,7 @@ for i in range(start_frame, end_frame, 1):
         #print(i)
 
     if variable == 1 or variable == 3:
+        field_string = 'nematic'
         if i<10:
             fileS = sys.argv[2] + "shape_field_00" + str(i) + ".txt"
             fileQ = sys.argv[2] + "nematic_field_00" + str(i) + ".txt"
@@ -103,6 +106,19 @@ for i in range(start_frame, end_frame, 1):
         else:
             fileS = sys.argv[2] + "shape_field_" + str(i) + ".txt"
             fileQ = sys.argv[2] + "nematic_field_" + str(i) + ".txt"
+
+    if variable == 2 or variable == 4:
+        field_string = 'shape'
+        if i<10:
+            fileQ = sys.argv[2] + "shape_field_00" + str(i) + ".txt"
+            fileS = sys.argv[2] + "nematic_field_00" + str(i) + ".txt"
+        elif i<100:
+            fileQ = sys.argv[2] + "shape_field_0" + str(i) + ".txt"
+            fileS = sys.argv[2] + "nematic_field_0" + str(i) + ".txt"
+        else:
+            fileQ = sys.argv[2] + "shape_field_" + str(i) + ".txt"
+            fileS = sys.argv[2] + "nematic_field_" + str(i) + ".txt"
+
     '''
     elif variable == 2 or variable == 4:
         if i<10:
@@ -225,6 +241,7 @@ for i in range(start_frame, end_frame, 1):
     vecfield_Q01 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
     vecfield_Q00 = Z_Q00
     vecfield_Q01 = Z_Q01
+
 
     winding_number = [[0. for q in range(0, LLX)] for p in range(0, LLY)]
     for p in range(0, LLY):
@@ -362,11 +379,11 @@ for i in range(start_frame, end_frame, 1):
 
 
 if variable == 1 or variable == 2:
-    with open('defects_velocity.txt', 'w') as f:
+    with open('defects_velocity_'+field_string+'.txt', 'w') as f:
         for i in range(len(velocity_defects_plus)):
             print(velocity_defects_plus[i], file=f)
 
-    with open('defects_stats.txt', 'w') as f:
+    with open('defects_stats_'+field_string+'.txt', 'w') as f:
         print(number_defects, file=f)
 
 

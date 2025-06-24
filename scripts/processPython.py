@@ -140,7 +140,6 @@ for line in filedata:
     cont_line+=1
 filedata.close()
 
-'''
 plt.figure(figsize=(5.452423529,4.089317647))
 for traj in range(start, end):
 #for traj in [5,9]:
@@ -179,7 +178,7 @@ plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
 #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_VQ_JQ.svg", transparent=True)
 plt.show()
 exit (1)
-'''
+
 
 # read output file
 n_holes = np.zeros(end-start)
