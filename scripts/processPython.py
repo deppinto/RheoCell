@@ -133,28 +133,53 @@ for line in filedata:
     cores.append(int(float(save[19])))
     wallslip.append(float(save[20]))
     shear_rate.append(float(save[21]))
-    #J_Q.append(float(save[22]))
+    J_Q.append(float(save[22]))
 
     #F.append( sqrt( float(save[10])/( float(save[11]) )) ) 
 
     cont_line+=1
 filedata.close()
 
+
+valsY1 = [0. for i in range(end)]
+valsY2 = [0. for i in range(end)]
+valsY3 = [0. for i in range(end)]
+valsX = [0. for i in range(end)]
+
+jobs[27] -= 1
+
 plt.figure(figsize=(5.452423529,4.089317647))
 for traj in range(start, end):
 #for traj in [5,9]:
     pdf_values = []
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defect_velocity_nematic.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defect_velocity_shape.txt","r")
+        if job == 83:
+            continue
+
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defects_velocity_nematic.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defects_velocity_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QS.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_SV.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QV.txt","r")
+        '''
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QV.txt","r")
         for line in fileoutput:
             save=line.split()
             pdf_values.append(float(save[0]))
         fileoutput.close()
+        '''
 
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QSV_stats.txt","r")
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defects_stats.txt","r")
+        for line in fileoutput:
+            save=line.split()
+            valsY1[traj] += float(save[0]) / jobs[traj]
+            #valsY2[traj] += float(save[1]) / jobs[traj]
+            #valsY3[traj] += float(save[2]) / jobs[traj]
+            valsX[traj] = J_Q[traj]+0.0000001
+        fileoutput.close()
+
+
+    '''
     counts, bins = np.histogram(pdf_values)
     bin_width = abs(bins[1] - bins[0]) / 2
     bin_length = len(bins)
@@ -163,21 +188,95 @@ for traj in range(start, end):
     for i in range(len(counts)):
         probability.append(float(counts[i]) / float(total_counts))
         bins[i] = (bins[i] + bin_width) * 180 / pi
+        #bins[i] = (bins[i] + bin_width)
     #plt.stairs(counts, bins)
     plt.plot(bins[0:bin_length-1], probability, '--o', label=J_Q[traj])
     #plt.plot(bins[0:bin_length-1], probability, '--o', label=gamma[traj])
     #plt.plot(bins[0:bin_length-1], probability, '--o', label=omega[traj])
+    '''
 
+'''
 plt.ylabel(r'$PDF$', fontsize=18)
-#plt.xlabel(r'Velocity $+1/2$', fontsize=18)
+#plt.xlabel(r'Velocity $+1/2$ Shape', fontsize=18)
 plt.xlabel(r'$\theta_{QV}$', fontsize=18)
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-#plt.legend(loc=(0.3, 0.6), ncols=1, frameon=False)
+plt.legend(loc=(0.4, 0.7), ncols=1, frameon=False)
 #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_VQ_JQ.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_VQ_JQ.svg", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_QV_gamma006_act05_fric001_JQ.png", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_QV_gamma006_act05_fric001_JQ.svg", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_velocity_defS_gamma006_act05_fric001_JQ.png", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_velocity_defS_gamma006_act05_fric001_JQ.svg", transparent=True)
+plt.show()
+'''
+
+save = valsX[17]
+valsX[17] = valsX[19]
+valsX[19] = save
+save = valsY1[17]
+valsY1[17] = valsY1[19]
+valsY1[19] = save
+save = valsY2[17]
+valsY2[17] = valsY2[19]
+valsY2[19] = save
+save = valsY3[17]
+valsY3[17] = valsY3[19]
+valsY3[19] = save
+
+
+#plt.plot(valsX[0:10:2], valsY1[0:10:2], "--o", label=r"$\zeta=0.3, \xi=0.1$")
+#plt.plot(valsX[1:10:2], valsY1[1:10:2], "--o", label=r"$\zeta=0.5, \xi=0.1$")
+#plt.plot(valsX[10:20:2], valsY1[10:20:2], "--o", label=r"$\zeta=0.3, \xi=0.01$")
+#plt.plot(valsX[11:20:2], valsY1[11:20:2], "--o", label=r"$\zeta=0.5, \xi=0.01$")
+plt.plot(valsX[20:24:2], valsY1[20:24:2], '--o', label=r'$\zeta=0.3, \xi=0.1$')
+plt.plot(valsX[21:24:2], valsY1[21:24:2], '--o', label=r'$\zeta=0.5, \xi=0.1$')
+plt.plot(valsX[24:30:2], valsY1[24:30:2], '--o', label=r'$\zeta=0.3, \xi=0.01$')
+plt.plot(valsX[25:30:2], valsY1[25:30:2], '--o', label=r'$\zeta=0.5, \xi=0.01$')
+plt.xscale("log")
+
+
+#plt.plot(valsX[0:10:2], valsY2[0:10:2], '--o', label=r'$\zeta=0.3, \xi=0.1$')
+#plt.plot(valsX[1:10:2], valsY2[1:10:2], '--o', label=r'$\zeta=0.5, \xi=0.1$')
+#plt.plot(valsX[10:20:2], valsY2[10:20:2], '--o', label=r'$\zeta=0.3, \xi=0.01$')
+#plt.plot(valsX[11:20:2], valsY2[11:20:2], '--o', label=r'$\zeta=0.5, \xi=0.01$')
+#plt.plot(valsX[20:24:2], valsY2[20:24:2], '--o', label=r'$\zeta=0.3, \xi=0.1$')
+#plt.plot(valsX[21:24:2], valsY2[21:24:2], '--o', label=r'$\zeta=0.5, \xi=0.1$')
+#plt.plot(valsX[24:30:2], valsY2[24:30:2], '--o', label=r'$\zeta=0.3, \xi=0.01$')
+#plt.plot(valsX[25:30:2], valsY2[25:30:2], '--o', label=r'$\zeta=0.5, \xi=0.01$')
+#plt.xscale('log')
+
+#plt.plot(valsX[0:10:2], valsY3[0:10:2], '--o', label=r'$\zeta=0.3, \xi=0.1$')
+#plt.plot(valsX[1:10:2], valsY3[1:10:2], '--o', label=r'$\zeta=0.5, \xi=0.1$')
+#plt.plot(valsX[10:20:2], valsY3[10:20:2], '--o', label=r'$\zeta=0.3, \xi=0.01$')
+#plt.plot(valsX[11:20:2], valsY3[11:20:2], '--o', label=r'$\zeta=0.5, \xi=0.01$')
+#plt.plot(valsX[20:24:2], valsY3[20:24:2], '--o', label=r'$\zeta=0.3, \xi=0.1$')
+#plt.plot(valsX[21:24:2], valsY3[21:24:2], '--o', label=r'$\zeta=0.5, \xi=0.1$')
+#plt.plot(valsX[24:30:2], valsY3[24:30:2], '--o', label=r'$\zeta=0.3, \xi=0.01$')
+#plt.plot(valsX[25:30:2], valsY3[25:30:2], '--o', label=r'$\zeta=0.5, \xi=0.01$')
+#plt.xscale('log')
+
+
+#plt.ylabel('Average velocity', fontsize=18)
+#plt.ylabel('Shape AR', fontsize=18)
+#plt.ylabel('misaligned area', fontsize=18)
+plt.ylabel('Defect number', fontsize=18)
+plt.xlabel(r'$J_{QS}$', fontsize=18)
+plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+plt.legend(loc=(0.01, 0.6), ncols=1, fontsize=12, frameon=False)
+plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Defect_number_gamma006_JQ.png", transparent=True)
+plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Defect_number_gamma006_JQ.svg", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Misaligned_area_gamma006_JQ.png", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Misaligned_area_gamma006_JQ.svg", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Shape_AR_gamma006_JQ.png", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Shape_AR_gamma006_JQ.svg", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Average_V_gamma006_JQ.png", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Average_V_gamma006_JQ.svg", transparent=True)
 plt.show()
 exit (1)
+
+
+
+
+
 
 
 # read output file
