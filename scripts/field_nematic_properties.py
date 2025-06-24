@@ -122,8 +122,8 @@ for i in range(size_R):
     if corr_num[i] > 0:
         correlations[i] = correlations[i] / corr_num[i]
         correlations[i] = correlations[i] / corr_dem
-        if variable == 1 or variable == 3:
-            print(corr_dist[i], correlations[i])
+    if variable == 1 or variable == 3:
+        print(corr_dist[i], correlations[i])
 
 
 if variable == 2 or variable == 4:
