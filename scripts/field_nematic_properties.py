@@ -41,9 +41,12 @@ corr_num = [0 for i in range(size_R)]
 corr_dem = 0.
 
 
+file_string = 'nematic'
+
 for i in range(start_frame, end_frame, 1):
 
     if variable == 1 or variable == 2:
+        file_string = 'nematic'
         if i<10:
             file = sys.argv[2] + "nematic_field_00" + str(i) + ".txt"
         elif i<100:
@@ -52,6 +55,7 @@ for i in range(start_frame, end_frame, 1):
             file = sys.argv[2] + "nematic_field_" + str(i) + ".txt"
 
     if variable == 3 or variable == 4:
+        file_string = 'shape'
         if i<10:
             file = sys.argv[2] + "shape_field_00" + str(i) + ".txt"
         elif i<100:
@@ -122,8 +126,12 @@ for i in range(size_R):
     if corr_num[i] > 0:
         correlations[i] = correlations[i] / corr_num[i]
         correlations[i] = correlations[i] / corr_dem
-    if variable == 1 or variable == 3:
-        print(corr_dist[i], correlations[i])
+    
+
+if variable == 1 or variable == 3:
+    with open('correlations_'+file_string+'.txt', 'w') as f:
+        for i in range(size_R):
+            print(corr_dist[i], correlations[i], file=f)
 
 
 if variable == 2 or variable == 4:

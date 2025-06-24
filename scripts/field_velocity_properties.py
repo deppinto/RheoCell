@@ -130,15 +130,19 @@ for i in range(start_frame, end_frame, 1):
                 correlations_vorticity[int(dist)] += (vorticity1 * vorticity2)
                 corr_num[int(dist)] += 1
 
+
 for i in range(size_R):
     if corr_num[i] > 0:
         correlations[i] = correlations[i] / corr_num[i]
         correlations[i] = correlations[i] / corr_dem
         correlations_vorticity[i] = correlations_vorticity[i] / corr_num[i]
         correlations_vorticity[i] = correlations_vorticity[i] / corr_dem_vort
-    if variable==1:
-        print(corr_dist[i], correlations[i], correlations_vorticity[i])
 
+
+if variable == 1 or variable == 3:
+    with open('correlations_velocity.txt', 'w') as f:
+        for i in range(size_R):
+            print(corr_dist[i], correlations[i], correlations_vorticity[i], file=f)
 
 
 if variable==2:
