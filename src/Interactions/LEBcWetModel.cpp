@@ -329,8 +329,8 @@ number LEBcWetModel::f_interaction(BaseField *p, int q) {
 	}
 
 	// CH term coupled to chemical
-	//number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*p->laplacianPhi[q]);
-	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2 * lambda * 0.5 * (p->aniTerm1x[p->neighbors_sub[5+q*9]] - p->aniTerm1x[p->neighbors_sub[3+q*9]] + p->aniTerm1y[p->neighbors_sub[7+q*9]] - p->aniTerm1y[p->neighbors_sub[1+q*9]]) - 2 * lambda * 0.5 * (p->aniTerm2x[p->neighbors_sub[5+q*9]] - p->aniTerm2x[p->neighbors_sub[3+q*9]] + p->aniTerm2y[p->neighbors_sub[7+q*9]] - p->aniTerm2y[p->neighbors_sub[1+q*9]]) - 0.5*2*lambda*p->laplacianPhi[q]);
+	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*p->laplacianPhi[q]);
+	//number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2 * lambda * 0.5 * (p->aniTerm1x[p->neighbors_sub[5+q*9]] - p->aniTerm1x[p->neighbors_sub[3+q*9]] + p->aniTerm1y[p->neighbors_sub[7+q*9]] - p->aniTerm1y[p->neighbors_sub[1+q*9]]) - 2 * lambda * 0.5 * (p->aniTerm2x[p->neighbors_sub[5+q*9]] - p->aniTerm2x[p->neighbors_sub[3+q*9]] + p->aniTerm2y[p->neighbors_sub[7+q*9]] - p->aniTerm2y[p->neighbors_sub[1+q*9]]) - 0.5*2*lambda*p->laplacianPhi[q]);
 	
 	// area conservation term
 	number A = - 4*(mu/a0)*(1-p->area/a0)*p->fieldScalar[q];
@@ -397,11 +397,14 @@ void LEBcWetModel::calc_internal_forces(BaseField *p, int q) {
 
 void LEBcWetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
-	if(store)p->thetaQ_old = p->thetaQ;
+	/*if(store)p->thetaQ_old = p->thetaQ;
 
 	p->thetaQ = p->thetaQ_old - dt * J_Q * atan2(p->S00 * p->Q01 - p->S01 * p->Q00, p->S00 * p->Q00 + p->S01 * p->Q01);
 	p->Q00 = cos(2 * p->thetaQ);
-	p->Q01 = sin(2 * p->thetaQ);
+	p->Q01 = sin(2 * p->thetaQ);*/
+
+	p->Q00 += dt * J_Q * (p->S00 - p->Q00);
+	p->Q01 += dt * J_Q * (p->S01 - p->Q01);
 
 	if(anchoring) update_anchoring(p);
 }

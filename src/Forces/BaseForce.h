@@ -91,6 +91,9 @@ public:
 	 * @param pos position of the particle
 	 */
 	virtual number potential(int k, number walls){return 0;};
+
+	virtual void apply_changes_after_equilibration() {};
+	virtual std::vector<number> velocity_profile(int k, int lx, int ly) {return std::vector<number>{0.,0.};};
 };
 
 using ForcePtr = std::shared_ptr<BaseForce>;

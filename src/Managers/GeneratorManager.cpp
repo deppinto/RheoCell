@@ -124,9 +124,12 @@ void GeneratorManager::init() {
 void GeneratorManager::generate() {
 	if(initial_configuration_type.compare("lattice") == 0)interaction->generate_lattice_configuration(fields);
 	else if(initial_configuration_type.compare("cluster") == 0)interaction->generate_cluster_configuration(fields);
-	else interaction->generate_random_configuration(fields);
+	else {
+		initial_configuration_type = "random";
+		interaction->generate_random_configuration(fields);
+	}
 
-	OX_LOG(Logger::LOG_INFO, "Generating random configuration of %d cells", N);
+	OX_LOG(Logger::LOG_INFO, "Generating %s configuration of %d cells", initial_configuration_type.c_str(), N);
 
 	for(auto p : fields) {
 		p->init();

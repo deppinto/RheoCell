@@ -59,13 +59,18 @@ void FD_CPUBackend::first_step(bool store) {
 
 			//int  k  = p->GetSubIndex(q, config_info->box);
 			int k = p->map_sub_to_box[q];
+			p->set_V_ext(k, box->getXsize(), box->getYsize());
+
 
 			// compute dphi
 	                dphi =
 	                // free energy
 	                - J0 * p->freeEnergy[q] 
                		// advection term
-	                - interaction->get_velocity_x(p,q) * p->fieldDX[q] - interaction->get_velocity_y(p,q) * p->fieldDY[q];
+	                - interaction->get_velocity_x(p,q) * p->fieldDX[q] - interaction->get_velocity_y(p,q) * p->fieldDY[q]
+			//external advection
+	                - p->V_ext[0] * p->fieldDX[q] - p->V_ext[1] * p->fieldDY[q];
+
 
 
 			if(store) {

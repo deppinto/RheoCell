@@ -41,6 +41,10 @@ void BaseInteraction::read_topology(std::vector<BaseField *> &fields) {
         }
 }
 
+void BaseInteraction::apply_changes_after_equilibration(){
+
+}
+
 void BaseInteraction::begin_energy_computation() {
 
 }

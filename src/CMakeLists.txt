@@ -46,6 +46,7 @@ SET(forces_SOURCES
 	Forces/ForceFactory.cpp
 	Forces/BaseForce.cpp
 	Forces/ChannelWalls.cpp
+	Forces/ShearFlowChannel.cpp
 )
 
 SET(box_SOURCES

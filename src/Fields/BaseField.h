@@ -80,6 +80,27 @@ public:
         }
 
 
+	//makes changes after equilibration to the external forces of each phase field
+        inline void set_ext_properties() {
+                if(ext_forces.size() > 0) {
+                        for(auto ext_force : ext_forces) {
+                                ext_force->apply_changes_after_equilibration();
+                        }
+                }
+        }
+
+
+	//makes changes after equilibration to the external forces of each phase field
+	std::vector<number> V_ext = std::vector<number> {0.,0.};
+        inline void set_V_ext(int k, int lx, int ly) {
+                if(ext_forces.size() > 0) {
+                        for(auto ext_force : ext_forces) {
+                                V_ext = ext_force->velocity_profile(k, lx, ly);
+                        }
+                }
+        }
+
+
 	/// Index of the particle. Usually it is a useful way of accessing arrays of particles
 	int index;
 	int type;
@@ -145,7 +166,7 @@ public:
         std::vector<number> dfield_old;
 	std::vector<int> neighbors_sub;
 
-	//fiedl patch values
+	//field patch values
 	int LsubX;
         int LsubY;
 	int subSize;

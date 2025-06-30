@@ -61,7 +61,7 @@ public:
 	 */
 	virtual void init() = 0;
 
-	virtual void apply_changes_after_equilibration(){};
+	virtual void apply_changes_after_equilibration();
 
 
 	/**

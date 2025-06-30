@@ -51,8 +51,8 @@ void WetModel::init() {
 	R1 = (R_eff * sqrt(AR)) * (R_eff * sqrt(AR));
 	R2 = (R_eff / sqrt(AR)) * (R_eff / sqrt(AR));
 	R_term = (1/R1) - (1/R2);*/
-	R1 = 1;
-	R2 = 0.1;
+	//R1 = 1;
+	//R2 = 1;
 	store_max_size=20;
 	if(tolerance>0)
 		solverCG.setTolerance(tolerance);
@@ -84,6 +84,8 @@ void WetModel::allocate_fields(std::vector<BaseField *> &fields) {
 }
 
 void WetModel::apply_changes_after_equilibration(){
+
+	BaseInteraction::apply_changes_after_equilibration();
 	zetaQ_self=zetaQ_self_active;
 	zetaQ_inter=zetaQ_inter_active;
 	J_Q=J_Q_active;
