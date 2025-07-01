@@ -15,7 +15,8 @@ WetModel::WetModel() :
 				J_Q(0),
 				friction_cell(0.),
 				tolerance(0.0001),
-				wall_slip(0.5){
+				wall_slip(0.5),
+				passive_alpha(1.){
 	a0=PI*R*R;
 }
 
@@ -42,6 +43,7 @@ void WetModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "CGtolerance", &tolerance, 0);
 	getInputNumber(&inp, "wall_slip", &wall_slip, 0);
 	getInputNumber(&inp, "Kg", &Kg, 0);
+	getInputNumber(&inp, "passive_alpha", &passive_alpha, 0);
 }
 
 void WetModel::init() {
@@ -567,8 +569,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	number f_passive_y = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] );
 	//number f_passive_x = p->freeEnergy[q]*p->fieldDX[q];
 	//number f_passive_y = p->freeEnergy[q]*p->fieldDY[q];
-	p->Fpassive_x[q] = f_passive_x;
-	p->Fpassive_y[q] = f_passive_y;
+	p->Fpassive_x[q] = f_passive_x * passive_alpha;
+	p->Fpassive_y[q] = f_passive_y * passive_alpha;
 
 	//active inter cells (active force)
 	number fQ_self_x = - (p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
@@ -618,8 +620,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 
 		//vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
-		vec_f_x[q+field_start_index[p->index]] = f_passive_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
-		vec_f_y[q+field_start_index[p->index]] = f_passive_y + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		vec_f_x[q+field_start_index[p->index]] = f_passive_x * passive_alpha + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		vec_f_y[q+field_start_index[p->index]] = f_passive_y * passive_alpha + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 	}
 	else{
 		vec_f_x[q+field_start_index[p->index]] = 0.;

@@ -41,6 +41,7 @@ protected:
 	number friction_cell_active;
 	number tolerance;
 	number wall_slip; //if more than 1 there is no slip, if smaller than 1 there is slip. The length of slip on the walls is greater with decreasing values
+	number passive_alpha;
 
 	number F_total_x;
 	number F_total_y;
