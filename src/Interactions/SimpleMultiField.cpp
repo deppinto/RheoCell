@@ -93,8 +93,10 @@ void SimpleMultiField::initFieldProperties(BaseField *p) {
 	for(int q=0; q<p->subSize;q++) {
 		int k = p->GetSubIndex(q, box);
 		BaseInteraction::updateFieldProperties(p, q, k);
-	        number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
-	        number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+	        //number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
+	        //number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+	        number dx = BaseInteraction::derivX(p, q, k);
+	        number dy = BaseInteraction::derivY(p, q, k);
 	        p->fieldDX[q] = dx;
 	        p->fieldDY[q] = dy;
 
@@ -110,8 +112,10 @@ void SimpleMultiField::computeGlobalSums(BaseField *p, int q, bool update_global
 	BaseInteraction::update_sub_to_box_map(p, q, k, p->GetSubXIndex(q, box), p->GetSubYIndex(q, box));
 
 
-        p->fieldDX[q] = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
-        p->fieldDY[q] = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+        //p->fieldDX[q] = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
+        //p->fieldDY[q] = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+        p->fieldDX[q] = BaseInteraction::derivX(p, q, k);
+        p->fieldDY[q] = BaseInteraction::derivY(p, q, k);
 	BaseInteraction::updateFieldProperties(p, q, k);
 }
 
@@ -136,34 +140,18 @@ void SimpleMultiField::begin_energy_computation(std::vector<BaseField *> &fields
 
 number SimpleMultiField::f_interaction(BaseField *p, int q) {
 
-	//int  k  = p->GetSubIndex(q, box);
 	int k = p->map_sub_to_box[q];
-        number dx = p->fieldDX[q];
-        number dy = p->fieldDY[q];
-	number xleft, xright, ybottom, ytop;
+        //number dx = p->fieldDX[q];
+        //number dy = p->fieldDY[q];
+	//number xleft, xright, ybottom, ytop;
 	
-	//The part commented below serves for when the sublattice has dirichlet boundary conditions (e.g. zero at the boundaries)
-	/*if(p->neighbors_sub[5+q*9]==-1)xright=0;
-	else xright=p->fieldScalar[p->neighbors_sub[5+q*9]];
+	//xright=p->fieldScalar[p->neighbors_sub[5+q*9]]; 
+	//ybottom=p->fieldScalar[p->neighbors_sub[7+q*9]]; 
+	//xleft=p->fieldScalar[p->neighbors_sub[3+q*9]]; 
+	//ytop=p->fieldScalar[p->neighbors_sub[1+q*9]];
 
-        if(p->neighbors_sub[7+q*9]==-1)ybottom=0;
-        else ybottom=p->fieldScalar[p->neighbors_sub[7+q*9]];
-
-        if(p->neighbors_sub[3+q*9]==-1)xleft=0;
-        else xleft=p->fieldScalar[p->neighbors_sub[3+q*9]];
-
-        if(p->neighbors_sub[1+q*9]==-1)ytop=0;
-        else ytop=p->fieldScalar[p->neighbors_sub[1+q*9]];*/
-
-	//this par gets the field values in teh respective directions from q;
-        //It is hardcoded so take care, the relvant part is that the lattice is square;
-        //The neighbors start form the top and rotate couterclockwise.
-	xright=p->fieldScalar[p->neighbors_sub[5+q*9]]; 
-	ybottom=p->fieldScalar[p->neighbors_sub[7+q*9]]; 
-	xleft=p->fieldScalar[p->neighbors_sub[3+q*9]]; 
-	ytop=p->fieldScalar[p->neighbors_sub[1+q*9]];
-
-	number laplacianPhi = xright + ybottom + xleft + ytop - 4.*p->fieldScalar[q];
+	number laplacianPhi = BaseInteraction::Laplacian(p, q, k);
+	//xright + ybottom + xleft + ytop - 4.*p->fieldScalar[q];
 
 	// CH term coupled to chemical
 	number CH =+ gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*laplacianPhi);
@@ -175,10 +163,11 @@ number SimpleMultiField::f_interaction(BaseField *p, int q) {
 	number Rep = + 4*kappa/lambda*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
 
 	// adhesion term
-	number lsquare = 2 * p->fieldScalar[q] * laplacianPhi + 2 * (dx *dx + dy * dy);
-	number laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[7+k*9]] + phi2[box->neighbors[3+k*9]] +  phi2[box->neighbors[1+k*9]] - 4.*phi2[k];
-	number suppress = (laplacianSquare-lsquare)/sqrt(1+(laplacianSquare-lsquare)*(laplacianSquare-lsquare));
-	number Adh = - 4*lambda*omega*suppress*p->fieldScalar[q];
+	//number lsquare = 2 * p->fieldScalar[q] * laplacianPhi + 2 * (dx *dx + dy * dy);
+	//number laplacianSquare = phi2[box->neighbors[5+k*9]] + phi2[box->neighbors[7+k*9]] + phi2[box->neighbors[3+k*9]] +  phi2[box->neighbors[1+k*9]] - 4.*phi2[k];
+	//number suppress = (laplacianSquare-lsquare)/sqrt(1+(laplacianSquare-lsquare)*(laplacianSquare-lsquare));
+	//number Adh = - 4*lambda*omega*suppress*p->fieldScalar[q];
+	number Adh = 0.;
 
 	// delta F / delta phi_i
 	number V = CH + A + Rep + Adh;

@@ -13,6 +13,8 @@ protected:
         std::vector<int> sides;
         std::vector<double> walls;
         std::vector<double> laplacian_walls;
+        std::vector<double> normal_x;
+        std::vector<double> normal_y;
 	number lambda_wall;
 
 public:

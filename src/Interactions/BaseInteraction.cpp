@@ -7,6 +7,7 @@ BaseInteraction::BaseInteraction() {
 	R=8;
 	rcut = 7; //care initial cell size
 	sqr_rcut = SQR(rcut);
+	wall_slip = 0.5;
 }
 
 BaseInteraction::~BaseInteraction() {
@@ -19,6 +20,7 @@ void BaseInteraction::get_settings(input_file &inp) {
 	getInputNumber(&inp, "energy_threshold", &energy_threshold, 0);
 	getInputInt(&inp, "omp_thread_num", &omp_thread_num, 0);
 	getInputInt(&inp, "R", &R, 1);
+	getInputNumber(&inp, "wall_slip", &wall_slip, 0);
 }
 
 
