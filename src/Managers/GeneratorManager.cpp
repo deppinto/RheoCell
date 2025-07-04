@@ -64,6 +64,12 @@ void GeneratorManager::load_options() {
 	getInputString(&input, "conf_file", output_conf, 1);
 	getInputString(&input, "initial_configuration_type", initial_configuration_type, 0);
 
+	if(initial_configuration_type.compare("lattice") == 0){
+		getInputInt(&input, "n_rows", &n_rows, 1);
+		getInputInt(&input, "n_columns", &n_columns, 1);
+	}
+
+
 	// seed;
 	int seed;
 	if(getInputInt(&input, "seed", &seed, 0) == KEY_NOT_FOUND) {
@@ -122,7 +128,7 @@ void GeneratorManager::init() {
 }
 
 void GeneratorManager::generate() {
-	if(initial_configuration_type.compare("lattice") == 0)interaction->generate_lattice_configuration(fields);
+	if(initial_configuration_type.compare("lattice") == 0)interaction->generate_lattice_configuration(fields, n_rows, n_columns);
 	else if(initial_configuration_type.compare("cluster") == 0)interaction->generate_cluster_configuration(fields);
 	else {
 		initial_configuration_type = "random";

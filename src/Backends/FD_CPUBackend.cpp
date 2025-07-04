@@ -72,7 +72,6 @@ void FD_CPUBackend::first_step(bool store) {
 	                - p->V_ext[0] * p->fieldDX[q] - p->V_ext[1] * p->fieldDY[q];
 
 
-
 			if(store) {
 				p->fieldScalar_old[q]=p->fieldScalar[q];
 				p->dfield_old[q]=dphi;

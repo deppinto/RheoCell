@@ -40,6 +40,7 @@ SET(interactions_SOURCES
 	Interactions/WetModel.cpp
 	Interactions/LEBcWetModel.cpp
 	Interactions/GeneralizedWetModel.cpp
+	Interactions/DifferentialAdhesion.cpp
 )
 
 SET(forces_SOURCES

@@ -146,14 +146,14 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 }
 
 
-void BaseInteraction::generate_lattice_configuration(std::vector<BaseField *> &fields) {
+void BaseInteraction::generate_lattice_configuration(std::vector<BaseField *> &fields, int n_rows, int n_columns) {
 
 	int N = fields.size();
 	//number totalNodes = box->getXsize() * box->getYsize();
-	number lattice_const = 14;
+	number lattice_const = 2 * R - 2;
 	number lattice_factor = sqrt(3.) / 2.; 
-	int n_rows = 10;
-	int n_columns = 10;
+	//int n_rows = 20;
+	//int n_columns = 5;
 	number start_x = box->getXsize()/2. - (n_columns/2.) * lattice_const;
 	number start_y = box->getYsize()/2. + (n_rows/2.) * lattice_const * lattice_factor;
 	int lattice_row = 0;
@@ -163,8 +163,8 @@ void BaseInteraction::generate_lattice_configuration(std::vector<BaseField *> &f
 
 		bool inserted = false;
 		do {
-			if(lattice_row % 2 == 0){p->CoM = std::vector<number> {start_x + lattice_column * lattice_const, start_y - lattice_row * lattice_const * lattice_factor};}
-			else {p->CoM = std::vector<number> {start_x + lattice_column * lattice_const + lattice_const/2, start_y - lattice_row * lattice_const * lattice_factor};}
+			if(lattice_row % 2 == 0){p->CoM = std::vector<number> {start_x + lattice_column * lattice_const, start_y - (lattice_row+0.5) * lattice_const * lattice_factor};}
+			else {p->CoM = std::vector<number> {start_x + lattice_column * lattice_const + lattice_const/2, start_y - (lattice_row+0.5) * lattice_const * lattice_factor};}
 			p->set_positions_initial(box);
 
 			lattice_column += 1;

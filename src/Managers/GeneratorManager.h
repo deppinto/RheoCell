@@ -23,6 +23,8 @@ protected:
 	double box_side_x, box_side_y;
 	double density;
 	int N;
+	int n_rows;
+	int n_columns;
 	std::vector<BaseField *> fields;
 
 	bool external_forces;

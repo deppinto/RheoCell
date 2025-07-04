@@ -1,5 +1,5 @@
-#ifndef SIMPLEMULTIFIELD_H_
-#define SIMPLEMULTIFIELD_H_
+#ifndef DIFFERENTIALADHESION_H_
+#define DIFFERENTIALADHESION_H_
 
 #include "BaseInteraction.h"
 #include "../Fields/MultiPhaseField.h"
@@ -12,16 +12,33 @@
  *
  */
 
-class SimpleMultiField: public BaseInteraction {
+class DifferentialAdhesion: public BaseInteraction {
 protected:
 
 	number gamma;
 	number lambda;
 	number mu;
+	//int R;
 	number kappa;
 	number omega;
 	number a0;
+	number zetaQ_self;
+	number zetaQ_inter;
+	number zetaQ_self_active;
+	number zetaQ_inter_active;
+	number strain_rate;
+	number strain_rate_active;
 
+	int size_rows = 0;
+	int size_rows_old = 0;
+	std::vector<number> vec_omega;
+	std::vector<number> phi_omega;
+	int store_max_size = 0;
+	std::vector<int> size_store_site_omega_index;
+	std::vector<int> store_site_omega_index;
+	std::vector<int> store_site_omega_sub;
+	std::vector<number> store_site_field;
+	std::vector<int> field_start_index;
 	/**
 	 * @brief Patchy interaction between two particles.
 	 *
@@ -32,14 +49,18 @@ protected:
 	 * @return
 	 */
 	//number f_interaction(BaseField *p, int q);
-	number f_interaction(BaseField *p, int q);
+	number f_interaction(BaseField *p, int q, BaseField *pp, int qq);
+	void construct_omega(std::vector<BaseField *> &fields);
 	void computeGlobalSums(BaseField *p, int q, bool update_global_sums=false);
+	void calc_internal_forces(BaseField *p, int q);
 	void initFieldProperties(BaseField *p);
 	std::vector<number> phi2;
+	std::vector<number> sumQ00;
+	std::vector<number> sumQ01;
 
 public:
-	SimpleMultiField();
-	virtual ~SimpleMultiField();
+	DifferentialAdhesion();
+	virtual ~DifferentialAdhesion();
 
 	//void get_settings(input_file &inp) override;
 	void init() override;
@@ -56,6 +77,7 @@ public:
 	void check_input_sanity(std::vector<BaseField *> &fields) override;
 	void get_settings(input_file &inp) override;
 	void apply_changes_after_equilibration() override;
+	void updateDirectedActiveForces(number dt, BaseField*p, bool store) override;
 };
 
-#endif /* SIMPLEMULTIFIELD_H_ */
+#endif /* DIFFERENTIALADHESION_H_ */

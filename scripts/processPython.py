@@ -45,7 +45,6 @@ start=int(float(sys.argv[2]))
 end=int(float(sys.argv[3]))
 variable=int(float(sys.argv[4]))
 
-
 '''
 #-------------------------------------optimization plot
 plt.figure(figsize=(5.452423529,4.089317647))
@@ -141,6 +140,52 @@ for line in filedata:
 filedata.close()
 
 
+
+#for traj in range(start, end):
+for traj in [start, end]:
+    #if traj==start:
+        #theta_5 = []
+    #else:
+        #theta_1 = []
+
+    theta_5 = []
+    for job in range(jobs_seq[traj], jobs_seq[traj+1]):
+
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
+        for line in fileoutput:
+            save=line.split()
+            theta_5.append(float(save[variable]))
+            #if traj == start:
+                #theta_5.append(float(save[variable]))
+            #else:
+                #theta_1.append(float(save[variable]))
+        fileoutput.close()
+
+
+    plt.plot(theta_5, '--o', label=traj)
+    #if traj==end:
+        #theta_diff = [abs(theta_5[i] - theta_1[i]) for i in range(len(theta_5))]
+        #plt.plot(theta_diff, '--o', label=traj)
+
+
+
+plt.ylabel(r'$\theta_5$', fontsize=18)
+plt.xlabel('Time', fontsize=18)
+#plt.xlim([0,500])
+plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+plt.legend(ncols=1, frameon=False)
+plt.show()
+exit(1)
+
+
+
+
+
+
+
+
+
+#Sumesh two tensor models----------------------------------------------------------------------------------------------
 valsY1 = [0. for i in range(end)]
 valsY2 = [0. for i in range(end)]
 valsY3 = [0. for i in range(end)]
@@ -294,12 +339,13 @@ plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSume
 
 plt.show()
 exit (1)
+#Sumesh two tensor models----------------------------------------------------------------------------------------------
 
 
 
 
 
-
+#MPF holes paper----------------------------------------------------------------------------------------------
 # read output file
 n_holes = np.zeros(end-start)
 lifetime_holes = np.zeros(end-start)
@@ -1175,6 +1221,8 @@ if variable == 4:
 
 
 exit(1)
+#MPF holes paper----------------------------------------------------------------------------------------------
+
 
 
 '''
@@ -1205,6 +1253,7 @@ for job in range(1, 6, 1):
 
 plt.show()
 '''
+
 
 #correlations below
 filedata=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/params","r")
@@ -1386,7 +1435,7 @@ plt.show()
 
 
 '''
-#other details for plotting
+#other details for plotting (from older scripts)
 calc1=[i / j for i, j in zip(y1, jobs)]
 calc2=[i / j for i, j in zip(y2, jobs)]
 calc3=[i / j for i, j in zip(y3, jobs)]

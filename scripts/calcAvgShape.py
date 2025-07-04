@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -143,6 +143,8 @@ for line in ifile:
         anchoring=int(float(words[2]))
     elif words[0]=='lambda_wall':
         lambda_wall=float(words[2])
+    elif words[0]=='steps':
+        steps=int(float(words[2]))
 
 
 tfile=open(topology,"r")
@@ -159,12 +161,6 @@ com_x_t = []
 com_y_t = []
 time_conf = []
 start_value = 11
-
-
-unrap_comx=[0. for i in range(0,N)]
-unrap_comx_save_1=[0. for i in range(0,N)]
-unrap_comx_save_2=[0. for i in range(0,N)]
-unrap_comy=[0. for i in range(0,N)]
 
 CoMX=[0. for i in range(0,N)]
 CoMY=[0. for i in range(0,N)]
@@ -192,10 +188,10 @@ x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
 
 
-theta_time_1 = []
-theta_time_2 = []
-theta_time_3 = []
-theta_time_4 = []
+total_time_frames = int(steps / print_conf_interval)
+n_rows = 10
+n_columns = 10
+theta_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 
 
 cont_line=0
@@ -207,12 +203,14 @@ for i in range(start_line):
 
 
 fig = plt.figure(figsize=(6,6))
+frame_num=int(t/print_conf_interval)-1
 for line in cfile:
     cont_line+=1
     words=line.split()
 
     if words[0]=='t':
         t=int(float(words[2]))
+        frame_num=int(t/print_conf_interval)-1
         time_conf.append(t)
 
         pt_num=0
@@ -304,14 +302,9 @@ for line in cfile:
             D_major_axis_vec_x = 0
             D_major_axis_vec_y = 0
 
-        if pt_num == 15:
-            theta_time_1.append(0.5 * np.atan2(S01, S00) * 180 / pi)
-        elif pt_num == 35:
-            theta_time_2.append(0.5 * np.atan2(S01, S00) * 180 / pi)
-        elif pt_num == 55:
-            theta_time_3.append(0.5 * np.atan2(S01, S00) * 180 / pi)
-        elif pt_num == 75:
-            theta_time_4.append(0.5 * np.atan2(S01, S00) * 180 / pi)
+
+        if pt_num - int(pt_num / n_columns) * n_columns == 5:
+            theta_time[int(pt_num / n_columns)][frame_num] = (0.5 * np.atan2(S01, S00) * 180 / pi)
 
 
         X, Y = np.meshgrid(x, y)
@@ -374,10 +367,10 @@ if variable==5:
 
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
-    plt.plot(theta_time_1, '-o' , color='firebrick', label='Row 9')
-    plt.plot(theta_time_2, '-s' , color='green', label='Row 7')
-    plt.plot(theta_time_3, '-^' , color='royalblue', label='Row 5')
-    plt.plot(theta_time_4, '-p' , color='goldenrod', label='Row 3')
+    plt.plot(theta_time, '-o' , color='firebrick', label='Row 9')
+    #plt.plot(theta_time_2, '-s' , color='green', label='Row 7')
+    #plt.plot(theta_time_3, '-^' , color='royalblue', label='Row 5')
+    #plt.plot(theta_time_4, '-p' , color='goldenrod', label='Row 3')
     plt.ylabel(r'$\theta_i$', fontsize=18)
     plt.xlabel('Time', fontsize=18)
     plt.xticks(fontsize=18)
@@ -387,6 +380,17 @@ if variable==5:
     plt.show()
     #plt.savefig('./theta_width_coarse.png')
     plt.close()
+
+if variable==6:
+
+    with open('theta_shape.txt', 'w') as f:
+        for i in range(total_time_frames):
+            print_str = ''
+            for j in range(n_rows):
+                print_str += str(theta_time[j][i])
+                print_str += ' '
+
+            print(print_str , file=f)  
 
 
 print('done')
