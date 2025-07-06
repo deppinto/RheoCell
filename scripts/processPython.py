@@ -169,7 +169,7 @@ for traj in [start, end]:
 
 
 
-plt.ylabel(r'$\theta_5$', fontsize=18)
+plt.ylabel(r'$\theta_i$', fontsize=18)
 plt.xlabel('Time', fontsize=18)
 #plt.xlim([0,500])
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)

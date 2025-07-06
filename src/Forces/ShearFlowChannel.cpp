@@ -48,6 +48,6 @@ number ShearFlowChannel::potential(int k, number walls) {
 std::vector<number> ShearFlowChannel::velocity_profile(int k, int lx, int ly) {
 	//int x = (k-(int(k/lx)*lx));
 	int y = (k/lx);
-	if(y > lambda && y < ly - lambda) return std::vector<number> {(y - (lambda+1)) * shear_rate / (ly - 2 * (lambda+1)), 0.};
+	if(y > lambda && y < ly - lambda) return std::vector<number> {(y - (lambda+1)) * shear_rate, 0.}; // (ly - 2 * (lambda+1)), 0.};
 	else return std::vector<number> {0., 0.};
 }

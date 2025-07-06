@@ -189,8 +189,8 @@ y=np.arange(0,ly,1)
 
 
 total_time_frames = int(steps / print_conf_interval)
-n_rows = 10
-n_columns = 10
+n_rows = 20
+n_columns = 5
 theta_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 
 
@@ -303,7 +303,7 @@ for line in cfile:
             D_major_axis_vec_y = 0
 
 
-        if pt_num - int(pt_num / n_columns) * n_columns == 5:
+        if pt_num - int(pt_num / n_columns) * n_columns == 3:
             theta_time[int(pt_num / n_columns)][frame_num] = (0.5 * np.atan2(S01, S00) * 180 / pi)
 
 

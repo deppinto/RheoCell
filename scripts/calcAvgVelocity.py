@@ -237,6 +237,8 @@ velmin=10000.
 
 velmax_x=0.
 velmin_x=10000.
+
+com_avg_velocity_calc = 0.
 for line in cfile:
     cont_line+=1
     words=line.split()
@@ -263,7 +265,10 @@ for line in cfile:
         cornerSite_x=[0. for i in range(0,N)]
         cornerSite_y=[0. for i in range(0,N)]
         com_velocity_x = [0. for i in range(0,N)]
-        com_velocity_x = [0. for i in range(0,N)]
+        com_velocity_y = [0. for i in range(0,N)]
+
+        print(com_avg_velocity_calc/N)
+        com_avg_velocity_calc = 0.
 
     elif words[0]=='b':
         lx=int(float(words[2]))
@@ -327,6 +332,7 @@ for line in cfile:
             MSD[len(MSD)-1]+=sqrt(unrap_comx[pt_num]*unrap_comx[pt_num]+unrap_comy[pt_num]*unrap_comy[pt_num])/N
             com_velocity_x[pt_num]=dist_com_x/((time_conf[t1]-time_conf[t2])*dt)
             com_velocity_y[pt_num]=dist_com_y/((time_conf[t1]-time_conf[t2])*dt)
+            com_avg_velocity_calc += sqrt(com_velocity_x[pt_num]*com_velocity_x[pt_num] + com_velocity_y[pt_num]*com_velocity_y[pt_num])
 
         nemX=float(words[9])
         nemY=float(words[10])
@@ -662,7 +668,7 @@ for line in cfile:
                 #cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos', extent=[0,lx,0,ly])
 
             frame_num=int(t/print_conf_interval)-1
-            print(frame_num)
+            #print(frame_num)
             #if frame_num%1==0:
                 #print(frame_num, cont_line, t)
             #if cont_line>N+2:
