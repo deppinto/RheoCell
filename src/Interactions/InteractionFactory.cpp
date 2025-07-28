@@ -4,6 +4,7 @@
 #include "ActiveMultiField.h"
 #include "ActiveNematic.h"
 #include "WetModel.h"
+#include "WetPolarModel.h"
 #include "GeneralizedWetModel.h"
 #include "LEBcActiveNematic.h"
 #include "LEBcWetModel.h"
@@ -30,6 +31,10 @@ InteractionPtr InteractionFactory::make_interaction(input_file &inp) {
 	else if(inter_type.compare("wetmodel") == 0){
                 if(backend.compare("CUDA") == 0) return std::make_shared<WetModel>();
                 else return std::make_shared<WetModel>();
+        }
+	else if(inter_type.compare("wetpolarmodel") == 0){
+                if(backend.compare("CUDA") == 0) return std::make_shared<WetPolarModel>();
+                else return std::make_shared<WetPolarModel>();
         }
 	else if(inter_type.compare("lebcactivenematic") == 0){
                 if(backend.compare("CUDA") == 0) return std::make_shared<LEBcActiveNematic>();

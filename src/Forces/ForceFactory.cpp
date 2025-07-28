@@ -37,6 +37,7 @@ void ForceFactory::add_force(input_file &inp, std::vector<BaseField *> &fields, 
 
 	if(type_str.compare("channel_walls") == 0) extF = std::make_shared<ChannelWalls>();
 	else if(type_str.compare("moving_walls") == 0) extF = std::make_shared<ChannelWalls>();
+	else if(type_str.compare("circle_walls") == 0) extF = std::make_shared<ChannelWalls>();
 	else if(type_str.compare("shear_flow_channel") == 0) extF = std::make_shared<ShearFlowChannel>();
 	else throw RCexception("Invalid force type `%s\'", type_str.c_str());
 

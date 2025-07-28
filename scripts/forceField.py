@@ -134,6 +134,7 @@ for line in cfile:
     #cset1 = plt.imshow(modulus, cmap='RdBu', interpolation='nearest', vmin=0, vmax=z_max)
     
 
+cset1 = plt.plot(43.5, 110.5, '*', color='#00FFFF', markersize=10)
 ax = plt.gca()
 ax.set_aspect('equal', adjustable='box')
 ax.set_xlim([0, lx])

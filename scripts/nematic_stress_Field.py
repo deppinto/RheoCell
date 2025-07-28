@@ -199,9 +199,9 @@ for p in range(0,LLY):
             psi = s/(2.-s)*atan2(num, den)
             if s==1:
                 cset1 = plt.plot(x, y, 'go', markersize=10)
-                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='g', head_width=1.5, head_length=1.5, width=0.5)
-            elif s==-1:
-                cset1 = plt.plot(x, y, 'b^', markersize=10)
+                cset1 = plt.arrow(x, y, 6*cos(psi), 6*sin(psi), color='g', head_width=0, head_length=0, width=1.0)
+            #elif s==-1:
+                #cset1 = plt.plot(x, y, 'b^', markersize=10)
 
 
         # keep this just in case our other symmetries give us integer defects
@@ -290,14 +290,15 @@ print("Stresses: ", total_stress, div_stress)
 '''
 
 
+#cset1 = plt.plot(45.5, 112.5, '*', color='#00FFFF', markersize=10)
 ax = plt.gca()
 ax.set_aspect('equal', adjustable='box')
 ax.set_xlim([0, lx])
 ax.set_ylim([0, ly])
-ax.set_yticklabels([])
-ax.set_xticklabels([])
-ax.set_xticks([])
-ax.set_yticks([])
+#ax.set_yticklabels([])
+#ax.set_xticklabels([])
+#ax.set_xticks([])
+#ax.set_yticks([])
 #fig.tight_layout()
 if variable==1:
     plt.savefig('frame.png')

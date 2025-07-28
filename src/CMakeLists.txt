@@ -38,6 +38,7 @@ SET(interactions_SOURCES
 	Interactions/ActiveNematic.cpp
 	Interactions/LEBcActiveNematic.cpp
 	Interactions/WetModel.cpp
+	Interactions/WetPolarModel.cpp
 	Interactions/LEBcWetModel.cpp
 	Interactions/GeneralizedWetModel.cpp
 	Interactions/DifferentialAdhesion.cpp
@@ -56,6 +57,7 @@ SET(box_SOURCES
 	Boxes/Channel.cpp
 	Boxes/MovingWalls.cpp
 	Boxes/SquareWalls.cpp
+	Boxes/CircleWalls.cpp
 	Boxes/OrthogonalBox.cpp
 	Boxes/LeesEdwardsBox.cpp
 	Boxes/BoxFactory.cpp

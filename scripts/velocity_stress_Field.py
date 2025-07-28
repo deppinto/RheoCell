@@ -227,7 +227,9 @@ for p in range(0,LLY):
             x,y = sum_x/n,sum_y/n
             # add defect to list
             if s==1:
-                cset1 = plt.plot(x, y, 'r*', markersize=10)
+                if y<130:
+                    print(x,y)
+                    cset1 = plt.plot(x, y, '*', color='#00FFFF', markersize=10)
             elif s==-1:
                 cset1 = plt.plot(x, y, 'kX', markersize=10)
 
