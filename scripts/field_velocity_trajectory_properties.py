@@ -188,7 +188,7 @@ for i in range(start_frame+1, end_frame+1, 1):
             hole_timestamp.append(i - 1)
             hole_position_x.append(avg_x)
             hole_position_y.append(avg_y)
-            #print(avg_x, avg_y)
+            print("hole formed: ",avg_x, avg_y)
             
             available_window = time_window
             if i - 2 < time_window:
@@ -371,7 +371,7 @@ for i in range(start_frame+1, end_frame+1, 1):
 
                                 if distx * distx + disty * disty < radius_stress * radius_stress:
                                     avg_strain += strain[yy][xx] / (pi * radius_stress * radius_stress)
-                        print(avg_strain, voids_area, i)
+                        print(avg_strain, voids_area, i, x, y)
 
 
 if hole_stats > 0:

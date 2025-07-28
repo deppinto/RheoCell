@@ -693,7 +693,7 @@ for traj in range(start, end):
         ax2.spines['right'].set_color('forestgreen')
         ax2.spines['left'].set_color('firebrick')
 
-
+        '''
         plt.close()
         plt.figure(figsize=(3*40.179/25.4, 3*25.142/25.4))
         plt.plot(x_lt, ani_histogram, '--o', color='firebrick')
@@ -722,6 +722,7 @@ for traj in range(start, end):
         plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/figOther.svg", transparent=True)
         plt.show()
         exit (1)
+        '''
 
 
     if variable == 3:
@@ -862,7 +863,7 @@ if variable == 2:
     ax[1,1].set_xlabel(r'$\varepsilon$')
     ax[1,2].set_xlabel('Lifetime')
 
-    ax[1,1].set_yscale('log')
+    #ax[1,1].set_yscale('log')
     #ax[1,1].set_xscale('log')
 
     fig_histograms.delaxes(ax[0,2])
