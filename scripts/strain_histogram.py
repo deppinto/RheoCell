@@ -161,9 +161,9 @@ for i in range(start_frame+1, end_frame+1, 1):
 
     cfile=open(file,"r")
     header=cfile.readline().split()
-    t=int(header[2])
     if len(header)<3:
         break
+    t=int(header[2])
 
     header=cfile.readline().split()
     lx=int(float(header[2]))
