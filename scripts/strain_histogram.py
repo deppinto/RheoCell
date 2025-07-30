@@ -125,7 +125,7 @@ for i in range(start_frame+1, end_frame+1, 1):
 
     if i < end_frame:
         header=traj_file.readline().split()
-        if len(header==0):
+        if len(header)==0:
             break
         t=int(header[2])
         header=traj_file.readline().split()
