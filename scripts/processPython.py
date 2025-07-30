@@ -369,6 +369,8 @@ survival_all_y = []
 survival_all_x = []
 logsurvival_all_y = []
 logsurvival_all_x = []
+nematic_1_all = []
+nematic_2_all = []
 
 st_all_x = []
 st_all_y = []
@@ -400,6 +402,8 @@ for traj in range(start, end):
     max_stress_histogram = np.zeros(10)
 
     avg_distance_velocity_defects = np.zeros(10)
+    avg_distance_nematic_defects_1 = np.zeros(10)
+    avg_distance_nematic_defects_2 = np.zeros(10)
 
     l_bins = 0.1
     x_l = [i * l_bins for i in range(int(1./l_bins))]
@@ -539,6 +543,19 @@ for traj in range(start, end):
             avg_distance_velocity_defects[int(float(save[0]))] += float(save[1])
         fileoutput.close()
 
+
+
+
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_nematic_histogram_tau10.txt","r")
+        for line in fileoutput:
+            save=line.split()
+            avg_distance_nematic_defects_1[int(float(save[0]))] += float(save[1])
+            avg_distance_nematic_defects_2[int(float(save[0]))] += float(save[2])
+        fileoutput.close()
+
+
+
+
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_velocity_stats.txt","r")
         for line in fileoutput:
             save=line.split()
@@ -627,6 +644,8 @@ for traj in range(start, end):
         max_stress_histogram[:] = max_stress_histogram[:] / count_jobs
 
         avg_distance_velocity_defects[:] = avg_distance_velocity_defects[:] / count_jobs
+        avg_distance_nematic_defects_1[:] = avg_distance_nematic_defects_1[:] / count_jobs
+        avg_distance_nematic_defects_2[:] = avg_distance_nematic_defects_2[:] / count_jobs
 
         '''
         for q in range(len(strain_count_20)):
@@ -734,6 +753,11 @@ for traj in range(start, end):
         max_stress_all.append(max_stress_histogram)
         ax[1,0].plot(avg_distance_velocity_defects, '-^', label=nemself[traj])
         vortex_all.append(avg_distance_velocity_defects)
+
+
+        nematic_1_all.append(avg_distance_nematic_defects_1)
+        nematic_2_all.append(avg_distance_nematic_defects_2)
+
 
         xx = x_sp
         yy = np.zeros(len(x_sp))
@@ -1090,7 +1114,7 @@ if variable == 3:
     #plt.text(-9.35, 0.16, r"$\frac{\xi}{\xi_{cell}}$", fontsize=18, fontname="Times New Roman")
 
 
-
+    '''
     ttt = [-i for i in range(9, -1, -1)]
     plt.figure(figsize=(3*40.179/25.4, 3*25.142/25.4))
     plt.plot(ttt, vortex_all[11][::-1]/8, '--o', color='firebrick')
@@ -1108,6 +1132,30 @@ if variable == 3:
     plt.subplots_adjust(left=0.2, bottom=0.22, right=0.975, top=0.99)
     #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig1c.png", transparent=True)
     #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig1c.svg", transparent=True)
+    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1d.png", transparent=True)
+    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1d.svg", transparent=True)
+    plt.show()
+    '''
+
+
+    ttt = [-i for i in range(9, -1, -1)]
+    plt.figure(figsize=(3*40.179/25.4, 3*25.142/25.4))
+    plt.plot(ttt, nematic_2_all[11][::-1]/8, '--o', color='firebrick')
+    plt.plot(ttt, nematic_2_all[10][::-1]/8, '--^', color='green')
+    plt.plot(ttt, nematic_2_all[9][::-1]/8, '--s', color='royalblue')
+    plt.plot(ttt, nematic_2_all[8][::-1]/8, '--p', color='goldenrod')
+    plt.plot(ttt, nematic_2_all[7][::-1]/8, '--h', color='peru')
+    plt.plot(ttt, nematic_2_all[5][::-1]/8, '--8', color='purple')
+    plt.plot(ttt, nematic_2_all[3][::-1]/8, '--D', color='gray')
+    plt.legend(['0.001', '0.0025', '0.005', '0.0075', '0.01', '0.05', '0.1'], prop={'family':'Times New Roman', 'size':'12'}, loc=(0.08, 0.05), ncols=3, frameon=False)
+    plt.text(-9.2, 1.2, r'$\chi$', fontsize=18, fontname="Times New Roman")
+    plt.ylabel(r'$r_{min}^{(2^{nd} defect)}/R$', fontname='Times New Roman', fontsize=18)
+    plt.xlabel(r'$t-t_{hole}$', fontname='Times New Roman', fontsize=18)
+    plt.xticks(fontname='Times New Roman', fontsize=18)
+    plt.yticks(fontname='Times New Roman', fontsize=18)
+    plt.subplots_adjust(left=0.2, bottom=0.22, right=0.975, top=0.99)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/figSM3b.png", transparent=True)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/figSM3b.svg", transparent=True)
     #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1d.png", transparent=True)
     #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1d.svg", transparent=True)
     plt.show()

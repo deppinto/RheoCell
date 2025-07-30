@@ -125,6 +125,8 @@ for i in range(start_frame+1, end_frame+1, 1):
 
     if i < end_frame:
         header=traj_file.readline().split()
+        if len(header==0):
+            break
         t=int(header[2])
         header=traj_file.readline().split()
 
@@ -141,7 +143,6 @@ for i in range(start_frame+1, end_frame+1, 1):
                             strain_hist_30[index] += 1.
                             index = int( (strain[y1][x1] - strain_min)/delta_bin_40 )
                             strain_hist_40[index] += 1.
-
 
     elif voids_area < 1 and start_hole_time >= 0:
         number_holes += 1
@@ -224,6 +225,9 @@ for i in range(start_frame+1, end_frame+1, 1):
                 strain_count_30[index] += 1.
                 index = int( (strain_value - strain_min)/delta_bin_40 )
                 strain_count_40[index] += 1.
+
+            if strain_value > strain_max:
+                print("strain: ", value)
 
 if start_hole_time >= 0:
     number_holes += 1
