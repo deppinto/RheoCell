@@ -139,7 +139,7 @@ for traj in range(start, end):
 
     strain_bins = 40
     strain_min = 0.
-    strain_max = 0.005
+    strain_max = 0.007
     strain_delta = strain_max - strain_min
     delta_bin = strain_delta / strain_bins
     x_st = [(i * delta_bin + strain_min + delta_bin/2) for i in range(strain_bins)]
@@ -165,7 +165,10 @@ for traj in range(start, end):
             continue
         if scripts==85 and os.path.isfile("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_histogram_"+str(strain_bins)+"bins.txt") == False:
             continue
-
+        if scripts==83 and os.path.isfile("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_histogram_"+str(strain_bins)+"bins.txt") == False:
+            continue
+        if scripts==84 and os.path.isfile("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_histogram_"+str(strain_bins)+"bins.txt") == False:
+            continue
 
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_test_plusonestrain.txt","r")
         cont_line = 0
@@ -334,7 +337,7 @@ for traj in range(start, end):
                 #P_final.append(P_hole_E)
                 xx_final.append(x_st[i])
         '''
-        if new_N_strain[i] > 0:
+        if new_N_strain[i] > 0 and x_st[i]<0.005:
             P_hole_E = new_N_strain_hole[i] / new_N_strain[i]
             #print(new_N_strain_hole[i], new_N_strain[i])
             #P_hole_E = new_N_strain_hole[i] / new_N_holes
@@ -423,13 +426,13 @@ plt.figure(figsize=(5.452423529,4.089317647))
 #plt.plot(st_all_x[1], st_all_y[1], '-.^', color='green', label='0.4')
 #plt.plot(st_all_x[0], st_all_y[0], '-.s', color='royalblue', label='0.3')
 
-plt.plot(log_st_all_x[8], log_st_all_y[8], ':o', color='firebrick', markerfacecolor='none')
-plt.plot(log_st_all_x[7], log_st_all_y[7], ':^', color='green', markerfacecolor='none')
-plt.plot(log_st_all_x[6], log_st_all_y[6], ':s', color='royalblue', markerfacecolor='none')
-plt.plot(log_st_all_x[5], log_st_all_y[5], '--o', color='firebrick', alpha=0.5)
-plt.plot(log_st_all_x[4], log_st_all_y[4], '--^', color='green', alpha=0.5)
-plt.plot(log_st_all_x[3], log_st_all_y[3], '--s', color='royalblue', alpha=0.5)
-plt.plot(log_st_all_x[2], log_st_all_y[2], '-.o', color='firebrick', label='0.5')
+#plt.plot(log_st_all_x[8], log_st_all_y[8], ':o', color='firebrick', markerfacecolor='none')
+#plt.plot(log_st_all_x[7], log_st_all_y[7], ':^', color='green', markerfacecolor='none')
+#plt.plot(log_st_all_x[6], log_st_all_y[6], ':s', color='royalblue', markerfacecolor='none')
+#plt.plot(log_st_all_x[5], log_st_all_y[5], '--o', color='firebrick', alpha=0.5)
+#plt.plot(log_st_all_x[4], log_st_all_y[4], '--^', color='green', alpha=0.5)
+#plt.plot(log_st_all_x[3], log_st_all_y[3], '--s', color='royalblue', alpha=0.5)
+#plt.plot(log_st_all_x[2], log_st_all_y[2], '-.o', color='firebrick', label='0.5')
 plt.plot(log_st_all_x[1], log_st_all_y[1], '-.^', color='green', label='0.4')
 plt.plot(log_st_all_x[0], log_st_all_y[0], '-.s', color='royalblue', label='0.3')
 
@@ -441,7 +444,7 @@ plt.yticks(fontname='Times New Roman',  fontsize=18)
 #plt.xscale('log')
 plt.yscale('log')
 #plt.ylim(-0.05, 100.05)
-plt.xlim(-0.0001, 0.0055)
+#plt.xlim(-0.0001, 0.0055)
 plt.subplots_adjust(left=0.18, bottom=0.2, right=0.955, top=0.97)
 
 plt.text(0.001, 0.07, r'$\zeta$', fontsize=18, fontname="Times New Roman")
@@ -450,13 +453,13 @@ plt.legend(prop={'family':'Times New Roman', 'size':'12'}, loc=(0.02, 0.65), nco
 fig = plt.gcf()
 ax = plt.gca()
 inset_ax = fig.add_axes([0.66, 0.29, 0.28, 0.24])
-inset_ax.plot(fric[8]**0.1/nemself[8], slope_fit[8], 'o', color='firebrick', ms=3, markerfacecolor='none')
-inset_ax.plot(fric[7]**0.1/nemself[7], slope_fit[7], '^', color='green', ms=3, markerfacecolor='none')
-inset_ax.plot(fric[6]**0.1/nemself[6], slope_fit[6], 's', color='royalblue', ms=3, markerfacecolor='none')
-inset_ax.plot(fric[5]**0.1/nemself[5], slope_fit[5], 'o', color='firebrick', ms=3, alpha=0.5)
-inset_ax.plot(fric[4]**0.1/nemself[4], slope_fit[4], '^', color='green', ms=3, alpha=0.5)
-inset_ax.plot(fric[3]**0.1/nemself[3], slope_fit[3], 's', color='royalblue', ms=3, alpha=0.5)
-inset_ax.plot(fric[2]**0.1/nemself[2], slope_fit[2], 'o', color='firebrick', ms=3)
+#inset_ax.plot(fric[8]**0.1/nemself[8], slope_fit[8], 'o', color='firebrick', ms=3, markerfacecolor='none')
+#inset_ax.plot(fric[7]**0.1/nemself[7], slope_fit[7], '^', color='green', ms=3, markerfacecolor='none')
+#inset_ax.plot(fric[6]**0.1/nemself[6], slope_fit[6], 's', color='royalblue', ms=3, markerfacecolor='none')
+#inset_ax.plot(fric[5]**0.1/nemself[5], slope_fit[5], 'o', color='firebrick', ms=3, alpha=0.5)
+#inset_ax.plot(fric[4]**0.1/nemself[4], slope_fit[4], '^', color='green', ms=3, alpha=0.5)
+#inset_ax.plot(fric[3]**0.1/nemself[3], slope_fit[3], 's', color='royalblue', ms=3, alpha=0.5)
+#inset_ax.plot(fric[2]**0.1/nemself[2], slope_fit[2], 'o', color='firebrick', ms=3)
 inset_ax.plot(fric[1]**0.1/nemself[1], slope_fit[1], '^', color='green', ms=3)
 inset_ax.plot(fric[0]**0.1/nemself[0], slope_fit[0], 's', color='royalblue', ms=3)
 inset_ax.set_ylabel('Slope', fontname='Times New Roman', fontsize=12)
