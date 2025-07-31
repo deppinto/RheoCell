@@ -79,7 +79,7 @@ total_frames = end_frame - start_frame
 
 strain_bins = 20
 strain_min = 0.
-strain_max = 0.005
+strain_max = 0.007
 strain_delta = strain_max - strain_min
 delta_bin = strain_delta / strain_bins
 x_st = [(i * delta_bin + strain_min + delta_bin/2) for i in range(strain_bins)]
