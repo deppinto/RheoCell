@@ -67,6 +67,7 @@ void WetPolarModel::read_topology(std::vector<BaseField*> &fields) {
         for(int i = 0; i < N; i++) {
                 fields[i]->index = i;
 		fields[i]->get_interaction_values(R);
+		fields[i]->clock = int(2 * drand48() * J_Q_active);
         }
 }
 
@@ -324,11 +325,22 @@ void WetPolarModel::calc_internal_forces(BaseField *p, int q) {
 
 void WetPolarModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
-	if(store)p->thetaQ_old = p->thetaQ;
+	//if(store)p->thetaQ_old = p->thetaQ;
+	//p->thetaQ = p->thetaQ_old + sqrt(dt) * J_Q * Utils::gaussian();
+	//p->Q00 = cos(p->thetaQ);
+	//p->Q01 = sin(p->thetaQ);
 
-	p->thetaQ = p->thetaQ_old + sqrt(dt) * J_Q * Utils::gaussian();
-	p->Q00 = cos(p->thetaQ);
-	p->Q01 = sin(p->thetaQ);
+	p->clock += 1;
+	//std::cout<<p->clock<<std::endl;
+	if(p->clock == J_Q_active * 2)
+	{
+		//std::cout<<p->index<<" "<<p->clock<<std::endl;
+		p->thetaQ = PI * (1-2*drand48());
+		p->Q00 = cos(p->thetaQ);
+		p->Q01 = sin(p->thetaQ);
+		p->clock = 0;
+	}
+
 
 	if(anchoring) update_anchoring(p);
 }

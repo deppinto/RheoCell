@@ -11,7 +11,6 @@ from matplotlib import cm
 import matplotlib
 #matplotlib.use('Agg')
 
-'''
 from matplotlib.font_manager import FontProperties
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib import font_manager, rcParams
@@ -36,10 +35,12 @@ font_manager.fontManager.addfont(bold_font_path)
 rcParams['mathtext.fontset'] = 'custom'
 
 # Set roman (upright), italic, and bold versions (all Times New Roman if needed)
-rcParams['mathtext.rm'] = font.get_name()  # e.g. "Times New Roman"
-rcParams['mathtext.it'] = fonti.get_name()
-rcParams['mathtext.bf'] = fontbd.get_name()
-'''
+#rcParams['mathtext.rm'] = font.get_name()  # e.g. "Times New Roman"
+#rcParams['mathtext.it'] = fonti.get_name()
+#rcParams['mathtext.bf'] = fontbd.get_name()
+rcParams['mathtext.it'] = 'Times New Roman:italic'
+rcParams['mathtext.rm'] = 'Times New Roman'
+rcParams['mathtext.bf'] = 'Times New Roman:bold'
 
 
 if len(sys.argv)!=5:
@@ -318,7 +319,6 @@ ax.set_xticklabels([])
 ax.set_xticks([])
 ax.set_yticks([])
 
-'''
 fig = plt.gcf()
 # Add colorbar
 cbar = fig.colorbar(cset1, ax=ax)
@@ -331,8 +331,7 @@ cbar.set_ticks([-1, -0.5, 0, 0.5, 1])
 # Set label above the colorbar
 #cbar.set_label(r'$\dot{\varepsilon}$,$\nabla f^a$', rotation=0, pad=10, loc='top', fontsize=18, fontname='Times New Roman')
 #cbar.ax.xaxis.set_label_position('top')  # Move label to top
-cbar.ax.set_title(r'$\dot{\mathbf{\varepsilon}}$ , $\nabla \cdot \mathbf{f}^a$', pad=10, fontsize=18, fontname='Times New Roman')
-'''
+cbar.ax.set_title(r'$\dot{\varepsilon}$ , $\nabla \cdot \mathbf{f}^\mathit{a}$', pad=10, fontsize=18, fontname='Times New Roman')
 
 #fig.tight_layout()
 if variable==1:
