@@ -157,7 +157,7 @@ void WetPolarModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 		size_rows += p->subSize;
 		for(int q=0; q<p->subSize;q++)
 			computeGlobalSums(p, q, false);
-		std::cout<<p->index<<" "<<p->perimeter<<std::endl;
+		//std::cout<<p->index<<" "<<p->perimeter<<std::endl;
 	}
 	if(size_rows != size_rows_old){
 		vec_v_x.resize(size_rows);
