@@ -95,6 +95,7 @@ void MultiPhaseField::init(int Lx, int Ly) {
 	//Fpassive= std::vector<number> {0.,0.};
 	//Factive= std::vector<number> {0.,0.};
 	area=0;
+	perimeter=0;
 	sumF=0;
 	offset.resize(2);
 	offset[0]=0; offset[1]=0;
@@ -137,6 +138,7 @@ void MultiPhaseField::init() {
 
 	//minor bookkeeping
 	area=0;
+	perimeter=0;
 	offset.resize(2);
 	offset[0]=0; offset[1]=0;
 	int x,y;
@@ -318,6 +320,7 @@ void MultiPhaseField::set_properties_to_zero() {
 	x_sub_left = LsubX;
 	y_sub_bottom = LsubY;
 	area=0;
+	perimeter=0;
 	sumF=0;
 	CoM[0] = 0.; 
 	CoM[1] = 0.;

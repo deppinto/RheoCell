@@ -3,10 +3,10 @@
 
 WetPolarModel::WetPolarModel() :
 				BaseInteraction(),
-				gamma(0.01),
+				gamma(0.06),
 				lambda(2.5),
 				omega(0.004),
-				mu(3.),
+				mu(20.),
 				kappa(0.1),
 				friction(1.),
 				zetaQ_self(0),
@@ -157,6 +157,7 @@ void WetPolarModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 		size_rows += p->subSize;
 		for(int q=0; q<p->subSize;q++)
 			computeGlobalSums(p, q, false);
+		std::cout<<p->index<<" "<<p->perimeter<<std::endl;
 	}
 	if(size_rows != size_rows_old){
 		vec_v_x.resize(size_rows);
@@ -243,6 +244,7 @@ void WetPolarModel::computeGlobalSums(BaseField *p, int q, bool update_global_su
         	p->fieldDY[q] = 0.;
 		p->laplacianPhi[q] = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + - 2.*p->fieldScalar[q];
 	}
+	p->perimeter += p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q];
 
 	BaseInteraction::updateFieldProperties(p, q, k);
 
@@ -284,8 +286,15 @@ number WetPolarModel::f_interaction(BaseField *p, int q) {
 	number suppress = (laplacianSquare-lsquare)/sqrt(1+(laplacianSquare-lsquare)*(laplacianSquare-lsquare));
 	number Adh = - 4*lambda*omega*suppress*p->fieldScalar[q];
 
+	//Perimeter term
+	number p0 = 12; //2 * PI * 8;
+	number beta = mu * 10.;
+	number P = 4*(beta/p0) * (1 - p->perimeter/p0) * p->laplacianPhi[q];
+	//number P = 0;
+	
+
 	// delta F / delta phi_i
-	number V = CH + A + Rep + Adh;
+	number V = CH + A + Rep + Adh + P;
 	p->freeEnergy[q] += V;
 	p->Pressure[q] = Rep - CH - A;
 	return V;

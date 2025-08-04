@@ -58,6 +58,7 @@ SET(box_SOURCES
 	Boxes/MovingWalls.cpp
 	Boxes/SquareWalls.cpp
 	Boxes/CircleWalls.cpp
+	Boxes/TriangleWalls.cpp
 	Boxes/OrthogonalBox.cpp
 	Boxes/LeesEdwardsBox.cpp
 	Boxes/BoxFactory.cpp

@@ -5,6 +5,7 @@
 #include "Channel.h"
 #include "SquareWalls.h"
 #include "CircleWalls.h"
+#include "TriangleWalls.h"
 #include "MovingWalls.h"
 
 #include "../Utilities/RCexception.h"
@@ -20,6 +21,7 @@ BoxPtr BoxFactory::make_box(input_file &inp) {
 	if(box_type.compare("square") == 0) {
 		if(type_str.compare("channel_walls") == 0) return std::make_shared<SquareWalls>();
 		else if(type_str.compare("circle_walls") == 0) return std::make_shared<CircleWalls>();
+		else if(type_str.compare("triangle_walls") == 0) return std::make_shared<TriangleWalls>();
 		else return std::make_shared<SquareBox>();
 	}
 	else if(box_type.compare("orthogonal") == 0) {
