@@ -15,7 +15,8 @@ WetPolarModel::WetPolarModel() :
 				friction_cell(0.),
 				tolerance(0.0001),
 				wall_slip(0.5),
-				passive_alpha(1.){
+				passive_alpha(1.),
+				beta(0.){
 	a0=PI*R*R;
 }
 
@@ -85,6 +86,7 @@ void WetPolarModel::apply_changes_after_equilibration(){
 	J_Q=J_Q_active;
 	friction=friction_active;
 	friction_cell=friction_cell_active;
+	beta=mu*10.;
 }
 
 void WetPolarModel::set_box(BaseBox *boxArg) {
@@ -287,8 +289,8 @@ number WetPolarModel::f_interaction(BaseField *p, int q) {
 	number Adh = - 4*lambda*omega*suppress*p->fieldScalar[q];
 
 	//Perimeter term
-	number p0 = 12; //2 * PI * 8;
-	number beta = mu * 10.;
+	//number p0 = 12; //2 * PI * 8;
+	//number beta = mu * 10.;
 	number P = 4*(beta/p0) * (1 - p->perimeter/p0) * p->laplacianPhi[q];
 	//number P = 0;
 	
