@@ -41,6 +41,7 @@ protected:
 
 	number p0 = 12.;
 	number beta;
+	number beta_active;
 
 	number F_total_x;
 	number F_total_y;

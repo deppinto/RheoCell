@@ -43,6 +43,7 @@ void WetPolarModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "CGtolerance", &tolerance, 0);
 	getInputNumber(&inp, "wall_slip", &wall_slip, 0);
 	getInputNumber(&inp, "passive_alpha", &passive_alpha, 0);
+	getInputNumber(&inp, "beta", &beta_active, 0);
 }
 
 void WetPolarModel::init() {
@@ -86,7 +87,7 @@ void WetPolarModel::apply_changes_after_equilibration(){
 	J_Q=J_Q_active;
 	friction=friction_active;
 	friction_cell=friction_cell_active;
-	beta=mu*10.;
+	beta=beta_active;
 }
 
 void WetPolarModel::set_box(BaseBox *boxArg) {
