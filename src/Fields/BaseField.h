@@ -104,7 +104,9 @@ public:
 	/// Index of the particle. Usually it is a useful way of accessing arrays of particles
 	int index;
 	int type;
-	int clock;
+	int run_clock;
+	int tumble;
+	int tumble_clock;
 
 	/// Positions of all interaction centers. This array must be initialized by child classes
 	std::vector<number> CoM;

@@ -267,7 +267,7 @@ for line in cfile:
         com_velocity_x = [0. for i in range(0,N)]
         com_velocity_y = [0. for i in range(0,N)]
 
-        print(com_avg_velocity_calc/N)
+        #print(com_avg_velocity_calc/N)
         com_avg_velocity_calc = 0.
 
     elif words[0]=='b':
@@ -322,11 +322,12 @@ for line in cfile:
             if dist_com_y<-ly/2:
                 dist_com_y+=ly
             unrap_comx[pt_num]+=dist_com_x
-            if t==10000:
-                unrap_comx_save_1[pt_num]=unrap_comx[pt_num]
-            if t==30000:
-                unrap_comx_save_2[pt_num]=unrap_comx[pt_num]
-                avg_mean_velocity+=(unrap_comx_save_2[pt_num]-unrap_comx_save_1[pt_num])/(20000*dt*N)
+
+            #if t==10000:
+                #unrap_comx_save_1[pt_num]=unrap_comx[pt_num]
+            #if t==30000:
+                #unrap_comx_save_2[pt_num]=unrap_comx[pt_num]
+                #avg_mean_velocity+=(unrap_comx_save_2[pt_num]-unrap_comx_save_1[pt_num])/(20000*dt*N)
 
             unrap_comy[pt_num]+=dist_com_y
             MSD[len(MSD)-1]+=sqrt(unrap_comx[pt_num]*unrap_comx[pt_num]+unrap_comy[pt_num]*unrap_comy[pt_num])/N
@@ -703,7 +704,7 @@ for line in cfile:
 
 plt.close()
 
-
+'''
 y=np.arange(0., ly, deltay_coarse)
 vx_width=[0. for i in range(0, sizey_coarse)]
 vy_width=[0. for i in range(0, sizey_coarse)]
@@ -717,6 +718,7 @@ for p in range(0, sizey_coarse):
 
     vx_width[p] = vx_width[p]/float(avg_val)
     vy_width[p] = vy_width[p]/float(avg_val)
+'''
 
 
 if variable==5:
@@ -824,9 +826,11 @@ if variable==6:
     with open('mean_velocity.txt', 'w') as f:
         print(abs(avg_mean_velocity), file=f)  
 
+    '''
     with open('v_width.txt', 'w') as f:
         for i in range(len(y)):
             print(vy_width[i], vx_width[i], y[i], file=f)  
+    '''
 
 
 print('done')

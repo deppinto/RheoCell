@@ -69,7 +69,9 @@ void WetPolarModel::read_topology(std::vector<BaseField*> &fields) {
         for(int i = 0; i < N; i++) {
                 fields[i]->index = i;
 		fields[i]->get_interaction_values(R);
-		fields[i]->clock = int(2 * drand48() * J_Q_active);
+		fields[i]->run_clock = int(2 * drand48() * J_Q_active);
+		fields[i]->tumble_clock = -1;
+		fields[i]->tumble = 0;
         }
 }
 
@@ -342,15 +344,24 @@ void WetPolarModel::updateDirectedActiveForces(number dt, BaseField*p, bool stor
 	//p->Q00 = cos(p->thetaQ);
 	//p->Q01 = sin(p->thetaQ);
 
-	p->clock += 1;
-	//std::cout<<p->clock<<std::endl;
-	if(p->clock == J_Q_active * 2)
+	p->run_clock += 1;
+	if(p->run_clock == J_Q_active * 2)
 	{
-		//std::cout<<p->index<<" "<<p->clock<<std::endl;
+		p->tumble = ((sqrt(p->area/PI) - (R/2)) / (R/2)) * J_Q_active;
+		p->tumble_clock = 0;
+		p->run_clock = 0;
+		p->Q00 = 0.;
+		p->Q01 = 0.;
+	}
+	else if(p->tumble_clock == p->tumble)
+	{
 		p->thetaQ = PI * (1-2*drand48());
 		p->Q00 = cos(p->thetaQ);
 		p->Q01 = sin(p->thetaQ);
-		p->clock = 0;
+		p->tumble_clock = -1;
+	}
+	else if(p->tumble_clock > -1){
+		p->tumble_clock += 1;
 	}
 
 
