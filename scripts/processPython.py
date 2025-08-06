@@ -154,8 +154,8 @@ for traj in range(start, end):
     theta_1 = []
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
 
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/MSD.txt","r")
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/MSD.txt","r")
         index_count = 0
         for line in fileoutput:
             save=line.split()
@@ -164,7 +164,7 @@ for traj in range(start, end):
             else:
                 theta_5[index_count] += float(save[variable]) / jobs[traj]
             index_count+=1
-            #theta_1.append(float(save[variable-1]))
+            theta_1.append(float(save[variable-1]))
             #if traj == start:
                 #theta_5.append(float(save[variable]))
             #else:
@@ -172,8 +172,9 @@ for traj in range(start, end):
         fileoutput.close()
 
 
-    plt.plot(theta_5, '--o', label=lx[traj])
-    #plt.plot(theta_1, '--s', label=variable-1)
+    #plt.plot(theta_5, '--o', label=lx[traj])
+    plt.plot(theta_5, '--o', label=variable)
+    plt.plot(theta_1, '--s', label=variable-1)
     #if traj==end:
         #theta_diff = [abs(theta_5[i] - theta_1[i]) for i in range(len(theta_5))]
         #plt.plot(theta_diff, '--o', label=traj)
@@ -189,8 +190,8 @@ plt.xlabel('Time', fontsize=18)
 #plt.xlim([0,500])
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
 plt.legend(ncols=1, frameon=False)
-plt.xscale('log')
-plt.yscale('log')
+#plt.xscale('log')
+#plt.yscale('log')
 plt.show()
 exit(1)
 
