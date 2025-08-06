@@ -302,7 +302,8 @@ for line in cfile:
             D_major_axis_vec_x = 0
             D_major_axis_vec_y = 0
 
-
+        
+        theta_i = (0.5 * np.atan2(S01, S00) * 180 / pi)
         if pt_num - int(pt_num / n_columns) * n_columns == 3:
             theta_time[int(pt_num / n_columns)][frame_num] = (0.5 * np.atan2(S01, S00) * 180 / pi)
 

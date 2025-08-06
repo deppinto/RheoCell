@@ -152,11 +152,15 @@ for traj in range(start, end):
 
     theta_5 = []
     theta_1 = []
+    S = []
+    phi_all = []
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
 
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/MSD.txt","r")
         index_count = 0
+        mean_orientation = 0.
+        mean_phi = 0.
         for line in fileoutput:
             save=line.split()
             if job == jobs_seq[traj]:
@@ -165,6 +169,25 @@ for traj in range(start, end):
                 theta_5[index_count] += float(save[variable]) / jobs[traj]
             index_count+=1
             theta_1.append(float(save[variable-1]))
+
+            num_rows = 0
+            sin_sum = 0.
+            cos_sum = 0.
+            for q in range(3, len(save) - 3):
+                mean_orientation += float(save[q])
+                sin_sum += sin(2 * (float(save[q])*pi/180))
+                cos_sum += cos(2 * (float(save[q])*pi/180))
+                num_rows += 1
+
+            mean_orientation = mean_orientation / num_rows
+            mean_phi = 0.5 * atan2(sin_sum, cos_sum)
+            phi_all.append(mean_phi * 180 / pi)
+            avg_value_S = 0.
+            for q in range(3, len(save) - 3):
+                #avg_value_S += cos(2*(float(save[q]) - mean_orientation))
+                avg_value_S += cos(2*( (float(save[q])*pi/180) - mean_phi))
+            
+            S.append(avg_value_S / num_rows)
             #if traj == start:
                 #theta_5.append(float(save[variable]))
             #else:
@@ -173,11 +196,13 @@ for traj in range(start, end):
 
 
     #plt.plot(theta_5, '--o', label=lx[traj])
-    plt.plot(theta_5, '--o', label=variable)
-    plt.plot(theta_1, '--s', label=variable-1)
+    #plt.plot(theta_5, '--o', label=variable)
+    #plt.plot(theta_1, '--s', label=variable-1)
+    plt.plot(S, '--o', label=traj)
+    #plt.plot(phi_all, '--o', label=traj)
     #if traj==end:
-        #theta_diff = [abs(theta_5[i] - theta_1[i]) for i in range(len(theta_5))]
-        #plt.plot(theta_diff, '--o', label=traj)
+    #theta_diff = [abs(theta_5[i] - theta_1[i]) for i in range(len(theta_5))]
+    #plt.plot(theta_diff, '--o', label=traj)
 
     if end == start:
         break
@@ -185,7 +210,8 @@ for traj in range(start, end):
 
 
 #plt.ylabel(r'$\theta_i$', fontsize=18)
-plt.ylabel('MSD', fontsize=18)
+#plt.ylabel('MSD', fontsize=18)
+plt.ylabel('S', fontsize=18)
 plt.xlabel('Time', fontsize=18)
 #plt.xlim([0,500])
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
