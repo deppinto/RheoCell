@@ -382,8 +382,8 @@ for line in cfile:
 
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*Q00[pt_num], 3*Q01[pt_num], width=0.5, color='k')
 
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 2*D_major_axis_vec_x, 2*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -2*D_major_axis_vec_x, -2*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 1*D_major_axis_vec_x, 1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -1*D_major_axis_vec_x, -1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
 
         #increment phase field index
         pt_num+=1

@@ -28,6 +28,7 @@ BoxPtr BoxFactory::make_box(input_file &inp) {
 		if(type_str.compare("channel_walls") == 0) return std::make_shared<Channel>();
 		else if(type_str.compare("moving_walls") == 0) return std::make_shared<MovingWalls>();
 		else if(type_str.compare("shear_flow_channel") == 0) return std::make_shared<Channel>();
+		else if(type_str.compare("pois_flow_channel") == 0) return std::make_shared<Channel>();
 		else return std::make_shared<OrthogonalBox>();
 	}
 	else if(box_type.compare("lees_edwards") == 0) {

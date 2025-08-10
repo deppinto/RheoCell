@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SCRIPT=123
+SCRIPT=125
 START=1
-END=2
+END=5
 INIJOB=1
 SEED_VAR=1
 #FILENAME="nematic_correlations.txt"

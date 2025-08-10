@@ -143,6 +143,8 @@ for line in filedata:
 filedata.close()
 
 
+final_x = []
+final_y = []
 for traj in range(start, end):
 #for traj in [start, end]:
     #if traj==start:
@@ -150,6 +152,7 @@ for traj in range(start, end):
     #else:
         #theta_1 = []
 
+    xx = []
     theta_5 = []
     theta_1 = []
     S = []
@@ -165,10 +168,11 @@ for traj in range(start, end):
             save=line.split()
             if job == jobs_seq[traj]:
                 theta_5.append(float(save[variable]) / jobs[traj])
+                xx.append(float(save[0]))
             else:
                 theta_5[index_count] += float(save[variable]) / jobs[traj]
             index_count+=1
-            theta_1.append(float(save[variable-1]))
+            #theta_1.append(float(save[variable-1]))
 
             num_rows = 0
             sin_sum = 0.
@@ -186,14 +190,20 @@ for traj in range(start, end):
             for q in range(3, len(save) - 3):
                 #avg_value_S += cos(2*(float(save[q]) - mean_orientation))
                 avg_value_S += cos(2*( (float(save[q])*pi/180) - mean_phi))
-            
             S.append(avg_value_S / num_rows)
+
             #if traj == start:
                 #theta_5.append(float(save[variable]))
             #else:
                 #theta_1.append(float(save[variable]))
         fileoutput.close()
 
+
+    #last_yy = theta_5[-50:]
+    #last_xx = xx[-50:]
+    #slope, intercept, _, _, _ = linregress(last_xx, last_yy)
+    #final_x.append((N[traj] * 8 * 8) / ((lx[traj] - 2 * 6)/2)**2)
+    #final_y.append(slope)
 
     #plt.plot(theta_5, '--o', label=lx[traj])
     #plt.plot(theta_5, '--o', label=variable)
@@ -208,14 +218,16 @@ for traj in range(start, end):
         break
 
 
-
+#plt.plot(final_x, final_y, '--o')
 #plt.ylabel(r'$\theta_i$', fontsize=18)
 #plt.ylabel('MSD', fontsize=18)
 plt.ylabel('S', fontsize=18)
 plt.xlabel('Time', fontsize=18)
+#plt.ylabel('D', fontsize=18)
+#plt.xlabel(r'$\phi$', fontsize=18)
 #plt.xlim([0,500])
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-plt.legend(ncols=1, frameon=False)
+plt.legend(ncols=1, frameon=False, loc='upper left')
 #plt.xscale('log')
 #plt.yscale('log')
 plt.show()

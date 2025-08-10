@@ -71,8 +71,12 @@ for line in cfile:
     corner_y=float(words[8])
 
     S = sqrt(float(words[9])**2 + float(words[10])**2)
-    nemX = sqrt((1 + float(words[9])/S)/2)
-    nemY = np.sign(float(words[10]))*sqrt((1 - float(words[9])/S)/2)
+    if S>0:
+        nemX = sqrt((1 + float(words[9])/S)/2)
+        nemY = np.sign(float(words[10]))*sqrt((1 - float(words[9])/S)/2)
+    else:
+        nemX = 0
+        nemY = 0
     #nemX=float(words[9])
     #nemY=float(words[10])
     #nemX = cos(0.5 * acos(float(words[9])))
@@ -122,7 +126,7 @@ for line in cfile:
     levels = np.arange(0.0, m, step) + step
     cmap=cm.winter
     #if pt_num%10==0 or (pt_num+1)%10==0:
-    if pt_num==0:
+    if pt_num==-1:
         cset1 = plt.contour(X, Y, Z, levels, cmap=cmap, alpha=0.5)
     else:
         cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cmap, alpha=0.5)

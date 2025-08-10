@@ -147,8 +147,10 @@ void WetModel::initFieldProperties(BaseField *p) {
 	        number dx = .5*( xright - xleft );
 	        number dy = .5*( ytop - ybottom );*/
 
-	        number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
-	        number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+	        //number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
+	        //number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+	        number dx = BaseInteraction::derivX(p, q, k);
+	        number dy = BaseInteraction::derivY(p, q, k);
 	        p->fieldDX[q] = dx;
 	        p->fieldDY[q] = dy;
 
@@ -251,7 +253,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			}
 
 			//populate sparse matrix
-			if(box->getWalls(p->map_sub_to_box[q])<wall_slip)
+			if(box->getWalls(p->map_sub_to_box[q])<1.)//wall_slip)
 				//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+4*friction_cell)));
 				//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+friction_cell)));
 				//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+8*friction_cell)));
@@ -406,7 +408,7 @@ void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 
 	BaseInteraction::update_sub_to_box_map(p, q, k, p->GetSubXIndex(q, box), p->GetSubYIndex(q, box));
 
-        p->fieldDX[q] = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
+        /*p->fieldDX[q] = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
 	if(box->getWalls(k)<wall_slip){
         	p->fieldDY[q] = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
 		p->laplacianPhi[q] = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] - 4.*p->fieldScalar[q];
@@ -420,7 +422,11 @@ void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 
 		//p->Phi00[q] = (p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] - 2 * p->fieldScalar[q]);
 		//p->Phi01[q] = 0.;
-	}
+	}*/
+
+        p->fieldDX[q] = BaseInteraction::derivX(p, q, k);
+        p->fieldDY[q] = BaseInteraction::derivY(p, q, k);
+	p->laplacianPhi[q] = BaseInteraction::Laplacian(p, q, k);
 
 	BaseInteraction::updateFieldProperties(p, q, k);
 

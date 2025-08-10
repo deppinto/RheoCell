@@ -116,8 +116,8 @@ void WetPolarModel::initFieldProperties(BaseField *p) {
 		int k = p->GetSubIndex(q, box);
 		BaseInteraction::updateFieldProperties(p, q, k);
 
-	        number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
-	        number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+	        number dx = BaseInteraction::derivX(p, q, k);
+	        number dy = BaseInteraction::derivY(p, q, k);
 	        p->fieldDX[q] = dx;
 	        p->fieldDY[q] = dy;
 
@@ -201,7 +201,7 @@ void WetPolarModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			if(box->getWalls(p->map_sub_to_box[q])<wall_slip)
 				tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction)));
 			else
-				tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], 1.0));
+				tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], 100.0));
 
 			for(auto j : neigh_values){
 				other_site_box = box->neighbors[j+p->map_sub_to_box[q]*9];
@@ -240,15 +240,9 @@ void WetPolarModel::computeGlobalSums(BaseField *p, int q, bool update_global_su
 	sum_phi[k]+=p->fieldScalar[q];
 	BaseInteraction::update_sub_to_box_map(p, q, k, p->GetSubXIndex(q, box), p->GetSubYIndex(q, box));
 
-        p->fieldDX[q] = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
-	if(box->getWalls(k)<wall_slip){
-        	p->fieldDY[q] = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
-		p->laplacianPhi[q] = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] - 4.*p->fieldScalar[q];
-	}
-	else{
-        	p->fieldDY[q] = 0.;
-		p->laplacianPhi[q] = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + - 2.*p->fieldScalar[q];
-	}
+        p->fieldDX[q] = BaseInteraction::derivX(p, q, k);
+        p->fieldDY[q] = BaseInteraction::derivY(p, q, k);
+	p->laplacianPhi[q] = BaseInteraction::Laplacian(p, q, k);
 	p->perimeter += p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q];
 
 	BaseInteraction::updateFieldProperties(p, q, k);
@@ -339,12 +333,7 @@ void WetPolarModel::calc_internal_forces(BaseField *p, int q) {
 
 void WetPolarModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
-	//if(store)p->thetaQ_old = p->thetaQ;
-	//p->thetaQ = p->thetaQ_old + sqrt(dt) * J_Q * Utils::gaussian();
-	//p->Q00 = cos(p->thetaQ);
-	//p->Q01 = sin(p->thetaQ);
-
-	p->run_clock += 1;
+	/*p->run_clock += 1;
 	if(p->run_clock == J_Q_active * 2)
 	{
 		p->tumble = ((sqrt(p->area/PI) - (R/2)) / (R/2)) * J_Q_active;
@@ -362,6 +351,20 @@ void WetPolarModel::updateDirectedActiveForces(number dt, BaseField*p, bool stor
 	}
 	else if(p->tumble_clock > -1){
 		p->tumble_clock += 1;
+	}*/
+
+
+    	number S_mod = sqrt(p->S00 * p->S00 + p->S01 * p->S01);
+	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
+	if(S_mod>0.00000001){
+		number t = 0.5 * atan2(p->S01, p->S00);
+		std::vector<number> d = {cos(t) , sin(t)};
+		number sgn = (d[0] * p->nemQ[0] + d[1] * p->nemQ[1] > 0.0)? 1.0:-1.0;
+		p->nemQ[0] = p->nemQ_old[0] + dt * J_Q * (sgn * d[0] - p->nemQ[0]);
+		p->nemQ[1] = p->nemQ_old[1] + dt * J_Q * (sgn * d[1] - p->nemQ[1]);
+
+		p->Q00 = p->nemQ[0];
+		p->Q01 = p->nemQ[1];
 	}
 
 

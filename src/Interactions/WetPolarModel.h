@@ -71,12 +71,12 @@ protected:
 	int size_rows = 0;
 	int size_rows_old = 0;
 	int index, sub_q, other_site_patch, other_site_box;
-	std::vector<int> neigh_values = std::vector<int> {0,1,2,3,5,6,7,8};
+	//std::vector<int> neigh_values = std::vector<int> {0,1,2,3,5,6,7,8};
 	//std::vector<number> weight_values = std::vector<number> {0.25, 0.5, 0.25, 0.5, 0., 0.5, 0.25, 0.5, 0.25};
 	//std::vector<number> weight_values = std::vector<number> { 0.16667, 0.66667, 0.16667, 0.66667, 0., 0.66667, 0.16667, 0.66667, 0.16667};
-	std::vector<number> weight_values = std::vector<number> {1, 1, 1, 1, 0, 1, 1, 1, 1};
-	//std::vector<int> neigh_values = std::vector<int> {1,3,5,7};
-	//std::vector<number> weight_values = std::vector<number> {0, 1, 0, 1, 0, 1, 0, 1, 0};
+	//std::vector<number> weight_values = std::vector<number> {1, 1, 1, 1, 0, 1, 1, 1, 1};
+	std::vector<int> neigh_values = std::vector<int> {1,3,5,7};
+	std::vector<number> weight_values = std::vector<number> {0, 1, 0, 1, 0, 1, 0, 1, 0};
 	//std::vector<int> neigh_values = std::vector<int> {4};
 	std::vector<int> size_store_site_velocity_index;
 	std::vector<int> store_site_velocity_index;

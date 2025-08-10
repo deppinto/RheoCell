@@ -33,8 +33,11 @@ void CircleWalls::init(int Lx, int Ly) {
 		for(int x=0; x<Lx; x++){
 			int k=x+y*Lx;
 			double dist = Lx/2 - sqrt( ((Lx/2) - x) * ((Lx/2) - x) + ((Ly/2) - y) * ((Ly/2) - y) );
-			if(dist<=0) dist = 0.;
-			walls[k]=exp(-double(dist)/lambda_wall);
+			//if(dist<=0) dist = 0.;
+			//walls[k]=exp(-double(dist)/lambda_wall);
+			if(dist <= 0) walls[k] = 1.;
+			else if(dist < lambda_wall) walls[k] = 1.;
+			else walls[k] = 0.;
 		}
 	}
 	neighbors.resize(Lx*Ly*9);
