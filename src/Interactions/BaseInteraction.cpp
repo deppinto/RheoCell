@@ -60,6 +60,10 @@ void BaseInteraction::resetSums(int k){
 }
 
 void BaseInteraction::updateFieldProperties(BaseField *p, int q, int k){
+	p->total_force_x = 0.;
+	p->total_force_y = 0.;
+	p->total_force_repulsion_x = 0.;
+	p->total_force_repulsion_y = 0.;
 	p->freeEnergy[q] = p->set_F_ext(q, box->getWalls(k), box->getLaplacianWalls(k));
 }
 

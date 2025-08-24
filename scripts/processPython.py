@@ -160,6 +160,8 @@ for traj in range(start, end):
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
 
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_minor_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/MSD.txt","r")
         index_count = 0
         mean_orientation = 0.
@@ -198,17 +200,16 @@ for traj in range(start, end):
                 #theta_1.append(float(save[variable]))
         fileoutput.close()
 
-
     #last_yy = theta_5[-50:]
     #last_xx = xx[-50:]
     #slope, intercept, _, _, _ = linregress(last_xx, last_yy)
     #final_x.append((N[traj] * 8 * 8) / ((lx[traj] - 2 * 6)/2)**2)
     #final_y.append(slope)
 
-    #plt.plot(theta_5, '--o', label=lx[traj])
+    plt.plot(theta_5, '--o', label=lx[traj])
     #plt.plot(theta_5, '--o', label=variable)
     #plt.plot(theta_1, '--s', label=variable-1)
-    plt.plot(S, '--o', label=traj)
+    #plt.plot(S, '--o', label=traj)
     #plt.plot(phi_all, '--o', label=traj)
     #if traj==end:
     #theta_diff = [abs(theta_5[i] - theta_1[i]) for i in range(len(theta_5))]
@@ -219,13 +220,14 @@ for traj in range(start, end):
 
 
 #plt.plot(final_x, final_y, '--o')
-#plt.ylabel(r'$\theta_i$', fontsize=18)
+plt.ylabel(r'$\theta_i$', fontsize=18)
 #plt.ylabel('MSD', fontsize=18)
-plt.ylabel('S', fontsize=18)
+#plt.ylabel('S', fontsize=18)
 plt.xlabel('Time', fontsize=18)
 #plt.ylabel('D', fontsize=18)
 #plt.xlabel(r'$\phi$', fontsize=18)
 #plt.xlim([0,500])
+#plt.ylim([0,3])
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
 plt.legend(ncols=1, frameon=False, loc='upper left')
 #plt.xscale('log')

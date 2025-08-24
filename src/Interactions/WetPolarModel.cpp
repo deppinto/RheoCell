@@ -296,6 +296,7 @@ number WetPolarModel::f_interaction(BaseField *p, int q) {
 	number V = CH + A + Rep + Adh + P;
 	p->freeEnergy[q] += V;
 	p->Pressure[q] = Rep - CH - A;
+	p->Repulsion[q] += Rep;
 	return V;
 }
 
@@ -310,6 +311,11 @@ void WetPolarModel::calc_internal_forces(BaseField *p, int q) {
 	p->Fpassive_x[q] = f_passive_x * passive_alpha;
 	p->Fpassive_y[q] = f_passive_y * passive_alpha;
 
+
+	p->total_force_repulsion_x += (-1) * 0.5 * ( p->Repulsion[p->neighbors_sub[5+q*9]] - p->Repulsion[p->neighbors_sub[3+q*9]] ) * p->fieldScalar[q];
+	p->total_force_repulsion_y += (-1) * 0.5 * ( p->Repulsion[p->neighbors_sub[7+q*9]] - p->Repulsion[p->neighbors_sub[1+q*9]] ) * p->fieldScalar[q];
+
+
 	//active inter cells (active force)
 	double Theta =  (-p->fieldDX[q] * p->Q00) < 0 ? 0.0 : 1.0;
 	number fQ_self_x = lambda * (-p->fieldDX[q] * p->Q00) * Theta * p->Q00;
@@ -323,6 +329,8 @@ void WetPolarModel::calc_internal_forces(BaseField *p, int q) {
 	if(box->getWalls(k)<wall_slip){
 		vec_f_x[q+field_start_index[p->index]] = f_passive_x * passive_alpha + fQ_self_x * zetaQ_self;
 		vec_f_y[q+field_start_index[p->index]] = f_passive_y * passive_alpha + fQ_self_y * zetaQ_self;
+		p->total_force_x += vec_f_x[q+field_start_index[p->index]] * p->fieldScalar[q];
+		p->total_force_y += vec_f_y[q+field_start_index[p->index]] * p->fieldScalar[q];
 	}
 	else{
 		vec_f_x[q+field_start_index[p->index]] = 0.;
@@ -354,7 +362,41 @@ void WetPolarModel::updateDirectedActiveForces(number dt, BaseField*p, bool stor
 	}*/
 
 
-    	number S_mod = sqrt(p->S00 * p->S00 + p->S01 * p->S01);
+	if(store)p->thetaQ_old = p->thetaQ + sqrt(dt) * zetaQ_inter * Utils::gaussian();
+
+	//shape alignment
+	/*number t = 0.5*atan2(p->S01,p->S00);
+	std::vector<number> ff = std::vector<number> {cos(t), sin(t)};
+	//make sure the angle between n and p are smaller thant 90 degree
+	if (ff[0]*p->Q00 + ff[1]*p->Q01 < 0.0 ){
+		ff[0] = -sqrt(p->S01*p->S01+p->S00*p->S00)*ff[0];
+		ff[1] = -sqrt(p->S01*p->S01+p->S00*p->S00)*ff[1];
+	}
+	else{
+		ff[0] = sqrt(p->S01*p->S01+p->S00*p->S00)*ff[0];
+		ff[1] = sqrt(p->S01*p->S01+p->S00*p->S00)*ff[1];
+	}*/
+
+	//velocity alignment
+	//std::vector<number> ff = box->normalised_in_box(std::vector<number> {p->CoM[0] - p->CoM_old[0], p->CoM[1] - p->CoM_old[1]});
+
+	//force anti-alignment
+	//std::vector<number> ff = std::vector<number> {-p->total_force_x, -p->total_force_y};
+	//std::vector<number> ff = std::vector<number> {p->total_force_x, p->total_force_y};
+
+	//CIL
+	//std::vector<number> ff = std::vector<number> {-p->total_force_repulsion_x, -p->total_force_repulsion_y};
+	std::vector<number> ff = std::vector<number> {p->total_force_repulsion_x, p->total_force_repulsion_y};
+	//std::vector<number> fff = std::vector<number> {p->total_force_repulsion_x, p->total_force_repulsion_y};
+
+	p->thetaQ = p->thetaQ_old - dt * J_Q * sqrt(ff[0] * ff[0] + ff[1] * ff[1]) * atan2(ff[0]*p->Q01 - ff[1]*p->Q00, ff[0]*p->Q00 + ff[1]*p->Q01);
+	//p->thetaQ = p->thetaQ_old - dt * J_Q * (atan2(ff[0]*p->Q01 - ff[1]*p->Q00, ff[0]*p->Q00 + ff[1]*p->Q01) + atan2(fff[0]*p->Q01 - fff[1]*p->Q00, fff[0]*p->Q00 + fff[1]*p->Q01));
+	//p->thetaQ = p->thetaQ_old - dt * J_Q * (atan2(ff[0]*p->Q01 - ff[1]*p->Q00, ff[0]*p->Q00 + ff[1]*p->Q01));
+	p->Q00 = cos(p->thetaQ);
+	p->Q01 = sin(p->thetaQ);
+		
+
+    	/*number S_mod = sqrt(p->S00 * p->S00 + p->S01 * p->S01);
 	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
 	if(S_mod>0.00000001){
 		number t = 0.5 * atan2(p->S01, p->S00);
@@ -365,7 +407,7 @@ void WetPolarModel::updateDirectedActiveForces(number dt, BaseField*p, bool stor
 
 		p->Q00 = p->nemQ[0];
 		p->Q01 = p->nemQ[1];
-	}
+	}*/
 
 
 	if(anchoring) update_anchoring(p);

@@ -19,7 +19,7 @@ BoxPtr BoxFactory::make_box(input_file &inp) {
 	getInputString(&inp, "type", type_str, 0);
 
 	if(box_type.compare("square") == 0) {
-		if(type_str.compare("channel_walls") == 0) return std::make_shared<SquareWalls>();
+		if(type_str.compare("square_walls") == 0) return std::make_shared<SquareWalls>();
 		else if(type_str.compare("circle_walls") == 0) return std::make_shared<CircleWalls>();
 		else if(type_str.compare("triangle_walls") == 0) return std::make_shared<TriangleWalls>();
 		else return std::make_shared<SquareBox>();

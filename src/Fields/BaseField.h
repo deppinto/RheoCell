@@ -54,8 +54,12 @@ public:
 	inline number set_F_ext(int q, number walls, number laplacian_walls) {
 		if(ext_forces.size() > 0) {
 			F_ext = 0.;
+			number force_calc;
 			for(auto ext_force : ext_forces) {
-				F_ext += ext_force->free_energy(fieldScalar[q], walls, laplacian_walls);
+				force_calc = ext_force->free_energy(fieldScalar[q], walls, laplacian_walls);
+				F_ext += force_calc;
+				//F_ext += ext_force->free_energy(fieldScalar[q], walls, laplacian_walls);
+				Repulsion[q] += force_calc;
 			}
 		}
 		return F_ext;
@@ -156,6 +160,11 @@ public:
 	std::vector<number> Fpassive_y;
 	std::vector<number> Factive_y;
 	std::vector<number> Pressure;
+        std::vector<number> Repulsion;
+	number total_force_x;
+	number total_force_y;
+	number total_force_repulsion_x;
+	number total_force_repulsion_y;
 
 	//child functions need to initialize everything below
 	virtual int GetSubIndex(int site, BaseBox *box) = 0;

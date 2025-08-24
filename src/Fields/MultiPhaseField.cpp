@@ -46,6 +46,7 @@ void MultiPhaseField::resizing() {
 	Factive_x.resize(subSize);
 	Factive_y.resize(subSize);
 	Pressure.resize(subSize);
+	Repulsion.resize(subSize);
 
 	cos_x_table.resize(LsubX);
 	cos_y_table.resize(LsubY);

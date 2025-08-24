@@ -40,6 +40,7 @@ void ForceFactory::add_force(input_file &inp, std::vector<BaseField *> &fields, 
 	else if(type_str.compare("moving_walls") == 0) extF = std::make_shared<ChannelWalls>();
 	else if(type_str.compare("circle_walls") == 0) extF = std::make_shared<ChannelWalls>();
 	else if(type_str.compare("triangle_walls") == 0) extF = std::make_shared<ChannelWalls>();
+	else if(type_str.compare("square_walls") == 0) extF = std::make_shared<ChannelWalls>();
 	else if(type_str.compare("shear_flow_channel") == 0) extF = std::make_shared<ShearFlowChannel>();
 	else if(type_str.compare("pois_flow_channel") == 0) extF = std::make_shared<PoiseuilleFlowChannel>();
 	else throw RCexception("Invalid force type `%s\'", type_str.c_str());

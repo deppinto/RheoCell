@@ -32,10 +32,12 @@ void SquareWalls::init(int Lx, int Ly) {
 	for(int y=0; y<Ly; y++){
 		for(int x=0; x<Lx; x++){
 			int k=x+y*Lx;
-			double wallsx=exp(-double(x)/lambda_wall) + exp(-double(Lx-x-1)/lambda_wall);
+			/*double wallsx=exp(-double(x)/lambda_wall) + exp(-double(Lx-x-1)/lambda_wall);
 			double wallsy=exp(-double(y)/lambda_wall) + exp(-double(Ly-y-1)/lambda_wall);
 			if(wallsx>wallsy)walls[k]=wallsx;
-			else walls[k]=wallsy;
+			else walls[k]=wallsy;*/
+			if(x<lambda_wall || x>Lx-lambda_wall)walls[k] = 1.;
+			if(y<lambda_wall || y>Ly-lambda_wall)walls[k] = 1.;
 		}
 	}
 

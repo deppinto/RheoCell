@@ -192,6 +192,8 @@ total_time_frames = int(steps / print_conf_interval)
 n_rows = 20
 n_columns = 5
 theta_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
+elongation_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
+minor_axis_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 
 
 cont_line=0
@@ -267,6 +269,9 @@ for line in cfile:
 
         S00 = 0
         S01 = 0
+        test_s00 = 0.
+        test_s11 = 0.
+        test_s01 = 0.
         for k in range(LsubX[pt_num]*LsubY[pt_num]):
             yy = int(k/LsubX[pt_num])
             xx = int(k - yy * LsubX[pt_num])
@@ -289,23 +294,45 @@ for line in cfile:
             S00 += -0.5*(field_dx * field_dx - field_dy * field_dy)
             S01 += -field_dx * field_dy
 
+            test_s00 += field_dx * field_dx
+            test_s11 += field_dy * field_dy
+            test_s01 += field_dx * field_dy
+
         #D_major_axis = 0.5 * np.atan2(S01, S00)
         #D_major_axis_vec_x = np.cos(D_major_axis)
         #D_major_axis_vec_y = np.sin(D_major_axis)
         #D_i = np.sqrt(S00 * S00 + S01 * S01)
 
+        '''
         D_i = np.sqrt(S00 * S00 + S01 * S01)
         if D_i > 0.000000001:
             D_major_axis_vec_x = D_i * sqrt((1 + S00/D_i)/2)
             D_major_axis_vec_y = D_i * np.sign(S01) * sqrt((1 - S00/D_i)/2)
-        else:
-            D_major_axis_vec_x = 0
-            D_major_axis_vec_y = 0
 
+            D_minor_axis_vec_x = - D_i * np.sign(S01) * np.sqrt((1 - S00/D_i)/2)
+            D_minor_axis_vec_y =   D_i * np.sqrt((1 + S00/D_i)/2)
+        else:
+            D_major_axis_vec_x = D_major_axis_vec_y = 0.
+            D_minor_axis_vec_x = D_minor_axis_vec_y = 0.
+        '''
+
+        F = np.array([[S00, S01],[S01, -S00]], dtype=float)
+        #F = np.array([[test_s00, test_s01],[test_s01, test_s11]], dtype=float)
+
+        U, S, Vt = np.linalg.svd(F)   # S[0] >= S[1]
+        V = Vt.T                      # columns are principal directions in the reference frame
+
+        D_major_axis_vec = S[0] * V[:, 0]   # scaled major axis (length = σ1)
+        D_minor_axis_vec = S[1] * V[:, 1]   # scaled minor axis (length = σ2)
         
         theta_i = (0.5 * np.atan2(S01, S00) * 180 / pi)
-        if pt_num - int(pt_num / n_columns) * n_columns == 3:
+        if pt_num - int(pt_num / n_columns) * n_columns == 0:
             theta_time[int(pt_num / n_columns)][frame_num] = (0.5 * np.atan2(S01, S00) * 180 / pi)
+            #elongation_time[int(pt_num / n_columns)][frame_num] = sqrt(D_major_axis_vec_x**2 + D_major_axis_vec_y**2)
+            #minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec_x**2 + D_minor_axis_vec_y**2)
+            elongation_time[int(pt_num / n_columns)][frame_num] = sqrt(D_major_axis_vec[0]**2 + D_major_axis_vec[1]**2)
+            minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec[0]**2 + D_minor_axis_vec[1]**2)
+            #print(elongation_time[int(pt_num / n_columns)][frame_num], minor_axis_time[int(pt_num / n_columns)][frame_num])
 
 
         X, Y = np.meshgrid(x, y)
@@ -322,8 +349,8 @@ for line in cfile:
             else:
                 cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)
 
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 2*D_major_axis_vec_x, 2*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -2*D_major_axis_vec_x, -2*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 2*D_major_axis_vec[0], 2*D_major_axis_vec[1], width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -2*D_major_axis_vec[0], -2*D_major_axis_vec[1], width=0.5, head_width=0, color='r')
 
         #increment phase field index
         pt_num+=1
@@ -389,6 +416,24 @@ if variable==6:
             print_str = ''
             for j in range(n_rows):
                 print_str += str(theta_time[j][i])
+                print_str += ' '
+
+            print(print_str , file=f)  
+
+    with open('elongation_shape.txt', 'w') as f:
+        for i in range(total_time_frames):
+            print_str = ''
+            for j in range(n_rows):
+                print_str += str(elongation_time[j][i])
+                print_str += ' '
+
+            print(print_str , file=f)  
+
+    with open('elongation_minor_shape.txt', 'w') as f:
+        for i in range(total_time_frames):
+            print_str = ''
+            for j in range(n_rows):
+                print_str += str(minor_axis_time[j][i])
                 print_str += ' '
 
             print(print_str , file=f)  

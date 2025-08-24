@@ -239,6 +239,9 @@ velmax_x=0.
 velmin_x=10000.
 
 com_avg_velocity_calc = 0.
+com_all_x = 0.
+com_all_y = 0.
+Gamma_rot = []
 for line in cfile:
     cont_line+=1
     words=line.split()
@@ -246,6 +249,8 @@ for line in cfile:
     if words[0]=='t':
         t=int(float(words[2]))
         time_conf.append(t)
+        com_all_x = 0.
+        com_all_y = 0.
         MSD.append(0.)
 
         pt_num=0
@@ -406,11 +411,52 @@ for line in cfile:
             cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color="k")
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color=cm.hot(color_val))
 
+        com_all_x += CoMX[pt_num]
+        com_all_y += CoMY[pt_num]
         #increment phase field index
         pt_num+=1
         
 
     if cont_line%(N+2)==0:
+
+            com_all_x = com_all_x / N
+            com_all_y = com_all_y / N
+            vector_sum = 0.
+            for p in range(N):
+                distx = CoMX[p] - com_all_x
+                if distx>lx/2:
+                    distx-=lx
+                if distx<-lx/2:
+                    distx+=lx
+                disty = CoMY[p] - com_all_y
+                if disty>ly/2:
+                    disty-=ly
+                if disty<-ly/2:
+                    disty+=ly
+
+                dist_com_x=(CoMX[p]-CoMX_old[p])
+                if dist_com_x>lx/2:
+                    dist_com_x-=lx
+                if dist_com_x<-lx/2:
+                    dist_com_x+=lx
+                dist_com_y=(CoMY[p]-CoMY_old[p])
+                if dist_com_y>ly/2:
+                    dist_com_y-=ly
+                if dist_com_y<-ly/2:
+                    dist_com_y+=ly
+
+                vector_x = distx * dist_com_y
+                vector_y = - disty * dist_com_x
+                norm = sqrt(vector_x**2 + vector_y**2)
+                if norm>0:
+                    vector_x = vector_x / norm
+                    vector_y = vector_y / norm
+                else:
+                    vector_x = 0.
+                    vector_y = 0.
+                vector_sum += vector_x
+
+            Gamma_rot.append(vector_sum/N) 
 
             '''
             for p in range(0,sizey_coarse):
@@ -804,27 +850,41 @@ if variable==5:
 
 if variable==6:
 
-    '''
+    averages = []
+    window_size=100
+    for i in range(len(Gamma_rot) - window_size + 1):
+        window = Gamma_rot[i:i + window_size]
+        averages.append(sum(window) / window_size)
+
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-    plt.plot(time_conf, MSD, '-o' , color='darkgreen')
-    plt.ylabel('MSD', fontsize=18)
+    #plt.plot(time_conf, MSD, '-o' , color='darkgreen')
+    #plt.plot(Gamma_rot, '-o' , color='darkgreen')
+    plt.plot(averages, '-o' , color='royalblue')
+    plt.ylabel(r'$\Gamma$', fontsize=18)
     plt.xlabel('time', fontsize=18)
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
+    plt.ylim(-1,1)
+    plt.axhline(y=-0.5, color='green', linestyle='--', linewidth=1)
+    plt.axhline(y=0.5, color='green', linestyle='--', linewidth=1)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results11/gamma_time_circle_Velocity_NN.svg", transparent=True)
+    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results11/gamma_time_circle_Velocity_NN.png", transparent=True)
     plt.show()
     #plt.savefig('./MSD_time.png')
     plt.close()
-    '''
 
+    '''
     with open('MSD.txt', 'w') as f:
         for i in range(len(MSD)):
             print(time_conf[i]*dt,MSD[i], file=f)  
 
     with open('mean_velocity.txt', 'w') as f:
         print(abs(avg_mean_velocity), file=f)  
+    '''
+
 
     '''
     with open('v_width.txt', 'w') as f:
