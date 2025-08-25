@@ -389,9 +389,9 @@ void WetPolarModel::updateDirectedActiveForces(number dt, BaseField*p, bool stor
 	std::vector<number> ff = std::vector<number> {p->total_force_repulsion_x, p->total_force_repulsion_y};
 	//std::vector<number> fff = std::vector<number> {p->total_force_repulsion_x, p->total_force_repulsion_y};
 
-	p->thetaQ = p->thetaQ_old - dt * J_Q * sqrt(ff[0] * ff[0] + ff[1] * ff[1]) * atan2(ff[0]*p->Q01 - ff[1]*p->Q00, ff[0]*p->Q00 + ff[1]*p->Q01);
+	//p->thetaQ = p->thetaQ_old - dt * J_Q * sqrt(ff[0] * ff[0] + ff[1] * ff[1]) * atan2(ff[0]*p->Q01 - ff[1]*p->Q00, ff[0]*p->Q00 + ff[1]*p->Q01);
 	//p->thetaQ = p->thetaQ_old - dt * J_Q * (atan2(ff[0]*p->Q01 - ff[1]*p->Q00, ff[0]*p->Q00 + ff[1]*p->Q01) + atan2(fff[0]*p->Q01 - fff[1]*p->Q00, fff[0]*p->Q00 + fff[1]*p->Q01));
-	//p->thetaQ = p->thetaQ_old - dt * J_Q * (atan2(ff[0]*p->Q01 - ff[1]*p->Q00, ff[0]*p->Q00 + ff[1]*p->Q01));
+	p->thetaQ = p->thetaQ_old - dt * J_Q * (atan2(ff[0]*p->Q01 - ff[1]*p->Q00, ff[0]*p->Q00 + ff[1]*p->Q01));
 	p->Q00 = cos(p->thetaQ);
 	p->Q01 = sin(p->thetaQ);
 		
