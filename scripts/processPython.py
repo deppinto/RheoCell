@@ -135,7 +135,7 @@ for line in filedata:
     cores.append(int(float(save[19])))
     wallslip.append(float(save[20]))
     shear_rate.append(float(save[21]))
-    #J_Q.append(float(save[22]))
+    J_Q.append(float(save[22]))
 
     #F.append( sqrt( float(save[10])/( float(save[11]) )) ) 
 
@@ -145,6 +145,7 @@ filedata.close()
 
 final_x = []
 final_y = []
+omega = []
 for traj in range(start, end):
 #for traj in [start, end]:
     #if traj==start:
@@ -159,10 +160,12 @@ for traj in range(start, end):
     phi_all = []
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_minor_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/MSD.txt","r")
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_rotation.txt","r")
         index_count = 0
         mean_orientation = 0.
         mean_phi = 0.
@@ -176,6 +179,7 @@ for traj in range(start, end):
             index_count+=1
             #theta_1.append(float(save[variable-1]))
 
+            '''
             num_rows = 0
             sin_sum = 0.
             cos_sum = 0.
@@ -193,6 +197,7 @@ for traj in range(start, end):
                 #avg_value_S += cos(2*(float(save[q]) - mean_orientation))
                 avg_value_S += cos(2*( (float(save[q])*pi/180) - mean_phi))
             S.append(avg_value_S / num_rows)
+            '''
 
             #if traj == start:
                 #theta_5.append(float(save[variable]))
@@ -200,13 +205,28 @@ for traj in range(start, end):
                 #theta_1.append(float(save[variable]))
         fileoutput.close()
 
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_jamm.txt","r")
+        for line in fileoutput:
+            save=line.split()
+            if job == jobs_seq[traj]:
+                theta_1.append(float(save[variable]) / jobs[traj])
+            else:
+                theta_1[index_count] += float(save[variable]) / jobs[traj]
+            index_count+=1
+        fileoutput.close()
+
+    omega.append(sum(theta_5)/(sum(theta_5)+sum(theta_1)))
+
     #last_yy = theta_5[-50:]
     #last_xx = xx[-50:]
     #slope, intercept, _, _, _ = linregress(last_xx, last_yy)
     #final_x.append((N[traj] * 8 * 8) / ((lx[traj] - 2 * 6)/2)**2)
     #final_y.append(slope)
+    #final_x.append(shear_rate[traj])
+    #final_y.append(np.mean(theta_5))
 
-    plt.plot(theta_5, '--o', label=lx[traj])
+    #plt.plot(theta_5, '--o', label=lx[traj])
     #plt.plot(theta_5, '--o', label=variable)
     #plt.plot(theta_1, '--s', label=variable-1)
     #plt.plot(S, '--o', label=traj)
@@ -218,20 +238,57 @@ for traj in range(start, end):
     if end == start:
         break
 
+#print(final_x)
+#print(final_y)
 
-#plt.plot(final_x, final_y, '--o')
-plt.ylabel(r'$\theta_i$', fontsize=18)
+#final_x = [1.0, 0.75, 0.5, 0.25, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001]
+#final_y = [0.49992082742607136, 0.48058329369018765, 0.46116523160021705, 0.4377948871250764, 0.4428061377749363, 0.5159620665712491, 0.523863398829233, 0.5828769623310098, 0.2893244788742896, 0.40499525754918736, 0.03450679770844628]
+#final_yy = [np.float64(0.9509520336270171), np.float64(0.9029565600880146), np.float64(0.7558733701227552), np.float64(0.746363071735866), np.float64(0.4716647352837026), np.float64(0.6990953993090971), np.float64(0.8111007830280228), np.float64(0.8917666537386556), np.float64(0.5177900353375421), np.float64(0.24271438919906277), np.float64(0.040002335139040814)]
+
+#plt.plot(final_x, final_y, '--o', color='firebrick')
+#plt.ylabel(r'$\psi_6$', fontsize=18)
+#plt.xlabel(r'$\dot{\gamma}$', fontsize=18)
+
+#plt.plot(theta_5, '--o', color='firebrick')
+#plt.ylabel(r'$\theta$', fontsize=18)
+#plt.xlabel('t', fontsize=18)
+
+plt.plot(omega, '--o')
+
+'''
+#fig = plt.gcf()
+ax1 = plt.gca()
+ax2 = ax1.twinx()
+#ax2.plot(final_x, final_yy, '--o', color='forestgreen')
+#ax2.set_ylabel(r'$\psi^L_2$', fontsize=18)
+ax2.plot(theta_1, '--o', color='forestgreen')
+ax2.set_ylabel('r', fontsize=18)
+ax1.tick_params(axis='y', colors='firebrick')
+ax2.tick_params(axis='y', colors='forestgreen')
+ax1.yaxis.label.set_color('firebrick')
+ax2.yaxis.label.set_color('forestgreen')
+ax2.spines['right'].set_color('forestgreen')
+ax2.spines['left'].set_color('firebrick')
+#for tick in ax2.yaxis.get_ticklabels():
+    #tick.set_fontsize(18)
+    #tick.set_fontname('Times New Roman')
+'''
+
+#plt.ylabel(r'$\theta_i$', fontsize=18)
 #plt.ylabel('MSD', fontsize=18)
 #plt.ylabel('S', fontsize=18)
-plt.xlabel('Time', fontsize=18)
+#plt.xlabel('Time', fontsize=18)
 #plt.ylabel('D', fontsize=18)
 #plt.xlabel(r'$\phi$', fontsize=18)
 #plt.xlim([0,500])
 #plt.ylim([0,3])
-plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+#plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+plt.subplots_adjust(left=0.15, bottom=0.15, right=0.85, top=0.85)
 plt.legend(ncols=1, frameon=False, loc='upper left')
 #plt.xscale('log')
 #plt.yscale('log')
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/lattice_theta_r_time_high_shear_low_dt.png", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/lattice_theta_r_time_high_shear_low_dt.svg", transparent=True)
 plt.show()
 exit(1)
 

@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -856,6 +856,76 @@ if variable==6:
         window = Gamma_rot[i:i + window_size]
         averages.append(sum(window) / window_size)
 
+    jamm_time = 0
+    rotation_time = 0
+    jamm_time_all = []
+    rotation_time_all = []
+    delta_control = 25
+    for i in range(len(averages)):
+
+        if rotation_time==0 and abs(averages[i])>0.5:
+            rot_test = 0
+            for j in range(delta_control):
+                if i+j>=len(averages):
+                    break
+                if abs(averages[i+j])>0.5:
+                    rot_test+=1
+            if rot_test > delta_control - 1:
+                rotation_time+=1
+        elif abs(averages[i])>0.5:
+            rotation_time+=1
+        elif rotation_time!=0 and abs(averages[i])<0.5:
+            wait_test = 0
+            for j in range(delta_control):
+                if i+j>=len(averages):
+                    break
+                if abs(averages[i+j])<0.5:
+                    wait_test+=1
+            if wait_test > delta_control - 1:
+                rotation_time_all.append(rotation_time)
+                rotation_time=0
+            else:
+                rotation_time+=1
+
+        if jamm_time==0 and abs(averages[i])<0.1:
+            jamm_test = 0
+            for j in range(delta_control):
+                if i+j>=len(averages):
+                    break
+                if abs(averages[i+j])<0.1:
+                    jamm_test+=1
+            if jamm_test > delta_control - 1:
+                jamm_time+=1
+        elif abs(averages[i])<0.1:
+            jamm_time+=1
+        elif jamm_time!=0 and abs(averages[i])>0.1:
+            wait_test = 0
+            for j in range(delta_control):
+                if i+j>=len(averages):
+                    break
+                if abs(averages[i+j])>0.1:
+                    wait_test+=1
+            if wait_test > delta_control - 1:
+                jamm_time_all.append(jamm_time)
+                jamm_time=0
+            else:
+                jamm_time+=1
+
+
+    if jamm_time>0:
+                jamm_time_all.append(jamm_time)
+    if rotation_time>0:
+                rotation_time_all.append(rotation_time)
+    #print(rotation_time_all)
+    #print(jamm_time_all)
+    with open('time_rotation.txt', 'w') as f:
+        for i in range(len(rotation_time_all)):
+            print(rotation_time_all[i] * dt, file=f)  
+    with open('time_jamm.txt', 'w') as f:
+        for i in range(len(jamm_time_all)):
+            print(jamm_time_all[i] * dt, file=f)  
+
+    '''
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
@@ -870,11 +940,13 @@ if variable==6:
     plt.axhline(y=-0.5, color='green', linestyle='--', linewidth=1)
     plt.axhline(y=0.5, color='green', linestyle='--', linewidth=1)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results11/gamma_time_circle_Velocity_NN.svg", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results11/gamma_time_circle_Velocity_NN.png", transparent=True)
+    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results11/gamma_time_circle_Velocity_NN.svg", transparent=True)
+    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results11/gamma_time_circle_Velocity_NN.png", transparent=True)
     plt.show()
     #plt.savefig('./MSD_time.png')
     plt.close()
+    '''
+
 
     '''
     with open('MSD.txt', 'w') as f:

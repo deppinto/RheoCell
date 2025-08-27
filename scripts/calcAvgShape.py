@@ -194,6 +194,7 @@ n_columns = 5
 theta_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 elongation_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 minor_axis_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
+S_time = []
 
 
 cont_line=0
@@ -206,6 +207,7 @@ for i in range(start_line):
 
 fig = plt.figure(figsize=(6,6))
 frame_num=int(t/print_conf_interval)-1
+theta_all = []
 for line in cfile:
     cont_line+=1
     words=line.split()
@@ -231,6 +233,7 @@ for line in cfile:
         cornerSite=[0 for i in range(0,N)]
         cornerSite_x=[0. for i in range(0,N)]
         cornerSite_y=[0. for i in range(0,N)]
+        theta_all = []
 
     elif words[0]=='b':
         lx=int(float(words[2]))
@@ -334,6 +337,9 @@ for line in cfile:
             minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec[0]**2 + D_minor_axis_vec[1]**2)
             #print(elongation_time[int(pt_num / n_columns)][frame_num], minor_axis_time[int(pt_num / n_columns)][frame_num])
 
+        if CoMY[pt_num] > 50 and CoMY[pt_num] < ly - 50: 
+            theta_all.append(theta_i)
+
 
         X, Y = np.meshgrid(x, y)
         step = 0.01
@@ -357,6 +363,20 @@ for line in cfile:
         
 
     if cont_line%(N+2)==0:
+
+            sin_sum = 0.
+            cos_sum = 0.
+            for q in theta_all:
+                sin_sum += sin(2 * q)
+                cos_sum += cos(2 * q)
+            mean_phi = 0.5 * atan2(sin_sum, cos_sum)
+
+            avg_value_S = 0.
+            for q in theta_all:
+                avg_value_S += cos(2*( q - mean_phi))
+            S_time.append(avg_value_S / len(theta_all))
+            #print(avg_value_S / len(theta_all))
+
 
             frame_num=int(t/print_conf_interval)-1
             #print(frame_num)

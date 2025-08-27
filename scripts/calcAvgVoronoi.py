@@ -21,6 +21,7 @@ variable=int(float(sys.argv[2]))
 
 from shapely.geometry import Polygon, LineString, Point, box
 from scipy.spatial import Voronoi
+from scipy.spatial import Delaunay
 
 bounds = (0, 14, 70, 294)
 def bounded_voronoi(points, bounds):
@@ -40,6 +41,199 @@ def bounded_voronoi(points, bounds):
         if not clipped_poly.is_empty:
             regions.append((point_idx, clipped_poly))
     return vor, regions
+
+
+def plot_periodic_delaunay(points, box_lengths):
+    """
+    Plot points and their Delaunay triangulation under periodic BCs
+    in a rectangular 2D box.
+    """
+    N = len(points)
+    Lx, Ly = box_lengths
+
+    # Tile the system
+    shifts = np.array([[dx * Lx, dy * Ly] 
+                       for dx in (-1,0,1) 
+                       for dy in (-1,0,1)])
+    tiled_points = np.vstack([points + shift for shift in shifts])
+    tiled_indices = np.repeat(np.arange(N), len(shifts))
+
+    # Triangulate
+    tri = Delaunay(tiled_points)
+
+    fig, ax = plt.subplots(figsize=(7, 4))
+    ax.set_aspect("equal")
+
+    # Draw box
+    ax.plot([0, Lx, Lx, 0, 0], [0, 0, Ly, Ly, 0], 'k-', lw=1)
+
+    # Draw triangulation edges
+    for simplex in tri.simplices:
+        for i in range(3):
+            a, b = simplex[i], simplex[(i+1)%3]
+            ia, ib = tiled_indices[a], tiled_indices[b]
+
+            # Only draw edges if at least one point is in the central box
+            if (0 <= tiled_points[a,0] < Lx and 0 <= tiled_points[a,1] < Ly) or \
+               (0 <= tiled_points[b,0] < Lx and 0 <= tiled_points[b,1] < Ly):
+                x = [tiled_points[a,0] % Lx, tiled_points[b,0] % Lx]
+                y = [tiled_points[a,1] % Ly, tiled_points[b,1] % Ly]
+                if ia==50 or ib==50:
+                    ax.plot(x, y, 'b-', lw=0.8, alpha=0.7)
+
+    # Plot points
+    ax.scatter(points[:,0], points[:,1], c="red", zorder=5)
+
+    ax.set_xlim(0, Lx)
+    ax.set_ylim(0, Ly)
+    plt.show()
+
+
+def minimum_image(vec, box_lengths):
+    """Apply minimum image convention for a displacement vector."""
+    return vec - box_lengths * np.round(vec / box_lengths)
+
+def periodic_delaunay_neighbors(points, box_lengths):
+    """
+    Compute nearest neighbors in 2D with periodic boundary conditions
+    using Delaunay triangulation in a rectangular box.
+
+    Parameters
+    ----------
+    points : (N, 2) ndarray
+        Array of point coordinates inside [0, Lx) x [0, Ly).
+    box_lengths : (2,) array_like
+        (Lx, Ly) lengths of the periodic box.
+
+    Returns
+    -------
+    neighbors : list of sets
+        neighbors[i] is a set of indices of nearest neighbors of point i.
+    """
+    N = len(points)
+    Lx, Ly = box_lengths
+
+    # Generate shifts for 3x3 tiling (center + neighbors in x and y)
+    shifts = np.array([
+        [dx * Lx, dy * Ly]
+        for dx in (-1, 0, 1)
+        for dy in (-1, 0, 1)
+    ])
+
+    # Tile the system
+    tiled_points = np.vstack([points + shift for shift in shifts])
+    tiled_indices = np.tile(np.arange(N), len(shifts))
+
+    # Delaunay triangulation
+    tri = Delaunay(tiled_points)
+
+
+    # Build neighbor sets
+    neighbors = [set() for _ in range(N)]
+    for simplex in tri.simplices:
+        for i in range(3):
+            for j in range(i+1, 3):
+                a, b = simplex[i], simplex[j]
+                ia, ib = tiled_indices[a], tiled_indices[b]
+                pa, pb = tiled_points[a], tiled_points[b]
+
+                # Only keep edges if at least one endpoint is in the central box
+                if (0 <= pa[0] < Lx and 0 <= pa[1] < Ly) or (0 <= pb[0] < Lx and 0 <= pb[1] < Ly):
+                    if ia != ib:  # skip self-links from periodic images
+                        neighbors[ia].add(ib)
+                        neighbors[ib].add(ia)
+
+    return neighbors
+
+def bond_orientational_order(points, neighbors, box_lengths, n=6):
+    """
+    Compute the n-fold bond orientational order parameter for each point.
+
+    Parameters
+    ----------
+    points : (N,2) ndarray
+        Particle positions
+    neighbors : list of lists
+        neighbors[i] is a list of indices of neighbors of particle i
+    box_lengths : (2,) tuple
+        Box dimensions (Lx, Ly)
+    n : int
+        Order parameter symmetry (6 for hexatic)
+
+    Returns
+    -------
+    psi_n : (N,) complex ndarray
+        n-fold bond orientational order parameter for each particle
+    """
+    N = len(points)
+    psi_n = np.zeros(N, dtype=complex)
+
+    for i in range(N):
+        psi = 0.0 + 0.0j
+        Ni = len(neighbors[i])
+        if Ni == 0:
+            continue
+        for j in neighbors[i]:
+            vec = minimum_image(points[j] - points[i], box_lengths)
+            theta = np.arctan2(vec[1], vec[0])
+            psi += np.exp(1j * n * theta)
+        psi_n[i] = psi / Ni
+    return psi_n
+
+
+def nematic_order(deformations, neighbors, box_lengths, n=2):
+
+    N = len(points)
+    psi_n = np.zeros(N, dtype=complex)
+
+    for i in range(N):
+        psi = 0.0 + 0.0j
+        Ni = len(neighbors[i])
+        if Ni == 0:
+            continue
+        for j in neighbors[i]:
+            theta1 = np.arctan2(deformations[i][0]*deformations[j][1] - deformations[i][1]*deformations[j][0], np.dot(deformations[i], deformations[j]))
+            theta2 = np.arctan2(-deformations[i][0]*deformations[j][1] + deformations[i][1]*deformations[j][0], np.dot(-deformations[i], deformations[j]))
+            theta=theta2
+            if theta1 < theta2:
+                theta = theta1
+            psi += np.exp(1j * n * theta)
+        psi_n[i] = psi / Ni
+    return psi_n
+
+
+def lane_order_local(points, neighbors, box_lengths, Ly):
+    """
+    Compute lane order with direction switching at Ly/2.
+
+    points: (N,2)
+    neighbors: list of lists
+    box_lengths: (Lx, Ly)
+    Ly: box height (for midline)
+
+    Returns:
+        psi_lane: (N,) alignment magnitude along local lane direction
+    """
+    N = len(points)
+    psi_lane = np.zeros(N)
+
+    for i in range(N):
+        # choose local lane direction
+        lane_dir = np.array([1.0, 0.0]) if points[i,1] > Ly/2 else np.array([-1.0, 0.0])
+        lane_dir /= np.linalg.norm(lane_dir)
+
+        Ni = len(neighbors[i])
+        if Ni == 0:
+            continue
+        proj_sum = 0.0
+        for j in neighbors[i]:
+            vec = points[j] - points[i]
+            # minimum image
+            vec -= box_lengths * np.round(vec / box_lengths)
+            proj_sum += np.abs(np.dot(vec, lane_dir)) / np.linalg.norm(vec)
+        psi_lane[i] = proj_sum / Ni
+    return psi_lane
+
 
 
 seed=4982
@@ -147,6 +341,8 @@ offsetY=[0 for i in range(0,N)]
 cornerSite=[0 for i in range(0,N)]
 cornerSite_x=[0. for i in range(0,N)]
 cornerSite_y=[0. for i in range(0,N)]
+D_X=[0. for i in range(0,N)]
+D_Y=[0. for i in range(0,N)]
 
 lfile=open(lastconf_file,"r")
 header=lfile.readline().split()
@@ -156,6 +352,11 @@ lx=int(float(header[2]))
 ly=int(float(header[3]))
 x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
+
+
+order_psi6 = []
+order_psiN = []
+order_psiL = []
 
 
 cont_line=0
@@ -191,6 +392,8 @@ for line in cfile:
         cornerSite=[0 for i in range(0,N)]
         cornerSite_x=[0. for i in range(0,N)]
         cornerSite_y=[0. for i in range(0,N)]
+        D_X=[0. for i in range(0,N)]
+        D_Y=[0. for i in range(0,N)]
 
     elif words[0]=='b':
         lx=int(float(words[2]))
@@ -269,6 +472,9 @@ for line in cfile:
 
         #print(2 * D_i)
 
+        D_X[pt_num] = D_major_axis_vec_x
+        D_Y[pt_num] = D_major_axis_vec_y
+
         X, Y = np.meshgrid(x, y)
         step = 0.01
         m = np.amax(Z)
@@ -295,8 +501,38 @@ for line in cfile:
 
     if cont_line%(N+2)==0:
 
+            deformations = np.array([[D_X[qq], D_Y[qq]] for qq in range(0, N)])
             points = np.array([[CoMX[qq], CoMY[qq]] for qq in range(0, N)])
             vor = Voronoi(points)
+
+            neigh = periodic_delaunay_neighbors(points, (lx, ly))
+            #plot_periodic_delaunay(points, (lx, ly))
+            #for i, nset in enumerate(neigh):
+                #print(f"Point {i} neighbors: {sorted(list(nset))}")
+
+            psi6 = bond_orientational_order(points, neigh, (lx, ly), n=6)
+            psiN = nematic_order(deformations, neigh, (lx, ly), n=2)
+            psiL = lane_order_local(points, neigh, (lx, ly), ly)
+            cont_bulk = 0
+            Psi6_global = 0.
+            PsiN_global = 0.
+            PsiL_global = 0.
+            for pp in range(N):
+                if CoMY[pp]>50 and CoMY[pp]<ly-50:
+                    cont_bulk+=1
+                    Psi6_global += psi6[pp]
+                    PsiN_global += psiN[pp]
+                    PsiL_global += psiL[pp]
+            Psi6_global = np.abs(Psi6_global/cont_bulk)
+            PsiN_global = np.abs(PsiN_global/cont_bulk)
+            PsiL_global = PsiL_global/cont_bulk
+            order_psi6.append(Psi6_global)
+            order_psiN.append(PsiN_global)
+            order_psiL.append(PsiL_global)
+            #print("Global hexatic order:", Psi6_global)
+            #print("Global nematic order:", PsiN_global)
+            #print("Global lane order:", PsiL_global)
+
 
             frame_num=int(t/print_conf_interval)-1
             #print(frame_num)
@@ -378,6 +614,11 @@ if variable==5:
     plt.close()
 
 if variable==6:
+
+    with open('order_parameters.txt', 'w') as f:
+        for i in range(len(order_psi6)):
+            print(time_conf[i]*dt, order_psi6[i], order_psiN[i], order_psiL[i], file=f)  
+
 
     '''
     with open('MSD.txt', 'w') as f:
