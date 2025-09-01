@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -925,7 +925,6 @@ if variable==6:
         for i in range(len(jamm_time_all)):
             print(jamm_time_all[i] * dt, file=f)  
 
-    '''
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
@@ -945,7 +944,6 @@ if variable==6:
     plt.show()
     #plt.savefig('./MSD_time.png')
     plt.close()
-    '''
 
 
     '''
