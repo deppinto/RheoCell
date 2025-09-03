@@ -45,6 +45,7 @@ void TriangleWalls::init(int Lx, int Ly) {
 		}
 	}
 
+	int empty_area=0;
 	for (int row = 0; row < height; ++row) {
 		int halfWidth = int((side / 2.0) * (1.0 - (double)row / height));
 		int left = center - halfWidth;
@@ -54,6 +55,7 @@ void TriangleWalls::init(int Lx, int Ly) {
 		if (y >= 0 && y < Ly) {
 			for (int x = left; x <= right && x < Lx; ++x) {
 				if (x >= 0) {
+					if(walls[int(x + y * Lx)]==1)empty_area+=1;
 					walls[int(x + y * Lx)] = 0.;
 				}
 			}
@@ -61,6 +63,7 @@ void TriangleWalls::init(int Lx, int Ly) {
 	}
 
 
+	std::cout<<"TESTING: Walls empty area: "<<empty_area<<std::endl;
 
 	/*
 	walls.resize(Lx*Ly);

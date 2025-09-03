@@ -29,6 +29,7 @@ void CircleWalls::init(int Lx, int Ly) {
 	sides[1] = Ly;
 
 	walls.resize(Lx*Ly);
+	int empty_area=0;
 	for(int y=0; y<Ly; y++){
 		for(int x=0; x<Lx; x++){
 			int k=x+y*Lx;
@@ -37,9 +38,11 @@ void CircleWalls::init(int Lx, int Ly) {
 			//walls[k]=exp(-double(dist)/lambda_wall);
 			if(dist <= 0) walls[k] = 1.;
 			else if(dist < lambda_wall) walls[k] = 1.;
-			else walls[k] = 0.;
+			else {walls[k] = 0.;empty_area+=1;}
 		}
 	}
+
+	std::cout<<"TESTING: Walls empty area: "<<empty_area<<std::endl;
 	neighbors.resize(Lx*Ly*9);
 	BaseBox::setNeighborsPeriodic(Lx, Ly);
 }

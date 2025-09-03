@@ -918,14 +918,15 @@ if variable==6:
                 rotation_time_all.append(rotation_time)
     #print(rotation_time_all)
     #print(jamm_time_all)
+    '''
     with open('time_rotation.txt', 'w') as f:
         for i in range(len(rotation_time_all)):
             print(rotation_time_all[i] * dt, file=f)  
     with open('time_jamm.txt', 'w') as f:
         for i in range(len(jamm_time_all)):
             print(jamm_time_all[i] * dt, file=f)  
-
     '''
+
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
@@ -945,7 +946,6 @@ if variable==6:
     plt.show()
     #plt.savefig('./MSD_time.png')
     plt.close()
-    '''
 
 
     '''
