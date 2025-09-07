@@ -108,12 +108,17 @@ def tangent_average_angle(contour_xy):
     theta = np.angle(M)
     return wrap_angle(theta)
 
-def boundary_intersections(contour_xy, circle_center, circle_radius, tol_px=2.0):
+def boundary_intersections(contour_xy, circle_center, circle_radius, tol_px=1.0):
     """Return intersection points (x,y) between contour and approximate circle boundary.
     Because contour points are continuous in general, we'll select contour points within tol_px of circle radius.
     """
-    if circle_center is None or circle_radius is None:
-        return np.empty((0,2))
+
+    circle_center = contour_xy.mean(axis=0)
+    dists = np.linalg.norm(contour_xy - circle_center, axis=1)
+    circle_radius = dists.max()
+    #if circle_center is None or circle_radius is None:
+        #return np.empty((0,2))
+
     d = np.hypot(contour_xy[:,0] - circle_center[0], contour_xy[:,1] - circle_center[1])
     mask = np.abs(d - circle_radius) <= tol_px
     pts = contour_xy[mask]
@@ -152,11 +157,15 @@ def extract_theta_timeseries(phi1_ts, phi2_ts, method='pca', dt=1.0,
     theta_wrapped = np.zeros(nt)
     contours_all = [None] * nt
     image_center = (W/2.0, H/2.0)
+    eps=0.0001
     for t in range(nt):
         phi1 = phi1_ts[t]
         phi2 = phi2_ts[t]
         f = phi1 - phi2
-        contours = extract_zero_contours(f, smooth_sigma=contour_smooth_sigma)
+        mask = (phi1 > eps) | (phi2 > eps)
+        f_masked = np.where(mask, f, np.nan)
+        #f_s = ndimage.gaussian_filter(f_masked, sigma=sigma)
+        contours = extract_zero_contours(f_masked, smooth_sigma=contour_smooth_sigma)
         if not contours:
             theta_wrapped[t] = np.nan
             contours_all[t] = []
@@ -180,6 +189,7 @@ def extract_theta_timeseries(phi1_ts, phi2_ts, method='pca', dt=1.0,
                 else:
                     p1, p2 = pts[0], pts[1]
                 theta = endpoints_line_angle(p1, p2)
+                #print(theta*180/pi)
             else:
                 # fallback to PCA
                 theta = principal_axis_angle(contour_xy)
@@ -275,6 +285,103 @@ def extract_runs_from_sign(sign_series):
         runs.append({'start': start, 'end': end, 'length': end-start+1, 'direction': val})
     return pd.DataFrame(runs)
 
+
+# -----------------------------
+# Main function: visualize interface + orientation
+# -----------------------------
+
+def contour_principal_angle(contour):
+    pts = contour - contour.mean(axis=0)
+    U, S, Vt = np.linalg.svd(pts, full_matrices=False)
+    v = Vt[0]
+    return atan2(v[1], v[0]), v
+
+def contour_tangent_average_angle(contour):
+    dx = np.diff(contour[:,0])
+    dy = np.diff(contour[:,1])
+    thetas = np.arctan2(dy, dx)
+    M = np.mean(np.exp(1j*thetas))
+    return np.angle(M)
+
+
+def endpoints_angle(contour, tol=1.0):
+    # contour: Nx2 array (x,y)
+    # center: (cx, cy)
+    # radius: circle radius
+
+    center = contour.mean(axis=0)
+    dists = np.linalg.norm(contour - center, axis=1)
+    radius = dists.max()
+    p3=center
+
+    cx, cy = center
+    d = np.sqrt((contour[:,0]-cx)**2 + (contour[:,1]-cy)**2)
+    pts = contour[np.abs(d - radius) < tol]
+    if pts.shape[0] < 2:
+        return None
+
+    # shift coords relative to center
+    rel = pts - np.array(center)
+
+    # angle of each point relative to center
+    angs = np.arctan2(rel[:,1], rel[:,0])
+
+    # find two points roughly opposite (max angular separation)
+    #i, j = np.unravel_index(np.argmax(np.abs(np.subtract.outer(angs, angs))), (len(pts), len(pts)))
+    i, j = np.unravel_index(np.argmax(np.sum((pts[:,None,:]-pts[None,:,:])**2,axis=2)), (len(pts),len(pts)))
+    if i == j:
+        return None
+    p1, p2 = pts[i], pts[j]
+
+    theta = atan2(p2[1]-p1[1], p2[0]-p1[0])
+    return wrap_angle(theta), radius, (p1, p2, p3)
+
+
+def visualize_interface(phi1, phi2, method='pca', circle_center=None, circle_radius=None, sigma=1.0, eps=0.0001):
+    f = phi1 - phi2
+    mask = (phi1 > eps) | (phi2 > eps)
+    f_masked = np.where(mask, f, np.nan)
+    f_s = ndimage.gaussian_filter(f_masked, sigma=sigma)
+    contours = measure.find_contours(f_s, 0.0)
+    if not contours:
+        raise RuntimeError("No interface found")
+    contour = max(contours, key=len)  # largest
+    contour = np.vstack([contour[:,1], contour[:,0]]).T  # (x,y)
+    
+    fig, ax = plt.subplots(figsize=(6,6))
+    ax.imshow(f, cmap='RdBu', origin='lower')
+    ax.plot(contour[:,0], contour[:,1], 'k-', lw=2)
+    
+    if method == 'pca':
+        theta, v = contour_principal_angle(contour)
+        center = contour.mean(axis=0)
+        ax.quiver(center[0], center[1], np.cos(theta), np.sin(theta),
+                  angles='xy', scale_units='xy', scale=5, color='lime', lw=2)
+        ax.set_title(f"PCA orientation: {theta*180/pi:.1f}°")
+    
+    elif method == 'tangent':
+        theta = contour_tangent_average_angle(contour)
+        center = contour.mean(axis=0)
+        ax.quiver(center[0], center[1], np.cos(theta), np.sin(theta),
+                  angles='xy', scale_units='xy', scale=5, color='orange', lw=2)
+        ax.set_title(f"Tangent-average orientation: {theta*180/pi:.1f}°")
+    
+    elif method == 'endpoints':
+        if circle_center is None or circle_radius is None:
+            raise ValueError("circle_center and circle_radius must be provided for endpoints method")
+        res = endpoints_angle(contour)
+        if res is None:
+            ax.set_title("Endpoints not found on boundary")
+        else:
+            theta, circle_radius, (p1,p2, circle_center) = res
+            ax.plot([p1[0], p2[0]], [p1[1], p2[1]], 'm--', lw=2)
+            ax.set_title(f"Endpoints orientation: {theta*180/pi:.1f}°")
+            ax.plot(*circle_center, 'mo')
+            circ = plt.Circle(circle_center, circle_radius, fill=False, color='gray', ls=':')
+            ax.add_patch(circ)
+    
+    ax.set_aspect('equal')
+    plt.show()
 
 
 seed=4982
@@ -531,7 +638,7 @@ H = ly
 W = lx
 
 
-method = 'tangent'
+method = 'endpoints'
 omega_threshold = 0.1
 theta_smooth_window = 100
 omega_smooth_window = 100
@@ -540,9 +647,14 @@ contour_smooth_sigma = smooth_phi_sigma = 1
 
 # default: circle centered at image center, radius min(H,W)/2 - 1
 circle_center = (W/2.0, H/2.0)
-circle_radius = min(H, W)/2.0 - 1.0
+#circle_radius = min(H, W)/2.0 - 1.0
+circle_radius = (W - 2 * 6) / 2 -2 
 print('Auto circle_center=', circle_center, 'radius=', circle_radius)
 
+#for i in range(time_total):
+pphi1 = phi1[4]
+pphi2 = phi2[4]
+visualize_interface(pphi1, pphi2, method=method, circle_radius = circle_radius, circle_center = circle_center)
 
 print('Extracting theta(t) from phase fields using method=', method)
 theta_wrapped, theta_unwrapped, contours = extract_theta_timeseries(phi1, phi2, method=method, dt=dt, 
@@ -568,6 +680,11 @@ sign = np.sign(omega_sm)
 sign[np.abs(omega_sm) < omega_threshold] = 0
 
 runs_df = extract_runs_from_sign(sign)
+#print(runs_df['length'])
+total_runs = 0
+for i in runs_df['length']:
+    total_runs += i
+print(total_runs/time_total)
 if not runs_df.empty:
     runs_df['time_start'] = runs_df['start'] * dt
     runs_df['time_end'] = runs_df['end'] * dt
@@ -624,7 +741,6 @@ plt.close()
 
 
 # ACF
-'''
 lags = np.arange(len(acf)) * dt
 plt.figure(figsize=(6,4))
 plt.plot(lags, acf, label='ACF(omega)')
@@ -651,7 +767,6 @@ if not runs_df.empty:
     plt.show()
     plt.close()
     #print('Wrote', fig3)
-'''
 
 
 
