@@ -12,7 +12,7 @@ import pandas as pd
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -682,9 +682,13 @@ sign[np.abs(omega_sm) < omega_threshold] = 0
 runs_df = extract_runs_from_sign(sign)
 #print(runs_df['length'])
 total_runs = 0
+time_rot = []
 for i in runs_df['length']:
     total_runs += i
-print(total_runs/time_total)
+    time_rot.append(i/time_total)
+#print(total_runs/time_total)
+print(time_rot)
+
 if not runs_df.empty:
     runs_df['time_start'] = runs_df['start'] * dt
     runs_df['time_end'] = runs_df['end'] * dt
@@ -789,6 +793,10 @@ if variable==5:
     plt.close()
 
 if variable==6:
+
+    with open('time_interface_rotation.txt', 'w') as f:
+        for i in range(len(time_rot)):
+            print(time_rot[i], file=f)  
 
     '''
     with open('theta_shape.txt', 'w') as f:

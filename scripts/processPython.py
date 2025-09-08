@@ -165,7 +165,8 @@ for traj in range(start, end):
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_minor_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/MSD.txt","r")
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_rotation.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_rotation.txt","r")
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_interface_rotation.txt","r")
         index_count = 0
         mean_orientation = 0.
         mean_phi = 0.
@@ -205,6 +206,7 @@ for traj in range(start, end):
                 #theta_1.append(float(save[variable]))
         fileoutput.close()
 
+        '''
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_jamm.txt","r")
         for line in fileoutput:
@@ -215,8 +217,10 @@ for traj in range(start, end):
                 theta_1[index_count] += float(save[variable]) / jobs[traj]
             index_count+=1
         fileoutput.close()
+        '''
 
-    omega.append(sum(theta_5)/(sum(theta_5)+sum(theta_1)))
+    #omega.append(sum(theta_5)/(sum(theta_5)+sum(theta_1)))
+    omega.append(sum(theta_5))
 
     #last_yy = theta_5[-50:]
     #last_xx = xx[-50:]

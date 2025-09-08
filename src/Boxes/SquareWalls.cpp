@@ -37,7 +37,7 @@ void SquareWalls::init(int Lx, int Ly) {
 			double wallsy=exp(-double(y)/lambda_wall) + exp(-double(Ly-y-1)/lambda_wall);
 			if(wallsx>wallsy)walls[k]=wallsx;
 			else walls[k]=wallsy;*/
-			if(x<lambda_wall || x>Lx-lambda_wall){
+			if(x<lambda_wall-1 || x>Lx-lambda_wall){
 				if(walls[k]==0)empty_area-=1;
 				walls[k] = 1.; 
 			}
