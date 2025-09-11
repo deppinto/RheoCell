@@ -576,11 +576,13 @@ for line in cfile:
             ax.set_yticks([])
             if variable==1 or variable==3:
                 if frame_num<10:
-                    plt.savefig('./Video/frame_00'+str(frame_num)+'.png', transparent=True)
+                    plt.savefig('./Video/frame_000'+str(frame_num)+'.png', transparent=True)
                 elif frame_num<100:
-                    plt.savefig('./Video/frame_0'+str(frame_num)+'.png')
+                    plt.savefig('./Video/frame_00'+str(frame_num)+'.png', transparent=True)
                 elif frame_num<1000:
-                    plt.savefig('./Video/frame_'+str(frame_num)+'.png')
+                    plt.savefig('./Video/frame_0'+str(frame_num)+'.png', transparent=True)
+                elif frame_num<10000:
+                    plt.savefig('./Video/frame_'+str(frame_num)+'.png', transparent=True)
             if variable==2 or variable==4:
                 plt.show()
                 #plt.savefig('./newfig_'+str(frame_num)+'.png', transparent=True)

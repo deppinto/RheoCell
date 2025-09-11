@@ -143,6 +143,162 @@ for line in filedata:
 filedata.close()
 
 
+'''
+# Example datasets
+circle_minus   = [
+0.9544999999999999,
+0.862,
+0.9560000000000002,
+0.9375,
+0.9180000000000003,
+0.9624999999999999,
+0.9250000000000002,
+0.91,
+0.9554999999999999,
+0.9605
+]
+
+circle_plus    = [
+0.8825000000000001,
+0.9365,
+0.9440000000000001,
+0.931,
+0.931,
+0.9265000000000001,
+0.9085000000000001,
+0.8925000000000001,
+0.954,
+0.926
+]
+
+square_minus   = [
+0.792,
+0.8015000000000001,
+0.514,
+0.7150000000000001,
+0.49199999999999994,
+0.5599999999999999,
+0.7020000000000001,
+0.48399999999999993,
+0.5235,
+0.541
+]
+
+square_plus    = [
+0.8145,
+0.9,
+0.881,
+0.9365,
+0.9279999999999998,
+0.9225000000000001,
+0.925,
+0.9290000000000002,
+0.864,
+0.898
+]
+
+triangle_minus = [
+0.3505,
+0.34950000000000003,
+0.3205,
+0.41450000000000004,
+0.3025,
+0.264,
+0.2245,
+0.272,
+0.23600000000000002,
+0.356
+]
+
+triangle_plus  = [
+0.5565,
+0.329,
+0.36349999999999993,
+0.46599999999999997,
+0.3435,
+0.6030000000000001,
+0.633,
+0.35350000000000004,
+0.6525,
+0.5945
+]
+
+
+datasets = [
+    [circle_minus, circle_plus],
+    [square_minus, square_plus],
+    [triangle_minus, triangle_plus]
+]
+
+# Colors: "-" darker, "+" brighter
+colors = [
+    ['darkred', 'red'],        # Circle
+    ['darkgreen', 'limegreen'],      # Square
+    ['brown', 'orange']            # Triangle
+]
+
+shapes = ['circle', 'square', 'triangle']
+markers = ['o', 's', '^']
+sub_labels = ['–', '+']
+sub_offset = [-0.15, 0.15]
+
+#fig, ax = plt.subplots(figsize=(7,5))
+fig, ax = plt.subplots(figsize=(5.452423529/2,4.089317647/2))
+
+for i, group in enumerate(datasets):
+    for j, data in enumerate(group):
+        xpos = i + sub_offset[j]
+        
+        # jittered scatter points
+        x = np.random.normal(xpos, 0.04, size=len(data))
+        ax.plot(x, data, markers[i], color=colors[i][j], alpha=0.7, markersize=5)
+
+        # mean and SEM
+        mean = np.mean(data)
+        sem  = np.std(data, ddof=1) / np.sqrt(len(data))
+
+        # horizontal line at mean
+        ax.hlines(mean, xpos-0.1, xpos+0.1, color='k', linewidth=1.5)
+
+        # error bar
+        ax.errorbar(xpos, mean, yerr=sem, color='k', capsize=5, lw=1.5)
+
+# Build x tick positions and labels
+tick_positions = []
+tick_labels = []
+for i in range(len(datasets)):
+    for j, lbl in enumerate(sub_labels):
+        tick_positions.append(i + sub_offset[j])
+        tick_labels.append(lbl)
+
+ax.set_xticks(tick_positions)
+ax.set_xticklabels(tick_labels, fontsize=18)
+ax.set_yticks(np.arange(0, 1.01, 0.2))
+ax.tick_params(axis='y', labelsize=18)
+
+# Add shapes below the axis (outside the plotting area)
+ymin, ymax = ax.get_ylim()
+y_offset = ymin - (ymax - ymin) * 0.1  # 10% below axis
+
+for i, shape in enumerate(shapes):
+    xpos = i  # group center
+    if shape == 'circle':
+        ax.plot(xpos, y_offset, 'o', color='red', markersize=12, clip_on=False)
+    elif shape == 'square':
+        ax.plot(xpos, y_offset, 's', color='green', markersize=12, clip_on=False)
+    elif shape == 'triangle':
+        ax.plot(xpos, y_offset, '^', color='darkorange', markersize=12, clip_on=False)
+
+# Keep the x-axis as standard
+ax.set_ylim(ymin, ymax)  # restore normal axis limits
+ax.set_ylabel('Junction persistence', fontsize=18)
+
+plt.tight_layout()
+plt.show()
+exit(1)
+'''
+
+
 final_x = []
 final_y = []
 omega = []
@@ -160,23 +316,30 @@ for traj in range(start, end):
     phi_all = []
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
 
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_minor_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/MSD.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_rotation.txt","r")
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_interface_rotation.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_interface_rotation_tangent.txt","r")
         index_count = 0
         mean_orientation = 0.
         mean_phi = 0.
+        sum_time = 0.
         for line in fileoutput:
             save=line.split()
+            theta_5.append(float(save[variable]))
+            #sum_time += float(save[variable])
+
+
             if job == jobs_seq[traj]:
                 theta_5.append(float(save[variable]) / jobs[traj])
-                xx.append(float(save[0]))
+                theta_1.append(float(save[variable+1]) / jobs[traj])
+                #xx.append(float(save[0]))
             else:
                 theta_5[index_count] += float(save[variable]) / jobs[traj]
+                theta_1[index_count] += float(save[variable+1]) / jobs[traj]
             index_count+=1
             #theta_1.append(float(save[variable-1]))
 
@@ -219,8 +382,9 @@ for traj in range(start, end):
         fileoutput.close()
         '''
 
+    print("-------------------------")
     #omega.append(sum(theta_5)/(sum(theta_5)+sum(theta_1)))
-    omega.append(sum(theta_5))
+    #omega.append(sum(theta_5)/jobs[traj])
 
     #last_yy = theta_5[-50:]
     #last_xx = xx[-50:]
@@ -253,11 +417,11 @@ for traj in range(start, end):
 #plt.ylabel(r'$\psi_6$', fontsize=18)
 #plt.xlabel(r'$\dot{\gamma}$', fontsize=18)
 
-#plt.plot(theta_5, '--o', color='firebrick')
+plt.plot(theta_1, theta_5, '--o', color='firebrick')
 #plt.ylabel(r'$\theta$', fontsize=18)
 #plt.xlabel('t', fontsize=18)
 
-plt.plot(omega, '--o')
+#plt.plot(omega, '--o')
 
 '''
 #fig = plt.gcf()

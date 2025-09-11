@@ -12,7 +12,7 @@ import pandas as pd
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -363,7 +363,7 @@ def visualize_interface(phi1, phi2, method='pca', circle_center=None, circle_rad
         theta = contour_tangent_average_angle(contour)
         center = contour.mean(axis=0)
         ax.quiver(center[0], center[1], np.cos(theta), np.sin(theta),
-                  angles='xy', scale_units='xy', scale=5, color='orange', lw=2)
+                  angles='xy', scale_units='xy', scale=0.1, color='orange', lw=5)
         ax.set_title(f"Tangent-average orientation: {theta*180/pi:.1f}°")
     
     elif method == 'endpoints':
@@ -381,6 +381,10 @@ def visualize_interface(phi1, phi2, method='pca', circle_center=None, circle_rad
             ax.add_patch(circ)
     
     ax.set_aspect('equal')
+    ax.set_yticklabels([])
+    ax.set_xticklabels([])
+    ax.set_xticks([])
+    ax.set_yticks([])
     plt.show()
 
 
@@ -638,7 +642,7 @@ H = ly
 W = lx
 
 
-method = 'endpoints'
+method = 'tangent'
 omega_threshold = 0.1
 theta_smooth_window = 100
 omega_smooth_window = 100
@@ -651,9 +655,9 @@ circle_center = (W/2.0, H/2.0)
 circle_radius = (W - 2 * 6) / 2 -2 
 print('Auto circle_center=', circle_center, 'radius=', circle_radius)
 
-#for i in range(time_total):
-pphi1 = phi1[4]
-pphi2 = phi2[4]
+#for i in range(135, 150):
+pphi1 = phi1[284]
+pphi2 = phi2[284]
 visualize_interface(pphi1, pphi2, method=method, circle_radius = circle_radius, circle_center = circle_center)
 
 print('Extracting theta(t) from phase fields using method=', method)
@@ -745,6 +749,7 @@ plt.close()
 
 
 # ACF
+'''
 lags = np.arange(len(acf)) * dt
 plt.figure(figsize=(6,4))
 plt.plot(lags, acf, label='ACF(omega)')
@@ -771,7 +776,7 @@ if not runs_df.empty:
     plt.show()
     plt.close()
     #print('Wrote', fig3)
-
+'''
 
 
 if variable==5:
@@ -794,7 +799,7 @@ if variable==5:
 
 if variable==6:
 
-    with open('time_interface_rotation.txt', 'w') as f:
+    with open('time_interface_rotation_tangent.txt', 'w') as f:
         for i in range(len(time_rot)):
             print(time_rot[i], file=f)  
 
