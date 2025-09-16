@@ -6,6 +6,10 @@ import os.path
 import matplotlib.cm as cm
 from scipy.stats import linregress
 from matplotlib import pyplot as plt
+from matplotlib.ticker import MaxNLocator
+from scipy import stats
+
+from statsmodels.tsa.stattools import acf
 
 from matplotlib.font_manager import FontProperties
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
@@ -47,6 +51,66 @@ scripts=int(float(sys.argv[1]))
 start=int(float(sys.argv[2]))
 end=int(float(sys.argv[3]))
 variable=int(float(sys.argv[4]))
+
+def estimate_period(t, y, acf_threshold=0.3):
+    """
+    Estimate the period of a time series using FFT and autocorrelation.
+    
+    Parameters
+    ----------
+    t : array-like
+        Time values (must be evenly spaced).
+    y : array-like
+        Signal values.
+    acf_threshold : float
+        Minimum autocorrelation peak height to consider as significant.
+        
+    Returns
+    -------
+    period : float or None
+        Estimated period, or None if no clear period is found.
+    method : str
+        Method used ("fft", "acf", or "none").
+    """
+    
+    dt = t[1] - t[0]  # assume uniform sampling
+    y = np.asarray(y)
+    y_detrended = y - np.mean(y)
+    
+    # === Method 1: FFT ===
+    freqs = np.fft.rfftfreq(len(t), d=dt)
+    spectrum = np.abs(np.fft.rfft(y_detrended))
+    
+    if len(spectrum) > 1:
+        freqs, spectrum = freqs[1:], spectrum[1:]  # remove DC component
+        dominant_freq = freqs[np.argmax(spectrum)]
+        if dominant_freq > 0:
+            period_fft = 1.0 / dominant_freq
+        else:
+            period_fft = None
+    else:
+        period_fft = None
+    
+    # === Method 2: Autocorrelation ===
+    acorr = acf(y_detrended, nlags=len(y)//2, fft=True)
+    
+    # Find peaks (ignoring lag=0)
+    peaks = np.where((acorr[1:-1] > acorr[:-2]) & (acorr[1:-1] > acorr[2:]))[0] + 1
+    
+    period_acf = None
+    if len(peaks) > 0:
+        best_peak = peaks[np.argmax(acorr[peaks])]
+        if acorr[best_peak] > acf_threshold:
+            period_acf = best_peak * dt
+    
+    # === Decision logic ===
+    if period_fft is not None:
+        return period_fft, "fft"
+    elif period_acf is not None:
+        return period_acf, "acf"
+    else:
+        return None, "none"
+
 
 '''
 #-------------------------------------optimization plot
@@ -299,9 +363,15 @@ exit(1)
 '''
 
 
+markers = ['o', 's', '^', 'D', 'v', '<', '>', 'p', '*', 'x']
+colors = plt.cm.tab10.colors  # 10 distinct colors
+
+
 final_x = []
 final_y = []
 omega = []
+time_array = np.linspace(0, 1000000, 1000)
+#plt.figure(figsize=(10, 6))
 for traj in range(start, end):
 #for traj in [start, end]:
     #if traj==start:
@@ -316,8 +386,8 @@ for traj in range(start, end):
     phi_all = []
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_minor_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/MSD.txt","r")
@@ -332,15 +402,21 @@ for traj in range(start, end):
             theta_5.append(float(save[variable]))
             #sum_time += float(save[variable])
 
+            #plt.plot(
+                    #float(save[variable+1]), float(save[variable]),
+                    #marker=markers[job % len(markers)],
+                    #color=colors[job % len(colors)],
+                    #linestyle=''
+                    #)
 
-            if job == jobs_seq[traj]:
-                theta_5.append(float(save[variable]) / jobs[traj])
-                theta_1.append(float(save[variable+1]) / jobs[traj])
+            #if job == jobs_seq[traj]:
+                #theta_5.append(float(save[variable]) / jobs[traj])
+                #theta_1.append(float(save[variable+1]) / jobs[traj])
                 #xx.append(float(save[0]))
-            else:
-                theta_5[index_count] += float(save[variable]) / jobs[traj]
-                theta_1[index_count] += float(save[variable+1]) / jobs[traj]
-            index_count+=1
+            #else:
+                #theta_5[index_count] += float(save[variable]) / jobs[traj]
+                #theta_1[index_count] += float(save[variable+1]) / jobs[traj]
+            #index_count+=1
             #theta_1.append(float(save[variable-1]))
 
             '''
@@ -369,9 +445,8 @@ for traj in range(start, end):
                 #theta_1.append(float(save[variable]))
         fileoutput.close()
 
-        '''
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_jamm.txt","r")
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_jamm.txt","r")
         for line in fileoutput:
             save=line.split()
             if job == jobs_seq[traj]:
@@ -380,9 +455,8 @@ for traj in range(start, end):
                 theta_1[index_count] += float(save[variable]) / jobs[traj]
             index_count+=1
         fileoutput.close()
-        '''
 
-    print("-------------------------")
+    #print("-------------------------")
     #omega.append(sum(theta_5)/(sum(theta_5)+sum(theta_1)))
     #omega.append(sum(theta_5)/jobs[traj])
 
@@ -392,7 +466,9 @@ for traj in range(start, end):
     #final_x.append((N[traj] * 8 * 8) / ((lx[traj] - 2 * 6)/2)**2)
     #final_y.append(slope)
     #final_x.append(shear_rate[traj])
-    #final_y.append(np.mean(theta_5))
+    #final_y.append(np.mean(last_yy))
+    #final_y.append(stats.sem(last_yy))
+    #final_y.append(np.std(last_yy))
 
     #plt.plot(theta_5, '--o', label=lx[traj])
     #plt.plot(theta_5, '--o', label=variable)
@@ -402,6 +478,12 @@ for traj in range(start, end):
     #if traj==end:
     #theta_diff = [abs(theta_5[i] - theta_1[i]) for i in range(len(theta_5))]
     #plt.plot(theta_diff, '--o', label=traj)
+
+
+    #period, method = estimate_period(time_array, np.array(theta_5))
+    #print("Estimated period:", period, " (method:", method, ")")
+    #print(period)
+    #plt.clf()
 
     if end == start:
         break
@@ -413,34 +495,102 @@ for traj in range(start, end):
 #final_y = [0.49992082742607136, 0.48058329369018765, 0.46116523160021705, 0.4377948871250764, 0.4428061377749363, 0.5159620665712491, 0.523863398829233, 0.5828769623310098, 0.2893244788742896, 0.40499525754918736, 0.03450679770844628]
 #final_yy = [np.float64(0.9509520336270171), np.float64(0.9029565600880146), np.float64(0.7558733701227552), np.float64(0.746363071735866), np.float64(0.4716647352837026), np.float64(0.6990953993090971), np.float64(0.8111007830280228), np.float64(0.8917666537386556), np.float64(0.5177900353375421), np.float64(0.24271438919906277), np.float64(0.040002335139040814)]
 
-#plt.plot(final_x, final_y, '--o', color='firebrick')
-#plt.ylabel(r'$\psi_6$', fontsize=18)
-#plt.xlabel(r'$\dot{\gamma}$', fontsize=18)
+#final_x = np.array([0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0007, 0.0008, 0.0013, 0.0017, 0.0024, 0.0033, 0.0045, 0.0062, 0.0085, 0.0117, 0.0161, 0.0221, 0.0304, 0.0418, 0.0574, 0.0788, 0.1083, 0.1487, 0.2043, 0.2807, 0.3857, 0.5298, 0.7279, 1.0])
+#final_y = np.array([np.float64(0.2896697218998192), np.float64(0.33630445246330626), np.float64(0.43400328779488384), np.float64(0.5311565138185511), np.float64(0.36390157063579237), np.float64(0.4825153593432849), np.float64(0.5456727494937862), np.float64(0.6290565442735762), np.float64(0.7141504126736063), np.float64(0.6562556393808907), np.float64(0.6472854206159414), np.float64(0.6003395495408252), np.float64(0.5664608817871121), np.float64(0.5448686791337419), np.float64(0.4660333152296762), np.float64(0.4173409962674875), np.float64(0.4488264016467213), np.float64(0.4981183325771869), np.float64(0.4900805944770621), np.float64(0.47759117672996), np.float64(0.4374513703054221), np.float64(0.460042828926506), np.float64(0.4700894656485616), np.float64(0.4471321150942393), np.float64(0.4672926325416104), np.float64(0.4742098447723692), np.float64(0.4724620589223277), np.float64(0.43883697137926064), np.float64(0.41935366245236233)])
+#final_y_err_sem = np.array([np.float64(2.4779534323162614e-05), np.float64(3.408960752434948e-05), np.float64(0.0001535934146319442), np.float64(0.0010893234448635936), np.float64(0.00322176268479729), np.float64(0.0004006262118523729), np.float64(0.0001690090859186959), np.float64(0.001843101630475457), np.float64(0.0038740933990313157), np.float64(0.0038788802323136856), np.float64(0.01112146317191135), np.float64(0.005624149335539616), np.float64(0.006976612355473009), np.float64(0.01249706029438529), np.float64(0.013778587488239059), np.float64(0.014268167255011852), np.float64(0.01611260699501519), np.float64(0.01580071682927956), np.float64(0.011599906972495107), np.float64(0.009983951939427839), np.float64(0.010675663616198369), np.float64(0.01774433056979585), np.float64(0.007883718438772218), np.float64(0.011526042237994569), np.float64(0.011757790853711076), np.float64(0.009544023984836125), np.float64(0.012037905923731749), np.float64(0.012598008015292714), np.float64(0.007171705254389642)])
+#final_y_err_std = np.array([np.float64(6.659588414731947e-05), np.float64(0.0021466228624031905), np.float64(0.0024526157987470928), np.float64(0.009710083120257984), np.float64(0.037068463729466955), np.float64(0.017306937546626322), np.float64(0.00628556824839815), np.float64(0.03333037203776919), np.float64(0.014079632541178892), np.float64(0.05281092285016849), np.float64(0.01290754822973717), np.float64(0.046402252195048815), np.float64(0.04431935018851303), np.float64(0.0440890124301868), np.float64(0.07066040716066056), np.float64(0.08275386080895042), np.float64(0.024882519261225266), np.float64(0.05708737575473875), np.float64(0.03525734632507903), np.float64(0.03343552763563954), np.float64(0.05082809682281099), np.float64(0.04285401805692968), np.float64(0.06610697814841611), np.float64(0.08009137715956625), np.float64(0.07903461795566741), np.float64(0.06348856133079687), np.float64(0.03258013474861658), np.float64(0.008039474890279357), np.float64(0.008740268641538517)])
+#final_yy = [np.float64(0.1770427643629094), np.float64(0.19647260244224415), np.float64(0.2991794492672249), np.float64(0.4789462290131415), np.float64(0.4251314850451014), np.float64(0.5809837510369256), np.float64(0.6519316011323135), np.float64(0.7874967499823531), np.float64(0.8991038844949556), np.float64(0.8971982943468012), np.float64(0.9527027378747758), np.float64(0.8822926685862289), np.float64(0.8467586730150047), np.float64(0.8332334497422386), np.float64(0.769568120856856), np.float64(0.7706259080359582), np.float64(0.7932582112437027), np.float64(0.7610656248840395), np.float64(0.7450465472190528), np.float64(0.7097550125187485), np.float64(0.6940237228965223), np.float64(0.6189111241656535), np.float64(0.6157832941421842), np.float64(0.6747623316267313), np.float64(0.6362965311781632), np.float64(0.7547420485208346), np.float64(0.8219757103885442), np.float64(0.8704084163937043), np.float64(0.8979139352454599)]
+#final_yy_err_sem = [np.float64(9.51369773533135e-06), np.float64(0.00030666040891474147), np.float64(0.000350373685535299), np.float64(0.0013871547314654262), np.float64(0.00529549481849528), np.float64(0.002472419649518046), np.float64(0.0008979383211997357), np.float64(0.0047614817196813125), np.float64(0.0020113760773112703), np.float64(0.007544417550024068), np.float64(0.001843935461391024), np.float64(0.0066288931707212595), np.float64(0.006331335741216147), np.float64(0.006298430347169542), np.float64(0.010094343880094366), np.float64(0.011821980115564344), np.float64(0.003554645608746467), np.float64(0.008155339393534107), np.float64(0.005036763760725575), np.float64(0.004776503947948506), np.float64(0.007261156688972999), np.float64(0.006122002579561383), np.float64(0.009443854021202302), np.float64(0.011441625308509463), np.float64(0.011290659707952486), np.float64(0.009069794475828126), np.float64(0.004654304964088084), np.float64(0.001148496412897051), np.float64(0.001248609805934074)]
+#final_yy_err_std = np.array([np.float64(6.659588414731947e-05), np.float64(0.0021466228624031905), np.float64(0.0024526157987470928), np.float64(0.009710083120257984), np.float64(0.037068463729466955), np.float64(0.017306937546626322), np.float64(0.00628556824839815), np.float64(0.03333037203776919), np.float64(0.014079632541178892), np.float64(0.05281092285016849), np.float64(0.01290754822973717), np.float64(0.046402252195048815), np.float64(0.04431935018851303), np.float64(0.0440890124301868), np.float64(0.07066040716066056), np.float64(0.08275386080895042), np.float64(0.024882519261225266), np.float64(0.05708737575473875), np.float64(0.03525734632507903), np.float64(0.03343552763563954), np.float64(0.05082809682281099), np.float64(0.04285401805692968), np.float64(0.06610697814841611), np.float64(0.08009137715956625), np.float64(0.07903461795566741), np.float64(0.06348856133079687), np.float64(0.03258013474861658), np.float64(0.008039474890279357), np.float64(0.008740268641538517)])
 
-plt.plot(theta_1, theta_5, '--o', color='firebrick')
+
+#plt.plot(theta_5, '--o', color='firebrick')
 #plt.ylabel(r'$\theta$', fontsize=18)
 #plt.xlabel('t', fontsize=18)
+x_phase = []
+y_phase = []
+for i in range(len(theta_5)):
+    x_phase.append(theta_1[i] * cos(2 * theta_5[i]))
+    y_phase.append(theta_1[i] * sin(2 * theta_5[i]))
+plt.plot(x_phase, y_phase, '--o', color='firebrick')
+
 
 #plt.plot(omega, '--o')
 
+
 '''
+gamma = [0.0418, 0.0574, 0.0788, 0.1083, 0.1487, 0.2043, 0.2807, 0.3857, 0.5298, 0.7279, 1]
+T_period = [5561.116672, 5005.005005, 3925.494122, 2860.00286, 2002.002002, 1668.335002, 1112.223334, 834.1675008, 625.6256256, 455.000455, 333.6670003]
+gamma = np.array(gamma)
+T_period = np.array(T_period)
+
+# Fit in log-log space
+log_gamma = np.log10(gamma)
+log_T = np.log10(T_period)
+
+#slope, intercept = np.polyfit(log_gamma, log_T, 1)
+# Best fit line
+#slope = -1.
+#fit_line = 10**(intercept + slope*log_gamma)
+
+# Solve for intercept b (since slope = -1 is fixed)
+b = np.mean(log_T + log_gamma)
+
+# Best-fit line with fixed slope
+x_fit = np.logspace(np.log10(gamma.min()), np.log10(gamma.max()), 400)
+y_fit = 10**b / x_fit   # since slope = -1
+
+plt.plot(gamma, T_period, 'o')
+#plt.plot(gamma, fit_line, '-', label=f"Fit: slope = {slope:.2f}")
+plt.plot(x_fit, y_fit, '--', linewidth=1.5)
+plt.ylabel('T', fontsize=18)
+plt.xlabel(r'$\dot{\gamma}$', fontsize=18)
+plt.xticks(fontsize=18)
+plt.yticks(fontsize=18)
+
+# Draw triangle (all black)
+plt.plot([0.06, 0.075], [5570, 5570], 'k-', linewidth=1.2)
+plt.plot([0.075, 0.075], [5570, 4420], 'k-', linewidth=1.2)
+
+# Add slope label at the corner opposite to hypotenuse
+plt.text(0.08, 5580, "-1", fontsize=16, ha='center', va='bottom')
+
+plt.xscale('log')
+plt.yscale('log')
+'''
+
+'''
+#psi6 and psi2
+plt.plot(final_x, final_y, '--o', color='firebrick')
+plt.fill_between(final_x, final_y - final_y_err_std, final_y + final_y_err_std, color="firebrick", alpha=0.1)
+plt.ylabel(r'$\psi_6$', fontsize=18)
+plt.xlabel(r'$\dot{\gamma}$', fontsize=18)
 #fig = plt.gcf()
 ax1 = plt.gca()
 ax2 = ax1.twinx()
-#ax2.plot(final_x, final_yy, '--o', color='forestgreen')
-#ax2.set_ylabel(r'$\psi^L_2$', fontsize=18)
-ax2.plot(theta_1, '--o', color='forestgreen')
-ax2.set_ylabel('r', fontsize=18)
+ax2.plot(final_x, final_yy, '--o', color='forestgreen')
+ax2.fill_between(final_x, final_yy - final_yy_err_std, final_yy + final_yy_err_std, color="forestgreen", alpha=0.1)
+ax2.set_ylabel(r'$\psi^L_2$', fontsize=18)
+#ax2.plot(theta_1, '--o', color='forestgreen')
+#ax2.set_ylabel('r', fontsize=18)
 ax1.tick_params(axis='y', colors='firebrick')
 ax2.tick_params(axis='y', colors='forestgreen')
 ax1.yaxis.label.set_color('firebrick')
 ax2.yaxis.label.set_color('forestgreen')
 ax2.spines['right'].set_color('forestgreen')
 ax2.spines['left'].set_color('firebrick')
-#for tick in ax2.yaxis.get_ticklabels():
-    #tick.set_fontsize(18)
-    #tick.set_fontname('Times New Roman')
+ax2.yaxis.set_major_locator(MaxNLocator(nbins=5))
+for tick in ax2.yaxis.get_ticklabels():
+    tick.set_fontsize(18)
+    tick.set_fontname('Times New Roman')
+for tick in ax1.yaxis.get_ticklabels():
+    tick.set_fontsize(18)
+    tick.set_fontname('Times New Roman')
+for tick in ax1.xaxis.get_ticklabels():
+    tick.set_fontsize(18)
+    tick.set_fontname('Times New Roman')
 '''
+
 
 #plt.ylabel(r'$\theta_i$', fontsize=18)
 #plt.ylabel('MSD', fontsize=18)
@@ -452,11 +602,13 @@ ax2.spines['left'].set_color('firebrick')
 #plt.ylim([0,3])
 #plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
 plt.subplots_adjust(left=0.15, bottom=0.15, right=0.85, top=0.85)
-plt.legend(ncols=1, frameon=False, loc='upper left')
+#plt.legend(ncols=1, frameon=False, loc='upper left')
 #plt.xscale('log')
 #plt.yscale('log')
 #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/lattice_theta_r_time_high_shear_low_dt.png", transparent=True)
 #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/lattice_theta_r_time_high_shear_low_dt.svg", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/period_shear.png", transparent=True)
+#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/period_shear.svg", transparent=True)
 plt.show()
 exit(1)
 
@@ -1248,10 +1400,10 @@ if variable==1:
     plt.plot(nemself[5:10], max_area_holes[5:10], '--h', color='green')
     plt.plot(nemself[10:15], max_area_holes[10:15], '--D', color='royalblue')
     #plt.legend(['0.1', '0.01', '0.001'], prop={'family':'Times New Roman', 'size':'12'}, loc=(0.05, 0.5), ncols=1, frameon=False)
-    #plt.text(0.145, 0.185, r'$\chi$', fontsize=18, fontname="Times New Roman")
+    #plt.text(0.145, 0.185, r'$\\chi$', fontsize=18, fontname="Times New Roman")
     plt.ylabel(r'$A_{max}/L^2$', fontname='Times New Roman', fontsize=18)
-    plt.xlabel(r'$\zeta$', fontname='Times New Roman', fontsize=18)
-    #plt.xlabel(r'$\gamma$', fontname='Times New Roman', fontsize=18)
+    plt.xlabel(r'$\\zeta$', fontname='Times New Roman', fontsize=18)
+    #plt.xlabel(r'$\\gamma$', fontname='Times New Roman', fontsize=18)
     plt.xticks(fontname='Times New Roman', fontsize=18)
     plt.yticks(fontname='Times New Roman', fontsize=18)
     plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
@@ -1271,10 +1423,10 @@ if variable==1:
     plt.plot(nemself[5:10], lifetime_holes[5:10], '--h', color='green')
     plt.plot(nemself[10:15], lifetime_holes[10:15], '--D', color='royalblue')
     #plt.legend(['0.1', '0.01', '0.001'], prop={'family':'Times New Roman', 'size':'12'}, loc=(0.05, 0.5), ncols=1, frameon=False)
-    #plt.text(0.145, 0.185, r'$\chi$', fontsize=18, fontname="Times New Roman")
+    #plt.text(0.145, 0.185, r'$\\chi$', fontsize=18, fontname="Times New Roman")
     plt.ylabel(r'$\tau_{hole}/t_{total}$', fontname='Times New Roman', fontsize=18)
-    plt.xlabel(r'$\zeta$', fontname='Times New Roman', fontsize=18)
-    #plt.xlabel(r'$\gamma$', fontname='Times New Roman', fontsize=18)
+    plt.xlabel(r'$\\zeta$', fontname='Times New Roman', fontsize=18)
+    #plt.xlabel(r'$\\gamma$', fontname='Times New Roman', fontsize=18)
     plt.xticks(fontname='Times New Roman', fontsize=18)
     plt.yticks(fontname='Times New Roman', fontsize=18)
     plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
@@ -1295,8 +1447,8 @@ if variable==1:
     #plt.plot(gamma[4:8], n_holes[0:4], '--o', color='firebrick')
     #plt.legend(['0.1', '0.01', '0.001'], prop={'family':'Times New Roman', 'size':'12'}, loc=(0.1, 0.6), ncols=1, frameon=False)
     plt.ylabel(r'$N_{holes}$', fontname='Times New Roman', fontsize=18)
-    plt.xlabel(r'$\zeta$', fontname='Times New Roman', fontsize=18)
-    #plt.xlabel(r'$\gamma$', fontname='Times New Roman', fontsize=18)
+    plt.xlabel(r'$\\zeta$', fontname='Times New Roman', fontsize=18)
+    #plt.xlabel(r'$\\gamma$', fontname='Times New Roman', fontsize=18)
     plt.xticks(fontname='Times New Roman', fontsize=18)
     plt.yticks(fontname='Times New Roman', fontsize=18)
     plt.ylim(-0.1,2.7)
@@ -1375,8 +1527,8 @@ if variable == 3:
     plt.plot(ttt, max_stress_all[5][::-1], '--8', color='darkviolet')
     plt.plot(ttt, max_stress_all[3][::-1], '--D', color='gray')
     plt.legend(['0.001', '0.0025', '0.005', '0.0075', '0.01', '0.05', '0.1'], prop={'family':'Times New Roman', 'size':'12'}, loc=(0.08, 0.05), ncols=3, frameon=False)
-    #plt.text(-9.2, 0.185, r'$\chi$', fontsize=18, fontname="Times New Roman")
-    plt.ylabel(r"$\dot{\varepsilon}_{hole}/\dot{\varepsilon}_{max}$", fontname='Times New Roman', fontsize=18)
+    #plt.text(-9.2, 0.185, r'$\\chi$', fontsize=18, fontname="Times New Roman")
+    plt.ylabel(r"$\\dot{\varepsilon}_{hole}/\\dot{\varepsilon}_{max}$", fontname='Times New Roman', fontsize=18)
     plt.xlabel(r'$t-t_{hole}$', fontname='Times New Roman', fontsize=18)
     plt.xticks(fontname='Times New Roman', fontsize=18)
     plt.yticks(fontname='Times New Roman', fontsize=18)
@@ -1401,7 +1553,7 @@ if variable == 3:
     plt.plot(ttt, vortex_all[5][::-1]/8, '--8', color='purple')
     plt.plot(ttt, vortex_all[3][::-1]/8, '--D', color='gray')
     #plt.legend(['0.001', '0.0025', '0.005', '0.0075', '0.01', '0.05', '0.1'], prop=legend_font, loc=(0.02, 0.05), ncols=3, frameon=False)
-    plt.ylabel(r'$r_{min}^{(spiral \ core)}/R$', fontname='Times New Roman', fontsize=18)
+    plt.ylabel(r'$r_{min}^{(spiral \\ core)}/R$', fontname='Times New Roman', fontsize=18)
     plt.xlabel(r'$t-t_{hole}$', fontname='Times New Roman', fontsize=18)
     plt.xticks(fontname='Times New Roman', fontsize=18)
     plt.yticks(fontname='Times New Roman', fontsize=18)
@@ -1463,12 +1615,12 @@ if variable == 3:
     plt.text(0.00213482 + (0.00248559 - 0.00213482), 0.122669 -  (0.184225 - 0.122669), "2", fontsize=18, fontname='Times New Roman', ha='left', va='bottom')
     #plt.plot(logsurvival_all_x[1], logsurvival_all_y[1], '--o', color='firebrick')
     #plt.plot(logsurvival_all_x[0], logsurvival_all_y[0], '--o', color='firebrick')
-    plt.text(0.00034, 2.20, r'$\zeta$', fontsize=18, fontname="Times New Roman")
+    plt.text(0.00034, 2.20, r'$\\zeta$', fontsize=18, fontname="Times New Roman")
     plt.legend(prop={'family':'Times New Roman', 'size':'12'}, loc=(0.02, 0.65), ncols=2, frameon=False)
-    plt.ylabel(r'$-log(S(\dot{\varepsilon}))$', fontname='Times New Roman', fontsize=18)
-    plt.xlabel(r'$\dot{\varepsilon}$', fontname='Times New Roman', fontsize=18)
-    #plt.ylabel(r'$S(\dot{\varepsilon})$', fontname='Times New Roman', fontsize=18)
-    #plt.xlabel(r'$\dot{\varepsilon}$', fontname='Times New Roman', fontsize=18)
+    plt.ylabel(r'$-log(S(\\dot{\varepsilon}))$', fontname='Times New Roman', fontsize=18)
+    plt.xlabel(r'$\\dot{\varepsilon}$', fontname='Times New Roman', fontsize=18)
+    #plt.ylabel(r'$S(\\dot{\varepsilon})$', fontname='Times New Roman', fontsize=18)
+    #plt.xlabel(r'$\\dot{\varepsilon}$', fontname='Times New Roman', fontsize=18)
     plt.xticks(fontname='Times New Roman', fontsize=18)
     plt.yticks(fontname='Times New Roman',  fontsize=18)
     plt.xscale('log')
@@ -1492,7 +1644,7 @@ if variable == 3:
     inset_ax.plot(survival_all_x[7], survival_all_y[7], '--o', color='firebrick', ms=3)
     inset_ax.plot(survival_all_x[8], survival_all_y[8], '--^', color='green', ms=3)
     inset_ax.plot(survival_all_x[9], survival_all_y[9], '--s', color='royalblue', ms=3)
-    inset_ax.set_ylabel(r'$S(\dot{\varepsilon})$', fontname='Times New Roman', fontsize=12)
+    inset_ax.set_ylabel(r'$S(\\dot{\varepsilon})$', fontname='Times New Roman', fontsize=12)
     inset_ax.set_xscale('log')
     for label in inset_ax.get_xticklabels():
         label.set_fontproperties('Times New Roman')
@@ -1532,7 +1684,7 @@ if variable == 3:
     #plt.plot(st_all_x[6], st_all_y[6], ':p', color='firebrick', label='0.3')
     #plt.plot(st_all_x[7], st_all_y[7], ':h', color='green', label='0.4')
     #plt.plot(st_all_x[8], st_all_y[8], ':D', color='royalblue', label='0.5')
-    plt.text(0.33, 0.875, r'$\zeta$', fontsize=18, fontname="Times New Roman")
+    plt.text(0.33, 0.875, r'$\\zeta$', fontsize=18, fontname="Times New Roman")
     plt.legend(prop={'family':'Times New Roman', 'size':'12'}, loc=(0.4, 0.8), ncols=3, frameon=False)
     plt.ylabel(r'$S(\tau_{hole})$', fontname='Times New Roman', fontsize=18)
     plt.xlabel(r'$\tau_{hole}/t_{total}$', fontname='Times New Roman', fontsize=18)
@@ -1977,10 +2129,10 @@ elif variable==2:
 if variable==1:
 	plt.xlabel('T', fontsize=18, fontname='Times New Roman')
 elif variable==0:
-	plt.xlabel(r'$\gamma$', fontsize=18, fontname='Times New Roman')
+	plt.xlabel(r'$\\gamma$', fontsize=18, fontname='Times New Roman')
 elif variable==2:
 	#plt.xlabel(r'$\rho$', fontsize=18, fontname='Times New Roman')
-	plt.xlabel(r'$\gamma$', fontsize=18, fontname='Times New Roman')
+	plt.xlabel(r'$\\gamma$', fontsize=18, fontname='Times New Roman')
 	#plt.xlabel('In plane angle', fontsize=18, fontname='Times New Roman')
 if variable==0:
 	plt.ylabel(r'$cos\theta_{max}$', fontsize=18, fontname='Times New Roman')

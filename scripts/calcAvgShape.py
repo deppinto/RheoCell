@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -301,12 +301,11 @@ for line in cfile:
             test_s11 += field_dy * field_dy
             test_s01 += field_dx * field_dy
 
-        #D_major_axis = 0.5 * np.atan2(S01, S00)
-        #D_major_axis_vec_x = np.cos(D_major_axis)
-        #D_major_axis_vec_y = np.sin(D_major_axis)
-        #D_i = np.sqrt(S00 * S00 + S01 * S01)
+        D_major_axis = 0.5 * np.atan2(S01, S00)
+        D_major_axis_vec_x = np.cos(D_major_axis)
+        D_major_axis_vec_y = np.sin(D_major_axis)
+        D_i = np.sqrt(S00 * S00 + S01 * S01)
 
-        '''
         D_i = np.sqrt(S00 * S00 + S01 * S01)
         if D_i > 0.000000001:
             D_major_axis_vec_x = D_i * sqrt((1 + S00/D_i)/2)
@@ -317,24 +316,23 @@ for line in cfile:
         else:
             D_major_axis_vec_x = D_major_axis_vec_y = 0.
             D_minor_axis_vec_x = D_minor_axis_vec_y = 0.
-        '''
 
-        F = np.array([[S00, S01],[S01, -S00]], dtype=float)
+        #F = np.array([[S00, S01],[S01, -S00]], dtype=float)
         #F = np.array([[test_s00, test_s01],[test_s01, test_s11]], dtype=float)
 
-        U, S, Vt = np.linalg.svd(F)   # S[0] >= S[1]
-        V = Vt.T                      # columns are principal directions in the reference frame
+        #U, S, Vt = np.linalg.svd(F)   # S[0] >= S[1]
+        #V = Vt.T                      # columns are principal directions in the reference frame
 
-        D_major_axis_vec = S[0] * V[:, 0]   # scaled major axis (length = σ1)
-        D_minor_axis_vec = S[1] * V[:, 1]   # scaled minor axis (length = σ2)
+        #D_major_axis_vec = S[0] * V[:, 0]   # scaled major axis (length = σ1)
+        #D_minor_axis_vec = S[1] * V[:, 1]   # scaled minor axis (length = σ2)
         
         theta_i = (0.5 * np.atan2(S01, S00) * 180 / pi)
         if pt_num - int(pt_num / n_columns) * n_columns == 0:
             theta_time[int(pt_num / n_columns)][frame_num] = (0.5 * np.atan2(S01, S00) * 180 / pi)
-            #elongation_time[int(pt_num / n_columns)][frame_num] = sqrt(D_major_axis_vec_x**2 + D_major_axis_vec_y**2)
-            #minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec_x**2 + D_minor_axis_vec_y**2)
-            elongation_time[int(pt_num / n_columns)][frame_num] = sqrt(D_major_axis_vec[0]**2 + D_major_axis_vec[1]**2)
-            minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec[0]**2 + D_minor_axis_vec[1]**2)
+            elongation_time[int(pt_num / n_columns)][frame_num] = sqrt(D_major_axis_vec_x**2 + D_major_axis_vec_y**2)
+            minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec_x**2 + D_minor_axis_vec_y**2)
+            #elongation_time[int(pt_num / n_columns)][frame_num] = sqrt(D_major_axis_vec[0]**2 + D_major_axis_vec[1]**2)
+            #minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec[0]**2 + D_minor_axis_vec[1]**2)
             #print(elongation_time[int(pt_num / n_columns)][frame_num], minor_axis_time[int(pt_num / n_columns)][frame_num])
 
         if CoMY[pt_num] > 50 and CoMY[pt_num] < ly - 50: 
@@ -355,8 +353,10 @@ for line in cfile:
             else:
                 cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)
 
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 2*D_major_axis_vec[0], 2*D_major_axis_vec[1], width=0.5, head_width=0, color='r')
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -2*D_major_axis_vec[0], -2*D_major_axis_vec[1], width=0.5, head_width=0, color='r')
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 2*D_major_axis_vec[0], 2*D_major_axis_vec[1], width=0.5, head_width=0, color='r')
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -2*D_major_axis_vec[0], -2*D_major_axis_vec[1], width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 2*D_major_axis_vec_x, 2*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -2*D_major_axis_vec_x, -2*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
 
         #increment phase field index
         pt_num+=1
