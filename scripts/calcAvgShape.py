@@ -334,6 +334,8 @@ for line in cfile:
             #elongation_time[int(pt_num / n_columns)][frame_num] = sqrt(D_major_axis_vec[0]**2 + D_major_axis_vec[1]**2)
             #minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec[0]**2 + D_minor_axis_vec[1]**2)
             #print(elongation_time[int(pt_num / n_columns)][frame_num], minor_axis_time[int(pt_num / n_columns)][frame_num])
+            if int(pt_num/n_columns)==9:
+                print((0.5 * np.atan2(S01, S00) * 180 / pi))
 
         if CoMY[pt_num] > 50 and CoMY[pt_num] < ly - 50: 
             theta_all.append(theta_i)

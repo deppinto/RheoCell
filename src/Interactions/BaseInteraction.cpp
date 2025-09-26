@@ -154,7 +154,51 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 
 void BaseInteraction::generate_lattice_configuration(std::vector<BaseField *> &fields, int n_rows, int n_columns) {
 
+
+	// Choose your oblique lattice parameters
+	number a = 2*R - 2;         // spacing along columns
+	number b = 2*R - 2;         // spacing along rows (can be different from a)
+	number theta = 60.0 * M_PI/180.0;  // angle between a and b (radians)
+
+	// Lattice basis vectors (x right, y up; use -sin if you want rows to go downward)
+	number ax = a;              number ay = 0;
+	number bx = b * cos(theta); number by = b * sin(theta);
+
+	// Center the lattice in the box
 	int N = fields.size();
+	number cx = box->getXsize() / 2.0;
+	number cy = box->getYsize() / 2.0;
+
+	// If you want the whole n_columns x n_rows block centered:
+	number start_x = cx - 0.5 * ((n_columns - 1) * ax + (n_rows - 1) * bx);
+	number start_y = cy - 0.5 * ((n_columns - 1) * ay + (n_rows - 1) * by);
+
+
+	// Honeycomb hex: add a second point per site
+	bool make_honeycomb = true; // set false for triangular
+	std::vector<std::vector<number>> basis;
+	basis.push_back({0.0, 0.0});                         // A sublattice
+	if (make_honeycomb) basis.push_back({(ax+bx)/3.0, (ay+by)/3.0}); // B sublattice
+
+	int placed = 0;
+	for (int r = 0; r < n_rows && placed < N; ++r) {
+		for (int c = 0; c < n_columns && placed < N; ++c) {
+			number x0 = start_x + c*ax + r*bx;
+			number y0 = start_y + c*ay + r*by;
+			
+			for (auto &d : basis) {
+				if (placed >= N) break;
+				BaseField* p = fields[placed++];
+				p->CoM = std::vector<number>{ x0 + d[0], y0 + d[1] };
+				p->set_positions_initial(box);
+				if(placed > 0 && N > 5 && placed % (N / 4) == 0) printf("Inserted %d%% of the particles (%d/%d)\n", placed*100/N, placed, N);
+			}
+		}
+	}
+	printf("Inserted %d%% of the particles (%d/%d)\n", 100, placed, N);
+
+
+	/*int N = fields.size();
 	//number totalNodes = box->getXsize() * box->getYsize();
 	number lattice_const = 2 * R - 2;
 	number lattice_factor = sqrt(3.) / 2.; 
@@ -184,7 +228,7 @@ void BaseInteraction::generate_lattice_configuration(std::vector<BaseField *> &f
 
 		if(i > 0 && N > 5 && i % (N / 4) == 0) printf("Inserted %d%% of the particles (%d/%d)\n", i*100/N, i, N);
 	}
-	printf("Inserted %d%% of the particles (%d/%d)\n", 100, N, N);
+	printf("Inserted %d%% of the particles (%d/%d)\n", 100, N, N);*/
 }
 
 
