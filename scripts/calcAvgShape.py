@@ -194,6 +194,7 @@ n_columns = 5
 theta_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 elongation_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 minor_axis_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
+aspect_ratio = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 S_time = []
 
 
@@ -318,24 +319,26 @@ for line in cfile:
             D_minor_axis_vec_x = D_minor_axis_vec_y = 0.
 
         #F = np.array([[S00, S01],[S01, -S00]], dtype=float)
-        #F = np.array([[test_s00, test_s01],[test_s01, test_s11]], dtype=float)
+        F = np.array([[test_s00, test_s01],[test_s01, test_s11]], dtype=float)
 
-        #U, S, Vt = np.linalg.svd(F)   # S[0] >= S[1]
-        #V = Vt.T                      # columns are principal directions in the reference frame
+        U, S, Vt = np.linalg.svd(F)   # S[0] >= S[1]
+        V = Vt.T                      # columns are principal directions in the reference frame
 
-        #D_major_axis_vec = S[0] * V[:, 0]   # scaled major axis (length = σ1)
-        #D_minor_axis_vec = S[1] * V[:, 1]   # scaled minor axis (length = σ2)
+        D_major_axis_vec = S[0] * V[:, 0]   # scaled major axis (length = σ1)
+        D_minor_axis_vec = S[1] * V[:, 1]   # scaled minor axis (length = σ2)
+
         
         theta_i = (0.5 * np.atan2(S01, S00) * 180 / pi)
         if pt_num - int(pt_num / n_columns) * n_columns == 0:
             theta_time[int(pt_num / n_columns)][frame_num] = (0.5 * np.atan2(S01, S00) * 180 / pi)
             elongation_time[int(pt_num / n_columns)][frame_num] = sqrt(D_major_axis_vec_x**2 + D_major_axis_vec_y**2)
             minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec_x**2 + D_minor_axis_vec_y**2)
+            aspect_ratio[int(pt_num / n_columns)][frame_num] = sqrt(S[0]/S[1]) - 1
             #elongation_time[int(pt_num / n_columns)][frame_num] = sqrt(D_major_axis_vec[0]**2 + D_major_axis_vec[1]**2)
             #minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec[0]**2 + D_minor_axis_vec[1]**2)
             #print(elongation_time[int(pt_num / n_columns)][frame_num], minor_axis_time[int(pt_num / n_columns)][frame_num])
             if int(pt_num/n_columns)==9:
-                print((0.5 * np.atan2(S01, S00) * 180 / pi))
+                print(S[0], S[1], (0.5 * np.atan2(S01, S00) * 180 / pi), sqrt(S[0]/S[1]) - 1)
 
         if CoMY[pt_num] > 50 and CoMY[pt_num] < ly - 50: 
             theta_all.append(theta_i)
@@ -460,5 +463,14 @@ if variable==6:
 
             print(print_str , file=f)  
 
+
+    with open('aspect_ratio_shape.txt', 'w') as f:
+        for i in range(total_time_frames):
+            print_str = ''
+            for j in range(n_rows):
+                print_str += str(aspect_ratio[j][i])
+                print_str += ' '
+
+            print(print_str , file=f)  
 
 print('done')

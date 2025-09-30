@@ -390,8 +390,8 @@ for traj in range(start, end):
     phi_all = []
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
+        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
+        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_minor_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/MSD.txt","r")
@@ -403,9 +403,9 @@ for traj in range(start, end):
         sum_time = 0.
         for line in fileoutput:
             save=line.split()
-            #theta_5.append((2*(float(save[variable]))*pi/180))
+            theta_5.append((2*(float(save[variable]))*pi/180))
             #sum_time += float(save[variable])
-            theta_5.append(float(save[variable]))
+            #theta_5.append(float(save[variable]))
 
             #plt.plot(
                     #float(save[variable+1]), float(save[variable]),
@@ -454,10 +454,9 @@ for traj in range(start, end):
                 #theta_1.append(float(save[variable]))
 
         fileoutput.close()
-        last_yy.append(np.mean(theta_5[-50:]))
+        #last_yy.append(np.mean(theta_5[-50:]))
 
 
-        '''
         fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
         #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_jamm.txt","r")
         for line in fileoutput:
@@ -480,7 +479,7 @@ for traj in range(start, end):
             save=line.split()
             theta_3.append((2*(float(save[variable]))*pi/180))
         fileoutput.close()
-        '''
+
 
 
     #print("-------------------------")
@@ -488,17 +487,14 @@ for traj in range(start, end):
     #omega.append(sum(theta_5)/jobs[traj])
 
 
-    if traj==3 or traj==4:
-        print('here:', last_yy)
-
     #last_yy = theta_5[-50:]
     #last_xx = xx[-50:]
     #slope, intercept, _, _, _ = linregress(last_xx, last_yy)
     #final_x.append((N[traj] * 8 * 8) / ((lx[traj] - 2 * 6)/2)**2)
     #final_y.append(slope)
     #final_x.append(shear_rate[traj])
-    final_y.append(np.mean(last_yy))
-    final_yy.append(stats.sem(last_yy))
+    #final_y.append(np.mean(last_yy))
+    #final_yy.append(stats.sem(last_yy))
     #final_yy.append(np.std(last_yy))
 
     #plt.plot(theta_5, '--o', label=shear_rate[traj])
@@ -520,14 +516,14 @@ for traj in range(start, end):
         break
 
 #print(final_x)
-print(final_y)
-print(final_yy)
+#print(final_y)
+#print(final_yy)
 
 #final_x = [1.0, 0.75, 0.5, 0.25, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001]
 #final_y = [0.49992082742607136, 0.48058329369018765, 0.46116523160021705, 0.4377948871250764, 0.4428061377749363, 0.5159620665712491, 0.523863398829233, 0.5828769623310098, 0.2893244788742896, 0.40499525754918736, 0.03450679770844628]
 #final_yy = [np.float64(0.9509520336270171), np.float64(0.9029565600880146), np.float64(0.7558733701227552), np.float64(0.746363071735866), np.float64(0.4716647352837026), np.float64(0.6990953993090971), np.float64(0.8111007830280228), np.float64(0.8917666537386556), np.float64(0.5177900353375421), np.float64(0.24271438919906277), np.float64(0.040002335139040814)]
 
-final_x = np.array([0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0007, 0.0008, 0.0013, 0.0017, 0.0024, 0.0033, 0.0045, 0.0062, 0.0085, 0.0117, 0.0161, 0.0221, 0.0304, 0.0418, 0.0574, 0.0788, 0.1083, 0.1487, 0.2043, 0.2807, 0.3857, 0.5298, 0.7279, 1.0])
+#final_x = np.array([0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0007, 0.0008, 0.0013, 0.0017, 0.0024, 0.0033, 0.0045, 0.0062, 0.0085, 0.0117, 0.0161, 0.0221, 0.0304, 0.0418, 0.0574, 0.0788, 0.1083, 0.1487, 0.2043, 0.2807, 0.3857, 0.5298, 0.7279, 1.0])
 #final_y = np.array([np.float64(0.2896697218998192), np.float64(0.33630445246330626), np.float64(0.43400328779488384), np.float64(0.5311565138185511), np.float64(0.36390157063579237), np.float64(0.4825153593432849), np.float64(0.5456727494937862), np.float64(0.6290565442735762), np.float64(0.7141504126736063), np.float64(0.6562556393808907), np.float64(0.6472854206159414), np.float64(0.6003395495408252), np.float64(0.5664608817871121), np.float64(0.5448686791337419), np.float64(0.4660333152296762), np.float64(0.4173409962674875), np.float64(0.4488264016467213), np.float64(0.4981183325771869), np.float64(0.4900805944770621), np.float64(0.47759117672996), np.float64(0.4374513703054221), np.float64(0.460042828926506), np.float64(0.4700894656485616), np.float64(0.4471321150942393), np.float64(0.4672926325416104), np.float64(0.4742098447723692), np.float64(0.4724620589223277), np.float64(0.43883697137926064), np.float64(0.41935366245236233)])
 #final_y_err_sem = np.array([np.float64(2.4779534323162614e-05), np.float64(3.408960752434948e-05), np.float64(0.0001535934146319442), np.float64(0.0010893234448635936), np.float64(0.00322176268479729), np.float64(0.0004006262118523729), np.float64(0.0001690090859186959), np.float64(0.001843101630475457), np.float64(0.0038740933990313157), np.float64(0.0038788802323136856), np.float64(0.01112146317191135), np.float64(0.005624149335539616), np.float64(0.006976612355473009), np.float64(0.01249706029438529), np.float64(0.013778587488239059), np.float64(0.014268167255011852), np.float64(0.01611260699501519), np.float64(0.01580071682927956), np.float64(0.011599906972495107), np.float64(0.009983951939427839), np.float64(0.010675663616198369), np.float64(0.01774433056979585), np.float64(0.007883718438772218), np.float64(0.011526042237994569), np.float64(0.011757790853711076), np.float64(0.009544023984836125), np.float64(0.012037905923731749), np.float64(0.012598008015292714), np.float64(0.007171705254389642)])
 #final_y_err_std = np.array([np.float64(6.659588414731947e-05), np.float64(0.0021466228624031905), np.float64(0.0024526157987470928), np.float64(0.009710083120257984), np.float64(0.037068463729466955), np.float64(0.017306937546626322), np.float64(0.00628556824839815), np.float64(0.03333037203776919), np.float64(0.014079632541178892), np.float64(0.05281092285016849), np.float64(0.01290754822973717), np.float64(0.046402252195048815), np.float64(0.04431935018851303), np.float64(0.0440890124301868), np.float64(0.07066040716066056), np.float64(0.08275386080895042), np.float64(0.024882519261225266), np.float64(0.05708737575473875), np.float64(0.03525734632507903), np.float64(0.03343552763563954), np.float64(0.05082809682281099), np.float64(0.04285401805692968), np.float64(0.06610697814841611), np.float64(0.08009137715956625), np.float64(0.07903461795566741), np.float64(0.06348856133079687), np.float64(0.03258013474861658), np.float64(0.008039474890279357), np.float64(0.008740268641538517)])
@@ -536,11 +532,11 @@ final_x = np.array([0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0007, 0.0008, 0.00
 #final_yy_err_std = np.array([np.float64(6.659588414731947e-05), np.float64(0.0021466228624031905), np.float64(0.0024526157987470928), np.float64(0.009710083120257984), np.float64(0.037068463729466955), np.float64(0.017306937546626322), np.float64(0.00628556824839815), np.float64(0.03333037203776919), np.float64(0.014079632541178892), np.float64(0.05281092285016849), np.float64(0.01290754822973717), np.float64(0.046402252195048815), np.float64(0.04431935018851303), np.float64(0.0440890124301868), np.float64(0.07066040716066056), np.float64(0.08275386080895042), np.float64(0.024882519261225266), np.float64(0.05708737575473875), np.float64(0.03525734632507903), np.float64(0.03343552763563954), np.float64(0.05082809682281099), np.float64(0.04285401805692968), np.float64(0.06610697814841611), np.float64(0.08009137715956625), np.float64(0.07903461795566741), np.float64(0.06348856133079687), np.float64(0.03258013474861658), np.float64(0.008039474890279357), np.float64(0.008740268641538517)])
 
 
-final_y = np.array([np.float64(0.2896697218998192), np.float64(0.3363044524633062), np.float64(0.43400328779488395), np.float64(0.5311565138185511), np.float64(0.36390157063579237), np.float64(0.4825153593432848), np.float64(0.5456727494937861), np.float64(0.629056544273576), np.float64(0.7141504126736063), np.float64(0.6562556393808908), np.float64(0.6472854206159414), np.float64(0.6003395495408252), np.float64(0.566460881787112), np.float64(0.5448686791337419), np.float64(0.46603331522967634), np.float64(0.41734099626748744), np.float64(0.44882640164672116), np.float64(0.4981183325771868), np.float64(0.4900805944770621), np.float64(0.47759117672996), np.float64(0.43745137030542214), np.float64(0.46004282892650616), np.float64(0.4700894656485616), np.float64(0.4471321150942392), np.float64(0.4672926325416104), np.float64(0.4742098447723692), np.float64(0.47246205892232773), np.float64(0.43883697137926064), np.float64(0.4193536624523622)])
-final_y_err_std = np.array([np.float64(0.14988819660637157), np.float64(0.12840999060439892), np.float64(0.16753510967171173), np.float64(0.22749771731515872), np.float64(0.18721095598679557), np.float64(0.22566023416979358), np.float64(0.13732808225565007), np.float64(0.19930413291475382), np.float64(0.11341902604432726), np.float64(0.0613008472313453), np.float64(0.04512467677189514), np.float64(0.038754018218931124), np.float64(0.045388992236570405), np.float64(0.05314927074891524), np.float64(0.03457109744525126), np.float64(0.06331653129309672), np.float64(0.07010703529098548), np.float64(0.04867610184204162), np.float64(0.0342553098757067), np.float64(0.032667163651612194), np.float64(0.019475273910254148), np.float64(0.030732971330311054), np.float64(0.03862256518604238), np.float64(0.04761534197680471), np.float64(0.020846434948343397), np.float64(0.044639250362093534), np.float64(0.021467925660586123), np.float64(0.031651481523000444), np.float64(0.0359232120502082)])
+#final_y = np.array([np.float64(0.2896697218998192), np.float64(0.3363044524633062), np.float64(0.43400328779488395), np.float64(0.5311565138185511), np.float64(0.36390157063579237), np.float64(0.4825153593432848), np.float64(0.5456727494937861), np.float64(0.629056544273576), np.float64(0.7141504126736063), np.float64(0.6562556393808908), np.float64(0.6472854206159414), np.float64(0.6003395495408252), np.float64(0.566460881787112), np.float64(0.5448686791337419), np.float64(0.46603331522967634), np.float64(0.41734099626748744), np.float64(0.44882640164672116), np.float64(0.4981183325771868), np.float64(0.4900805944770621), np.float64(0.47759117672996), np.float64(0.43745137030542214), np.float64(0.46004282892650616), np.float64(0.4700894656485616), np.float64(0.4471321150942392), np.float64(0.4672926325416104), np.float64(0.4742098447723692), np.float64(0.47246205892232773), np.float64(0.43883697137926064), np.float64(0.4193536624523622)])
+#final_y_err_std = np.array([np.float64(0.14988819660637157), np.float64(0.12840999060439892), np.float64(0.16753510967171173), np.float64(0.22749771731515872), np.float64(0.18721095598679557), np.float64(0.22566023416979358), np.float64(0.13732808225565007), np.float64(0.19930413291475382), np.float64(0.11341902604432726), np.float64(0.0613008472313453), np.float64(0.04512467677189514), np.float64(0.038754018218931124), np.float64(0.045388992236570405), np.float64(0.05314927074891524), np.float64(0.03457109744525126), np.float64(0.06331653129309672), np.float64(0.07010703529098548), np.float64(0.04867610184204162), np.float64(0.0342553098757067), np.float64(0.032667163651612194), np.float64(0.019475273910254148), np.float64(0.030732971330311054), np.float64(0.03862256518604238), np.float64(0.04761534197680471), np.float64(0.020846434948343397), np.float64(0.044639250362093534), np.float64(0.021467925660586123), np.float64(0.031651481523000444), np.float64(0.0359232120502082)])
 
-final_yy = np.array([np.float64(0.1770427643629094), np.float64(0.19647260244224413), np.float64(0.29917944926722495), np.float64(0.4789462290131416), np.float64(0.42513148504510134), np.float64(0.5809837510369256), np.float64(0.6519316011323136), np.float64(0.7874967499823531), np.float64(0.8991038844949555), np.float64(0.8971982943468013), np.float64(0.9527027378747759), np.float64(0.882292668586229), np.float64(0.846758673015005), np.float64(0.8332334497422386), np.float64(0.7695681208568559), np.float64(0.770625908035958), np.float64(0.7932582112437029), np.float64(0.7610656248840396), np.float64(0.7450465472190528), np.float64(0.7097550125187485), np.float64(0.694023722896522), np.float64(0.6189111241656535), np.float64(0.6157832941421841), np.float64(0.6747623316267314), np.float64(0.6362965311781632), np.float64(0.7547420485208345), np.float64(0.821975710388544), np.float64(0.8704084163937044), np.float64(0.89791393524546)])
-final_yy_err_std = np.array([np.float64(0.10863810861394337), np.float64(0.09212537713171122), np.float64(0.11954129797131798), np.float64(0.17723006672867725), np.float64(0.12901985836815003), np.float64(0.13963142290636962), np.float64(0.09001271021915588), np.float64(0.05598211021176802), np.float64(0.08756261418090687), np.float64(0.04683217950636677), np.float64(0.03305875910738458), np.float64(0.06380806273706008), np.float64(0.07056540913058833), np.float64(0.035674676212209974), np.float64(0.07130928449810396), np.float64(0.08101935232552417), np.float64(0.0758855297325258), np.float64(0.11596248087355591), np.float64(0.08230799634161359), np.float64(0.0878132979496909), np.float64(0.07182992654035648), np.float64(0.1294069883158062), np.float64(0.08048978295632345), np.float64(0.06983955838366351), np.float64(0.0662632732697333), np.float64(0.046758489540577264), np.float64(0.06629134036082554), np.float64(0.030609695672286545), np.float64(0.028092017828046656)])
+#final_yy = np.array([np.float64(0.1770427643629094), np.float64(0.19647260244224413), np.float64(0.29917944926722495), np.float64(0.4789462290131416), np.float64(0.42513148504510134), np.float64(0.5809837510369256), np.float64(0.6519316011323136), np.float64(0.7874967499823531), np.float64(0.8991038844949555), np.float64(0.8971982943468013), np.float64(0.9527027378747759), np.float64(0.882292668586229), np.float64(0.846758673015005), np.float64(0.8332334497422386), np.float64(0.7695681208568559), np.float64(0.770625908035958), np.float64(0.7932582112437029), np.float64(0.7610656248840396), np.float64(0.7450465472190528), np.float64(0.7097550125187485), np.float64(0.694023722896522), np.float64(0.6189111241656535), np.float64(0.6157832941421841), np.float64(0.6747623316267314), np.float64(0.6362965311781632), np.float64(0.7547420485208345), np.float64(0.821975710388544), np.float64(0.8704084163937044), np.float64(0.89791393524546)])
+#final_yy_err_std = np.array([np.float64(0.10863810861394337), np.float64(0.09212537713171122), np.float64(0.11954129797131798), np.float64(0.17723006672867725), np.float64(0.12901985836815003), np.float64(0.13963142290636962), np.float64(0.09001271021915588), np.float64(0.05598211021176802), np.float64(0.08756261418090687), np.float64(0.04683217950636677), np.float64(0.03305875910738458), np.float64(0.06380806273706008), np.float64(0.07056540913058833), np.float64(0.035674676212209974), np.float64(0.07130928449810396), np.float64(0.08101935232552417), np.float64(0.0758855297325258), np.float64(0.11596248087355591), np.float64(0.08230799634161359), np.float64(0.0878132979496909), np.float64(0.07182992654035648), np.float64(0.1294069883158062), np.float64(0.08048978295632345), np.float64(0.06983955838366351), np.float64(0.0662632732697333), np.float64(0.046758489540577264), np.float64(0.06629134036082554), np.float64(0.030609695672286545), np.float64(0.028092017828046656)])
 
 
 #plt.plot(theta_5, '--o', color='firebrick')
@@ -549,7 +545,7 @@ final_yy_err_std = np.array([np.float64(0.10863810861394337), np.float64(0.09212
 
 #plt.plot(omega, '--o')
 
-'''
+
 gamma = [0.0418, 0.0574, 0.0788, 0.1083, 0.1487, 0.2043, 0.2807, 0.3857, 0.5298, 0.7279, 1]
 T_period = [5561.116672, 5005.005005, 3925.494122, 2860.00286, 2002.002002, 1668.335002, 1112.223334, 834.1675008, 625.6256256, 455.000455, 333.6670003]
 color_T = ["royalblue", "royalblue", "royalblue", "forestgreen", "royalblue", "royalblue", "royalblue", "royalblue", "royalblue", "royalblue", "firebrick"]
@@ -600,6 +596,7 @@ size_r2 = max(theta_2)
 dtheta = np.diff(theta_5)
 dr = np.diff(theta_1)
 vel = np.sqrt(dtheta**2 + dr**2)
+vel = vel / (dt[0]*deltat[0])
 
 ax_inset1 = fig.add_axes([0.65, 0.605, 0.25, 0.25], polar=True)  # top-right
 ax_inset2 = fig.add_axes([0.2, 0.275, 0.25, 0.25], polar=True)  # bottom-left
@@ -630,7 +627,9 @@ ax_inset1.spines['polar'].set_color('firebrick')
 # Compute velocity = sqrt((Δθ)^2 + (Δr)^2)
 dtheta1 = np.diff(theta_3)
 dr1 = np.diff(theta_2)
-vel1 = np.sqrt(dtheta**2 + dr**2)
+vel1 = np.sqrt(dtheta1**2 + dr1**2)
+vel1 = vel1 / (dt[0]*deltat[0])
+
 
 # Line in polar coordinates
 ax_inset2.scatter(theta_3[0:500], theta_2[0:500], c=vel1[0:500], cmap="RdBu_r", alpha=0.2, s=2)
@@ -657,9 +656,9 @@ ax_inset2.grid(True)
 ax_inset2.spines['polar'].set_color('forestgreen')
 
 plt.tight_layout()
+
+
 '''
-
-
 #psi6 and psi2
 plt.plot(final_x, final_y, '--o', color='firebrick')
 plt.fill_between(final_x, final_y - final_y_err_std, final_y + final_y_err_std, color="firebrick", alpha=0.1)
@@ -691,6 +690,7 @@ for tick in ax1.xaxis.get_ticklabels():
     tick.set_fontname('Times New Roman')
 plt.xscale('log')
 plt.tight_layout()
+'''
 
 
 #plt.ylabel(r'$\theta_i$', fontsize=18)
