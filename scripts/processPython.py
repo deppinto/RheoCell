@@ -1,3 +1,4 @@
+#!/home/diogo/PythonEnv/bin/python
 import sys
 import numpy as np
 from math import *
@@ -14,11 +15,13 @@ from statsmodels.tsa.stattools import acf
 from matplotlib.font_manager import FontProperties
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib import font_manager, rcParams
+
+
 # Load font from file
-#font_path = "/home/p/pinto/Fonts/Times_New_Roman_Normal.ttf"
-font_path = "/home/p/pinto/Fonts/times.ttf"
-italic_font_path = "/home/p/pinto/Fonts/timesi.ttf"
-bold_font_path = "/home/p/pinto/Fonts/timesbd.ttf"
+#font_path = "/home/diogo/Fonts/Times_New_Roman_Normal.ttf"
+font_path = "/home/diogo/Fonts/times.ttf"
+italic_font_path = "/home/diogo/Fonts/timesi.ttf"
+bold_font_path = "/home/diogo/Fonts/timesbd.ttf"
 
 custom_font = FontProperties(fname=font_path)
 legend_font = FontProperties(fname=font_path, size=12)
@@ -115,7 +118,7 @@ def estimate_period(t, y, acf_threshold=0.3):
 '''
 #-------------------------------------optimization plot
 plt.figure(figsize=(5.452423529,4.089317647))
-fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/optimization.txt","r")
+fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/optimization.txt","r")
 cores=[]
 runtime=[]
 for line in fileoutput:
@@ -133,14 +136,14 @@ plt.xlabel('# cores', fontsize=18)
 plt.xticks(fontsize=18)
 plt.yticks(fontsize=18)
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/runtime_cores.png", transparent=True)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/runtime_cores.png", transparent=True)
 plt.show()
 exit(1)
 #-------------------------------------optimization plot
 '''
 
 #filedata=open("/scratch/pinto/Phase_Field/RheoCell/Work/Results/scripts"+str(scripts)+"/dados.txt","r")
-filedata=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/params","r")
+filedata=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/params","r")
 #JOBS	N	LX	LY	EQTIME	TIME	DT	PRTCONF	JO	FRICELL	FRIC	NEMSELF	NEMINTR	GAMMA	KAPPA	LAMBDA	MU	OMEGA	CGTOL	CORES	WSLIP	SHEAR
 jobs=[]
 jobs_seq=[1]
@@ -392,13 +395,13 @@ for traj in range(start, end):
     phi_all = []
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
 
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_minor_shape.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/MSD.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_rotation.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_interface_rotation_tangent.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_minor_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/MSD.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_rotation.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_interface_rotation_tangent.txt","r")
         index_count = 0
         mean_orientation = 0.
         mean_phi = 0.
@@ -459,9 +462,9 @@ for traj in range(start, end):
         #last_yy.append(np.mean(theta_5[-50:]))
 
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/aspect_ratio_shape.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_jamm.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/aspect_ratio_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_jamm.txt","r")
         for line in fileoutput:
             save=line.split()
             if job == jobs_seq[traj]:
@@ -472,26 +475,26 @@ for traj in range(start, end):
         fileoutput.close()
 
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_21/elongation_shape.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_21/aspect_ratio_shape.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_21/elongation_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_21/aspect_ratio_shape.txt","r")
         for line in fileoutput:
             save=line.split()
             theta_2.append(float(save[variable]))
         fileoutput.close()
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_21/theta_shape.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_21/theta_shape.txt","r")
         for line in fileoutput:
             save=line.split()
             theta_3.append((2*(float(save[variable]))*pi/180))
         fileoutput.close()
 
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/elongation_shape.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/aspect_ratio_shape.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/elongation_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/aspect_ratio_shape.txt","r")
         for line in fileoutput:
             save=line.split()
             theta_6.append(float(save[variable]))
         fileoutput.close()
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/theta_shape.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/theta_shape.txt","r")
         for line in fileoutput:
             save=line.split()
             theta_7.append((2*(float(save[variable]))*pi/180))
@@ -556,8 +559,8 @@ for traj in range(start, end):
 
 
 plt.plot(theta_1, '--o', color='firebrick')
-plt.plot(theta_2, '--s', color='forestgreen')
-plt.plot(theta_6, '--^', color='royalblue')
+#plt.plot(theta_2, '--s', color='forestgreen')
+#plt.plot(theta_6, '--^', color='royalblue')
 
 
 #plt.ylabel(r'$\theta$', fontsize=18)
@@ -729,11 +732,11 @@ plt.tight_layout()
 #plt.legend(ncols=1, frameon=False, loc='upper left')
 #plt.xscale('log')
 #plt.yscale('log')
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear.svg", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/period_shear.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/period_shear.svg", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/r_time_series_med.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/period_shear.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/period_shear.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/r_time_series_med.png", transparent=True)
 plt.show()
 exit(1)
 
@@ -764,22 +767,22 @@ plt.figure(figsize=(5.452423529,4.089317647))
         if job == 83:
             continue
 
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defects_velocity_nematic.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defects_velocity_shape.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QS.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_SV.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defects_velocity_nematic.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defects_velocity_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QS.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_SV.txt","r")
 
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QV.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QV.txt","r")
         #for line in fileoutput:
             #save=line.split()
             #pdf_values.append(float(save[0]))
         #fileoutput.close()
 
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QSV_stats.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defects_stats.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/correlations_nematic.txt","r")
-        #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/correlations_shape.txt","r")
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/correlations_velocity.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/histogram_QSV_stats.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/defects_stats.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/correlations_nematic.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/correlations_shape.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/correlations_velocity.txt","r")
         for line in fileoutput:
             save=line.split()
             #valsY1[traj] += float(save[0]) / jobs[traj]
@@ -819,11 +822,11 @@ plt.ylabel(r'$PDF$', fontsize=18)
 plt.xlabel(r'$\theta_{QV}$', fontsize=18)
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
 plt.legend(loc=(0.4, 0.7), ncols=1, frameon=False)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_QV_gamma006_act05_fric001_JQ.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_QV_gamma006_act05_fric001_JQ.svg", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_velocity_defS_gamma006_act05_fric001_JQ.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_velocity_defS_gamma006_act05_fric001_JQ.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_QV_gamma006_act05_fric001_JQ.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_theta_QV_gamma006_act05_fric001_JQ.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_velocity_defS_gamma006_act05_fric001_JQ.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/PDF_velocity_defS_gamma006_act05_fric001_JQ.svg", transparent=True)
 plt.show()
 '''
 
@@ -879,22 +882,22 @@ valsY3[19] = save
 #plt.xlabel(r'$J_{QS}$', fontsize=18)
 #plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
 #plt.legend(loc=(0.01, 0.6), ncols=1, fontsize=12, frameon=False)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Defect_number_gamma006_JQ.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Defect_number_gamma006_JQ.svg", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Misaligned_area_gamma006_JQ.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Misaligned_area_gamma006_JQ.svg", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Shape_AR_gamma006_JQ.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Shape_AR_gamma006_JQ.svg", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Average_V_gamma006_JQ.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Average_V_gamma006_JQ.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Defect_number_gamma006_JQ.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Defect_number_gamma006_JQ.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Misaligned_area_gamma006_JQ.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Misaligned_area_gamma006_JQ.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Shape_AR_gamma006_JQ.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Shape_AR_gamma006_JQ.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Average_V_gamma006_JQ.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Average_V_gamma006_JQ.svg", transparent=True)
 
 '''
 plt.ylabel(r'$C_W$', fontsize=18)
 plt.xlabel(r'$R$', fontsize=18)
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
 plt.legend(loc=(0.6, 0.5), ncols=1, fontsize=12, frameon=False)
-plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Corr_W_gamma006_act05_fric001_JQ.png", transparent=True)
-plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Corr_W_gamma006_act05_fric001_JQ.svg", transparent=True)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Corr_W_gamma006_act05_fric001_JQ.png", transparent=True)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/ResultsSumesh/Corr_W_gamma006_act05_fric001_JQ.svg", transparent=True)
 
 plt.show()
 exit (1)
@@ -1019,7 +1022,7 @@ for traj in range(start, end):
         if job==349 and scripts==85:
             continue
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_stats.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_stats.txt","r")
         nn = 0
         for line in fileoutput:
             save=line.split()
@@ -1046,7 +1049,7 @@ for traj in range(start, end):
             count_jobs += 1
 
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram.txt","r")
         for line in fileoutput:
             save=line.split()
             hist_step=int(int(float(save[0]) * 50.01) * 0.5)
@@ -1057,19 +1060,19 @@ for traj in range(start, end):
         fileoutput.close()
 
         '''
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_circularity.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_circularity.txt","r")
         for line in fileoutput:
             save=line.split()
             circularity_histogram[int(float(save[0]) * 50.01)] += float(save[1])
         fileoutput.close()
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_radius_speed_time.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_radius_speed_time.txt","r")
         for line in fileoutput:
             save=line.split()
             radius_speed_histogram[int(float(save[0]) * 50.01)] += float(save[1])
         fileoutput.close()
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_ani.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_ani.txt","r")
         for line in fileoutput:
             save=line.split()
             ani_histogram[int(float(save[0]) * 50.01)] += float(save[1])
@@ -1077,20 +1080,20 @@ for traj in range(start, end):
         '''
 
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_radius_speed.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_histogram_radius_speed.txt","r")
         for line in fileoutput:
             save=line.split()
             rspeed_histogram[int(float(save[0]))] += float(save[1])
         fileoutput.close()
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_stress_histogram_tau10.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_stress_histogram_tau10.txt","r")
         for line in fileoutput:
             save=line.split()
             avg_stress_histogram[int(float(save[0]))] += float(save[1])
             max_stress_histogram[int(float(save[0]))] += float(save[2])
         fileoutput.close()
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_velocity_histogram_tau10.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_velocity_histogram_tau10.txt","r")
         for line in fileoutput:
             save=line.split()
             avg_distance_velocity_defects[int(float(save[0]))] += float(save[1])
@@ -1099,7 +1102,7 @@ for traj in range(start, end):
 
 
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_nematic_histogram_tau10.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_nematic_histogram_tau10.txt","r")
         for line in fileoutput:
             save=line.split()
             avg_distance_nematic_defects_1[int(float(save[0]))] += float(save[1])
@@ -1109,14 +1112,14 @@ for traj in range(start, end):
 
 
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_velocity_stats.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_velocity_stats.txt","r")
         for line in fileoutput:
             save=line.split()
             avg_FTLE[traj - start] += float(save[2]) / jobs[traj]
         fileoutput.close()
 
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_histogram_20bins.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_histogram_20bins.txt","r")
         cont_line = 0
         for line in fileoutput:
             save=line.split()
@@ -1126,7 +1129,7 @@ for traj in range(start, end):
             cont_line+=1
         fileoutput.close()
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_histogram_30bins.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_histogram_30bins.txt","r")
         cont_line = 0
         for line in fileoutput:
             save=line.split()
@@ -1136,7 +1139,7 @@ for traj in range(start, end):
             cont_line+=1
         fileoutput.close()
 
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_histogram_40bins.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_histogram_40bins.txt","r")
         cont_line = 0
         for line in fileoutput:
             save=line.split()
@@ -1147,7 +1150,7 @@ for traj in range(start, end):
         fileoutput.close()
 
         '''
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_defectsplusone.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/voids_strain_defectsplusone.txt","r")
         old_t = 0
         stmax = 0.
         old_index = 0
@@ -1290,8 +1293,8 @@ for traj in range(start, end):
         for tick in ax2.yaxis.get_ticklabels():
             tick.set_fontsize(18)
             tick.set_fontname('Times New Roman')
-        plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/figOther.png", transparent=True)
-        plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/figOther.svg", transparent=True)
+        plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/figOther.png", transparent=True)
+        plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/figOther.svg", transparent=True)
         plt.show()
         exit (1)
         '''
@@ -1532,12 +1535,12 @@ if variable==1:
     plt.xticks(fontname='Times New Roman', fontsize=18)
     plt.yticks(fontname='Times New Roman', fontsize=18)
     plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3a.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3a.svg", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/figSM2a.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/figSM2a.svg", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3a.png", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3a.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig3a.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig3a.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/figSM2a.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/figSM2a.svg", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3a.png", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3a.svg", transparent=True)
     plt.show()
     '''
 
@@ -1555,12 +1558,12 @@ if variable==1:
     plt.xticks(fontname='Times New Roman', fontsize=18)
     plt.yticks(fontname='Times New Roman', fontsize=18)
     plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3a.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3a.svg", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/figSM2a.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/figSM2a.svg", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3New.png", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3New.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig3a.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig3a.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/figSM2a.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/figSM2a.svg", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3New.png", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3New.svg", transparent=True)
     plt.show()
     '''
 
@@ -1578,12 +1581,12 @@ if variable==1:
     plt.yticks(fontname='Times New Roman', fontsize=18)
     plt.ylim(-0.1,2.7)
     plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3b.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3b.svg", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/figSM2b.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/figSM2b.svg", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3b.png", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3b.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig3b.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig3b.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/figSM2b.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/figSM2b.svg", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3b.png", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3b.svg", transparent=True)
     plt.show()
     '''
 
@@ -1658,10 +1661,10 @@ if variable == 3:
     plt.xticks(fontname='Times New Roman', fontsize=18)
     plt.yticks(fontname='Times New Roman', fontsize=18)
     plt.subplots_adjust(left=0.2, bottom=0.22, right=0.975, top=0.99)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig1d.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig1d.svg", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1c.png", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1c.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig1d.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig1d.svg", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1c.png", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1c.svg", transparent=True)
     plt.show()
     '''
     #plt.text(-9.35, 0.16, r"$\frac{\xi}{\xi_{cell}}$", fontsize=18, fontname="Times New Roman")
@@ -1683,10 +1686,10 @@ if variable == 3:
     plt.xticks(fontname='Times New Roman', fontsize=18)
     plt.yticks(fontname='Times New Roman', fontsize=18)
     plt.subplots_adjust(left=0.2, bottom=0.22, right=0.975, top=0.99)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig1c.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig1c.svg", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1d.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1d.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig1c.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig1c.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1d.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1d.svg", transparent=True)
     plt.show()
     '''
 
@@ -1707,10 +1710,10 @@ if variable == 3:
     plt.xticks(fontname='Times New Roman', fontsize=18)
     plt.yticks(fontname='Times New Roman', fontsize=18)
     plt.subplots_adjust(left=0.2, bottom=0.22, right=0.975, top=0.99)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/figSM3b.png", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/figSM3b.svg", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1d.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1d.svg", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/figSM3b.png", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/figSM3b.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1d.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig1d.svg", transparent=True)
     plt.show()
 
 
@@ -1778,12 +1781,12 @@ if variable == 3:
         label.set_fontproperties('Times New Roman')
         label.set_fontsize(12)
 
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig2.png", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig2.svg", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig2.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig2.svg", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig2_inset.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig2_inset.svg", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig2.png", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig2.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig2.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig2.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig2_inset.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig2_inset.svg", transparent=True)
     plt.show()
     '''
 
@@ -1817,10 +1820,10 @@ if variable == 3:
     plt.yticks(fontname='Times New Roman', fontsize=18)
     plt.subplots_adjust(left=0.15, bottom=0.22, right=0.965, top=0.99)
     #plt.subplots_adjust(left=0.18, bottom=0.22, right=0.955, top=0.99)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3c.png", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3c.svg", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3c.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3c.svg", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig3c.png", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig3c.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3c.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3c.svg", transparent=True)
     plt.show()
     '''
 
@@ -1860,12 +1863,12 @@ if variable == 4:
     #plt.legend(prop={'family':'Times New Roman', 'size':'12'}, loc=(0.025, 0.72), ncols=1, frameon=True, facecolor='white', edgecolor='black', framealpha=1.0)
     plt.yscale('log')
     plt.ylim([0.0007, 0.15])
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results7/Phase_diagram_1.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results7/Phase_diagram_1.svg", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3d.png", transparent=True)
-    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/fig3d.svg", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3d.png", transparent=True)
-    plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3d.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Results7/Phase_diagram_1.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Results7/Phase_diagram_1.svg", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig3d.png", transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/fig3d.svg", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3d.png", transparent=True)
+    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Presentation/fig3d.svg", transparent=True)
     plt.show()
 
     
@@ -1955,11 +1958,11 @@ exit(1)
 plt.figure(figsize=(5.452423529,4.089317647))
 avg_vel=[]
 for job in range(1, 6, 1):
-    #fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time.txt","r")
+    #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time.txt","r")
     if job==4:
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts50/Job_4/stress_time.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts50/Job_4/stress_time.txt","r")
     else:
-        fileoutput=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time.txt","r")
     time=[]
     stress=[]
     cont=0
@@ -1981,7 +1984,7 @@ plt.show()
 
 
 #correlations below
-filedata=open("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/params","r")
+filedata=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/params","r")
 jobs = []
 jobs_seq = [0]
 lx = []
@@ -2007,8 +2010,8 @@ if start==0:
     avg_value = 0
 
     for j in range(0 + 1, 3 + 1):
-        #fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts72/Job_"+str(j)+"/velocity_correlations.txt"
-        fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts72/Job_"+str(j)+"/nematic_correlations.txt"
+        #fname = "/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts72/Job_"+str(j)+"/velocity_correlations.txt"
+        fname = "/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts72/Job_"+str(j)+"/nematic_correlations.txt"
         if os.path.isfile(fname) == False:
             continue
 
@@ -2035,8 +2038,8 @@ if start==8:
     avg_value = 0
 
     for j in range(3 + 1, 6 + 1):
-        #fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts72/Job_"+str(j)+"/velocity_correlations.txt"
-        fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts72/Job_"+str(j)+"/nematic_correlations.txt"
+        #fname = "/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts72/Job_"+str(j)+"/velocity_correlations.txt"
+        fname = "/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts72/Job_"+str(j)+"/nematic_correlations.txt"
         if os.path.isfile(fname) == False:
             continue
 
@@ -2064,8 +2067,8 @@ for i in range(start, end):
     avg_value = 0
 
     for j in range(int(jobs_seq[i]) + 1, int(jobs_seq[i+1]) + 1):
-        #fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(j)+"/velocity_correlations.txt"
-        fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(j)+"/nematic_correlations.txt"
+        #fname = "/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(j)+"/velocity_correlations.txt"
+        fname = "/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(j)+"/nematic_correlations.txt"
         if os.path.isfile(fname) == False:
             continue
 
@@ -2090,8 +2093,8 @@ for i in range(start, end):
         corr_vel = [0. for i in range(size_R)]
         avg_value = 0
         for j in range(0 + 1, 3 + 1):
-            #fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts71/Job_"+str(j)+"/velocity_correlations.txt"
-            fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts71/Job_"+str(j)+"/nematic_correlations.txt"
+            #fname = "/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts71/Job_"+str(j)+"/velocity_correlations.txt"
+            fname = "/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts71/Job_"+str(j)+"/nematic_correlations.txt"
             if os.path.isfile(fname) == False:
                 continue
 
@@ -2116,8 +2119,8 @@ for i in range(start, end):
         corr_vel = [0. for i in range(size_R)]
         avg_value = 0
         for j in range(3 + 1, 6 + 1):
-            #fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts71/Job_"+str(j)+"/velocity_correlations.txt"
-            fname = "/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts71/Job_"+str(j)+"/nematic_correlations.txt"
+            #fname = "/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts71/Job_"+str(j)+"/velocity_correlations.txt"
+            fname = "/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts71/Job_"+str(j)+"/nematic_correlations.txt"
             if os.path.isfile(fname) == False:
                 continue
 
@@ -2154,11 +2157,11 @@ plt.yticks(fontname='Times New Roman', fontsize=18)
 #plt.legend([r'$\omega$=0.01',r'$\omega$=0.1',r'$\omega$=0.4'], fontsize=14, loc=(0.,0.65), frameon=False)
 plt.legend([r'$\xi_{cell}=0$', r'$\chi=1$',r'$\chi=0.1$',r'$\chi=0.01$', r'$\chi=0.001$',r'$\chi=0.0001$'], loc=(0.6,0.37), prop={'family':'Times New Roman', 'size':'12'}, frameon=False)
 plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/C_Q_soft.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/C_Q_soft.svg", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/figSM1b.png", transparent=True)
-#plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Paper/figSM1b.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/C_Q_soft.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/C_Q_soft.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/mean_velocity_1.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/figSM1b.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Paper/figSM1b.svg", transparent=True)
 plt.show()
 
 exit (1)

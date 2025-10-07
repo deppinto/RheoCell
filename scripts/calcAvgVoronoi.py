@@ -20,8 +20,12 @@ variable=int(float(sys.argv[2]))
 
 
 from shapely.geometry import Polygon, LineString, Point, box
+from scipy.ndimage import gaussian_filter1d
 from scipy.spatial import Voronoi
 from scipy.spatial import Delaunay
+from scipy.spatial import cKDTree
+from scipy.signal import find_peaks
+
 
 bounds = (0, 14, 70, 294)
 def bounded_voronoi(points, bounds):
@@ -235,6 +239,143 @@ def lane_order_local(points, neighbors, box_lengths, Ly):
     return psi_lane
 
 
+##-------------------------------------------------------------------------for lattice configurations--------------------------------------------------
+def periodic_delaunay_theta(points, box, y_min, y_max,
+                            tile_range=1, nbins=360, sigma_bins=2.0, peak_prominence_frac=0.05, window_deg=12):
+    """
+    Compute lattice angle theta (deg) from periodic Delaunay neighbors inside a y-range.
+    Args:
+        points: (N,2) array-like, points assumed in one canonical cell (0..Lx, 0..Ly) or arbitrary coords consistent with box
+        box: (Lx, Ly) tuple for periodicity
+        y_min, y_max: floats selecting which points to analyze (strict inequality)
+        tile_range: int (1 => 3x3 tiling)
+        nbins, sigma_bins, peak_prominence_frac, window_deg: histogram/peak tuning
+    Returns:
+        theta_deg: acute lattice angle in degrees
+        diag: dict with diagnostics (chosen_peak_centers_deg, avg_vectors, counts, all_bond_angles_deg, bond_pairs)
+    """
+    pts = np.asarray(points)
+    Lx, Ly = box
+    N = len(pts)
+
+    # --- build tiled points and index map ---
+    tiles = []
+    idx_map = []
+    for ix in range(-tile_range, tile_range+1):
+        for iy in range(-tile_range, tile_range+1):
+            offset = np.array([ix*Lx, iy*Ly])
+            tiles.append(pts + offset)
+            idx_map.extend(range(N))
+    tiled = np.vstack(tiles)
+
+    # Delaunay on tiled points
+    tri = Delaunay(tiled)
+    triangles = tri.simplices
+
+    # collect unique undirected edges mapped back to original indices
+    edges = set()
+    for tri_inds in triangles:
+        for a in range(3):
+            i = tri_inds[a]; j = tri_inds[(a+1) % 3]
+            ii = idx_map[i]; jj = idx_map[j]
+            if ii != jj:
+                a0, b0 = (ii, jj) if ii < jj else (jj, ii)
+                edges.add((a0, b0))
+
+    # neighbor sets (symmetric)
+    neighbors = [set() for _ in range(N)]
+    for (i,j) in edges:
+        neighbors[i].add(j); neighbors[j].add(i)
+
+    # --- select indices in y-range ---
+    sel_mask = (pts[:,1] > y_min) & (pts[:,1] < y_max)
+    sel_idx = np.nonzero(sel_mask)[0]
+    if len(sel_idx) < 3:
+        raise ValueError("Not enough points selected (need >=3).")
+
+    # --- collect bond vectors among selected points (minimum-image) ---
+    bond_vecs = []
+    bond_pairs = []
+    for i in sel_idx:
+        for j in neighbors[i]:
+            if j <= i:
+                continue
+            if j in sel_idx:
+                v = pts[j] - pts[i]
+                # minimum image (shortest periodic displacement)
+                dx = v[0] - round(v[0]/Lx) * Lx
+                dy = v[1] - round(v[1]/Ly) * Ly
+                bond_vecs.append([dx, dy])
+                bond_pairs.append((i, j))
+    if len(bond_vecs) == 0:
+        raise RuntimeError("No Delaunay bonds found among selected points.")
+
+    bond_vecs = np.asarray(bond_vecs)
+    angs = np.arctan2(bond_vecs[:,1], bond_vecs[:,0])
+    angs = np.where(angs < 0, angs + 2*np.pi, angs)
+    angs = np.where(angs >= np.pi, angs - np.pi, angs)   # fold into [0, pi)
+
+    # --- histogram, smooth, find peaks ---
+    bins = np.linspace(0, np.pi, nbins+1)
+    hist, _ = np.histogram(angs, bins=bins)
+    hist3 = np.concatenate([hist, hist, hist])
+    smooth3 = gaussian_filter1d(hist3.astype(float), sigma_bins)
+    smooth = smooth3[len(hist):2*len(hist)]
+    centers = 0.5 * (bins[:-1] + bins[1:])
+
+    prom = peak_prominence_frac * np.max(smooth)
+    peaks, _ = find_peaks(smooth, prominence=prom)
+    if len(peaks) == 0:
+        peaks, _ = find_peaks(smooth, prominence=0.01 * np.max(smooth))
+    if len(peaks) == 0:
+        raise RuntimeError("No angular peaks detected.")
+
+    # choose top-two peaks
+    top2 = np.argsort(-smooth[peaks])[:2]
+    chosen_centers = centers[peaks][top2]   # in radians
+
+    # --- average bond vectors around each peak (align sign) ---
+    avg_vectors = []
+    counts = []
+    for pa in chosen_centers:
+        diff = np.abs(angs - pa)
+        diff = np.minimum(diff, np.pi - diff)
+        sel = diff < np.deg2rad(window_deg)
+        selvecs = bond_vecs[sel].copy()
+        if selvecs.size == 0:
+            avg_vectors.append(np.array([math.cos(pa), math.sin(pa)]))
+            counts.append(0)
+            continue
+        u = np.array([cos(pa), sin(pa)])
+        dots = selvecs.dot(u)
+        selvecs[dots < 0] *= -1.0   # flip to common direction
+        avg = selvecs.mean(axis=0)
+        avg_vectors.append(avg)
+        counts.append(len(selvecs))
+
+    # --- acute angle between averaged vectors ---
+    a1 = avg_vectors[0]; a2 = avg_vectors[1]
+    dot = float(np.dot(a1, a2))
+    cosang = dot / (np.linalg.norm(a1) * np.linalg.norm(a2))
+    cosang = max(-1.0, min(1.0, cosang))
+    delta = degrees(acos(cosang))
+    theta = min(delta, 180.0 - delta)
+
+    diagnostics = {
+        'chosen_peak_centers_deg': np.degrees(chosen_centers),
+        'avg_vectors': avg_vectors,
+        'counts': counts,
+        'all_bond_angles_deg': np.degrees(angs),
+        'bond_pairs': bond_pairs,
+        'smooth': smooth,
+        'centers_deg': np.degrees(centers)
+    }
+
+    return theta, diagnostics
+
+
+
+
 
 seed=4982
 eq_steps=0
@@ -353,10 +494,15 @@ ly=int(float(header[3]))
 x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
 
+n_rows = 20
+n_columns = 5
 
 order_psi6 = []
 order_psiN = []
 order_psiL = []
+theta_lattice = []
+mask_phi = np.zeros(N, dtype=bool)
+pointsCoM = []
 
 
 cont_line=0
@@ -373,6 +519,8 @@ for line in cfile:
     words=line.split()
 
     if words[0]=='t':
+        mask_phi = np.zeros(N, dtype=bool)
+        pointsCoM = []
         t=int(float(words[2]))
         time_conf.append(t)
 
@@ -475,6 +623,12 @@ for line in cfile:
         D_X[pt_num] = D_major_axis_vec_x
         D_Y[pt_num] = D_major_axis_vec_y
 
+
+        pointsCoM.append([CoMX[pt_num], CoMY[pt_num]])
+        if int(pt_num / n_columns) == 8 or int(pt_num / n_columns) == 9:
+            mask_phi[pt_num] = True  # however you identify row points
+
+
         X, Y = np.meshgrid(x, y)
         step = 0.01
         m = np.amax(Z)
@@ -532,6 +686,11 @@ for line in cfile:
             #print("Global hexatic order:", Psi6_global)
             #print("Global nematic order:", PsiN_global)
             #print("Global lane order:", PsiL_global)
+
+
+            theta, diag = periodic_delaunay_theta(pointsCoM, box=(lx,ly), y_min=100, y_max=150)
+            #print("Lattice angle θ = ", theta, int(t/print_conf_interval)-1)
+            theta_lattice.append(theta)
 
 
             frame_num=int(t/print_conf_interval)-1
@@ -617,7 +776,7 @@ if variable==6:
 
     with open('order_parameters.txt', 'w') as f:
         for i in range(len(order_psi6)):
-            print(time_conf[i]*dt, order_psi6[i], order_psiN[i], order_psiL[i], file=f)  
+            print(time_conf[i]*dt, order_psi6[i], order_psiN[i], order_psiL[i], theta_lattice[i], file=f)  
 
 
     '''
