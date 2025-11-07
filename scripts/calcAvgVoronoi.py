@@ -501,7 +501,6 @@ order_psi6 = []
 order_psiN = []
 order_psiL = []
 theta_lattice = []
-mask_phi = np.zeros(N, dtype=bool)
 pointsCoM = []
 
 
@@ -519,7 +518,6 @@ for line in cfile:
     words=line.split()
 
     if words[0]=='t':
-        mask_phi = np.zeros(N, dtype=bool)
         pointsCoM = []
         t=int(float(words[2]))
         time_conf.append(t)
@@ -625,8 +623,6 @@ for line in cfile:
 
 
         pointsCoM.append([CoMX[pt_num], CoMY[pt_num]])
-        if int(pt_num / n_columns) == 8 or int(pt_num / n_columns) == 9:
-            mask_phi[pt_num] = True  # however you identify row points
 
 
         X, Y = np.meshgrid(x, y)

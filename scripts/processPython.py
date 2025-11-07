@@ -463,20 +463,24 @@ for traj in range(start, end):
 
 
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
-        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/aspect_ratio_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/aspect_ratio_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_jamm.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
         for line in fileoutput:
             save=line.split()
             if job == jobs_seq[traj]:
-                theta_1.append(float(save[variable]) / jobs[traj])
+                #theta_1.append(float(save[variable]) / jobs[traj])
+                theta_1.append(float(save[4]) / jobs[traj])
+                #theta_1.append(10*((float(save[4])-42)/20))
             else:
                 theta_1[index_count] += float(save[variable]) / jobs[traj]
             index_count+=1
         fileoutput.close()
 
 
-        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_21/elongation_shape.txt","r")
-        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_21/aspect_ratio_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_21/elongation_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_21/order_parameters.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_21/aspect_ratio_shape.txt","r")
         for line in fileoutput:
             save=line.split()
             theta_2.append(float(save[variable]))
@@ -488,8 +492,9 @@ for traj in range(start, end):
         fileoutput.close()
 
 
-        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/elongation_shape.txt","r")
-        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/aspect_ratio_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/order_parameters.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/elongation_shape.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/aspect_ratio_shape.txt","r")
         for line in fileoutput:
             save=line.split()
             theta_6.append(float(save[variable]))
@@ -558,9 +563,36 @@ for traj in range(start, end):
 #final_yy_err_std = np.array([np.float64(0.10863810861394337), np.float64(0.09212537713171122), np.float64(0.11954129797131798), np.float64(0.17723006672867725), np.float64(0.12901985836815003), np.float64(0.13963142290636962), np.float64(0.09001271021915588), np.float64(0.05598211021176802), np.float64(0.08756261418090687), np.float64(0.04683217950636677), np.float64(0.03305875910738458), np.float64(0.06380806273706008), np.float64(0.07056540913058833), np.float64(0.035674676212209974), np.float64(0.07130928449810396), np.float64(0.08101935232552417), np.float64(0.0758855297325258), np.float64(0.11596248087355591), np.float64(0.08230799634161359), np.float64(0.0878132979496909), np.float64(0.07182992654035648), np.float64(0.1294069883158062), np.float64(0.08048978295632345), np.float64(0.06983955838366351), np.float64(0.0662632732697333), np.float64(0.046758489540577264), np.float64(0.06629134036082554), np.float64(0.030609695672286545), np.float64(0.028092017828046656)])
 
 
-plt.plot(theta_1, '--o', color='firebrick')
-#plt.plot(theta_2, '--s', color='forestgreen')
+plt.plot(theta_5, '--o', color='firebrick')
+plt.xlim([200,400])
+plt.ylim([0,2])
+#plt.plot(theta_1, '--s', color='forestgreen')
+ax1 = plt.gca()
+ax2 = ax1.twinx()
+ax2.plot(theta_1, '--s', color='forestgreen')
 #plt.plot(theta_6, '--^', color='royalblue')
+ax2.set_xlim([200,400])
+ax2.set_ylim([40,60])
+
+
+'''
+from scipy.optimize import curve_fit
+x = np.linspace(0, 1000, 1000)
+#y = 8*np.cos(0.075 * shear_rate[21] * x)**2 + 44.2
+def f(x, k):
+    return 8 * np.cos(k * shear_rate[start] * x)**2 + 44.2
+popt, _ = curve_fit(f, x, theta_5, p0=0.1, maxfev=10000)
+print("params:", popt)
+plt.plot(x, f(x, *popt), color='red', label='Cosine fit')
+
+
+def abs_cos_model(x, k, p):
+    return 8 * (np.abs(np.cos(k * shear_rate[start] * x))**1) + 44.2
+p0 = [0.1, 2]
+popt, pcov = curve_fit(abs_cos_model, x, theta_5, p0=p0, maxfev=10000)
+#print("params:", popt)
+#plt.plot(x, abs_cos_model(x, *popt), 'r', lw=2)
+'''
 
 
 #plt.ylabel(r'$\theta$', fontsize=18)
@@ -568,10 +600,10 @@ plt.plot(theta_1, '--o', color='firebrick')
 
 #plt.plot(omega, '--o')
 
-
 '''
 gamma = [0.0418, 0.0574, 0.0788, 0.1083, 0.1487, 0.2043, 0.2807, 0.3857, 0.5298, 0.7279, 1]
-T_period = [5561.116672, 5005.005005, 3925.494122, 2860.00286, 2002.002002, 1668.335002, 1112.223334, 834.1675008, 625.6256256, 455.000455, 333.6670003]
+#T_period = [5561.116672, 5005.005005, 3925.494122, 2860.00286, 2002.002002, 1668.335002, 1112.223334, 834.1675008, 625.6256256, 455.000455, 333.6670003]
+T_period = [7500, 5005.005005, 3925.494122, 2860.00286, 2002.002002, 1668.335002, 1112.223334, 834.1675008, 625.6256256, 455.000455, 333.6670003]
 color_T = ["royalblue", "royalblue", "royalblue", "forestgreen", "royalblue", "royalblue", "royalblue", "royalblue", "royalblue", "royalblue", "firebrick"]
 gamma = np.array(gamma)
 T_period = np.array(T_period)
@@ -683,7 +715,6 @@ plt.tight_layout()
 '''
 
 
-
 '''
 #psi6 and psi2
 plt.plot(final_x, final_y, '--o', color='firebrick')
@@ -736,7 +767,7 @@ plt.tight_layout()
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear.svg", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/period_shear.png", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/period_shear.svg", transparent=True)
-#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/r_time_series_med.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/lattice_phi_time_series_fit.png", transparent=True)
 plt.show()
 exit(1)
 

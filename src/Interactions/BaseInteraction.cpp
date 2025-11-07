@@ -175,7 +175,7 @@ void BaseInteraction::generate_lattice_configuration(std::vector<BaseField *> &f
 
 
 	// Honeycomb hex: add a second point per site
-	bool make_honeycomb = true; // set false for triangular
+	bool make_honeycomb = false; // set false for triangular
 	std::vector<std::vector<number>> basis;
 	basis.push_back({0.0, 0.0});                         // A sublattice
 	if (make_honeycomb) basis.push_back({(ax+bx)/3.0, (ay+by)/3.0}); // B sublattice
