@@ -131,12 +131,12 @@ for line in cfile:
     else:
         cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cmap, alpha=0.5)
 
-    #if pt_num==-1:
-        #cset1 = plt.arrow(CoMX, CoMY, 3*nemX, 3*nemY, color='r')
-        #cset1 = plt.arrow(CoMX, CoMY, -3*nemX, -3*nemY, color='r')
-    #else:
-        #cset1 = plt.arrow(CoMX, CoMY, 3*nemX, 3*nemY, color='k')
-        #cset1 = plt.arrow(CoMX, CoMY, -3*nemX, -3*nemY, color='k')
+    if pt_num==-1:
+        cset1 = plt.arrow(CoMX, CoMY, 3*nemX, 3*nemY, color='r')
+        cset1 = plt.arrow(CoMX, CoMY, -3*nemX, -3*nemY, color='r')
+    else:
+        cset1 = plt.arrow(CoMX, CoMY, 3*nemX, 3*nemY, color='k')
+        cset1 = plt.arrow(CoMX, CoMY, -3*nemX, -3*nemY, color='k')
 
     print(pt_num, area)
     pt_num+=1
@@ -152,8 +152,8 @@ if variable==1:
     plt.savefig('frame.png')
 if variable==2:
     plt.axis('off')
-    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/image.png", dpi=600, transparent=True)
-    plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/image.svg", dpi=600, transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/image.png", dpi=600, transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/image.svg", dpi=600, transparent=True)
     plt.show()
 
 
