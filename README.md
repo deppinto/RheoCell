@@ -13,7 +13,7 @@ cmake ..
 make
 ```
 
-We use the Eigen3 package to do matrix operations (https://libeigen.gitlab.io/). This package can be used as header only, but should be supplied to cmake.
+We use the Eigen3 package for matrix operations (https://libeigen.gitlab.io/). This package can be used as header only, but should be supplied to cmake.
 
 ## Running
 
@@ -29,4 +29,4 @@ where NN should be replaced by integers and will specify the the length and widt
 
 ## Examples
 
-Some example input files are included in the `examples` directory. The `scripts` directory includes multiple python scripts that are used to analyse the results. In particular, the read_conf.py allows the user to visualize a configuration by supplying the topology file (see `examples` directory) and the configuration file extracted from a run (e.g. last_conf.dat).
+Some example input files are included in the `examples` directory. The `scripts` directory includes multiple python scripts that are used to analyse the results. In particular, the `read_conf.py` allows the user to visualize a configuration by supplying the topology file (see `examples` directory) and the configuration file extracted from a run (e.g. `last_conf.dat`).
