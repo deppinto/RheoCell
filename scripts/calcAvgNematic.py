@@ -276,12 +276,12 @@ for line in cfile:
         CoMX[pt_num]=float(words[2])
         CoMY[pt_num]=float(words[3])
 
-        #CoMX[pt_num] += 35
+        CoMX[pt_num] += 16
         #CoMY[pt_num] -= 25
         #if CoMY[pt_num] < 0:
             #CoMY[pt_num] += ly
-        #if CoMX[pt_num] >= lx:
-            #CoMX[pt_num] -= lx
+        if CoMX[pt_num] >= lx:
+            CoMX[pt_num] -= lx
 
         offsetX[pt_num]=int(float(words[4]))
         offsetY[pt_num]=int(float(words[5]))
@@ -306,12 +306,12 @@ for line in cfile:
             yy=int(site/lx)
             xx=site-int(yy*lx)
 
-            #xx = xx + 35
+            xx = xx + 16
             #yy = yy - 25
             #if yy < 0:
                 #yy += ly
-            #if xx >= lx:
-                #xx -= lx
+            if xx >= lx:
+                xx -= lx
 
             Z[yy][xx]=value
             area[pt_num]+=value*value
@@ -348,11 +348,12 @@ for line in cfile:
             S00 += -0.5*(field_dx * field_dx - field_dy * field_dy)
             S01 += -field_dx * field_dy
 
-        #D_major_axis = 0.5 * np.atan2(S01, S00)
-        #D_major_axis_vec_x = np.cos(D_major_axis)
-        #D_major_axis_vec_y = np.sin(D_major_axis)
+        D_major_axis = 0.5 * np.atan2(S01, S00)
+        D_major_axis_vec_x = 2 * np.cos(D_major_axis)
+        D_major_axis_vec_y = 2 * np.sin(D_major_axis)
         #D_i = np.sqrt(S00 * S00 + S01 * S01)
 
+        '''
         D_i = np.sqrt(S00 * S00 + S01 * S01)
         if D_i > 0.000000001:
             D_major_axis_vec_x = D_i * sqrt((1 + S00/D_i)/2)
@@ -360,6 +361,7 @@ for line in cfile:
         else:
             D_major_axis_vec_x = 0
             D_major_axis_vec_y = 0
+        '''
 
         #print(2 * D_i)
 
@@ -576,8 +578,8 @@ for line in cfile:
             com_y_t.append(CoMY)
             ax = plt.gca()
             ax.set_aspect('equal', adjustable='box')
-            ax.set_xlim([0, lx])
-            ax.set_ylim([0, ly])
+            #ax.set_xlim([10, lx-10])
+            ax.set_ylim([250, 300])
             ax.set_yticklabels([])
             ax.set_xticklabels([])
             ax.set_xticks([])

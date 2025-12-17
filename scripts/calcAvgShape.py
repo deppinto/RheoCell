@@ -337,8 +337,8 @@ for line in cfile:
             #elongation_time[int(pt_num / n_columns)][frame_num] = sqrt(D_major_axis_vec[0]**2 + D_major_axis_vec[1]**2)
             #minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec[0]**2 + D_minor_axis_vec[1]**2)
             #print(elongation_time[int(pt_num / n_columns)][frame_num], minor_axis_time[int(pt_num / n_columns)][frame_num])
-            if int(pt_num/n_columns)==9:
-                print(S[0], S[1], (0.5 * np.atan2(S01, S00) * 180 / pi), sqrt(S[0]/S[1]) - 1)
+            #if int(pt_num/n_columns)==9:
+                #print(S[0], S[1], (0.5 * np.atan2(S01, S00) * 180 / pi), sqrt(S[0]/S[1]) - 1)
 
         if CoMY[pt_num] > 50 and CoMY[pt_num] < ly - 50: 
             theta_all.append(theta_i)
@@ -379,7 +379,12 @@ for line in cfile:
             avg_value_S = 0.
             for q in theta_all:
                 avg_value_S += cos(2*( q - mean_phi))
-            S_time.append(avg_value_S / len(theta_all))
+
+            if len(theta_all)>0:
+                S_time.append(avg_value_S / len(theta_all))
+            else:
+                S_time.append(0.)
+
             #print(avg_value_S / len(theta_all))
 
 

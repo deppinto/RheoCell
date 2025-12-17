@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -603,18 +603,18 @@ for line in cfile:
             S00 += -0.5*(field_dx * field_dx - field_dy * field_dy)
             S01 += -field_dx * field_dy
 
-        #D_major_axis = 0.5 * np.atan2(S01, S00)
-        #D_major_axis_vec_x = np.cos(D_major_axis)
-        #D_major_axis_vec_y = np.sin(D_major_axis)
-        #D_i = np.sqrt(S00 * S00 + S01 * S01)
-
+        D_major_axis = 0.5 * np.atan2(S01, S00)
+        D_major_axis_vec_x = 2*np.cos(D_major_axis)
+        D_major_axis_vec_y = 2*np.sin(D_major_axis)
         D_i = np.sqrt(S00 * S00 + S01 * S01)
-        if D_i > 0.000000001:
-            D_major_axis_vec_x = D_i * sqrt((1 + S00/D_i)/2)
-            D_major_axis_vec_y = D_i * np.sign(S01) * sqrt((1 - S00/D_i)/2)
-        else:
-            D_major_axis_vec_x = 0
-            D_major_axis_vec_y = 0
+
+        #D_i = np.sqrt(S00 * S00 + S01 * S01)
+        #if D_i > 0.000000001:
+            #D_major_axis_vec_x = D_i * sqrt((1 + S00/D_i)/2)
+            #D_major_axis_vec_y = D_i * np.sign(S01) * sqrt((1 - S00/D_i)/2)
+        #else:
+            #D_major_axis_vec_x = 0
+            #D_major_axis_vec_y = 0
 
         #print(2 * D_i)
 
@@ -716,8 +716,8 @@ for line in cfile:
 
 
             ax.set_aspect('equal', adjustable='box')
-            ax.set_xlim([0, lx])
-            ax.set_ylim([165, 200])
+            ax.set_xlim([10, lx-10])
+            ax.set_ylim([120, 160])
             ax.set_yticklabels([])
             ax.set_xticklabels([])
             ax.set_xticks([])

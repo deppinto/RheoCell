@@ -141,6 +141,19 @@ hole_timestamp = []
 hole_position_x = []
 hole_position_y = []
 
+
+velocity_rms_global = 0.
+velocity_rms_holes = 0.
+velocity_rms_no_holes = 0.
+velocity_rms_10tau = 0.
+velocity_rms_track = np.zeros(total_frames * maximum_defect_number)
+
+average_rms_global = 0
+average_rms_holes = 0
+average_rms_no_holes = 0
+average_rms_10tau = 0
+
+
 for i in range(start_frame+1, end_frame+1, 1):
 
     voids=[[0. for q in range(lx)] for k in range(ly)]
@@ -188,7 +201,7 @@ for i in range(start_frame+1, end_frame+1, 1):
             hole_timestamp.append(i - 1)
             hole_position_x.append(avg_x)
             hole_position_y.append(avg_y)
-            print("hole formed: ",avg_x, avg_y)
+            #print("hole formed: ",avg_x, avg_y)
             
             available_window = time_window
             if i - 2 < time_window:
@@ -211,6 +224,10 @@ for i in range(start_frame+1, end_frame+1, 1):
                         min_value = dist_val
 
                 avg_distance_tau[q] = min_value
+
+                velocity_rms_10tau += velocity_rms_track[tt_window]
+                average_rms_10tau += 1
+
 
             small_array = avg_distance_tau[0:available_window]
             if available_window == 1:
@@ -272,6 +289,21 @@ for i in range(start_frame+1, end_frame+1, 1):
             value_y=float(words[k+3])
             Z_x[int(yy)][int(xx)]=value_x
             Z_y[int(yy)][int(xx)]=value_y
+
+            if voids[int(yy)][int(xx)] > cell_value_thresh:
+                velocity_rms_global += sqrt(value_x**2 + value_y**2)**2
+                average_rms_global+=1
+                
+                velocity_rms_track[(i-1)] += sqrt(value_x**2 + value_y**2)**2
+
+                if start_hole_time > 0:
+                    velocity_rms_holes += sqrt(value_x**2 + value_y**2)**2
+                    average_rms_holes += 1
+                else:
+                    velocity_rms_no_holes += sqrt(value_x**2 + value_y**2)**2
+                    average_rms_no_holes += 1
+
+
 
         read_line += 1
 
@@ -371,7 +403,7 @@ for i in range(start_frame+1, end_frame+1, 1):
 
                                 if distx * distx + disty * disty < radius_stress * radius_stress:
                                     avg_strain += strain[yy][xx] / (pi * radius_stress * radius_stress)
-                        print(avg_strain, voids_area, i, x, y)
+                        #print(avg_strain, voids_area, i, x, y)
 
 
 if hole_stats > 0:
@@ -499,6 +531,13 @@ if variable==1:
     #for i in range(len(time)):
         #print(time[i], avg_stress[i], variance_stress[i], avg_stress_var[i])
     #print("final:", hole_stats, time_window, avg_distance, avg_FTLE_area/FTLE_area_counts, max_FTLE/hole_stats)
+
+
+    with open('voids_velocity_rms_stats.txt', 'w') as f:
+        if number_holes>0:
+            print(sqrt(velocity_rms_global/average_rms_global), sqrt(velocity_rms_holes/average_rms_holes), sqrt(velocity_rms_no_holes/average_rms_no_holes), velocity_rms_10tau/average_rms_10tau, file=f)
+        else:
+            print(velocity_rms_global/average_rms_global, 0., velocity_rms_no_holes/average_rms_no_holes, 0., file=f)
 
     with open('voids_velocity_stats.txt', 'w') as f:
         if hole_stats>0:
