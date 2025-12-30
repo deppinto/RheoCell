@@ -608,13 +608,13 @@ for line in cfile:
         D_major_axis_vec_y = 2*np.sin(D_major_axis)
         D_i = np.sqrt(S00 * S00 + S01 * S01)
 
-        #D_i = np.sqrt(S00 * S00 + S01 * S01)
-        #if D_i > 0.000000001:
-            #D_major_axis_vec_x = D_i * sqrt((1 + S00/D_i)/2)
-            #D_major_axis_vec_y = D_i * np.sign(S01) * sqrt((1 - S00/D_i)/2)
-        #else:
-            #D_major_axis_vec_x = 0
-            #D_major_axis_vec_y = 0
+        D_i = np.sqrt(S00 * S00 + S01 * S01)
+        if D_i > 0.000000001:
+            D_major_axis_vec_x = D_i * sqrt((1 + S00/D_i)/2)
+            D_major_axis_vec_y = D_i * np.sign(S01) * sqrt((1 - S00/D_i)/2)
+        else:
+            D_major_axis_vec_x = 0
+            D_major_axis_vec_y = 0
 
         #print(2 * D_i)
 
@@ -642,8 +642,8 @@ for line in cfile:
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*nemX, -3*nemY, width=0.5, head_width=0, color='k')
 
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 2*D_major_axis_vec_x, 2*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -2*D_major_axis_vec_x, -2*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 1*D_major_axis_vec_x, 1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -1*D_major_axis_vec_x, -1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
 
         #increment phase field index
         pt_num+=1
@@ -724,11 +724,14 @@ for line in cfile:
             ax.set_yticks([])
             if variable==1 or variable==3:
                 if frame_num<10:
-                    plt.savefig('./Video/frame_00'+str(frame_num)+'.png', transparent=True)
+                    #plt.savefig('./Video/frame_00'+str(frame_num)+'.png')
+                    plt.savefig('./Video/frame_00'+str(frame_num)+'.svg')
                 elif frame_num<100:
-                    plt.savefig('./Video/frame_0'+str(frame_num)+'.png')
+                    #plt.savefig('./Video/frame_0'+str(frame_num)+'.png')
+                    plt.savefig('./Video/frame_0'+str(frame_num)+'.svg')
                 elif frame_num<1000:
-                    plt.savefig('./Video/frame_'+str(frame_num)+'.png')
+                    #plt.savefig('./Video/frame_'+str(frame_num)+'.png')
+                    plt.savefig('./Video/frame_'+str(frame_num)+'.svg')
             if variable==2 or variable==4:
                 plt.show()
                 #plt.savefig('./newfig_'+str(frame_num)+'.png', transparent=True)

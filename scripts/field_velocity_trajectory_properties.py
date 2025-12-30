@@ -296,7 +296,7 @@ for i in range(start_frame+1, end_frame+1, 1):
                 
                 velocity_rms_track[(i-1)] += sqrt(value_x**2 + value_y**2)**2
 
-                if start_hole_time > 0:
+                if start_hole_time >= 0:
                     velocity_rms_holes += sqrt(value_x**2 + value_y**2)**2
                     average_rms_holes += 1
                 else:
@@ -535,6 +535,7 @@ if variable==1:
 
     with open('voids_velocity_rms_stats.txt', 'w') as f:
         if number_holes>0:
+            print(average_rms_global,average_rms_holes ,average_rms_no_holes ,average_rms_10tau )
             print(sqrt(velocity_rms_global/average_rms_global), sqrt(velocity_rms_holes/average_rms_holes), sqrt(velocity_rms_no_holes/average_rms_no_holes), velocity_rms_10tau/average_rms_10tau, file=f)
         else:
             print(velocity_rms_global/average_rms_global, 0., velocity_rms_no_holes/average_rms_no_holes, 0., file=f)

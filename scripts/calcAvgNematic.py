@@ -353,7 +353,6 @@ for line in cfile:
         D_major_axis_vec_y = 2 * np.sin(D_major_axis)
         #D_i = np.sqrt(S00 * S00 + S01 * S01)
 
-        '''
         D_i = np.sqrt(S00 * S00 + S01 * S01)
         if D_i > 0.000000001:
             D_major_axis_vec_x = D_i * sqrt((1 + S00/D_i)/2)
@@ -361,7 +360,6 @@ for line in cfile:
         else:
             D_major_axis_vec_x = 0
             D_major_axis_vec_y = 0
-        '''
 
         #print(2 * D_i)
 
@@ -579,18 +577,24 @@ for line in cfile:
             ax = plt.gca()
             ax.set_aspect('equal', adjustable='box')
             #ax.set_xlim([10, lx-10])
-            ax.set_ylim([250, 300])
+            #ax.set_ylim([250, 300])
+            #ax.set_ylim([120, 160])
+            ax.set_xlim([0, lx])
+            ax.set_ylim([0, ly])
             ax.set_yticklabels([])
             ax.set_xticklabels([])
             ax.set_xticks([])
             ax.set_yticks([])
             if variable==1 or variable==3:
                 if frame_num<10:
-                    plt.savefig('./Video/frame_00'+str(frame_num)+'.png', transparent=True)
+                    plt.savefig('./Video/frame_00'+str(frame_num)+'.png')
+                    #plt.savefig('./Video/frame_00'+str(frame_num)+'.svg')
                 elif frame_num<100:
                     plt.savefig('./Video/frame_0'+str(frame_num)+'.png')
+                    #plt.savefig('./Video/frame_0'+str(frame_num)+'.svg')
                 elif frame_num<1000:
                     plt.savefig('./Video/frame_'+str(frame_num)+'.png')
+                    #plt.savefig('./Video/frame_'+str(frame_num)+'.svg')
             if variable==2 or variable==4:
                 plt.show()
                 #plt.savefig('./newfig_'+str(frame_num)+'.png', transparent=True)
