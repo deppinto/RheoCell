@@ -157,7 +157,7 @@ radius_time = np.zeros(end_frame - start_frame)
 lattice_max=[[-1. for q in range(lx)] for k in range(ly)]
 lattice_cell=[[-1 for q in range(lx)] for k in range(ly)]
 
-histogram_size = int(0.5 * (end_frame - start_frame))
+histogram_size = int(1. * (end_frame - start_frame))
 #histogram_hole_counts = np.zeros(histogram_size)
 histogram_hole_area = np.zeros(histogram_size)
 histogram_hole_circularity = np.zeros(histogram_size)

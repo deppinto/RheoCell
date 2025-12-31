@@ -743,6 +743,7 @@ ax_inset2.spines['polar'].set_color('forestgreen')
 plt.tight_layout()
 '''
 
+'''
 #psi6 and psi2
 #plt.plot(final_x, final_y, '--o', color='firebrick')
 #plt.fill_between(final_x, final_y - final_y_err_std, final_y + final_y_err_std, color="firebrick", alpha=0.1)
@@ -786,6 +787,7 @@ ax2.set_ylim(0, 1)
 #plt.vlines(x=1, ymin=0, ymax=0.4193536624523622, linestyle='--', color='k', linewidth=1)
 plt.xscale('log')
 plt.tight_layout()
+'''
 
 
 '''
