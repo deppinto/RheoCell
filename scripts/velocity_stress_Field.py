@@ -14,6 +14,8 @@ import matplotlib
 from matplotlib.font_manager import FontProperties
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib import font_manager, rcParams
+
+'''
 # Load font from file
 #font_path = "/home/p/pinto/Fonts/Times_New_Roman_Normal.ttf"
 font_path = "/home/p/pinto/Fonts/times.ttf"
@@ -41,6 +43,7 @@ rcParams['mathtext.fontset'] = 'custom'
 rcParams['mathtext.it'] = 'Times New Roman:italic'
 rcParams['mathtext.rm'] = 'Times New Roman'
 rcParams['mathtext.bf'] = 'Times New Roman:bold'
+'''
 
 
 if len(sys.argv)!=5:
@@ -228,9 +231,9 @@ for p in range(0,LLY):
             x,y = sum_x/n,sum_y/n
             # add defect to list
             if s==1:
-                if y<130:
-                    print(x,y)
-                    cset1 = plt.plot(x, y, '*', color='#00FFFF', markersize=10)
+                #if y<130:
+                    #print(x,y)
+                cset1 = plt.plot(x, y, '*', color='#00FFFF', markersize=10)
             elif s==-1:
                 cset1 = plt.plot(x, y, 'kX', markersize=10)
 
@@ -319,19 +322,19 @@ ax.set_xticklabels([])
 ax.set_xticks([])
 ax.set_yticks([])
 
-fig = plt.gcf()
+#fig = plt.gcf()
 # Add colorbar
-cbar = fig.colorbar(cset1, ax=ax)
+#cbar = fig.colorbar(cset1, ax=ax)
 # Change tick font name and size
-cbar.ax.tick_params(labelsize=18)  # Font size
-for label in cbar.ax.get_yticklabels():
-    label.set_fontname('Times New Roman')  # Replace with desired font
-cbar.set_ticks([-1, -0.5, 0, 0.5, 1])
+#cbar.ax.tick_params(labelsize=18)  # Font size
+#for label in cbar.ax.get_yticklabels():
+#    label.set_fontname('Times New Roman')  # Replace with desired font
+#cbar.set_ticks([-1, -0.5, 0, 0.5, 1])
 
 # Set label above the colorbar
 #cbar.set_label(r'$\dot{\varepsilon}$,$\nabla f^a$', rotation=0, pad=10, loc='top', fontsize=18, fontname='Times New Roman')
 #cbar.ax.xaxis.set_label_position('top')  # Move label to top
-cbar.ax.set_title(r'$\dot{\varepsilon}$ , $\nabla \cdot \mathbf{f}^\mathit{a}$', pad=10, fontsize=18, fontname='Times New Roman')
+#cbar.ax.set_title(r'$\dot{\varepsilon}$ , $\nabla \cdot \mathbf{f}^\mathit{a}$', pad=10, fontsize=18, fontname='Times New Roman')
 
 #fig.tight_layout()
 if variable==1:

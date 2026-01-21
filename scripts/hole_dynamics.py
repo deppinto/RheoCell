@@ -166,7 +166,7 @@ histogram_hole_radius_speed_time = np.zeros(histogram_size)
 
 histogram_hole_radius_speed = np.zeros(lx)
 histogram_hole_radius_speed_counts = np.zeros(lx)
-deltat = 1000
+deltat = 100
 dt = 0.1
 
 start_value = 11

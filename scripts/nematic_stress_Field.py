@@ -202,10 +202,10 @@ for p in range(0,LLY):
                 cset1 = plt.plot(x, y, 'go', markersize=10)
                 cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='g', head_width=0, head_length=0, width=1.0)
             elif s==-1:
-                cset1 = plt.plot(x, y, 'b^', markersize=10)
-                cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='r', head_width=1.5, head_length=1.5, width=0.5)
-                cset1 = plt.arrow(x, y, defect_length*cos(psi + 2.0944), defect_length*sin(psi + 2.0944), color='r', head_width=1.5, head_length=1.5, width=0.5)
-                cset1 = plt.arrow(x, y, defect_length*cos(psi + 2 * 2.0944), defect_length*sin(psi + 2 * 2.0944), color='r', head_width=1.5, head_length=1.5, width=0.5)
+                #cset1 = plt.plot(x, y, 'b^', markersize=10)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='b', head_width=1.5, head_length=1.5, width=0.75)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi + 2.0944), defect_length*sin(psi + 2.0944), color='b', head_width=1.5, head_length=1.5, width=0.75)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi + 2 * 2.0944), defect_length*sin(psi + 2 * 2.0944), color='b', head_width=1.5, head_length=1.5, width=0.75)
 
 
         # keep this just in case our other symmetries give us integer defects

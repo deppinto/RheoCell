@@ -276,12 +276,12 @@ for line in cfile:
         CoMX[pt_num]=float(words[2])
         CoMY[pt_num]=float(words[3])
 
-        CoMX[pt_num] += 16
-        #CoMY[pt_num] -= 25
-        #if CoMY[pt_num] < 0:
-            #CoMY[pt_num] += ly
-        if CoMX[pt_num] >= lx:
-            CoMX[pt_num] -= lx
+        CoMX[pt_num] -= 60
+        CoMY[pt_num] -= 30
+        if CoMY[pt_num] < 0:
+            CoMY[pt_num] += ly
+        if CoMX[pt_num] < 0:
+            CoMX[pt_num] += lx
 
         offsetX[pt_num]=int(float(words[4]))
         offsetY[pt_num]=int(float(words[5]))
@@ -306,12 +306,19 @@ for line in cfile:
             yy=int(site/lx)
             xx=site-int(yy*lx)
 
-            xx = xx + 16
+            #xx = xx + 16
             #yy = yy - 25
             #if yy < 0:
                 #yy += ly
-            if xx >= lx:
-                xx -= lx
+            #if xx >= lx:
+                #xx -= lx
+
+            xx = xx - 60
+            yy = yy - 30
+            if yy < 0:
+                yy += ly
+            if xx < 0:
+                xx += lx
 
             Z[yy][xx]=value
             area[pt_num]+=value*value
@@ -380,10 +387,11 @@ for line in cfile:
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*nemX, -3*nemY, width=0.5, head_width=0, color='k')
 
-            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*Q00[pt_num], 3*Q01[pt_num], width=0.5, color='k')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*Q00[pt_num], 3*Q01[pt_num], head_width=0, width=0.5, color='k')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*Q00[pt_num], -3*Q01[pt_num], head_width=0, width=0.5, color='k')
 
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 1*D_major_axis_vec_x, 1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -1*D_major_axis_vec_x, -1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 1*D_major_axis_vec_x, 1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -1*D_major_axis_vec_x, -1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
 
         #increment phase field index
         pt_num+=1
