@@ -4,7 +4,8 @@
 #include "FDBackend.h"
 
 /**
- * @brief Manages a FD simulation on CPU. It supports Predictor Corrector integration
+ * @brief Manages a FD simulation on CPU. It supports Predictor Corrector integration.
+ * This is the Allen-Cahn integration, i.e. does not conserve the total field.
  */
 
 class FD_CPUBackend: public FDBackend {

@@ -62,6 +62,13 @@ void GeneratorManager::load_options() {
 
 	getInputString(&input, "trajectory_file", trajectory, 1);
 	getInputString(&input, "conf_file", output_conf, 1);
+	getInputString(&input, "initial_configuration_type", initial_configuration_type, 0);
+
+	if(initial_configuration_type.compare("lattice") == 0){
+		getInputInt(&input, "n_rows", &n_rows, 1);
+		getInputInt(&input, "n_columns", &n_columns, 1);
+	}
+
 
 	// seed;
 	int seed;
@@ -121,9 +128,14 @@ void GeneratorManager::init() {
 }
 
 void GeneratorManager::generate() {
-	interaction->generate_random_configuration(fields);
+	if(initial_configuration_type.compare("lattice") == 0)interaction->generate_lattice_configuration(fields, n_rows, n_columns);
+	else if(initial_configuration_type.compare("cluster") == 0)interaction->generate_cluster_configuration(fields);
+	else {
+		initial_configuration_type = "random";
+		interaction->generate_random_configuration(fields);
+	}
 
-	OX_LOG(Logger::LOG_INFO, "Generating random configuration of %d cells", N);
+	OX_LOG(Logger::LOG_INFO, "Generating %s configuration of %d cells", initial_configuration_type.c_str(), N);
 
 	for(auto p : fields) {
 		p->init();
@@ -138,7 +150,7 @@ void GeneratorManager::generate() {
 
 	for(int i = 0; i < N; i++) {
 		BaseField *p = fields[i];
-		conf_output << p->LsubX << " "<< p->LsubY<< " "<< p->CoM[0] << " " << p->CoM[1] << " " << p->offset[0] << " " << p->offset[1] << " " << p->sub_corner_bottom_left << " " << p->unrap_sub_corner_bottom_left_x << " " << p->unrap_sub_corner_bottom_left_y << " "<< p->nemQ[0] << " "<< p->nemQ[1] << " ";
+		conf_output << p->LsubX << " "<< p->LsubY<< " "<< p->CoM[0] << " " << p->CoM[1] << " " << p->offset[0] << " " << p->offset[1] << " " << p->sub_corner_bottom_left << " " << p->unrap_sub_corner_bottom_left_x << " " << p->unrap_sub_corner_bottom_left_y << " "<< p->Q00 << " "<< p->Q01 << " ";
 	        for(int q=0; q<p->subSize; q++)conf_output << p->GetSubIndex(q, CONFIG_INFO->box) << " " << p->fieldScalar[q] << " ";
 		conf_output << std::endl;
 	}

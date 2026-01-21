@@ -46,6 +46,7 @@ void MultiPhaseField::resizing() {
 	Factive_x.resize(subSize);
 	Factive_y.resize(subSize);
 	Pressure.resize(subSize);
+	Repulsion.resize(subSize);
 
 	cos_x_table.resize(LsubX);
 	cos_y_table.resize(LsubY);
@@ -73,8 +74,11 @@ void MultiPhaseField::init(int Lx, int Ly) {
         S01=0.;
 
 	thetaQ = thetaQ_old = PI * (1-2*drand48());
-	Q00=0.5*cos(2*thetaQ);
-	Q01=0.5*sin(2*thetaQ);
+	//number modQ = drand48();
+	//Q00= modQ * cos(2*thetaQ);
+	//Q01= modQ * sin(2*thetaQ);
+	Q00= cos(2*thetaQ);
+	Q01= sin(2*thetaQ);
 	nemQ.resize(2);
 	nemQ_old.resize(2);
     	number nemQ_mod = sqrt(Q00 * Q00 + Q01 * Q01);
@@ -86,12 +90,13 @@ void MultiPhaseField::init(int Lx, int Ly) {
     	number ny = sgn*sqrt((1 - Q00/nemQ_mod)/2);
 	nemQ = {nx, ny};
 	nemQ_old = {nx, ny};
-	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
-	Q01 = nemQ[0] * nemQ[1];
+	//Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
+	//Q01 = nemQ[0] * nemQ[1];
 
 	//Fpassive= std::vector<number> {0.,0.};
 	//Factive= std::vector<number> {0.,0.};
 	area=0;
+	perimeter=0;
 	sumF=0;
 	offset.resize(2);
 	offset[0]=0; offset[1]=0;
@@ -113,8 +118,11 @@ void MultiPhaseField::init() {
 
 	//nematic part
 	thetaQ = thetaQ_old = PI * (1-2*drand48());
-	Q00=0.5*cos(2*thetaQ);
-	Q01=0.5*sin(2*thetaQ);
+	//number modQ = drand48();
+	//Q00= modQ * cos(2*thetaQ);
+	//Q01= modQ * sin(2*thetaQ);
+	Q00= cos(2*thetaQ);
+	Q01= sin(2*thetaQ);
 	nemQ.resize(2);
 	nemQ_old.resize(2);
     	number nemQ_mod = sqrt(Q00 * Q00 + Q01 * Q01);
@@ -126,11 +134,12 @@ void MultiPhaseField::init() {
     	number ny = sgn*sqrt((1 - Q00/nemQ_mod)/2);
 	nemQ = {nx, ny};
 	nemQ_old = {nx, ny};
-	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
-	Q01 = nemQ[0] * nemQ[1];
+	//Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
+	//Q01 = nemQ[0] * nemQ[1];
 
 	//minor bookkeeping
 	area=0;
+	perimeter=0;
 	offset.resize(2);
 	offset[0]=0; offset[1]=0;
 	int x,y;
@@ -312,6 +321,7 @@ void MultiPhaseField::set_properties_to_zero() {
 	x_sub_left = LsubX;
 	y_sub_bottom = LsubY;
 	area=0;
+	perimeter=0;
 	sumF=0;
 	CoM[0] = 0.; 
 	CoM[1] = 0.;

@@ -69,8 +69,19 @@ for line in cfile:
     corner=int(float(words[6]))
     corner_x=float(words[7])
     corner_y=float(words[8])
-    nemX=float(words[9])
-    nemY=float(words[10])
+
+    S = sqrt(float(words[9])**2 + float(words[10])**2)
+    if S>0:
+        nemX = sqrt((1 + float(words[9])/S)/2)
+        nemY = np.sign(float(words[10]))*sqrt((1 - float(words[9])/S)/2)
+    else:
+        nemX = 0
+        nemY = 0
+    #nemX=float(words[9])
+    #nemY=float(words[10])
+    #nemX = cos(0.5 * acos(float(words[9])))
+    #nemY = sin(0.5 * acos(float(words[9])))
+
     for i in range(start_value,len(words),2):
         site=int(float(words[i]))
         value=float(words[i+1])
@@ -114,7 +125,8 @@ for line in cfile:
 
     levels = np.arange(0.0, m, step) + step
     cmap=cm.winter
-    if pt_num==18:
+    #if pt_num%10==0 or (pt_num+1)%10==0:
+    if pt_num==-1:
         cset1 = plt.contour(X, Y, Z, levels, cmap=cmap, alpha=0.5)
     else:
         cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cmap, alpha=0.5)
@@ -139,6 +151,9 @@ ax.set_ylim([0, ly])
 if variable==1:
     plt.savefig('frame.png')
 if variable==2:
+    plt.axis('off')
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/image.png", dpi=600, transparent=True)
+    #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/image.svg", dpi=600, transparent=True)
     plt.show()
 
 

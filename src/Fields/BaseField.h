@@ -54,8 +54,12 @@ public:
 	inline number set_F_ext(int q, number walls, number laplacian_walls) {
 		if(ext_forces.size() > 0) {
 			F_ext = 0.;
+			number force_calc;
 			for(auto ext_force : ext_forces) {
-				F_ext += ext_force->free_energy(fieldScalar[q], walls, laplacian_walls);
+				force_calc = ext_force->free_energy(fieldScalar[q], walls, laplacian_walls);
+				F_ext += force_calc;
+				//F_ext += ext_force->free_energy(fieldScalar[q], walls, laplacian_walls);
+				Repulsion[q] += force_calc;
 			}
 		}
 		return F_ext;
@@ -80,9 +84,33 @@ public:
         }
 
 
+	//makes changes after equilibration to the external forces of each phase field
+        inline void set_ext_properties() {
+                if(ext_forces.size() > 0) {
+                        for(auto ext_force : ext_forces) {
+                                ext_force->apply_changes_after_equilibration();
+                        }
+                }
+        }
+
+
+	//makes changes after equilibration to the external forces of each phase field
+	std::vector<number> V_ext = std::vector<number> {0.,0.};
+        inline void set_V_ext(int k, int lx, int ly) {
+                if(ext_forces.size() > 0) {
+                        for(auto ext_force : ext_forces) {
+                                V_ext = ext_force->velocity_profile(k, lx, ly);
+                        }
+                }
+        }
+
+
 	/// Index of the particle. Usually it is a useful way of accessing arrays of particles
 	int index;
 	int type;
+	int run_clock;
+	int tumble;
+	int tumble_clock;
 
 	/// Positions of all interaction centers. This array must be initialized by child classes
 	std::vector<number> CoM;
@@ -105,6 +133,13 @@ public:
 	std::vector<number> Phi00;
 	std::vector<number> Phi01;
 
+	//anisotropic terms
+	std::vector<number> aniTerm1x;
+	std::vector<number> aniTerm2x;
+	std::vector<number> aniTerm1y;
+	std::vector<number> aniTerm2y;
+
+
 	//shape tensor
 	number S01;
         number S00;
@@ -125,6 +160,11 @@ public:
 	std::vector<number> Fpassive_y;
 	std::vector<number> Factive_y;
 	std::vector<number> Pressure;
+        std::vector<number> Repulsion;
+	number total_force_x;
+	number total_force_y;
+	number total_force_repulsion_x;
+	number total_force_repulsion_y;
 
 	//child functions need to initialize everything below
 	virtual int GetSubIndex(int site, BaseBox *box) = 0;
@@ -138,7 +178,7 @@ public:
         std::vector<number> dfield_old;
 	std::vector<int> neighbors_sub;
 
-	//fiedl patch values
+	//field patch values
 	int LsubX;
         int LsubY;
 	int subSize;
@@ -149,7 +189,7 @@ public:
         number unrap_sub_corner_bottom_left_y;
         int sub_corner_bottom_left_old;
 	int border; //usually equals 4
-	virtual void set_sub_border(){border=4;};
+	virtual void set_sub_border(){border=-1;};
 	int x_sub_left, y_sub_top, x_sub_right, y_sub_bottom;
 	std::vector<int> map_sub_to_box;
 	std::vector<int> map_sub_to_box_x;
@@ -163,6 +203,7 @@ public:
 	//general properties of fields
         number area;
         number area_old;
+        number perimeter;
         number sumF;
         number sumF_old;
 };

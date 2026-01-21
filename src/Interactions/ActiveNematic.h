@@ -22,12 +22,14 @@ protected:
 	//int R;
 	number kappa;
 	number a0;
+	//std::vector<number> a0;
 	number friction;
 	number zetaQ_self;
 	number zetaQ_inter;
 	number zetaQ_self_active;
 	number zetaQ_inter_active;
 	number J_Q;
+	number J_Q_active;
 	bool anchoring = false;
 
 	number f_interaction(BaseField *p, int q);

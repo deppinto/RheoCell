@@ -19,6 +19,7 @@ SET(observables_SOURCES
 	Observables/ForceField.cpp
 	Observables/NematicField.cpp
 	Observables/StressField.cpp
+	Observables/ShapeField.cpp
 )
 
 SET(backends_SOURCES
@@ -26,6 +27,7 @@ SET(backends_SOURCES
 	Backends/SimBackend.cpp
 	Backends/FDBackend.cpp
 	Backends/FD_CPUBackend.cpp 
+	Backends/FD_CHBackend.cpp 
 )
 
 SET(interactions_SOURCES
@@ -36,21 +38,28 @@ SET(interactions_SOURCES
 	Interactions/ActiveNematic.cpp
 	Interactions/LEBcActiveNematic.cpp
 	Interactions/WetModel.cpp
+	Interactions/WetPolarModel.cpp
 	Interactions/LEBcWetModel.cpp
 	Interactions/GeneralizedWetModel.cpp
+	Interactions/DifferentialAdhesion.cpp
 )
 
 SET(forces_SOURCES
 	Forces/ForceFactory.cpp
 	Forces/BaseForce.cpp
 	Forces/ChannelWalls.cpp
+	Forces/ShearFlowChannel.cpp
+	Forces/PoiseuilleFlowChannel.cpp
 )
 
 SET(box_SOURCES
 	Boxes/BaseBox.cpp
 	Boxes/SquareBox.cpp
 	Boxes/Channel.cpp
+	Boxes/MovingWalls.cpp
 	Boxes/SquareWalls.cpp
+	Boxes/CircleWalls.cpp
+	Boxes/TriangleWalls.cpp
 	Boxes/OrthogonalBox.cpp
 	Boxes/LeesEdwardsBox.cpp
 	Boxes/BoxFactory.cpp

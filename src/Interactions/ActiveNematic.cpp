@@ -11,7 +11,7 @@ ActiveNematic::ActiveNematic() :
 				friction(2.),
 				zetaQ_self(0),
 				zetaQ_inter(0),
-				J_Q(1) {
+				J_Q(0) {
 	a0=PI*R*R;
 }
 
@@ -32,7 +32,7 @@ void ActiveNematic::get_settings(input_file &inp) {
 	getInputNumber(&inp, "friction", &friction, 0);
 	getInputNumber(&inp, "zetaQ_self", &zetaQ_self_active, 0);
 	getInputNumber(&inp, "zetaQ_inter", &zetaQ_inter_active, 0);
-	getInputNumber(&inp, "J_Q", &J_Q, 0);
+	getInputNumber(&inp, "J_Q", &J_Q_active, 0);
 	getInputBool(&inp, "anchoring", &anchoring, 0);
 }
 
@@ -42,16 +42,28 @@ void ActiveNematic::init() {
 
 void ActiveNematic::read_topology(std::vector<BaseField*> &fields) {
         int N = fields.size();
+        //a0.resize(N);
 
+        allocate_fields(fields);
         std::ifstream topology(topology_filename, std::ios::in);
         if(!topology.good()) {
                 throw RCexception("Can't read topology file '%s'. Aborting", topology_filename);
         }
+	char line[100000]="";
+	topology.getline(line, 100000);
+	topology.getline(line, 100000);
+	char *pch;
+	pch = strtok (line," ");
+	topology.close();
 
-        allocate_fields(fields);
         for(int i = 0; i < N; i++) {
+		//double eff_R = drand48() * 4. - 2.;
+		//a0[i] = PI * (R + eff_R) * (R + eff_R);
                 fields[i]->index = i;
 		fields[i]->get_interaction_values(R);
+
+		fields[i]->type = atoi(pch);
+		pch = strtok (NULL, " ");
         }
 }
 
@@ -64,6 +76,7 @@ void ActiveNematic::allocate_fields(std::vector<BaseField *> &fields) {
 void ActiveNematic::apply_changes_after_equilibration(){
 	zetaQ_self=zetaQ_self_active;
 	zetaQ_inter=zetaQ_inter_active;
+	J_Q=J_Q_active;
 }
 
 void ActiveNematic::set_box(BaseBox *boxArg) {
@@ -196,12 +209,13 @@ number ActiveNematic::f_interaction(BaseField *p, int q) {
    
 	// area conservation term
 	number A = - 4*mu/a0*(1-p->area/a0)*p->fieldScalar[q];
+	//number A = - 4*mu/a0[p->index]*(1-p->area/a0[p->index])*p->fieldScalar[q];
 
 	// repulsion term
 	number Rep = + 4*kappa/lambda*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
 
 	// adhesion term
-	number lsquare = 2 * p->fieldScalar[q] * laplacianPhi + 2 * (dx *dx + dy * dy);
+	number lsquare = 2 * p->fieldScalar[q] * laplacianPhi + 2 * (p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q]);
 	number suppress = (laplacianSquare-lsquare)/sqrt(1+(laplacianSquare-lsquare)*(laplacianSquare-lsquare));
 	number Adh = - 4*lambda*omega*suppress*p->fieldScalar[q];
 
@@ -243,15 +257,33 @@ void ActiveNematic::calc_internal_forces(BaseField *p, int q) {
 void ActiveNematic::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
 	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
-	
-	number t = 0.5 * atan2(p->S01, p->S00);
+
+	if(p->type==0){
+		p->nemQ[0] = p->nemQ_old[0];
+		p->nemQ[1] = p->nemQ_old[1];
+	}
+	else if(p->type==1){
+		number t = 0.5 * atan2(p->S01, p->S00);
+		std::vector<number> d = {cos(t) , sin(t)};
+		number sgn = (d[0] * p->nemQ[0] + d[1] * p->nemQ[1] > 0.0)? 1.0:-1.0;
+		p->nemQ[0] = p->nemQ_old[0] + dt * J_Q * (sgn * d[0] - p->nemQ[0]);
+		p->nemQ[1] = p->nemQ_old[1] + dt * J_Q * (sgn * d[1] - p->nemQ[1]);
+
+		p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
+		p->Q01 = p->nemQ[0] * p->nemQ[1];
+	}
+	else throw RCexception("Too many field types");
+
+
+	/*number t = 0.5 * atan2(p->S01, p->S00);
 	std::vector<number> d = {cos(t) , sin(t)};
 	number sgn = (d[0] * p->nemQ[0] + d[1] * p->nemQ[1] > 0.0)? 1.0:-1.0;
 	p->nemQ[0] = p->nemQ_old[0] + dt * J_Q * (sgn * d[0] - p->nemQ[0]);
 	p->nemQ[1] = p->nemQ_old[1] + dt * J_Q * (sgn * d[1] - p->nemQ[1]);
 
 	p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
-	p->Q01 = p->nemQ[0] * p->nemQ[1];
+	p->Q01 = p->nemQ[0] * p->nemQ[1];*/
+
 
 	if(anchoring) updateAnchoring(p);
 }

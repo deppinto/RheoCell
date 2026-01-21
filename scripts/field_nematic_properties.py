@@ -9,11 +9,11 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 
 if len(sys.argv)!=6:
-    print(sys.argv[0]," [topology file] [frames location] [start frame] [end frame] [1:save conf; 2:make plot]")
+    print(sys.argv[0]," [topology file] [frames location] [start frame] [end frame] [1 or 3:save conf; 2 or 4:make plot]")
     sys.exit(1)
 
 variable=int(float(sys.argv[5])) 
@@ -41,14 +41,28 @@ corr_num = [0 for i in range(size_R)]
 corr_dem = 0.
 
 
+file_string = 'nematic'
+
 for i in range(start_frame, end_frame, 1):
 
-    if i<10:
-        file = sys.argv[2] + "nematic_field_00" + str(i) + ".txt"
-    elif i<100:
-        file = sys.argv[2] + "nematic_field_0" + str(i) + ".txt"
-    else:
-        file = sys.argv[2] + "nematic_field_" + str(i) + ".txt"
+    if variable == 1 or variable == 2:
+        file_string = 'nematic'
+        if i<10:
+            file = sys.argv[2] + "nematic_field_00" + str(i) + ".txt"
+        elif i<100:
+            file = sys.argv[2] + "nematic_field_0" + str(i) + ".txt"
+        else:
+            file = sys.argv[2] + "nematic_field_" + str(i) + ".txt"
+
+    if variable == 3 or variable == 4:
+        file_string = 'shape'
+        if i<10:
+            file = sys.argv[2] + "shape_field_00" + str(i) + ".txt"
+        elif i<100:
+            file = sys.argv[2] + "shape_field_0" + str(i) + ".txt"
+        else:
+            file = sys.argv[2] + "shape_field_" + str(i) + ".txt"
+
 
     cfile=open(file,"r")
     header=cfile.readline().split()
@@ -107,16 +121,20 @@ for i in range(start_frame, end_frame, 1):
                 correlations[int(dist)] += 2 * (Z_x[y1][x1] * Z_x[y2][x2] + Z_y[y1][x1] * Z_y[y2][x2])
                 corr_num[int(dist)] += 1
 
+
 for i in range(size_R):
     if corr_num[i] > 0:
         correlations[i] = correlations[i] / corr_num[i]
         correlations[i] = correlations[i] / corr_dem
-    if variable==1:
-        print(corr_dist[i], correlations[i])
+    
+
+if variable == 1 or variable == 3:
+    with open('correlations_'+file_string+'.txt', 'w') as f:
+        for i in range(size_R):
+            print(corr_dist[i], correlations[i], file=f)
 
 
-
-if variable==2:
+if variable == 2 or variable == 4:
     plt.figure(figsize=(5.452423529,4.089317647))
     plt.plot(corr_dist, correlations, '--o')
     plt.ylabel(r'$C_Q$', fontsize=18)

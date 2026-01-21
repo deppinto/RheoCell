@@ -18,8 +18,8 @@ protected:
 	number gamma;
 	number lambda;
 	number mu;
-	//int R;
 	number kappa;
+	number omega;
 	number a0;
 
 	/**
@@ -31,8 +31,10 @@ protected:
 	 * @param update_forces
 	 * @return
 	 */
+	//number f_interaction(BaseField *p, int q);
 	number f_interaction(BaseField *p, int q);
 	void computeGlobalSums(BaseField *p, int q, bool update_global_sums=false);
+	void initFieldProperties(BaseField *p);
 	std::vector<number> phi2;
 
 public:
@@ -48,10 +50,12 @@ public:
 	void begin_energy_computation() override;
 	void begin_energy_computation(std::vector<BaseField *> &fields) override;
 	void resetSums(int k) override;
+	void updateFieldProperties(BaseField *p, int q, int k) override;
 
         void read_topology(std::vector<BaseField *> &fields) override;
 	void check_input_sanity(std::vector<BaseField *> &fields) override;
 	void get_settings(input_file &inp) override;
+	void apply_changes_after_equilibration() override;
 };
 
 #endif /* SIMPLEMULTIFIELD_H_ */

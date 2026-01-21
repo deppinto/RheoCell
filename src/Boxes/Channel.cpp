@@ -32,7 +32,9 @@ void Channel::init(int Lx, int Ly) {
 	for(int y=0; y<Ly; y++){
 		for(int x=0; x<Lx; x++){
 			int k=x+y*Lx;
-			walls[k] = exp(-double(y)/lambda_wall) + exp(-double(Ly-y-1)/lambda_wall);  
+			//walls[k] = exp(-double(y)/lambda_wall) + exp(-double(Ly-y-1)/lambda_wall);  
+			if(y<lambda_wall || y>Ly-lambda_wall) walls[k] = 1.;
+			else walls[k] = 0.;
 		}
 	}
 
@@ -40,9 +42,13 @@ void Channel::init(int Lx, int Ly) {
 	BaseBox::setNeighborsPeriodic(Lx, Ly);
 
 	laplacian_walls.resize(Lx*Ly);
+	normal_x.resize(Lx*Ly);
+	normal_y.resize(Lx*Ly);
 	for(int y=0; y<Ly; y++){
 		for(int x=0; x<Lx; x++){
 			int k=x+y*Lx;
+			normal_x[k] = 0.5 * (walls[neighbors[5+k*9]] - walls[neighbors[3+k*9]]);
+			normal_y[k] = 0.5 * (walls[neighbors[7+k*9]] - walls[neighbors[1+k*9]]);
 			laplacian_walls[k] = walls[neighbors[5+k*9]] + walls[neighbors[7+k*9]] + walls[neighbors[3+k*9]] + walls[neighbors[1+k*9]] - 4.*walls[k];
 		}
 	}

@@ -5,6 +5,7 @@
 #include "ForceField.h"
 #include "NematicField.h"
 #include "StressField.h"
+#include "ShapeField.h"
 
 #include <nlohmann/json.hpp>
 
@@ -20,6 +21,7 @@ ObservablePtr ObservableFactory::make_observable(input_file &obs_inp) {
 	else if(!strncasecmp(obs_type, "force_field", 512)) res = std::make_shared<ForceField>();
 	else if(!strncasecmp(obs_type, "stress_field", 512)) res = std::make_shared<StressField>();
 	else if(!strncasecmp(obs_type, "nematic_field", 512)) res = std::make_shared<NematicField>();
+	else if(!strncasecmp(obs_type, "shape_field", 512)) res = std::make_shared<ShapeField>();
 	else {
 		if(res == NULL) throw RCexception("Observable '%s' not found. Aborting", obs_type);
 	}

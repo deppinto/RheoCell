@@ -32,7 +32,9 @@ std::tuple<std::vector<int>, std::string> ChannelWalls::init(input_file &inp) {
 
 number ChannelWalls::free_energy(number phi, number walls, number laplacianSquare) {
 
-	return 2.0*kappa_wall/lambda*phi*walls*walls - 4.0*omega_wall*lambda*phi*((laplacianSquare)/sqrt(1+(laplacianSquare)*(laplacianSquare)));
+	return 2.0*kappa_wall/lambda*phi*walls*walls; 
+	//- 4.0*omega_wall*lambda*phi; 
+	//((laplacianSquare)/sqrt(1+(laplacianSquare)*(laplacianSquare)));
 }
 
 number ChannelWalls::potential(int k, number walls) {

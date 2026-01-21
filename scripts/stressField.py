@@ -59,7 +59,7 @@ for line in cfile:
     Z_yy=[[0 for q in range(lx)] for k in range(ly)]
     Z_xy=[[0 for q in range(lx)] for k in range(ly)]
     Z_iso=[[0 for q in range(lx)] for k in range(ly)]
-    for i in range(start_value,len(words),11):
+    for i in range(start_value,len(words),13):
         #site=int(float(words[i]))
         xx=float(words[i])
         yy=float(words[i+1])
@@ -73,6 +73,8 @@ for line in cfile:
         value_act_xx=float(words[i+8])
         value_act_yy=float(words[i+9])
         value_act_xy=float(words[i+10])
+        value_pressure_xx=float(words[i+11])
+        value_pressure_yy=float(words[i+12])
 
         Z_xx[int(yy)][int(xx)] = value_field_xx
         Z_yy[int(yy)][int(xx)] = value_field_yy

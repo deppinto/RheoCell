@@ -36,6 +36,11 @@ void LEBcMultiPhaseField::resizing() {
 	velocityX.resize(subSize);
         velocityY.resize(subSize);
 
+	aniTerm1x.resize(subSize);
+	aniTerm1y.resize(subSize);
+	aniTerm2x.resize(subSize);
+	aniTerm2y.resize(subSize);
+
 	velocityX_correction.resize(LsubY);
 	phi_correction.resize(LsubY);
         shear_velocity_sign.resize(subSize);
@@ -82,10 +87,11 @@ void LEBcMultiPhaseField::init(int Lx, int Ly) {
 	nemQ_old.resize(2);
 	nemQ = {0., 0.};
 	nemQ_old = {0., 0.};
-	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
-	Q01 = nemQ[0] * nemQ[1];
+	//Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
+	//Q01 = nemQ[0] * nemQ[1];
 
 	area=0;
+	perimeter=0;
 	sumF=0;
 
 	offset.resize(2);
@@ -120,8 +126,8 @@ void LEBcMultiPhaseField::init() {
 	nemQ_old.resize(2);
 	nemQ = {0., 0.};
 	nemQ_old = {0., 0.};
-	Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
-	Q01 = nemQ[0] * nemQ[1];
+	//Q00 = 0.5 * (nemQ[0] * nemQ[0] - nemQ[1] * nemQ[1]);
+	//Q01 = nemQ[0] * nemQ[1];
 
 	//minor bookkeeping
 	offset.resize(2);
@@ -132,6 +138,7 @@ void LEBcMultiPhaseField::init() {
 	tracer_particle_old=std::vector<number>(2, 0);*/
 
 	area=0;
+	perimeter=0;
 	int x,y;
 	for(int i=0; i<subSize; i++){
 		y=LsubY/2-i/LsubX;
@@ -455,6 +462,7 @@ void LEBcMultiPhaseField::set_properties_to_zero() {
 	x_sub_left = LsubX;
 	y_sub_bottom = LsubY;
 	area=0;
+	perimeter=0;
 	sumF=0;
 	CoM[0] = 0.; 
 	CoM[1] = 0.;

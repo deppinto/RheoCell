@@ -1,6 +1,7 @@
 #include "BackendFactory.h"
 
 #include "FD_CPUBackend.h"
+#include "FD_CHBackend.h"
 #ifndef NOCUDA
 #include "../CUDA/Backends/FD_CUDABackend.h"
 #ifndef CUDA_DOUBLE_PRECISION
@@ -21,7 +22,7 @@ std::shared_ptr<SimBackend> BackendFactory::make_backend(input_file &inp) {
 
 	if(getInputString(&inp, "sim_type", sim_type, 0) == KEY_NOT_FOUND) {
 		OX_LOG(Logger::LOG_INFO, "Simulation type not specified, using FD");
-		sim_type = "FD";
+		sim_type = "FD_CPU";
 	}
 	else {
 		OX_LOG(Logger::LOG_INFO, "Simulation type: %s", sim_type.c_str());
@@ -29,7 +30,7 @@ std::shared_ptr<SimBackend> BackendFactory::make_backend(input_file &inp) {
 
 
 	SimBackend *new_backend = nullptr;
-	if(sim_type == "FD") {
+	if(sim_type == "FD_CPU") {
 		if(backend_opt == "CPU") {
 			new_backend = new FD_CPUBackend();
 		}
@@ -41,6 +42,44 @@ std::shared_ptr<SimBackend> BackendFactory::make_backend(input_file &inp) {
 			}
 			if(backend_prec == "mixed") {
 				new_backend = new FD_CUDAMixedBackend();
+			}
+			else if(backend_prec == "float") {
+				new_backend = new FD_CUDABackend();
+			}
+			else {
+				throw RCexception("Backend precision '%s' is not allowed, as the code has been compiled with 'float' and 'mixed' support only", backend_prec.c_str());
+			}
+#else
+			if(precision_state == KEY_NOT_FOUND) {
+				backend_prec = "double";
+			}
+			if(backend_prec == "double") {
+				new_backend = new FD_CUDABackend();
+			}
+			else {
+				throw RCexception("Backend precision '%s' is not allowed, as the code has been compiled with 'double' support only", backend_prec.c_str());
+			}
+#endif
+			OX_LOG(Logger::LOG_INFO, "CUDA backend precision: %s", backend_prec.c_str());
+		}
+#endif
+		else {
+			throw RCexception("Backend '%s' not supported", backend_opt.c_str());
+		}
+	}
+	else if(sim_type == "FD_CH") {
+		if(backend_opt == "CPU") {
+			new_backend = new FD_CHBackend();
+		}
+#ifndef NOCUDA
+		else if(backend_opt == "CUDA") {
+			throw RCexception("Backend '%s' not supported", backend_opt.c_str());
+#ifndef CUDA_DOUBLE_PRECISION
+			if(precision_state == KEY_NOT_FOUND) {
+				backend_prec = "mixed";
+			}
+			if(backend_prec == "mixed") {
+				new_backend = new CUDAMixedBackend();
 			}
 			else if(backend_prec == "float") {
 				new_backend = new FD_CUDABackend();

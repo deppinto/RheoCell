@@ -11,6 +11,41 @@ from matplotlib import cm
 import matplotlib
 #matplotlib.use('Agg')
 
+from matplotlib.font_manager import FontProperties
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from matplotlib import font_manager, rcParams
+
+'''
+# Load font from file
+#font_path = "/home/p/pinto/Fonts/Times_New_Roman_Normal.ttf"
+font_path = "/home/p/pinto/Fonts/times.ttf"
+italic_font_path = "/home/p/pinto/Fonts/timesi.ttf"
+bold_font_path = "/home/p/pinto/Fonts/timesbd.ttf"
+
+custom_font = FontProperties(fname=font_path)
+legend_font = FontProperties(fname=font_path, size=12)
+font = font_manager.FontProperties(fname=font_path)
+fonti = font_manager.FontProperties(fname=italic_font_path)
+fontbd = font_manager.FontProperties(fname=bold_font_path)
+
+# Register font with a name
+font_manager.fontManager.addfont(font_path)
+font_manager.fontManager.addfont(italic_font_path)
+font_manager.fontManager.addfont(bold_font_path)
+
+# Set custom mathtext font to match your font
+rcParams['mathtext.fontset'] = 'custom'
+
+# Set roman (upright), italic, and bold versions (all Times New Roman if needed)
+#rcParams['mathtext.rm'] = font.get_name()  # e.g. "Times New Roman"
+#rcParams['mathtext.it'] = fonti.get_name()
+#rcParams['mathtext.bf'] = fontbd.get_name()
+rcParams['mathtext.it'] = 'Times New Roman:italic'
+rcParams['mathtext.rm'] = 'Times New Roman'
+rcParams['mathtext.bf'] = 'Times New Roman:bold'
+'''
+
+
 if len(sys.argv)!=5:
     print(sys.argv[0]," [topology file] [velocity file] [stress file] [1:save conf; 2:make plot]")
     sys.exit(1)
@@ -72,8 +107,8 @@ for line in cfile:
         Z_x[int(yy)][int(xx)]=value_x
         Z_y[int(yy)][int(xx)]=value_y
 
-        if int(xx)%2==0 and int(yy)%2==0:
-            cset1 = plt.arrow(xx, yy, 20*value_x, 20*value_y, width=0.075, color='k')
+        if int(xx)%4==0 and int(yy)%4==0:
+            cset1 = plt.arrow(xx, yy, 60*value_x, 60*value_y, width=0.5, color='k')
     read_line+=1
 
 
@@ -196,7 +231,9 @@ for p in range(0,LLY):
             x,y = sum_x/n,sum_y/n
             # add defect to list
             if s==1:
-                cset1 = plt.plot(x, y, 'r*', markersize=10)
+                #if y<130:
+                    #print(x,y)
+                cset1 = plt.plot(x, y, '*', color='#00FFFF', markersize=10)
             elif s==-1:
                 cset1 = plt.plot(x, y, 'kX', markersize=10)
 
@@ -244,11 +281,14 @@ for line in cfile:
         Z_xx[int(yy)][int(xx)] = value_field_xx
         Z_yy[int(yy)][int(xx)] = value_field_yy
         Z_xy[int(yy)][int(xx)] = value_field_xy
-        Z_iso[int(yy)][int(xx)] = (-1) * (Z_xx[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)]) / 2
+        Z_iso[int(yy)][int(xx)] = (Z_xx[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)]) / 2
         #Z_iso[int(yy)][int(xx)] = Z_xy[int(yy)][int(xx)]
 
     z_min, z_max = 0., np.abs(Z_iso).max()
-    cset1 = plt.imshow(Z_iso, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
+    for i in range(ly):
+        for j in range(lx):
+            Z_iso[i][j] = Z_iso[i][j] / z_max
+    cset1 = plt.imshow(Z_iso, cmap='RdBu_r', interpolation='nearest', vmin=-1, vmax=1)
 
 
 '''
@@ -277,6 +317,25 @@ ax = plt.gca()
 ax.set_aspect('equal', adjustable='box')
 ax.set_xlim([0, lx])
 ax.set_ylim([0, ly])
+ax.set_yticklabels([])
+ax.set_xticklabels([])
+ax.set_xticks([])
+ax.set_yticks([])
+
+#fig = plt.gcf()
+# Add colorbar
+#cbar = fig.colorbar(cset1, ax=ax)
+# Change tick font name and size
+#cbar.ax.tick_params(labelsize=18)  # Font size
+#for label in cbar.ax.get_yticklabels():
+#    label.set_fontname('Times New Roman')  # Replace with desired font
+#cbar.set_ticks([-1, -0.5, 0, 0.5, 1])
+
+# Set label above the colorbar
+#cbar.set_label(r'$\dot{\varepsilon}$,$\nabla f^a$', rotation=0, pad=10, loc='top', fontsize=18, fontname='Times New Roman')
+#cbar.ax.xaxis.set_label_position('top')  # Move label to top
+#cbar.ax.set_title(r'$\dot{\varepsilon}$ , $\nabla \cdot \mathbf{f}^\mathit{a}$', pad=10, fontsize=18, fontname='Times New Roman')
+
 #fig.tight_layout()
 if variable==1:
     plt.savefig('frame.png')

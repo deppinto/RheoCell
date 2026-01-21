@@ -15,7 +15,8 @@ WetModel::WetModel() :
 				J_Q(0),
 				friction_cell(0.),
 				tolerance(0.0001),
-				wall_slip(0.5){
+				wall_slip(0.5),
+				passive_alpha(1.){
 	a0=PI*R*R;
 }
 
@@ -42,6 +43,7 @@ void WetModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "CGtolerance", &tolerance, 0);
 	getInputNumber(&inp, "wall_slip", &wall_slip, 0);
 	getInputNumber(&inp, "Kg", &Kg, 0);
+	getInputNumber(&inp, "passive_alpha", &passive_alpha, 0);
 }
 
 void WetModel::init() {
@@ -51,8 +53,8 @@ void WetModel::init() {
 	R1 = (R_eff * sqrt(AR)) * (R_eff * sqrt(AR));
 	R2 = (R_eff / sqrt(AR)) * (R_eff / sqrt(AR));
 	R_term = (1/R1) - (1/R2);*/
-	R1 = 1;
-	R2 = 0.1;
+	//R1 = 1;
+	//R2 = 1;
 	store_max_size=20;
 	if(tolerance>0)
 		solverCG.setTolerance(tolerance);
@@ -84,6 +86,8 @@ void WetModel::allocate_fields(std::vector<BaseField *> &fields) {
 }
 
 void WetModel::apply_changes_after_equilibration(){
+
+	BaseInteraction::apply_changes_after_equilibration();
 	zetaQ_self=zetaQ_self_active;
 	zetaQ_inter=zetaQ_inter_active;
 	J_Q=J_Q_active;
@@ -100,8 +104,8 @@ void WetModel::set_box(BaseBox *boxArg) {
 	sumQ00.resize(Lx*Ly);
 	sumQ01.resize(Lx*Ly);
 	sum_phi.resize(Lx*Ly);
-	grad_free_energy_x.resize(Lx*Ly);
-	grad_free_energy_y.resize(Lx*Ly);
+	//grad_free_energy_x.resize(Lx*Ly);
+	//grad_free_energy_y.resize(Lx*Ly);
 	size_store_site_velocity_index.resize(Lx*Ly);
 	store_site_velocity_index.resize(Lx*Ly*store_max_size);
 	store_site_field.resize(Lx*Ly*store_max_size);
@@ -113,8 +117,8 @@ void WetModel::resetSums(int k) {
         sumQ00[k]=0;
         sumQ01[k]=0;
         sum_phi[k]=0;
-	grad_free_energy_x[k]=0.;
-	grad_free_energy_y[k]=0.;
+	//grad_free_energy_x[k]=0.;
+	//grad_free_energy_y[k]=0.;
 }
 
 void WetModel::initFieldProperties(BaseField *p) {
@@ -143,8 +147,10 @@ void WetModel::initFieldProperties(BaseField *p) {
 	        number dx = .5*( xright - xleft );
 	        number dy = .5*( ytop - ybottom );*/
 
-	        number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
-	        number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+	        //number dx = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
+	        //number dy = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+	        number dx = BaseInteraction::derivX(p, q, k);
+	        number dy = BaseInteraction::derivY(p, q, k);
 	        p->fieldDX[q] = dx;
 	        p->fieldDY[q] = dy;
 
@@ -247,7 +253,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			}
 
 			//populate sparse matrix
-			if(box->getWalls(p->map_sub_to_box[q])<wall_slip)
+			if(box->getWalls(p->map_sub_to_box[q])<1.)//wall_slip)
 				//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+4*friction_cell)));
 				//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+friction_cell)));
 				//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+8*friction_cell)));
@@ -402,7 +408,7 @@ void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 
 	BaseInteraction::update_sub_to_box_map(p, q, k, p->GetSubXIndex(q, box), p->GetSubYIndex(q, box));
 
-        p->fieldDX[q] = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
+        /*p->fieldDX[q] = .5*( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
 	if(box->getWalls(k)<wall_slip){
         	p->fieldDY[q] = .5*( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
 		p->laplacianPhi[q] = p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] - 4.*p->fieldScalar[q];
@@ -416,10 +422,16 @@ void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 
 		//p->Phi00[q] = (p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] - 2 * p->fieldScalar[q]);
 		//p->Phi01[q] = 0.;
-	}
+	}*/
+
+        p->fieldDX[q] = BaseInteraction::derivX(p, q, k);
+        p->fieldDY[q] = BaseInteraction::derivY(p, q, k);
+	p->laplacianPhi[q] = BaseInteraction::Laplacian(p, q, k);
 
 	BaseInteraction::updateFieldProperties(p, q, k);
 
+	//sumQ00[k] += (p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
+	//sumQ01[k] += (p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
 
 	if(size_store_site_velocity_index[k]>=store_max_size){
 		for(int m=0; m<size_store_site_velocity_index[k];m++){
@@ -561,23 +573,25 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	//passive (passive force)
 	number f_passive_x = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] );
 	number f_passive_y = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] );
-	p->Fpassive_x[q] = f_passive_x;
-	p->Fpassive_y[q] = f_passive_y;
+	//number f_passive_x = p->freeEnergy[q]*p->fieldDX[q];
+	//number f_passive_y = p->freeEnergy[q]*p->fieldDY[q];
+	p->Fpassive_x[q] = f_passive_x * passive_alpha;
+	p->Fpassive_y[q] = f_passive_y * passive_alpha;
 
 	//active inter cells (active force)
 	number fQ_self_x = - (p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
 	number fQ_self_y = - (p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
 
-	//number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[7+k*9]] - sumQ01[box->neighbors[1+k*9]] ) ) - fQ_self_x;
-	//number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[7+k*9]] - sumQ00[box->neighbors[1+k*9]] ) ) - fQ_self_y;
+	number fQ_inter_x = - ( 0.5 * ( sumQ00[box->neighbors[5+k*9]] - sumQ00[box->neighbors[3+k*9]] ) + 0.5 * ( sumQ01[box->neighbors[7+k*9]] - sumQ01[box->neighbors[1+k*9]] ) ) - fQ_self_x;
+	number fQ_inter_y = - ( 0.5 * ( sumQ01[box->neighbors[5+k*9]] - sumQ01[box->neighbors[3+k*9]] ) - 0.5 * ( sumQ00[box->neighbors[7+k*9]] - sumQ00[box->neighbors[1+k*9]] ) ) - fQ_self_y;
 	//number fQ_inter_x = - ( sumQ00[k] - (p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]));
 	//number fQ_inter_y = - ( sumQ01[k] - (p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]));
-	//number fQ_inter_x = - ( sumQ00[k] );
-	//number fQ_inter_y = - ( sumQ01[k] );
+	//number fQ_inter_x = - ( sumQ00[k] + fQ_self_x);
+	//number fQ_inter_y = - ( sumQ01[k] + fQ_self_y);
 	//number fQ_inter_x = - (sumQ00[k]*p->fieldDX[q] + sumQ01[k]*p->fieldDY[q]);
 	//number fQ_inter_y = - (sumQ01[k]*p->fieldDX[q] - sumQ00[k]*p->fieldDY[q]);
-	number fQ_inter_x = - (p->NQ00 * p->fieldDX[q] + p->NQ01 * p->fieldDY[q]);
-	number fQ_inter_y = - (p->NQ01 * p->fieldDX[q] - p->NQ00 * p->fieldDY[q]);
+	//number fQ_inter_x = - (p->NQ00 * p->fieldDX[q] + p->NQ01 * p->fieldDY[q]);
+	//number fQ_inter_y = - (p->NQ01 * p->fieldDX[q] - p->NQ00 * p->fieldDY[q]);
 
 	p->Factive_x[q] = zetaQ_self * fQ_self_x + zetaQ_inter * fQ_inter_x;
 	p->Factive_y[q] = zetaQ_self * fQ_self_y + zetaQ_inter * fQ_inter_y;
@@ -612,8 +626,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 
 		//vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
-		vec_f_x[q+field_start_index[p->index]] = f_passive_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
-		vec_f_y[q+field_start_index[p->index]] = f_passive_y + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		vec_f_x[q+field_start_index[p->index]] = f_passive_x * passive_alpha + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		vec_f_y[q+field_start_index[p->index]] = f_passive_y * passive_alpha + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 	}
 	else{
 		vec_f_x[q+field_start_index[p->index]] = 0.;
@@ -624,16 +638,52 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 
 void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
-	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
-	
-	number t = 0.5 * atan2(p->S01, p->S00);
-	std::vector<number> d = {cos(t) , sin(t)};
-	number sgn = (d[0] * p->nemQ[0] + d[1] * p->nemQ[1] > 0.0)? 1.0:-1.0;
-	p->nemQ[0] = p->nemQ_old[0] + dt * J_Q * (sgn * d[0] - p->nemQ[0]);
-	p->nemQ[1] = p->nemQ_old[1] + dt * J_Q * (sgn * d[1] - p->nemQ[1]);
+	//if(store)p->thetaQ_old = p->thetaQ;
 
-	p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
-	p->Q01 = p->nemQ[0] * p->nemQ[1];
+	//p->thetaQ = p->thetaQ_old - dt * J_Q * atan2(p->S00 * p->Q01 - p->S01 * p->Q00, p->S00 * p->Q00 + p->S01 * p->Q01);
+	//p->Q00 = cos(2 * p->thetaQ);
+	//p->Q01 = sin(2 * p->thetaQ);
+
+    	/*number nemQ_mod = sqrt(p->Q00 * p->Q00 + p->Q01 * p->Q01);
+    	p->nemQ[0] = sqrt((1 + p->Q00/nemQ_mod)/2);
+	number sgn;
+	if(p->Q01>0)sgn=1;
+	else if(p->Q01<0) sgn=-1;
+	else sgn=0;
+    	p->nemQ[1] = sgn*sqrt((1 - p->Q00/nemQ_mod)/2);*/
+
+
+    	number S_mod = sqrt(p->S00 * p->S00 + p->S01 * p->S01);
+	if(store)p->nemQ_old = {p->nemQ[0] , p->nemQ[1]};
+	if(S_mod>0.00000001){
+		number t = 0.5 * atan2(p->S01, p->S00);
+		std::vector<number> d = {cos(t) , sin(t)};
+		number sgn = (d[0] * p->nemQ[0] + d[1] * p->nemQ[1] > 0.0)? 1.0:-1.0;
+		p->nemQ[0] = p->nemQ_old[0] + dt * J_Q * (sgn * d[0] - p->nemQ[0]);
+		p->nemQ[1] = p->nemQ_old[1] + dt * J_Q * (sgn * d[1] - p->nemQ[1]);
+
+		p->Q00 = 0.5 * (p->nemQ[0] * p->nemQ[0] - p->nemQ[1] * p->nemQ[1]);
+		p->Q01 = p->nemQ[0] * p->nemQ[1];
+	}
+
+
+	/*p->Q00 += dt * J_Q * (p->S00 - p->Q00);
+	p->Q01 += dt * J_Q * (p->S01 - p->Q01);
+    	number nemQ_mod = sqrt(p->Q00 * p->Q00 + p->Q01 * p->Q01);
+	if(nemQ_mod>0.000000001){
+	    	number nx = sqrt((1 + p->Q00/nemQ_mod)/2);
+		number sgn;
+		if(p->Q01>0)sgn=1;
+		else if(p->Q01<0) sgn=-1;
+		else sgn=0;
+    		number ny = sgn*sqrt((1 - p->Q00/nemQ_mod)/2);
+		p->nemQ[0]=nemQ_mod * nx;
+		p->nemQ[1]=nemQ_mod * ny;
+	}
+	else{
+		p->nemQ[0]=0.;
+		p->nemQ[1]=0.;
+	}*/
 
 	if(anchoring) update_anchoring(p);
 }

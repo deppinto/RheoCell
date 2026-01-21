@@ -86,8 +86,8 @@ for line in cfile:
         Z_Q01[int(yy)][int(xx)]=Q01
 
         if int(xx)%2==0 and int(yy)%2==0:
-            cset1 = plt.arrow(xx, yy, 5*nx, 5*ny, width=0.1, color="k", head_width=0)
-            cset1 = plt.arrow(xx, yy, -5*nx, -5*ny, width=0.1, color="k", head_width=0)
+            cset1 = plt.arrow(xx, yy, 1*nx, 1*ny, width=0.1, color="k", head_width=0)
+            cset1 = plt.arrow(xx, yy, -1*nx, -1*ny, width=0.1, color="k", head_width=0)
 
     #z_min, z_max = -np.abs(Z).max(), np.abs(Z).max()
     #z_min, z_max = 0., np.abs(Z_field).max()
@@ -202,10 +202,10 @@ for p in range(0,LLY):
                 den += dxQxx + s*dyQxy
             psi = s/(2.-s)*atan2(num, den)
             if s==1:
-                cset1 = plt.plot(x, y, 'go', markersize=20)
+                cset1 = plt.plot(x, y, 'go', markersize=10)
                 cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='g', head_width=1.5, head_length=1.5, width=0.5)
             elif s==-1:
-                cset1 = plt.plot(x, y, 'b^', markersize=20)
+                cset1 = plt.plot(x, y, 'b^', markersize=10)
 
 
         # keep this just in case our other symmetries give us integer defects
@@ -224,10 +224,10 @@ for p in range(0,LLY):
 
 ax = plt.gca()
 ax.set_aspect('equal', adjustable='box')
-#ax.set_xlim([0, lx])
-#ax.set_ylim([0, ly])
-ax.set_xlim([38, 68])
-ax.set_ylim([75, 105])
+ax.set_xlim([0, lx])
+ax.set_ylim([0, ly])
+#ax.set_xlim([38, 68])
+#ax.set_ylim([75, 105])
 #ax.set_xlim([65, 95])
 #ax.set_ylim([60, 90])
 ax.set_yticklabels([])

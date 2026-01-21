@@ -14,6 +14,8 @@
 #include <fstream>
 #include <set>
 #include <vector>
+#include <stdio.h>
+#include <string.h>
 
 /**
  * @brief Base class for managing particle-particle interactions. It is an abstract class.
@@ -27,6 +29,7 @@ protected:
 	int R;
 	number friction = 1.0;
         number rcut, sqr_rcut;
+	number wall_slip;
 	/// This is useful for "hard" potentials
 	bool is_infinite;
 	
@@ -59,7 +62,7 @@ public:
 	 */
 	virtual void init() = 0;
 
-	virtual void apply_changes_after_equilibration(){};
+	virtual void apply_changes_after_equilibration();
 
 
 	/**
@@ -141,6 +144,8 @@ public:
 	 * @param N
 	 */
 	virtual void generate_random_configuration(std::vector<BaseField *> &fields);
+	virtual void generate_lattice_configuration(std::vector<BaseField *> &fields, int n_rows, int n_columns);
+	virtual void generate_cluster_configuration(std::vector<BaseField *> &fields);
 
 
 	/**
@@ -187,6 +192,76 @@ public:
 	virtual void get_settings(input_file &inp);
 	number K;
 	number U;
+
+	virtual number derivX(BaseField *p, int q, int k){
+
+		/*number field_left;
+		number field_right;
+
+		if(box->getWalls(k)<wall_slip){
+			field_right = p->fieldScalar[p->neighbors_sub[5+q*9]];
+			field_left = p->fieldScalar[p->neighbors_sub[3+q*9]];
+		}
+		else{
+			if(box->getWalls(box->neighbors[5+k*9]) < wall_slip)field_right = p->fieldScalar[p->neighbors_sub[5+q*9]];
+			else field_right = p->fieldScalar[p->neighbors_sub[3+q*9]];
+
+			if(box->getWalls(box->neighbors[3+k*9]) < wall_slip)field_left = p->fieldScalar[p->neighbors_sub[3+q*9]];
+			else field_left = p->fieldScalar[p->neighbors_sub[5+q*9]];
+		}
+	        //return .5 * ( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
+	        return .5 * ( field_right - field_left );*/
+
+		if(box->getWalls(box->neighbors[5+k*9]) < wall_slip && box->getWalls(box->neighbors[3+k*9]) < wall_slip) 
+			return .5 * ( p->fieldScalar[p->neighbors_sub[5+q*9]] - p->fieldScalar[p->neighbors_sub[3+q*9]] );
+		else 
+			return 0.;
+
+	}
+
+	virtual number derivY(BaseField *p, int q, int k){
+
+		if(box->getWalls(box->neighbors[7+k*9]) < wall_slip && box->getWalls(box->neighbors[1+k*9]) < wall_slip) 
+			return .5 * ( p->fieldScalar[p->neighbors_sub[7+q*9]] - p->fieldScalar[p->neighbors_sub[1+q*9]] );
+		else 
+			return 0.;
+	}
+
+	virtual number Laplacian(BaseField *p, int q, int k){
+	
+		if(box->getWalls(box->neighbors[7+k*9]) < wall_slip && box->getWalls(box->neighbors[1+k*9]) < wall_slip) 
+			if(box->getWalls(box->neighbors[5+k*9]) < wall_slip && box->getWalls(box->neighbors[3+k*9]) < wall_slip)
+				return p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] + p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] - 4 * p->fieldScalar[q];
+			else if(box->getWalls(box->neighbors[5+k*9]) < wall_slip)
+				return p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] + 2 * p->fieldScalar[p->neighbors_sub[5+q*9]] - 4 * p->fieldScalar[q];
+			else if(box->getWalls(box->neighbors[3+k*9]) < wall_slip)
+				return p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] + 2 * p->fieldScalar[p->neighbors_sub[3+q*9]] - 4 * p->fieldScalar[q];
+			else
+				return p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] - 2 * p->fieldScalar[q];
+
+		else if(box->getWalls(box->neighbors[7+k*9]) < wall_slip) 
+			if(box->getWalls(box->neighbors[5+k*9]) < wall_slip && box->getWalls(box->neighbors[3+k*9]) < wall_slip)
+				return 2 * p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] - 4 * p->fieldScalar[q];
+			else if(box->getWalls(box->neighbors[5+k*9]) < wall_slip)
+				return 2 * p->fieldScalar[p->neighbors_sub[7+q*9]] + 2 * p->fieldScalar[p->neighbors_sub[5+q*9]] - 4 * p->fieldScalar[q];
+			else if(box->getWalls(box->neighbors[3+k*9]) < wall_slip)
+				return 2 * p->fieldScalar[p->neighbors_sub[7+q*9]] + 2 * p->fieldScalar[p->neighbors_sub[3+q*9]] - 4 * p->fieldScalar[q];
+			else
+				return 2 * p->fieldScalar[p->neighbors_sub[7+q*9]] - 2 * p->fieldScalar[q];
+
+		else if(box->getWalls(box->neighbors[1+k*9]) < wall_slip) 
+			if(box->getWalls(box->neighbors[5+k*9]) < wall_slip && box->getWalls(box->neighbors[3+k*9]) < wall_slip)
+				return 2 * p->fieldScalar[p->neighbors_sub[1+q*9]] + p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] - 4 * p->fieldScalar[q];
+			else if(box->getWalls(box->neighbors[5+k*9]) < wall_slip)
+				return 2 * p->fieldScalar[p->neighbors_sub[1+q*9]] + 2 * p->fieldScalar[p->neighbors_sub[5+q*9]] - 4 * p->fieldScalar[q];
+			else if(box->getWalls(box->neighbors[3+k*9]) < wall_slip)
+				return 2 * p->fieldScalar[p->neighbors_sub[1+q*9]] + 2 * p->fieldScalar[p->neighbors_sub[3+q*9]] - 4 * p->fieldScalar[q];
+			else
+				return 2 * p->fieldScalar[p->neighbors_sub[1+q*9]] - 2 * p->fieldScalar[q];
+		else 
+			return 0.;
+	}
+
 };
 
 using InteractionPtr = std::shared_ptr<BaseInteraction>;

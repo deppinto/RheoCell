@@ -14,6 +14,7 @@ protected:
 	input_file input;
 	char output_conf[256];
 	char trajectory[256];
+	std::string initial_configuration_type;
 
 	InteractionPtr interaction;
 
@@ -22,6 +23,8 @@ protected:
 	double box_side_x, box_side_y;
 	double density;
 	int N;
+	int n_rows;
+	int n_columns;
 	std::vector<BaseField *> fields;
 
 	bool external_forces;

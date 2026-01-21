@@ -4,9 +4,11 @@
 #include "ActiveMultiField.h"
 #include "ActiveNematic.h"
 #include "WetModel.h"
+#include "WetPolarModel.h"
 #include "GeneralizedWetModel.h"
 #include "LEBcActiveNematic.h"
 #include "LEBcWetModel.h"
+#include "DifferentialAdhesion.h"
 
 InteractionPtr InteractionFactory::make_interaction(input_file &inp) {
 	std::string inter_type("simplefield");
@@ -30,6 +32,10 @@ InteractionPtr InteractionFactory::make_interaction(input_file &inp) {
                 if(backend.compare("CUDA") == 0) return std::make_shared<WetModel>();
                 else return std::make_shared<WetModel>();
         }
+	else if(inter_type.compare("wetpolarmodel") == 0){
+                if(backend.compare("CUDA") == 0) return std::make_shared<WetPolarModel>();
+                else return std::make_shared<WetPolarModel>();
+        }
 	else if(inter_type.compare("lebcactivenematic") == 0){
                 if(backend.compare("CUDA") == 0) return std::make_shared<LEBcActiveNematic>();
                 else return std::make_shared<LEBcActiveNematic>();
@@ -41,6 +47,10 @@ InteractionPtr InteractionFactory::make_interaction(input_file &inp) {
 	else if(inter_type.compare("generalizedwetmodel") == 0){
                 if(backend.compare("CUDA") == 0) return std::make_shared<GeneralizedWetModel>();
                 else return std::make_shared<GeneralizedWetModel>();
+        }
+	else if(inter_type.compare("differentialadhesion") == 0){
+                if(backend.compare("CUDA") == 0) return std::make_shared<DifferentialAdhesion>();
+                else return std::make_shared<DifferentialAdhesion>();
         }
 	else {
 		throw RCexception("Interaction '%s' not found. Aborting", inter_type.c_str());

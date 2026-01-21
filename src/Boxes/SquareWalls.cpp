@@ -29,20 +29,26 @@ void SquareWalls::init(int Lx, int Ly) {
 	sides[1] = Ly;
 
 	walls.resize(Lx*Ly);
+	int empty_area=Lx*Ly;
 	for(int y=0; y<Ly; y++){
 		for(int x=0; x<Lx; x++){
 			int k=x+y*Lx;
-			double wallsx=exp(-double(x)/lambda_wall) + exp(-double(Lx-x-1)/lambda_wall);
+			/*double wallsx=exp(-double(x)/lambda_wall) + exp(-double(Lx-x-1)/lambda_wall);
 			double wallsy=exp(-double(y)/lambda_wall) + exp(-double(Ly-y-1)/lambda_wall);
 			if(wallsx>wallsy)walls[k]=wallsx;
-			else walls[k]=wallsy;
-			//if(y<6)std::cout<<x<<" "<<y<<" "<<k<<" "<<walls[k]<<std::endl;
-			//walls[k] = exp(-double(y)/lambda_wall) + exp(-double(Ly-y-1)/lambda_wall);  
-			//walls[k] = exp(-double(x)/lambda_wall) + exp(-double(Lx-x-1)/lambda_wall);  
-			//if(x==3)std::cout<<"print here: "<<wallsx<<" "<<wallsy<<" "<<walls[k]<<std::endl;
+			else walls[k]=wallsy;*/
+			if(x<lambda_wall-1 || x>Lx-lambda_wall){
+				if(walls[k]==0)empty_area-=1;
+				walls[k] = 1.; 
+			}
+			if(y<lambda_wall || y>Ly-lambda_wall){
+				if(walls[k]==0)empty_area-=1;
+				walls[k] = 1.; 
+			}
 		}
 	}
 
+	std::cout<<"TESTING: Walls empty area: "<<empty_area<<std::endl;
 	neighbors.resize(Lx*Ly*9);
 	BaseBox::setNeighborsPeriodic(Lx, Ly);
 }

@@ -275,24 +275,51 @@ for line in cfile:
         LsubY[pt_num]=int(float(words[1]))
         CoMX[pt_num]=float(words[2])
         CoMY[pt_num]=float(words[3])
+
+        CoMX[pt_num] -= 60
+        CoMY[pt_num] -= 30
+        if CoMY[pt_num] < 0:
+            CoMY[pt_num] += ly
+        if CoMX[pt_num] < 0:
+            CoMX[pt_num] += lx
+
         offsetX[pt_num]=int(float(words[4]))
         offsetY[pt_num]=int(float(words[5]))
         cornerSite[pt_num]=int(float(words[6]))
         cornerSite_x[pt_num]=int(float(words[7]))
         cornerSite_y[pt_num]=int(float(words[8]))
 
-        nemX=float(words[9])
-        nemY=float(words[10])
-        normNem = sqrt(nemX * nemX + nemY * nemY)
-        theta_nem[pt_num]=asin((nemX*nemY)/0.5)/2
-        Q00[pt_num]= 0.5 * (nemX * nemX - nemY * nemY)
-        Q01[pt_num]= nemX * nemY
+        nemQ_mod = sqrt(float(words[9])**2 + float(words[10])**2)
+        nemX = sqrt((1 + float(words[9])/nemQ_mod)/2)
+        nemY = np.sign(float(words[10]))*sqrt((1 - float(words[9])/nemQ_mod)/2)
+        Q00[pt_num]=float(words[9])
+        Q01[pt_num]=float(words[10])
+        #normNem = sqrt(nemX * nemX + nemY * nemY)
+        #theta_nem[pt_num]=asin((nemX*nemY)/0.5)/2
+        #Q00[pt_num]= 0.5 * (nemX * nemX - nemY * nemY)
+        #Q01[pt_num]= nemX * nemY
+        #print(normNem)
 
         for i in range(start_value,len(words),2):
             site=int(float(words[i]))
             value=float(words[i+1])
             yy=int(site/lx)
             xx=site-int(yy*lx)
+
+            #xx = xx + 16
+            #yy = yy - 25
+            #if yy < 0:
+                #yy += ly
+            #if xx >= lx:
+                #xx -= lx
+
+            xx = xx - 60
+            yy = yy - 30
+            if yy < 0:
+                yy += ly
+            if xx < 0:
+                xx += lx
+
             Z[yy][xx]=value
             area[pt_num]+=value*value
 
@@ -304,7 +331,6 @@ for line in cfile:
             nematic_grid_coarse_00[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value*Q00[pt_num]
             nematic_grid_coarse_01[int(yy/deltay_coarse)][int(xx/deltax_coarse)]+=value*Q01[pt_num]
 
-        '''
         S00 = 0
         S01 = 0
         for k in range(LsubX[pt_num]*LsubY[pt_num]):
@@ -330,11 +356,19 @@ for line in cfile:
             S01 += -field_dx * field_dy
 
         D_major_axis = 0.5 * np.atan2(S01, S00)
-        D_major_axis_vec_x = np.cos(D_major_axis)
-        D_major_axis_vec_y = np.sin(D_major_axis)
+        D_major_axis_vec_x = 2 * np.cos(D_major_axis)
+        D_major_axis_vec_y = 2 * np.sin(D_major_axis)
+        #D_i = np.sqrt(S00 * S00 + S01 * S01)
+
         D_i = np.sqrt(S00 * S00 + S01 * S01)
-        print(2 * D_i)
-        '''
+        if D_i > 0.000000001:
+            D_major_axis_vec_x = D_i * sqrt((1 + S00/D_i)/2)
+            D_major_axis_vec_y = D_i * np.sign(S01) * sqrt((1 - S00/D_i)/2)
+        else:
+            D_major_axis_vec_x = 0
+            D_major_axis_vec_y = 0
+
+        #print(2 * D_i)
 
         X, Y = np.meshgrid(x, y)
         step = 0.01
@@ -345,16 +379,19 @@ for line in cfile:
         levels = np.arange(0.0, m, step) + step
 
         if variable==1 or variable==2 or variable==3:
-            if pt_num==44:
+            if pt_num==-1:
                 cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
             else:
                 cset1 = plt.contour(X, Y, Z, levels=[0.5], cmap=cm.winter, alpha=0.5)
 
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*nemX, -3*nemY, width=0.5, head_width=0, color='k')
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*nemX, -3*nemY, width=0.5, head_width=0, color='k')
 
-            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*D_major_axis_vec_x, 3*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
-            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*D_major_axis_vec_x, -3*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*Q00[pt_num], 3*Q01[pt_num], head_width=0, width=0.5, color='k')
+            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*Q00[pt_num], -3*Q01[pt_num], head_width=0, width=0.5, color='k')
+
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 1*D_major_axis_vec_x, 1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -1*D_major_axis_vec_x, -1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
 
         #increment phase field index
         pt_num+=1
@@ -538,7 +575,7 @@ for line in cfile:
                             #print("Defect topology: ", q, p, winding_number[p][q])
 
             frame_num=int(t/print_conf_interval)-1
-            print(frame_num)
+            #print(frame_num)
             #if frame_num%1==0:
                 #print(frame_num, cont_line, t)
             #if cont_line>N+2:
@@ -547,6 +584,9 @@ for line in cfile:
             com_y_t.append(CoMY)
             ax = plt.gca()
             ax.set_aspect('equal', adjustable='box')
+            #ax.set_xlim([10, lx-10])
+            #ax.set_ylim([250, 300])
+            #ax.set_ylim([120, 160])
             ax.set_xlim([0, lx])
             ax.set_ylim([0, ly])
             ax.set_yticklabels([])
@@ -555,11 +595,14 @@ for line in cfile:
             ax.set_yticks([])
             if variable==1 or variable==3:
                 if frame_num<10:
-                    plt.savefig('./Video/frame_00'+str(frame_num)+'.png', transparent=True)
+                    plt.savefig('./Video/frame_00'+str(frame_num)+'.png')
+                    #plt.savefig('./Video/frame_00'+str(frame_num)+'.svg')
                 elif frame_num<100:
                     plt.savefig('./Video/frame_0'+str(frame_num)+'.png')
+                    #plt.savefig('./Video/frame_0'+str(frame_num)+'.svg')
                 elif frame_num<1000:
                     plt.savefig('./Video/frame_'+str(frame_num)+'.png')
+                    #plt.savefig('./Video/frame_'+str(frame_num)+'.svg')
             if variable==2 or variable==4:
                 plt.show()
                 #plt.savefig('./newfig_'+str(frame_num)+'.png', transparent=True)

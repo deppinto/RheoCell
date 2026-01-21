@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -237,6 +237,11 @@ velmin=10000.
 
 velmax_x=0.
 velmin_x=10000.
+
+com_avg_velocity_calc = 0.
+com_all_x = 0.
+com_all_y = 0.
+Gamma_rot = []
 for line in cfile:
     cont_line+=1
     words=line.split()
@@ -244,6 +249,8 @@ for line in cfile:
     if words[0]=='t':
         t=int(float(words[2]))
         time_conf.append(t)
+        com_all_x = 0.
+        com_all_y = 0.
         MSD.append(0.)
 
         pt_num=0
@@ -263,7 +270,10 @@ for line in cfile:
         cornerSite_x=[0. for i in range(0,N)]
         cornerSite_y=[0. for i in range(0,N)]
         com_velocity_x = [0. for i in range(0,N)]
-        com_velocity_x = [0. for i in range(0,N)]
+        com_velocity_y = [0. for i in range(0,N)]
+
+        #print(com_avg_velocity_calc/N)
+        com_avg_velocity_calc = 0.
 
     elif words[0]=='b':
         lx=int(float(words[2]))
@@ -317,16 +327,18 @@ for line in cfile:
             if dist_com_y<-ly/2:
                 dist_com_y+=ly
             unrap_comx[pt_num]+=dist_com_x
-            if t==10000:
-                unrap_comx_save_1[pt_num]=unrap_comx[pt_num]
-            if t==30000:
-                unrap_comx_save_2[pt_num]=unrap_comx[pt_num]
-                avg_mean_velocity+=(unrap_comx_save_2[pt_num]-unrap_comx_save_1[pt_num])/(20000*dt*N)
+
+            #if t==10000:
+                #unrap_comx_save_1[pt_num]=unrap_comx[pt_num]
+            #if t==30000:
+                #unrap_comx_save_2[pt_num]=unrap_comx[pt_num]
+                #avg_mean_velocity+=(unrap_comx_save_2[pt_num]-unrap_comx_save_1[pt_num])/(20000*dt*N)
 
             unrap_comy[pt_num]+=dist_com_y
             MSD[len(MSD)-1]+=sqrt(unrap_comx[pt_num]*unrap_comx[pt_num]+unrap_comy[pt_num]*unrap_comy[pt_num])/N
             com_velocity_x[pt_num]=dist_com_x/((time_conf[t1]-time_conf[t2])*dt)
             com_velocity_y[pt_num]=dist_com_y/((time_conf[t1]-time_conf[t2])*dt)
+            com_avg_velocity_calc += sqrt(com_velocity_x[pt_num]*com_velocity_x[pt_num] + com_velocity_y[pt_num]*com_velocity_y[pt_num])
 
         nemX=float(words[9])
         nemY=float(words[10])
@@ -399,11 +411,52 @@ for line in cfile:
             cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color="k")
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], com_velocity_x[pt_num]/norm, com_velocity_y[pt_num]/norm, width=0.5, color=cm.hot(color_val))
 
+        com_all_x += CoMX[pt_num]
+        com_all_y += CoMY[pt_num]
         #increment phase field index
         pt_num+=1
         
 
     if cont_line%(N+2)==0:
+
+            com_all_x = com_all_x / N
+            com_all_y = com_all_y / N
+            vector_sum = 0.
+            for p in range(N):
+                distx = CoMX[p] - com_all_x
+                if distx>lx/2:
+                    distx-=lx
+                if distx<-lx/2:
+                    distx+=lx
+                disty = CoMY[p] - com_all_y
+                if disty>ly/2:
+                    disty-=ly
+                if disty<-ly/2:
+                    disty+=ly
+
+                dist_com_x=(CoMX[p]-CoMX_old[p])
+                if dist_com_x>lx/2:
+                    dist_com_x-=lx
+                if dist_com_x<-lx/2:
+                    dist_com_x+=lx
+                dist_com_y=(CoMY[p]-CoMY_old[p])
+                if dist_com_y>ly/2:
+                    dist_com_y-=ly
+                if dist_com_y<-ly/2:
+                    dist_com_y+=ly
+
+                vector_x = distx * dist_com_y
+                vector_y = - disty * dist_com_x
+                norm = sqrt(vector_x**2 + vector_y**2)
+                if norm>0:
+                    vector_x = vector_x / norm
+                    vector_y = vector_y / norm
+                else:
+                    vector_x = 0.
+                    vector_y = 0.
+                vector_sum += vector_x
+
+            Gamma_rot.append(vector_sum/N) 
 
             '''
             for p in range(0,sizey_coarse):
@@ -662,7 +715,7 @@ for line in cfile:
                 #cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos', extent=[0,lx,0,ly])
 
             frame_num=int(t/print_conf_interval)-1
-            print(frame_num)
+            #print(frame_num)
             #if frame_num%1==0:
                 #print(frame_num, cont_line, t)
             #if cont_line>N+2:
@@ -697,7 +750,7 @@ for line in cfile:
 
 plt.close()
 
-
+'''
 y=np.arange(0., ly, deltay_coarse)
 vx_width=[0. for i in range(0, sizey_coarse)]
 vy_width=[0. for i in range(0, sizey_coarse)]
@@ -711,6 +764,7 @@ for p in range(0, sizey_coarse):
 
     vx_width[p] = vx_width[p]/float(avg_val)
     vy_width[p] = vy_width[p]/float(avg_val)
+'''
 
 
 if variable==5:
@@ -796,31 +850,119 @@ if variable==5:
 
 if variable==6:
 
+    averages = []
+    window_size=100
+    for i in range(len(Gamma_rot) - window_size + 1):
+        window = Gamma_rot[i:i + window_size]
+        averages.append(sum(window) / window_size)
+
+    jamm_time = 0
+    rotation_time = 0
+    jamm_time_all = []
+    rotation_time_all = []
+    delta_control = 25
+    for i in range(len(averages)):
+
+        if rotation_time==0 and abs(averages[i])>0.5:
+            rot_test = 0
+            for j in range(delta_control):
+                if i+j>=len(averages):
+                    break
+                if abs(averages[i+j])>0.5:
+                    rot_test+=1
+            if rot_test > delta_control - 1:
+                rotation_time+=1
+        elif abs(averages[i])>0.5:
+            rotation_time+=1
+        elif rotation_time!=0 and abs(averages[i])<0.5:
+            wait_test = 0
+            for j in range(delta_control):
+                if i+j>=len(averages):
+                    break
+                if abs(averages[i+j])<0.5:
+                    wait_test+=1
+            if wait_test > delta_control - 1:
+                rotation_time_all.append(rotation_time)
+                rotation_time=0
+            else:
+                rotation_time+=1
+
+        if jamm_time==0 and abs(averages[i])<0.1:
+            jamm_test = 0
+            for j in range(delta_control):
+                if i+j>=len(averages):
+                    break
+                if abs(averages[i+j])<0.1:
+                    jamm_test+=1
+            if jamm_test > delta_control - 1:
+                jamm_time+=1
+        elif abs(averages[i])<0.1:
+            jamm_time+=1
+        elif jamm_time!=0 and abs(averages[i])>0.1:
+            wait_test = 0
+            for j in range(delta_control):
+                if i+j>=len(averages):
+                    break
+                if abs(averages[i+j])>0.1:
+                    wait_test+=1
+            if wait_test > delta_control - 1:
+                jamm_time_all.append(jamm_time)
+                jamm_time=0
+            else:
+                jamm_time+=1
+
+
+    if jamm_time>0:
+                jamm_time_all.append(jamm_time)
+    if rotation_time>0:
+                rotation_time_all.append(rotation_time)
+    #print(rotation_time_all)
+    #print(jamm_time_all)
+    with open('time_rotation.txt', 'w') as f:
+        for i in range(len(rotation_time_all)):
+            print(rotation_time_all[i] * dt, file=f)  
+    with open('time_jamm.txt', 'w') as f:
+        for i in range(len(jamm_time_all)):
+            print(jamm_time_all[i] * dt, file=f)  
+
     '''
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-    plt.plot(time_conf, MSD, '-o' , color='darkgreen')
-    plt.ylabel('MSD', fontsize=18)
+    #plt.plot(time_conf, MSD, '-o' , color='darkgreen')
+    #plt.plot(Gamma_rot, '-o' , color='darkgreen')
+    plt.plot(averages, '-o' , color='royalblue')
+    plt.ylabel(r'$\Gamma$', fontsize=18)
     plt.xlabel('time', fontsize=18)
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
+    plt.ylim(-1,1)
+    plt.axhline(y=-0.5, color='green', linestyle='--', linewidth=1)
+    plt.axhline(y=0.5, color='green', linestyle='--', linewidth=1)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results11/gamma_time_circle_Velocity_NN.svg", transparent=True)
+    #plt.savefig("/home/p/pinto/Phase_Field/RheoCell/Work/Analysis/Slides/Results11/gamma_time_circle_Velocity_NN.png", transparent=True)
     plt.show()
     #plt.savefig('./MSD_time.png')
     plt.close()
     '''
 
+
+    '''
     with open('MSD.txt', 'w') as f:
         for i in range(len(MSD)):
             print(time_conf[i]*dt,MSD[i], file=f)  
 
     with open('mean_velocity.txt', 'w') as f:
         print(abs(avg_mean_velocity), file=f)  
+    '''
 
+
+    '''
     with open('v_width.txt', 'w') as f:
         for i in range(len(y)):
             print(vy_width[i], vx_width[i], y[i], file=f)  
+    '''
 
 
 print('done')
