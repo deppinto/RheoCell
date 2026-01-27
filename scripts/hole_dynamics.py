@@ -138,6 +138,7 @@ cell_value_thresh = 0.01
 
 voids=[[0. for q in range(lx)] for k in range(ly)]
 voids_area = lx*ly
+circ=0
 hole_lifetime = 0
 stats_hole_lifetime = []
 
@@ -149,6 +150,7 @@ number_holes = 0
 
 tv = np.zeros(end_frame - start_frame)
 vv = np.zeros(end_frame - start_frame)
+cct = np.zeros(end_frame - start_frame)
 circularity = np.zeros(end_frame - start_frame)
 ani = np.zeros(end_frame - start_frame)
 radius_speed = np.zeros(end_frame - start_frame)
@@ -413,6 +415,7 @@ for line in cfile:
 
         tv[time_line] = t
         vv[time_line] = voids_area / area0
+        cct[time_line] = circ
         voids=[[0. for q in range(lx)] for k in range(ly)]
         voids_area = lx*ly
         lattice_max=[[-1. for q in range(lx)] for k in range(ly)]
@@ -512,6 +515,7 @@ if start_hole_time >= 0:
 
 tv[time_line] = t
 vv[time_line] = voids_area / area0
+cct[time_line] = circ
 
 
 for i in range(len(histogram_hole_area)):
@@ -541,7 +545,7 @@ if variable==1:
 
     with open('voids_area_time.txt', 'w') as f:
         for i in range(len(vv)):
-            print(i, vv[i] * area0, file=f)
+            print(i, vv[i] * area0, cct[i], file=f)
 
     '''
     with open('voids_histogram_area.txt', 'w') as f:
