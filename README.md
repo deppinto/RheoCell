@@ -4,7 +4,7 @@ Simulation code used for (preprint arXiv:2508.06461) that models cell monolayers
 
 ## Building
 
-We use cmake to build the executable files. The input is the following from the main folder:
+We use cmake to build the executable files. The first time the code is compiled, it should take a minute or two. The input is the following from the main folder:
 
 ```
 mkdir build
@@ -29,4 +29,4 @@ where NN should be replaced by integers and will specify the the length and widt
 
 ## Examples
 
-Some example input files are included in the `examples` directory. The `scripts` directory includes multiple python scripts that are used to analyse the results. In particular, the `read_conf.py` allows the user to visualize a configuration by supplying the topology file (see `examples` directory) and the configuration file extracted from a run (e.g. `last_conf.dat`).
+Some example input files are included in the `examples` directory. The `scripts` directory includes multiple python scripts that are used to analyse the results. In particular, the `read_conf.py` allows the user to visualize a configuration by supplying the topology file (see `examples` directory) and the configuration file extracted from a run (e.g. `last_conf.dat`). Runtime depends on the choice of parameters, particularly on the total number of time steps ("steps"). The example provided should only take some minutes.
