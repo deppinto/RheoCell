@@ -154,13 +154,16 @@ number SimpleMultiField::f_interaction(BaseField *p, int q) {
 	//xright + ybottom + xleft + ytop - 4.*p->fieldScalar[q];
 
 	// CH term coupled to chemical
-	number CH =+ gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*laplacianPhi);
+	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*laplacianPhi);
+	number CH_density = (gamma/lambda)*4*p->fieldScalar[q]*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-p->fieldScalar[q]) - gamma*lambda*(p->fieldDX[q]*p->fieldDX[q] + p->fieldDY[q]*p->fieldDY[q]);
    
 	// area conservation term
 	number A = - 4*mu/a0*(1-p->area/a0)*p->fieldScalar[q];
+	number A_density = - mu/a0*p->fieldScalar[q]*p->fieldScalar[q];
 
 	// repulsion term
-	number Rep = + 4*kappa/lambda*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
+	number Rep = 4*kappa/lambda*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
+	number Rep_density = (kappa/lambda)*p->fieldScalar[q]*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
 
 	// adhesion term
 	//number lsquare = 2 * p->fieldScalar[q] * laplacianPhi + 2 * (dx *dx + dy * dy);
@@ -172,6 +175,9 @@ number SimpleMultiField::f_interaction(BaseField *p, int q) {
 	// delta F / delta phi_i
 	number V = CH + A + Rep + Adh;
 	p->freeEnergy[q] += V;
+	p->freeEnergyDensity[q] += CH_density + A_density + Rep_density;
+	p->freeEnergyDensityGradient_x[q] += 2 * gamma * lambda * p->fieldDX[q];
+	p->freeEnergyDensityGradient_y[q] += 2 * gamma * lambda * p->fieldDY[q];
 	p->Pressure[q] = Rep - CH - A;
 
 	return V;

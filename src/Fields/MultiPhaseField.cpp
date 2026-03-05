@@ -32,6 +32,9 @@ void MultiPhaseField::resizing() {
 	//Phi00.resize(subSize);	
 	//Phi01.resize(subSize);	
 	freeEnergy.resize(subSize);
+	freeEnergyDensity.resize(subSize);
+	freeEnergyDensityGradient_x.resize(subSize);
+	freeEnergyDensityGradient_y.resize(subSize);
 	fieldScalar_old.resize(subSize);
 	dfield_old.resize(subSize);
 	neighbors_sub.resize(subSize*9);

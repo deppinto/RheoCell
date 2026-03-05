@@ -20,6 +20,7 @@ SET(observables_SOURCES
 	Observables/NematicField.cpp
 	Observables/StressField.cpp
 	Observables/ShapeField.cpp
+	Observables/ThermodynamicStressField.cpp
 )
 
 SET(backends_SOURCES

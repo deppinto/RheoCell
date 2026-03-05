@@ -174,6 +174,9 @@ public:
 	//vectors for integration
         std::vector<number> fieldScalar;
         std::vector<number> freeEnergy;
+        std::vector<number> freeEnergyDensity;
+        std::vector<number> freeEnergyDensityGradient_x;
+        std::vector<number> freeEnergyDensityGradient_y;
         std::vector<number> fieldScalar_old;
         std::vector<number> dfield_old;
 	std::vector<int> neighbors_sub;
