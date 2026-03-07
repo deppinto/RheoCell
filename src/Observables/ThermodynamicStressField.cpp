@@ -70,7 +70,8 @@ string ThermodynamicStressField::field(BaseField *p) {
 
 void ThermodynamicStressField::calc_field(BaseField *p) {
 
-	//std::cout<<"begin-------------------------------------------------------------------- "<<p->index<<std::endl;
+	std::cout<<"begin-------------------------------------------------------------------- "<<p->index<<std::endl;
+	number value_calc = 0.;
 	for(int q=0;q<p->subSize; q++){
 		int k = p->map_sub_to_box[q];
 		//std::cout<<"first: "<<k<<" "<<Lx<<" "<<Ly<<std::endl;
@@ -78,9 +79,10 @@ void ThermodynamicStressField::calc_field(BaseField *p) {
 		f_field_xx[k] += p->freeEnergyDensity[q] - p->freeEnergy[q] * p->fieldScalar[q] + p->fieldDX[q] * p->freeEnergyDensityGradient_x[q];
 		f_field_yy[k] += p->freeEnergyDensity[q] - p->freeEnergy[q] * p->fieldScalar[q] + p->fieldDY[q] * p->freeEnergyDensityGradient_y[q];
 		f_field_xy[k] += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
+		value_calc += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
 		phi_field[k] += p->fieldScalar[q];
 	}
-	//std::cout<<"cell-------------------------------------------------------------------- "<<p->index<<std::endl;
+	std::cout<<"cell-------------------------------------------------------------------- "<<p->index<<" "<<value_calc<<std::endl;
 }
 
 string ThermodynamicStressField::f_field(llint step) {
@@ -99,7 +101,6 @@ string ThermodynamicStressField::f_field(llint step) {
 	for(auto p_idx : visible_fields) {
 		BaseField *p = config_info->fields()[p_idx];
 		bool visible = (only_type == -1 || p->type == only_type);
-		if(p_idx!=50)continue;
 		if(visible) {
 			calc_field(p);
 		}
