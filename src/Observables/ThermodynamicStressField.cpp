@@ -99,6 +99,7 @@ string ThermodynamicStressField::f_field(llint step) {
 	for(auto p_idx : visible_fields) {
 		BaseField *p = config_info->fields()[p_idx];
 		bool visible = (only_type == -1 || p->type == only_type);
+		if(p_idx!=50)continue;
 		if(visible) {
 			calc_field(p);
 		}

@@ -155,7 +155,7 @@ number SimpleMultiField::f_interaction(BaseField *p, int q) {
 
 	// CH term coupled to chemical
 	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*laplacianPhi);
-	number CH_density = (gamma/lambda)*4*p->fieldScalar[q]*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-p->fieldScalar[q]) - gamma*lambda*(p->fieldDX[q]*p->fieldDX[q] + p->fieldDY[q]*p->fieldDY[q]);
+	number CH_density = (gamma/lambda)*4*p->fieldScalar[q]*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-p->fieldScalar[q]) + gamma*lambda*(p->fieldDX[q]*p->fieldDX[q] + p->fieldDY[q]*p->fieldDY[q]);
    
 	// area conservation term
 	number A = - 4*mu/a0*(1-p->area/a0)*p->fieldScalar[q];
