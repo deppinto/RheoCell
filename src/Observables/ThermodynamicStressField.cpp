@@ -70,19 +70,26 @@ string ThermodynamicStressField::field(BaseField *p) {
 
 void ThermodynamicStressField::calc_field(BaseField *p) {
 
-	std::cout<<"begin-------------------------------------------------------------------- "<<p->index<<std::endl;
-	number value_calc = 0.;
+	//std::cout<<"begin-------------------------------------------------------------------- "<<p->index<<std::endl;
+	//number value_calc = 0.;
+	//number value_calc_sides = 0.;
+	//number value_calc_ends = 0.;
 	for(int q=0;q<p->subSize; q++){
+		//int xx = q%30;
+		//int yy = q/30;
 		int k = p->map_sub_to_box[q];
 		//std::cout<<"first: "<<k<<" "<<Lx<<" "<<Ly<<std::endl;
 
 		f_field_xx[k] += p->freeEnergyDensity[q] - p->freeEnergy[q] * p->fieldScalar[q] + p->fieldDX[q] * p->freeEnergyDensityGradient_x[q];
 		f_field_yy[k] += p->freeEnergyDensity[q] - p->freeEnergy[q] * p->fieldScalar[q] + p->fieldDY[q] * p->freeEnergyDensityGradient_y[q];
 		f_field_xy[k] += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
-		value_calc += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
+		//value_calc += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
+		//if(xx<15 && yy>15)value_calc_sides += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
+		//else if(xx>15 && yy<15)value_calc_sides += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
+		//else value_calc_ends += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
 		phi_field[k] += p->fieldScalar[q];
 	}
-	std::cout<<"cell-------------------------------------------------------------------- "<<p->index<<" "<<value_calc<<std::endl;
+	//std::cout<<"cell-------------------------------------------------------------------- "<<p->index<<" "<<value_calc<<" "<<value_calc_sides<<" "<<value_calc_ends<<std::endl;
 }
 
 string ThermodynamicStressField::f_field(llint step) {
