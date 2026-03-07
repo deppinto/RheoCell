@@ -41,6 +41,11 @@ number ShearFlowChannel::free_energy(number phi, number walls, number laplacianS
 	return 4.0*kappa_wall/lambda*phi*walls*walls;
 }
 
+number ShearFlowChannel::free_energy_density(number phi, number walls, number laplacianSquare) {
+
+	return 2.0*kappa_wall/lambda*phi*phi*walls*walls;
+}
+
 number ShearFlowChannel::potential(int k, number walls) {
 	return walls;
 }

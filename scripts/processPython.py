@@ -374,6 +374,7 @@ final_x = []
 final_y = []
 final_yy = []
 omega = []
+stress_values = []
 time_array = np.linspace(0, 1000000, 1000)
 #plt.figure(figsize=(10, 6))
 for traj in range(start, end):
@@ -395,7 +396,8 @@ for traj in range(start, end):
     phi_all = []
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
 
-        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Single_runs/save_confs/Running/confs_46/elongation_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
@@ -412,6 +414,7 @@ for traj in range(start, end):
             #theta_5.append(((float(save[variable]))*pi/180))
             #sum_time += float(save[variable])
             theta_5.append(float(save[variable]))
+            stress_values.append(float(save[variable]))
 
             #plt.plot(
                     #float(save[variable+1]), float(save[variable]),
@@ -516,15 +519,15 @@ for traj in range(start, end):
     #omega.append(sum(theta_5)/jobs[traj])
 
 
-    last_yy = theta_5[-50:]
+    #last_yy = theta_5[-50:]
     #last_xx = xx[-50:]
     #slope, intercept, _, _, _ = linregress(last_xx, last_yy)
     #final_x.append((N[traj] * 8 * 8) / ((lx[traj] - 2 * 6)/2)**2)
     #final_y.append(slope)
     #final_x.append(shear_rate[traj])
-    final_y.append(np.mean(last_yy))
+    #final_y.append(np.mean(last_yy))
     #final_yy.append(stats.sem(last_yy))
-    final_yy.append(np.std(last_yy))
+    #final_yy.append(np.std(last_yy))
 
     #plt.plot(theta_5, '--o', label=shear_rate[traj])
     #plt.plot(theta_5, '--o', label=variable)
@@ -551,8 +554,22 @@ for traj in range(start, end):
         break
 
 #print(final_x)
-print(final_y)
-print(final_yy)
+#print(final_y)
+#print(final_yy)
+plt.plot(shear_rate[0:29], stress_values[0:29], '--o', label='low dt')
+plt.plot(shear_rate[29:58], stress_values[29:58], '--s', label='high dt')
+plt.xscale('log')
+plt.ylabel(r'$\sigma_{xy}$', fontname='Times New Roman', fontsize=18)
+plt.xlabel(r'$\dot{\gamma}$', fontname='Times New Roman', fontsize=18)
+plt.xticks(fontname='Times New Roman', fontsize=18)
+plt.yticks(fontname='Times New Roman', fontsize=18)
+plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
+plt.legend(ncols=1, fontsize=14,  frameon=False)
+#plt.yscale('log')
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xy.svg", transparent=True)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xy.png", transparent=True)
+plt.show()
+exit (1)
 
 #final_x = [1.0, 0.75, 0.5, 0.25, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001]
 #final_y = [0.49992082742607136, 0.48058329369018765, 0.46116523160021705, 0.4377948871250764, 0.4428061377749363, 0.5159620665712491, 0.523863398829233, 0.5828769623310098, 0.2893244788742896, 0.40499525754918736, 0.03450679770844628]
@@ -830,7 +847,7 @@ plt.tight_layout()
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/lattice_r_time_series_new_hex.png", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/phase_1_time.svg", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/phi_plot_low.svg", transparent=True)
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/pouis_plot_order.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/pouis_plot_order.svg", transparent=True)
 plt.show()
 exit(1)
 

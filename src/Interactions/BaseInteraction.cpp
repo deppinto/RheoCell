@@ -65,6 +65,7 @@ void BaseInteraction::updateFieldProperties(BaseField *p, int q, int k){
 	p->total_force_repulsion_x = 0.;
 	p->total_force_repulsion_y = 0.;
 	p->freeEnergy[q] = p->set_F_ext(q, box->getWalls(k), box->getLaplacianWalls(k));
+	p->freeEnergyDensity[q] = p->set_f_density_ext(q, box->getWalls(k), box->getLaplacianWalls(k));
 }
 
 void BaseInteraction::update_sub_to_box_map(BaseField *p, int q, int sub_site, int sub_site_x, int sub_site_y){

@@ -64,6 +64,18 @@ public:
 		}
 		return F_ext;
 	}
+	number f_density_ext = 0;
+	inline number set_f_density_ext(int q, number walls, number laplacian_walls) {
+		if(ext_forces.size() > 0) {
+			f_density_ext = 0.;
+			number f_calc;
+			for(auto ext_force : ext_forces) {
+				f_calc = ext_force->free_energy_density(fieldScalar[q], walls, laplacian_walls);
+				f_density_ext += f_calc;
+			}
+		}
+		return f_density_ext;
+	}
 
         /**
          * @brief Computes the interaction resulting from all the external forces acting on the particle. Stores the result in the ext_potential member.

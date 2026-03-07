@@ -83,6 +83,7 @@ public:
 	 * @param pos position of the particle
 	 */
 	virtual number free_energy(number phi, number walls, number laplacianSquare){return 0;};
+	virtual number free_energy_density(number phi, number walls, number laplacianSquare){return 0;};
 
 	/**
 	 * @brief returns value of the potential associated to the force (a number)

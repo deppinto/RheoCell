@@ -20,6 +20,7 @@ public:
 	std::tuple<std::vector<int>, std::string> init(input_file &inp) override;
 
 	virtual number free_energy(number phi, number walls, number laplacianSquare);
+	virtual number free_energy_density(number phi, number walls, number laplacianSquare);
 	virtual number potential(int k, number walls);
 	virtual std::vector<number> velocity_profile(int k, int lx, int ly);
 	virtual void apply_changes_after_equilibration();

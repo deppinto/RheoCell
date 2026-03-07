@@ -176,8 +176,8 @@ number SimpleMultiField::f_interaction(BaseField *p, int q) {
 	number V = CH + A + Rep + Adh;
 	p->freeEnergy[q] += V;
 	p->freeEnergyDensity[q] += CH_density + A_density + Rep_density;
-	p->freeEnergyDensityGradient_x[q] += 2 * gamma * lambda * p->fieldDX[q];
-	p->freeEnergyDensityGradient_y[q] += 2 * gamma * lambda * p->fieldDY[q];
+	p->freeEnergyDensityGradient_x[q] = 2 * gamma * lambda * p->fieldDX[q];
+	p->freeEnergyDensityGradient_y[q] = 2 * gamma * lambda * p->fieldDY[q];
 	p->Pressure[q] = Rep - CH - A;
 
 	return V;
