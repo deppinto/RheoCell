@@ -161,11 +161,11 @@ if variable==1:
     #print("Stress:", avg_stress_xx, avg_stress_yy, avg_stress_xy)
 
     with open('stress_time_avg.txt', 'w') as f:
-        print(avg_stress_xx, avg_stress_yy, avg_stress_xy)
+        print(avg_stress_xx, avg_stress_yy, avg_stress_xy, file=f)
 
     with open('stress_time.txt', 'w') as f:
         for i in range(len(avg_stress_xy_time)):
-            print(time[i], avg_stress_xx[i], avg_stress_yy[i], avg_stress_xy[i], file=f)
+            print(time[i], avg_stress_xx_time[i], avg_stress_yy_time[i], avg_stress_xy_time[i], file=f)
 
 
 if variable==2:
