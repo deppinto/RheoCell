@@ -100,11 +100,11 @@ for i in range(start_frame, end_frame, 1):
     #header=traj_file.readline().split()
 
     if i<10:
-        file = sys.argv[2] + "stress_field_00" + str(i) + ".txt"
+        file = sys.argv[2] + "thermodynamic_stress_field_00" + str(i) + ".txt"
     elif i<100:
-        file = sys.argv[2] + "stress_field_0" + str(i) + ".txt"
+        file = sys.argv[2] + "thermodynamic_stress_field_0" + str(i) + ".txt"
     else:
-        file = sys.argv[2] + "stress_field_" + str(i) + ".txt"
+        file = sys.argv[2] + "thermodynamic_stress_field_" + str(i) + ".txt"
     #print(file)
 
     cfile=open(file,"r")
