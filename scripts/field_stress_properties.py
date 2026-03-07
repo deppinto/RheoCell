@@ -78,6 +78,8 @@ avg_stress_xx = 0.
 avg_stress_yy = 0.
 time = []
 
+l_avg=(ly-100)*lx
+l_t_avg=(ly-100)*lx*(end_frame-start_frame)
 
 for i in range(start_frame, end_frame, 1):
 
@@ -143,13 +145,13 @@ for i in range(start_frame, end_frame, 1):
             Z_xy[int(yy)][int(xx)]=value_xy
 
             if yy>50 and yy<ly-50:
-                avg_stree_xy_time[i] += value_xy 
-                avg_stree_xx_time[i] += value_xx 
-                avg_stree_yy_time[i] += value_yy 
+                avg_stress_xy_time[i] += value_xy/l_avg 
+                avg_stress_xx_time[i] += value_xx/l_avg
+                avg_stress_yy_time[i] += value_yy/l_avg
 
-                avg_stress_xy += value_xy
-                avg_stress_xx += value_xx
-                avg_stress_yy += value_yy
+                avg_stress_xy += value_xy/l_t_avg
+                avg_stress_xx += value_xx/l_t_avg
+                avg_stress_yy += value_yy/l_t_avg
 
 
         read_line += 1
