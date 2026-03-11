@@ -83,6 +83,7 @@ void ThermodynamicStressField::calc_field(BaseField *p) {
 		f_field_xx[k] += p->freeEnergyDensity[q] - p->freeEnergy[q] * p->fieldScalar[q] + p->fieldDX[q] * p->freeEnergyDensityGradient_x[q];
 		f_field_yy[k] += p->freeEnergyDensity[q] - p->freeEnergy[q] * p->fieldScalar[q] + p->fieldDY[q] * p->freeEnergyDensityGradient_y[q];
 		f_field_xy[k] += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
+		f_field_ChemPot[k] += p->freeEnergy[q];
 		//value_calc += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
 		//if(xx<15 && yy>15)value_calc_sides += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
 		//else if(xx>15 && yy<15)value_calc_sides += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
@@ -98,10 +99,12 @@ string ThermodynamicStressField::f_field(llint step) {
 	std::fill(f_field_xx.begin(), f_field_xx.end(), 0.);
 	std::fill(f_field_yy.begin(), f_field_yy.end(), 0.);
 	std::fill(f_field_xy.begin(), f_field_xy.end(), 0.);
+	std::fill(f_field_ChemPot.begin(), f_field_ChemPot.end(), 0.);
 	std::fill(phi_field.begin(), phi_field.end(), 0.);
 	std::fill(f_field_coarse_xx.begin(), f_field_coarse_xx.end(), 0.);
 	std::fill(f_field_coarse_yy.begin(), f_field_coarse_yy.end(), 0.);
 	std::fill(f_field_coarse_xy.begin(), f_field_coarse_xy.end(), 0.);
+	std::fill(f_field_coarse_ChemPot.begin(), f_field_coarse_ChemPot.end(), 0.);
 	std::fill(phi_field_coarse.begin(), phi_field_coarse.end(), 0.);
 
 
@@ -116,7 +119,7 @@ string ThermodynamicStressField::f_field(llint step) {
 	for(int i=0; i<Ly; i++){
 		for(int j=0; j<Lx; j++){
 			int site = j + i * Lx;
-			conf << j+0.5 <<" "<< i+0.5 << " " << f_field_xx[site] << " " << f_field_yy[site] << " "<< f_field_xy[site] <<" ";
+			conf << j+0.5 <<" "<< i+0.5 << " " << f_field_xx[site] << " " << f_field_yy[site] << " "<< f_field_xy[site] <<" "<< f_field_ChemPot[site]<<" ";
 		}
 	}
 	conf<<"\n";
@@ -135,12 +138,13 @@ string ThermodynamicStressField::f_field(llint step) {
 					f_field_coarse_xx[site] += f_field_xx[ss] / (size_grid * size_grid);
 					f_field_coarse_yy[site] += f_field_yy[ss] / (size_grid * size_grid);
 					f_field_coarse_xy[site] += f_field_xy[ss] / (size_grid * size_grid);
+					f_field_coarse_ChemPot[site] += f_field_ChemPot[ss] / (size_grid * size_grid);
 					phi_field_coarse[site] += 1.;				
 				}
 			}
 
 
-			conf << j + 0.5 <<" "<<  i + 0.5  << " " << f_field_coarse_xx[site] << " " << f_field_coarse_yy[site] << " "<< f_field_coarse_xy[site] << " ";
+			conf << j + 0.5 <<" "<<  i + 0.5  << " " << f_field_coarse_xx[site] << " " << f_field_coarse_yy[site] << " "<< f_field_coarse_xy[site] << " "<< f_field_coarse_ChemPot[site] << " ";
 		}
 	}
 

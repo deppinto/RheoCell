@@ -554,21 +554,25 @@ for traj in range(start, end):
     if end == start:
         break
 
+
+stress_values=np.array(stress_values)
+result = stress_values.reshape(29, 10).sum(axis=1)
 #print(final_x)
 #print(final_y)
 #print(final_yy)
-plt.plot(shear_rate[0:29], stress_values[0:29], '--o', label='low dt')
-plt.plot(shear_rate[29:58], stress_values[29:58], '--s', label='high dt')
+plt.plot(shear_rate[0:29], result[0:29], '--o', label='random')
+#plt.plot(shear_rate[0:29], stress_values[0:29], '--o', label='low dt')
+#plt.plot(shear_rate[29:58], stress_values[29:58], '--s', label='high dt')
 plt.xscale('log')
-plt.ylabel(r'$\sigma_{xy}$', fontname='Times New Roman', fontsize=18)
+plt.ylabel(r'$\sigma_{xx}$', fontname='Times New Roman', fontsize=18)
 plt.xlabel(r'$\dot{\gamma}$', fontname='Times New Roman', fontsize=18)
 plt.xticks(fontname='Times New Roman', fontsize=18)
 plt.yticks(fontname='Times New Roman', fontsize=18)
 plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
 plt.legend(ncols=1, fontsize=14,  frameon=False)
 #plt.yscale('log')
-#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xy.svg", transparent=True)
-#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xy.png", transparent=True)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xx_random.svg", transparent=True)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xx_random.png", transparent=True)
 plt.show()
 exit (1)
 
