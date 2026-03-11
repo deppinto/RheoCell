@@ -145,9 +145,9 @@ for i in range(start_frame, end_frame, 1):
             Z_xy[int(yy)][int(xx)]=value_xy
 
             if yy>50 and yy<ly-50:
-                avg_stress_xy_time[i] += value_xy/l_avg 
-                avg_stress_xx_time[i] += value_xx/l_avg
-                avg_stress_yy_time[i] += value_yy/l_avg
+                avg_stress_xy_time[i-start_frame] += value_xy/l_avg 
+                avg_stress_xx_time[i-start_frame] += value_xx/l_avg
+                avg_stress_yy_time[i-start_frame] += value_yy/l_avg
 
                 avg_stress_xy += value_xy/l_t_avg
                 avg_stress_xx += value_xx/l_t_avg

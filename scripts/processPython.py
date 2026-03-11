@@ -415,6 +415,7 @@ for traj in range(start, end):
             #sum_time += float(save[variable])
             theta_5.append(float(save[variable]))
             stress_values.append(float(save[variable]))
+            #stress_values.append(0.5 * (float(save[variable]) +  float(save[variable+1])))
 
             #plt.plot(
                     #float(save[variable+1]), float(save[variable]),
@@ -566,8 +567,8 @@ plt.yticks(fontname='Times New Roman', fontsize=18)
 plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
 plt.legend(ncols=1, fontsize=14,  frameon=False)
 #plt.yscale('log')
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xy.svg", transparent=True)
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xy.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xy.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xy.png", transparent=True)
 plt.show()
 exit (1)
 
