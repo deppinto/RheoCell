@@ -32,6 +32,7 @@ void ThermodynamicStressField::init() {
 	f_field_xx.resize(Lx * Ly);
 	f_field_yy.resize(Lx * Ly);
 	f_field_xy.resize(Lx * Ly);
+	f_field_ChemPot.resize(Lx * Ly);
 	phi_field.resize(Lx * Ly);
 
 
@@ -40,6 +41,7 @@ void ThermodynamicStressField::init() {
 	f_field_coarse_xx.resize(Lx_coarse * Ly_coarse);
 	f_field_coarse_yy.resize(Ly_coarse * Ly_coarse);
 	f_field_coarse_xy.resize(Ly_coarse * Ly_coarse);
+	f_field_coarse_ChemPot.resize(Ly_coarse * Ly_coarse);
 	phi_field_coarse.resize(Lx_coarse * Ly_coarse);
 
 	if(visible_fields.size() == 0) {
