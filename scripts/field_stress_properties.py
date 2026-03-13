@@ -73,9 +73,11 @@ thresh = 0.5 * pi * R0 * R0
 avg_stress_xy_time = [0. for i in range(end_frame-start_frame)]
 avg_stress_xx_time = [0. for i in range(end_frame-start_frame)]
 avg_stress_yy_time = [0. for i in range(end_frame-start_frame)]
+avg_ChemPot_time = [0. for i in range(end_frame-start_frame)]
 avg_stress_xy = 0.
 avg_stress_xx = 0.
 avg_stress_yy = 0.
+avg_ChemPot = 0.
 time = []
 
 l_avg=(ly-100)*lx
@@ -121,6 +123,7 @@ for i in range(start_frame, end_frame, 1):
     Z_xx=[[0 for q in range(lx)] for k in range(ly)]
     Z_yy=[[0 for q in range(lx)] for k in range(ly)]
     Z_xy=[[0 for q in range(lx)] for k in range(ly)]
+    Z_ChemPot=[[0 for q in range(lx)] for k in range(ly)]
     start_value = 0
     read_line = 0
     for line in cfile:
@@ -133,25 +136,31 @@ for i in range(start_frame, end_frame, 1):
         Z_xx=[[0 for q in range(lx)] for k in range(ly)]
         Z_yy=[[0 for q in range(lx)] for k in range(ly)]
         Z_xy=[[0 for q in range(lx)] for k in range(ly)]
-        for k in range(start_value,len(words),5):
+        Z_ChemPot=[[0 for q in range(lx)] for k in range(ly)]
+        for k in range(start_value,len(words), 6):
             xx=float(words[k])
             yy=float(words[k+1])
             value_xx=float(words[k+2])
             value_yy=float(words[k+3])
             value_xy=float(words[k+4])
+            value_ChemPot=float(words[k+5])
 
             Z_xx[int(yy)][int(xx)]=value_xx
             Z_yy[int(yy)][int(xx)]=value_yy
             Z_xy[int(yy)][int(xx)]=value_xy
+            Z_ChemPot[int(yy)][int(xx)]=value_ChemPot
+
 
             if yy>50 and yy<ly-50:
                 avg_stress_xy_time[i-start_frame] += value_xy/l_avg 
                 avg_stress_xx_time[i-start_frame] += value_xx/l_avg
                 avg_stress_yy_time[i-start_frame] += value_yy/l_avg
+                avg_ChemPot_time[i-start_frame] += value_ChemPot/l_avg
 
                 avg_stress_xy += value_xy/l_t_avg
                 avg_stress_xx += value_xx/l_t_avg
                 avg_stress_yy += value_yy/l_t_avg
+                avg_ChemPot += value_ChemPot/l_t_avg
 
 
         read_line += 1
@@ -161,11 +170,11 @@ if variable==1:
     #print("Stress:", avg_stress_xx, avg_stress_yy, avg_stress_xy)
 
     with open('stress_time_avg.txt', 'w') as f:
-        print(avg_stress_xx, avg_stress_yy, avg_stress_xy, file=f)
+        print(avg_stress_xx, avg_stress_yy, avg_stress_xy, avg_ChemPot, file=f)
 
     with open('stress_time.txt', 'w') as f:
         for i in range(len(avg_stress_xy_time)):
-            print(time[i], avg_stress_xx_time[i], avg_stress_yy_time[i], avg_stress_xy_time[i], file=f)
+            print(time[i], avg_stress_xx_time[i], avg_stress_yy_time[i], avg_stress_xy_time[i], avg_ChemPot_time[i], file=f)
 
 
 if variable==2:
