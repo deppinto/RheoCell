@@ -80,8 +80,10 @@ avg_stress_yy = 0.
 avg_ChemPot = 0.
 time = []
 
-l_avg=(ly-100)*lx
-l_t_avg=(ly-100)*lx*(end_frame-start_frame)
+#l_avg=(ly-100)*lx
+#l_t_avg=(ly-100)*lx*(end_frame-start_frame)
+l_avg=(ly/2-50)*lx
+l_t_avg=(ly/2-50)*lx*(end_frame-start_frame)
 
 for i in range(start_frame, end_frame, 1):
 
@@ -151,7 +153,8 @@ for i in range(start_frame, end_frame, 1):
             Z_ChemPot[int(yy)][int(xx)]=value_ChemPot
 
 
-            if yy>50 and yy<ly-50:
+            #if yy>50 and yy<ly-50:
+            if yy>50 and yy<ly/2:
                 avg_stress_xy_time[i-start_frame] += value_xy/l_avg 
                 avg_stress_xx_time[i-start_frame] += value_xx/l_avg
                 avg_stress_yy_time[i-start_frame] += value_yy/l_avg

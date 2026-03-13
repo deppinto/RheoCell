@@ -556,7 +556,9 @@ for traj in range(start, end):
 
 
 stress_values=np.array(stress_values)
-result = stress_values.reshape(29, 10).sum(axis=1)
+#result = stress_values.reshape(29, 10).sum(axis=1)
+#result = stress_values.reshape(29, 3).sum(axis=1)
+result = stress_values.reshape(29, jobs[0]).sum(axis=1)
 #print(final_x)
 #print(final_y)
 #print(final_yy)
@@ -571,8 +573,8 @@ plt.yticks(fontname='Times New Roman', fontsize=18)
 plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
 plt.legend(ncols=1, fontsize=14,  frameon=False)
 #plt.yscale('log')
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xx_random.svg", transparent=True)
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xx_random.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xx_random.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xx_random.png", transparent=True)
 plt.show()
 exit (1)
 
