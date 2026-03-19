@@ -21,12 +21,14 @@ protected:
 	std::vector<number> f_field_yy;
 	std::vector<number> f_field_xy;
 	std::vector<number> f_field_ChemPot;
+	std::vector<number> f_field_ChemPot_2;
 	std::vector<number> phi_field;
 	int size_grid = 8;
 	std::vector<number> f_field_coarse_xx;
 	std::vector<number> f_field_coarse_yy;
 	std::vector<number> f_field_coarse_xy;
 	std::vector<number> f_field_coarse_ChemPot;
+	std::vector<number> f_field_coarse_ChemPot_2;
 	std::vector<number> phi_field_coarse;
 	/**
 	 * @brief Returns the configuration header(s)

@@ -33,6 +33,7 @@ void ThermodynamicStressField::init() {
 	f_field_yy.resize(Lx * Ly);
 	f_field_xy.resize(Lx * Ly);
 	f_field_ChemPot.resize(Lx * Ly);
+	f_field_ChemPot_2.resize(Lx * Ly);
 	phi_field.resize(Lx * Ly);
 
 
@@ -42,6 +43,7 @@ void ThermodynamicStressField::init() {
 	f_field_coarse_yy.resize(Ly_coarse * Ly_coarse);
 	f_field_coarse_xy.resize(Ly_coarse * Ly_coarse);
 	f_field_coarse_ChemPot.resize(Ly_coarse * Ly_coarse);
+	f_field_coarse_ChemPot_2.resize(Ly_coarse * Ly_coarse);
 	phi_field_coarse.resize(Lx_coarse * Ly_coarse);
 
 	if(visible_fields.size() == 0) {
@@ -86,6 +88,7 @@ void ThermodynamicStressField::calc_field(BaseField *p) {
 		f_field_yy[k] += p->freeEnergyDensity[q] - p->freeEnergy[q] * p->fieldScalar[q] + p->fieldDY[q] * p->freeEnergyDensityGradient_y[q];
 		f_field_xy[k] += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
 		f_field_ChemPot[k] += p->freeEnergy[q];
+		f_field_ChemPot_2[k] += p->freeEnergy[q] * p->freeEnergy[q];
 		//value_calc += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
 		//if(xx<15 && yy>15)value_calc_sides += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
 		//else if(xx>15 && yy<15)value_calc_sides += p->fieldDX[q] * p->freeEnergyDensityGradient_y[q];
@@ -102,11 +105,13 @@ string ThermodynamicStressField::f_field(llint step) {
 	std::fill(f_field_yy.begin(), f_field_yy.end(), 0.);
 	std::fill(f_field_xy.begin(), f_field_xy.end(), 0.);
 	std::fill(f_field_ChemPot.begin(), f_field_ChemPot.end(), 0.);
+	std::fill(f_field_ChemPot_2.begin(), f_field_ChemPot_2.end(), 0.);
 	std::fill(phi_field.begin(), phi_field.end(), 0.);
 	std::fill(f_field_coarse_xx.begin(), f_field_coarse_xx.end(), 0.);
 	std::fill(f_field_coarse_yy.begin(), f_field_coarse_yy.end(), 0.);
 	std::fill(f_field_coarse_xy.begin(), f_field_coarse_xy.end(), 0.);
 	std::fill(f_field_coarse_ChemPot.begin(), f_field_coarse_ChemPot.end(), 0.);
+	std::fill(f_field_coarse_ChemPot_2.begin(), f_field_coarse_ChemPot_2.end(), 0.);
 	std::fill(phi_field_coarse.begin(), phi_field_coarse.end(), 0.);
 
 
@@ -121,7 +126,7 @@ string ThermodynamicStressField::f_field(llint step) {
 	for(int i=0; i<Ly; i++){
 		for(int j=0; j<Lx; j++){
 			int site = j + i * Lx;
-			conf << j+0.5 <<" "<< i+0.5 << " " << f_field_xx[site] << " " << f_field_yy[site] << " "<< f_field_xy[site] <<" "<< f_field_ChemPot[site]<<" ";
+			conf << j+0.5 <<" "<< i+0.5 << " " << f_field_xx[site] << " " << f_field_yy[site] << " "<< f_field_xy[site] <<" "<< f_field_ChemPot[site]<<" "<< f_field_ChemPot_2[site]<<" ";
 		}
 	}
 	conf<<"\n";
@@ -141,12 +146,13 @@ string ThermodynamicStressField::f_field(llint step) {
 					f_field_coarse_yy[site] += f_field_yy[ss] / (size_grid * size_grid);
 					f_field_coarse_xy[site] += f_field_xy[ss] / (size_grid * size_grid);
 					f_field_coarse_ChemPot[site] += f_field_ChemPot[ss] / (size_grid * size_grid);
+					f_field_coarse_ChemPot_2[site] += f_field_ChemPot_2[ss] / (size_grid * size_grid);
 					phi_field_coarse[site] += 1.;				
 				}
 			}
 
 
-			conf << j + 0.5 <<" "<<  i + 0.5  << " " << f_field_coarse_xx[site] << " " << f_field_coarse_yy[site] << " "<< f_field_coarse_xy[site] << " "<< f_field_coarse_ChemPot[site] << " ";
+			conf << j + 0.5 <<" "<<  i + 0.5  << " " << f_field_coarse_xx[site] << " " << f_field_coarse_yy[site] << " "<< f_field_coarse_xy[site] << " "<< f_field_coarse_ChemPot[site] << " "<< f_field_coarse_ChemPot_2[site] << " ";
 		}
 	}
 

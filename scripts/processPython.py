@@ -375,6 +375,7 @@ final_y = []
 final_yy = []
 omega = []
 stress_values = []
+E_diss_values = []
 time_array = np.linspace(0, 1000000, 1000)
 #plt.figure(figsize=(10, 6))
 for traj in range(start, end):
@@ -397,8 +398,11 @@ for traj in range(start, end):
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
 
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
-        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg.txt","r")
-        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
+
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time.txt","r")
+
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Single_runs/save_confs/Running/confs_46/elongation_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_minor_shape.txt","r")
@@ -411,10 +415,13 @@ for traj in range(start, end):
         sum_time = 0.
         for line in fileoutput:
             save=line.split()
-            #theta_5.append(((float(save[variable]))*pi/180))
+            theta_5.append((2*(float(save[variable]))*pi/180))
             #sum_time += float(save[variable])
-            theta_5.append(float(save[variable]))
-            stress_values.append(float(save[variable]))
+            #theta_5.append(float(save[variable]))
+            #theta_1.append(float(save[variable]))
+            #stress_values.append(float(save[2]))
+            #stress_values.append(float(save[0])-float(save[1]))
+            #E_diss_values.append(float(save[3]))
             #stress_values.append(0.5 * (float(save[variable]) +  float(save[variable+1])))
 
             #plt.plot(
@@ -466,9 +473,8 @@ for traj in range(start, end):
         fileoutput.close()
         #last_yy.append(np.mean(theta_5[-50:]))
 
-        '''
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
-        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/aspect_ratio_shape.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/aspect_ratio_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_jamm.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
         for line in fileoutput:
@@ -496,23 +502,20 @@ for traj in range(start, end):
             save=line.split()
             theta_3.append((2*(float(save[variable]))*pi/180))
         fileoutput.close()
-        '''
 
         
-        '''
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/order_parameters.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/elongation_shape.txt","r")
-        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/aspect_ratio_shape.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_2/aspect_ratio_shape.txt","r")
         for line in fileoutput:
             save=line.split()
             theta_6.append(float(save[variable]))
         fileoutput.close()
-        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/theta_shape.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_2/theta_shape.txt","r")
         for line in fileoutput:
             save=line.split()
             theta_7.append((2*(float(save[variable]))*pi/180))
         fileoutput.close()
-        '''
 
 
     #print("-------------------------")
@@ -551,20 +554,24 @@ for traj in range(start, end):
     #print(period)
     #plt.clf()
 
+    #stress_values.append(sum(theta_5[-250:]) / len(theta_5[-250:]))
+    #E_diss_values.append(sum(theta_1[-250:]) / len(theta_1[-250:]))
+
     if end == start:
         break
 
-
-stress_values=np.array(stress_values)
+'''
+#stress_values=np.array(stress_values)
 #result = stress_values.reshape(29, 10).sum(axis=1)
 #result = stress_values.reshape(29, 3).sum(axis=1)
-result = stress_values.reshape(29, jobs[0]).sum(axis=1)
+#result = stress_values.reshape(29, jobs[0]).sum(axis=1)
 #print(final_x)
 #print(final_y)
 #print(final_yy)
-plt.plot(shear_rate[0:29], result[0:29], '--o', label='random')
+#plt.plot(stress_values, '--o', label='random')
+#plt.plot(shear_rate[0:29], result[0:29], '--o', label='random')
 #plt.plot(shear_rate[0:29], stress_values[0:29], '--o', label='low dt')
-#plt.plot(shear_rate[29:58], stress_values[29:58], '--s', label='high dt')
+plt.plot(shear_rate[29:58], E_diss_values[29:58], '--s', label='high dt')
 plt.xscale('log')
 #plt.ylabel(r'$\sigma_{xy}$', fontname='Times New Roman', fontsize=18)
 plt.ylabel(r'$E_{diss}$', fontname='Times New Roman', fontsize=18)
@@ -576,10 +583,11 @@ plt.legend(ncols=1, fontsize=14,  frameon=False)
 #plt.yscale('log')
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xy_random_pois.svg", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_stress_xy_random_pois.png", transparent=True)
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_diss_energy_random.svg", transparent=True)
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_diss_energy_random.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_diss_energy_random.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/avg_diss_energy_random.png", transparent=True)
 plt.show()
 exit (1)
+'''
 
 #final_x = [1.0, 0.75, 0.5, 0.25, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001]
 #final_y = [0.49992082742607136, 0.48058329369018765, 0.46116523160021705, 0.4377948871250764, 0.4428061377749363, 0.5159620665712491, 0.523863398829233, 0.5828769623310098, 0.2893244788742896, 0.40499525754918736, 0.03450679770844628]
@@ -594,11 +602,12 @@ final_x = np.array([0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0007, 0.0008, 0.00
 #final_yy_err_std = np.array([np.float64(6.659588414731947e-05), np.float64(0.0021466228624031905), np.float64(0.0024526157987470928), np.float64(0.009710083120257984), np.float64(0.037068463729466955), np.float64(0.017306937546626322), np.float64(0.00628556824839815), np.float64(0.03333037203776919), np.float64(0.014079632541178892), np.float64(0.05281092285016849), np.float64(0.01290754822973717), np.float64(0.046402252195048815), np.float64(0.04431935018851303), np.float64(0.0440890124301868), np.float64(0.07066040716066056), np.float64(0.08275386080895042), np.float64(0.024882519261225266), np.float64(0.05708737575473875), np.float64(0.03525734632507903), np.float64(0.03343552763563954), np.float64(0.05082809682281099), np.float64(0.04285401805692968), np.float64(0.06610697814841611), np.float64(0.08009137715956625), np.float64(0.07903461795566741), np.float64(0.06348856133079687), np.float64(0.03258013474861658), np.float64(0.008039474890279357), np.float64(0.008740268641538517)])
 
 
-#final_y = np.array([np.float64(0.2896697218998192), np.float64(0.3363044524633062), np.float64(0.43400328779488395), np.float64(0.5311565138185511), np.float64(0.36390157063579237), np.float64(0.4825153593432848), np.float64(0.5456727494937861), np.float64(0.629056544273576), np.float64(0.7141504126736063), np.float64(0.6562556393808908), np.float64(0.6472854206159414), np.float64(0.6003395495408252), np.float64(0.566460881787112), np.float64(0.5448686791337419), np.float64(0.46603331522967634), np.float64(0.41734099626748744), np.float64(0.44882640164672116), np.float64(0.4981183325771868), np.float64(0.4900805944770621), np.float64(0.47759117672996), np.float64(0.43745137030542214), np.float64(0.46004282892650616), np.float64(0.4700894656485616), np.float64(0.4471321150942392), np.float64(0.4672926325416104), np.float64(0.4742098447723692), np.float64(0.47246205892232773), np.float64(0.43883697137926064), np.float64(0.4193536624523622)])
-#final_y_err_std = np.array([np.float64(0.14988819660637157), np.float64(0.12840999060439892), np.float64(0.16753510967171173), np.float64(0.22749771731515872), np.float64(0.18721095598679557), np.float64(0.22566023416979358), np.float64(0.13732808225565007), np.float64(0.19930413291475382), np.float64(0.11341902604432726), np.float64(0.0613008472313453), np.float64(0.04512467677189514), np.float64(0.038754018218931124), np.float64(0.045388992236570405), np.float64(0.05314927074891524), np.float64(0.03457109744525126), np.float64(0.06331653129309672), np.float64(0.07010703529098548), np.float64(0.04867610184204162), np.float64(0.0342553098757067), np.float64(0.032667163651612194), np.float64(0.019475273910254148), np.float64(0.030732971330311054), np.float64(0.03862256518604238), np.float64(0.04761534197680471), np.float64(0.020846434948343397), np.float64(0.044639250362093534), np.float64(0.021467925660586123), np.float64(0.031651481523000444), np.float64(0.0359232120502082)])
+final_y = np.array([np.float64(0.2896697218998192), np.float64(0.3363044524633062), np.float64(0.43400328779488395), np.float64(0.5311565138185511), np.float64(0.36390157063579237), np.float64(0.4825153593432848), np.float64(0.5456727494937861), np.float64(0.629056544273576), np.float64(0.7141504126736063), np.float64(0.6562556393808908), np.float64(0.6472854206159414), np.float64(0.6003395495408252), np.float64(0.566460881787112), np.float64(0.5448686791337419), np.float64(0.46603331522967634), np.float64(0.41734099626748744), np.float64(0.44882640164672116), np.float64(0.4981183325771868), np.float64(0.4900805944770621), np.float64(0.47759117672996), np.float64(0.43745137030542214), np.float64(0.46004282892650616), np.float64(0.4700894656485616), np.float64(0.4471321150942392), np.float64(0.4672926325416104), np.float64(0.4742098447723692), np.float64(0.47246205892232773), np.float64(0.43883697137926064), np.float64(0.4193536624523622)])
+final_y_err_std = np.array([np.float64(0.14988819660637157), np.float64(0.12840999060439892), np.float64(0.16753510967171173), np.float64(0.22749771731515872), np.float64(0.18721095598679557), np.float64(0.22566023416979358), np.float64(0.13732808225565007), np.float64(0.19930413291475382), np.float64(0.11341902604432726), np.float64(0.0613008472313453), np.float64(0.04512467677189514), np.float64(0.038754018218931124), np.float64(0.045388992236570405), np.float64(0.05314927074891524), np.float64(0.03457109744525126), np.float64(0.06331653129309672), np.float64(0.07010703529098548), np.float64(0.04867610184204162), np.float64(0.0342553098757067), np.float64(0.032667163651612194), np.float64(0.019475273910254148), np.float64(0.030732971330311054), np.float64(0.03862256518604238), np.float64(0.04761534197680471), np.float64(0.020846434948343397), np.float64(0.044639250362093534), np.float64(0.021467925660586123), np.float64(0.031651481523000444), np.float64(0.0359232120502082)])
 
-#final_yy = np.array([np.float64(0.1770427643629094), np.float64(0.19647260244224413), np.float64(0.29917944926722495), np.float64(0.4789462290131416), np.float64(0.42513148504510134), np.float64(0.5809837510369256), np.float64(0.6519316011323136), np.float64(0.7874967499823531), np.float64(0.8991038844949555), np.float64(0.8971982943468013), np.float64(0.9527027378747759), np.float64(0.882292668586229), np.float64(0.846758673015005), np.float64(0.8332334497422386), np.float64(0.7695681208568559), np.float64(0.770625908035958), np.float64(0.7932582112437029), np.float64(0.7610656248840396), np.float64(0.7450465472190528), np.float64(0.7097550125187485), np.float64(0.694023722896522), np.float64(0.6189111241656535), np.float64(0.6157832941421841), np.float64(0.6747623316267314), np.float64(0.6362965311781632), np.float64(0.7547420485208345), np.float64(0.821975710388544), np.float64(0.8704084163937044), np.float64(0.89791393524546)])
-#final_yy_err_std = np.array([np.float64(0.10863810861394337), np.float64(0.09212537713171122), np.float64(0.11954129797131798), np.float64(0.17723006672867725), np.float64(0.12901985836815003), np.float64(0.13963142290636962), np.float64(0.09001271021915588), np.float64(0.05598211021176802), np.float64(0.08756261418090687), np.float64(0.04683217950636677), np.float64(0.03305875910738458), np.float64(0.06380806273706008), np.float64(0.07056540913058833), np.float64(0.035674676212209974), np.float64(0.07130928449810396), np.float64(0.08101935232552417), np.float64(0.0758855297325258), np.float64(0.11596248087355591), np.float64(0.08230799634161359), np.float64(0.0878132979496909), np.float64(0.07182992654035648), np.float64(0.1294069883158062), np.float64(0.08048978295632345), np.float64(0.06983955838366351), np.float64(0.0662632732697333), np.float64(0.046758489540577264), np.float64(0.06629134036082554), np.float64(0.030609695672286545), np.float64(0.028092017828046656)])
+final_yy = np.array([np.float64(0.1770427643629094), np.float64(0.19647260244224413), np.float64(0.29917944926722495), np.float64(0.4789462290131416), np.float64(0.42513148504510134), np.float64(0.5809837510369256), np.float64(0.6519316011323136), np.float64(0.7874967499823531), np.float64(0.8991038844949555), np.float64(0.8971982943468013), np.float64(0.9527027378747759), np.float64(0.882292668586229), np.float64(0.846758673015005), np.float64(0.8332334497422386), np.float64(0.7695681208568559), np.float64(0.770625908035958), np.float64(0.7932582112437029), np.float64(0.7610656248840396), np.float64(0.7450465472190528), np.float64(0.7097550125187485), np.float64(0.694023722896522), np.float64(0.6189111241656535), np.float64(0.6157832941421841), np.float64(0.6747623316267314), np.float64(0.6362965311781632), np.float64(0.7547420485208345), np.float64(0.821975710388544), np.float64(0.8704084163937044), np.float64(0.89791393524546)])
+final_yy_err_std = np.array([np.float64(0.10863810861394337), np.float64(0.09212537713171122), np.float64(0.11954129797131798), np.float64(0.17723006672867725), np.float64(0.12901985836815003), np.float64(0.13963142290636962), np.float64(0.09001271021915588), np.float64(0.05598211021176802), np.float64(0.08756261418090687), np.float64(0.04683217950636677), np.float64(0.03305875910738458), np.float64(0.06380806273706008), np.float64(0.07056540913058833), np.float64(0.035674676212209974), np.float64(0.07130928449810396), np.float64(0.08101935232552417), np.float64(0.0758855297325258), np.float64(0.11596248087355591), np.float64(0.08230799634161359), np.float64(0.0878132979496909), np.float64(0.07182992654035648), np.float64(0.1294069883158062), np.float64(0.08048978295632345), np.float64(0.06983955838366351), np.float64(0.0662632732697333), np.float64(0.046758489540577264), np.float64(0.06629134036082554), np.float64(0.030609695672286545), np.float64(0.028092017828046656)])
+
 
 final_y_pois=np.array([np.float64(0.24617177348806252), np.float64(0.04868461810293099), np.float64(0.30562060657158635), np.float64(0.23060183488707814), np.float64(0.6821645889071535), np.float64(0.3631629960345226), np.float64(0.604959767204746), np.float64(0.7066510045383881), np.float64(0.5382224353929297), np.float64(0.6791851983919507), np.float64(0.6203520618726686), np.float64(0.5783511241340171), np.float64(0.5100016071309956), np.float64(0.5498228353303659), np.float64(0.2873042168958151), np.float64(0.34037372285092116), np.float64(0.4073082206493455), np.float64(0.38513139392071316), np.float64(0.3670048170443201), np.float64(0.29326674418734705), np.float64(0.3684226915410573), np.float64(0.3898935611472462), np.float64(0.375821041890976), np.float64(0.5090868278730316), np.float64(0.3674097811347598), np.float64(0.2814475393967661), np.float64(0.4748036114309424), np.float64(0.46773225335650465), np.float64(0.3858696838022122)])
 final_y_pois_std=np.array([np.float64(0.0007404117465828295), np.float64(6.767691399068092e-05), np.float64(0.0009844762371600817), np.float64(0.0009089838780696993), np.float64(0.00019522109706485432), np.float64(7.700289469465063e-05), np.float64(3.451541343503457e-05), np.float64(0.0005268853488862592), np.float64(0.002457594672766735), np.float64(0.012787237698822), np.float64(0.0085504523080607), np.float64(0.03607578306209607), np.float64(0.05044106122765181), np.float64(0.04293220170300471), np.float64(0.10515968185603912), np.float64(0.09515014484943665), np.float64(0.0662075426137097), np.float64(0.1035902214891353), np.float64(0.06879424223216694), np.float64(0.07623985324636685), np.float64(0.06246208940385298), np.float64(0.07061575288336698), np.float64(0.05099934214124126), np.float64(0.05751275867671283), np.float64(0.06816792459188474), np.float64(0.0618631784039236), np.float64(0.0740291291584936), np.float64(0.05891155721282286), np.float64(0.05303054427849663)])
@@ -648,7 +657,6 @@ plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
 '''
 
 
-'''
 gamma = [0.0418, 0.0574, 0.0788, 0.1083, 0.1487, 0.2043, 0.2807, 0.3857, 0.5298, 0.7279, 1]
 #T_period = [5561.116672, 5005.005005, 3925.494122, 2860.00286, 2002.002002, 1668.335002, 1112.223334, 834.1675008, 625.6256256, 455.000455, 333.6670003]
 T_period = [7500, 5005.005005, 3925.494122, 2860.00286, 2002.002002, 1668.335002, 1112.223334, 834.1675008, 625.6256256, 455.000455, 333.6670003]
@@ -697,6 +705,7 @@ ax.text(0.08, 5580, "-1", fontsize=16, ha='center', va='bottom', fontname='Times
 # Axes through center
 size_r1 = max(theta_1)
 size_r2 = max(theta_2)
+size_r3 = max(theta_6)
 
 # Compute velocity = sqrt((Δθ)^2 + (Δr)^2)
 dtheta = np.diff(theta_5)
@@ -768,24 +777,137 @@ ax_inset2.grid(True)
 ax_inset2.spines['polar'].set_color('forestgreen')
 
 plt.tight_layout()
-'''
+#plt.show()
+plt.clf()
+
+
+# -----------------------
+# Separate figure for inset 1 (polar)
+# -----------------------
+fig_p1 = plt.figure(figsize=(5,5))
+ax_p1 = fig_p1.add_subplot(111, polar=True)
+
+# scatter the same data as in your inset (use the same index ranges and styling)
+ax_p1.scatter(theta_5[0:500], theta_1[0:500], c='royalblue', alpha=0.2, s=3)
+ax_p1.scatter(theta_5[-500:], theta_1[-500:], c='royalblue', s=3)  # same as sc1
+
+# If you prefer to color by velocity (uncomment & adapt):
+# sc1 = ax_p1.scatter(theta_5[-500:], theta_1[-500:], c=vel[-500:], cmap="RdBu_r", s=2)
+# fig_p1.colorbar(sc1, ax=ax_p1, fraction=0.046, pad=0.04).set_label(r"$\omega$", fontsize=12)
+
+# styling to match inset1
+ax_p1.set_rmax(1.2 * size_r1)
+ax_p1.set_rticks([1.2*size_r1])
+ax_p1.set_thetagrids([0, 90, 180, 270],
+                     labels=[r"$0$", r"$\frac{\pi}{2}$", r"$\pi$", r"$\frac{3\pi}{2}$"],
+                     fontsize=30, fontname='Times New Roman')
+ax_p1.tick_params(axis='x', pad=15)
+
+ax_p1.grid(True)
+#ax_p1.spines['polar'].set_color('firebrick')
+#fig_p1.text(0.175, 0.9, r'$\dot{\gamma}=0.0778$',
+#            ha='center', va='bottom',
+#            fontsize=30, fontname='Times New Roman')
+
+for label in ax_p1.get_yticklabels() + ax_p1.get_xticklabels():
+    label.set_fontname('Times New Roman')
+    label.set_fontsize(30)
+
+fig_p1.tight_layout()
+# Save to file
+fig_p1.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset1.png", dpi=300, bbox_inches="tight")
+fig_p1.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset1.svg", dpi=300, bbox_inches="tight")
+
+
+# -----------------------
+# Separate figure for inset 2 (polar)
+# -----------------------
+fig_p2 = plt.figure(figsize=(5,5))
+ax_p2 = fig_p2.add_subplot(111, polar=True)
+
+ax_p2.scatter(theta_3[0:500], theta_2[0:500], c='royalblue', alpha=0.2, s=3)
+ax_p2.scatter(theta_3[-500:], theta_2[-500:], c='royalblue', s=3)  # same as sc2
+
+# If you prefer to color by velocity (uncomment & adapt):
+# sc2 = ax_p2.scatter(theta_3[-500:], theta_2[-500:], c=vel1[-500:], cmap="RdBu_r", s=2)
+# fig_p2.colorbar(sc2, ax=ax_p2, fraction=0.046, pad=0.04).set_label(r"$\omega$", fontsize=12)
+
+# styling to match inset2
+ax_p2.set_rmax(1.2 * size_r2)
+ax_p2.set_rticks([1.2*size_r2])
+ax_p2.set_thetagrids([0, 90, 180, 270],
+                     labels=[r"$0$", r"$\frac{\pi}{2}$", r"$\pi$", r"$\frac{3\pi}{2}$"],
+                     fontsize=30, fontname='Times New Roman')
+ax_p2.tick_params(axis='x', pad=15)
+
+ax_p2.grid(True)
+#ax_p2.spines['polar'].set_color('forestgreen')
+#fig_p2.text(0.175, 0.9, r'$\dot{\gamma}=0.3857$',
+#            ha='center', va='bottom',
+#            fontsize=30, fontname='Times New Roman')
+
+for label in ax_p2.get_yticklabels() + ax_p2.get_xticklabels():
+    label.set_fontname('Times New Roman')
+    label.set_fontsize(30)
+
+fig_p2.tight_layout()
+# Save to file
+fig_p2.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset2.png", dpi=300, bbox_inches="tight")
+fig_p2.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset2.svg", dpi=300, bbox_inches="tight")
+
+# -----------------------
+# Separate figure for inset 3 (polar)
+# -----------------------
+fig_p3 = plt.figure(figsize=(5,5))
+ax_p3 = fig_p3.add_subplot(111, polar=True)
+
+ax_p3.scatter(theta_7[0:500], theta_6[0:500], c='royalblue', alpha=0.2, s=3)
+ax_p3.scatter(theta_7[-500:], theta_6[-500:], c='royalblue', s=3)  # same as sc2
+
+# If you prefer to color by velocity (uncomment & adapt):
+# sc2 = ax_p2.scatter(theta_3[-500:], theta_2[-500:], c=vel1[-500:], cmap="RdBu_r", s=2)
+# fig_p2.colorbar(sc2, ax=ax_p2, fraction=0.046, pad=0.04).set_label(r"$\omega$", fontsize=12)
+
+# styling to match inset2
+ax_p3.set_rmax(1.2 * size_r3)
+ax_p3.set_rticks([1.2*size_r3])
+ax_p3.set_thetagrids([0, 90, 180, 270],
+                     labels=[r"$0$", r"$\frac{\pi}{2}$", r"$\pi$", r"$\frac{3\pi}{2}$"],
+                     fontsize=30, fontname='Times New Roman')
+ax_p3.tick_params(axis='x', pad=15)
+
+ax_p3.grid(True)
+#ax_p2.spines['polar'].set_color('forestgreen')
+#fig_p2.text(0.175, 0.9, r'$\dot{\gamma}=0.3857$',
+#            ha='center', va='bottom',
+#            fontsize=30, fontname='Times New Roman')
+
+for label in ax_p3.get_yticklabels() + ax_p3.get_xticklabels():
+    label.set_fontname('Times New Roman')
+    label.set_fontsize(30)
+
+fig_p3.tight_layout()
+# Save to file
+fig_p3.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset3.png", dpi=300, bbox_inches="tight")
+fig_p3.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset3.svg", dpi=300, bbox_inches="tight")
 
 '''
 #psi6 and psi2
-#plt.plot(final_x, final_y, '--o', color='firebrick')
-#plt.fill_between(final_x, final_y - final_y_err_std, final_y + final_y_err_std, color="firebrick", alpha=0.1)
-plt.plot(final_x, final_y_pois, '--o', color='firebrick')
-plt.fill_between(final_x, final_y_pois - final_y_pois_std, final_y_pois + final_y_pois_std, color="firebrick", alpha=0.1)
-plt.ylabel(r'$\psi_6$', fontsize=18)
+plt.figure(figsize=(6.4, 3.8))
+plt.plot(final_x, final_y, '--o', color='firebrick')
+plt.fill_between(final_x, final_y - final_y_err_std, final_y + final_y_err_std, color="firebrick", alpha=0.1)
+#plt.plot(final_x, final_y_pois, '--o', color='firebrick')
+#plt.fill_between(final_x, final_y_pois - final_y_pois_std, final_y_pois + final_y_pois_std, color="firebrick", alpha=0.1)
+plt.ylabel(r'$\psi_6$', fontsize=18, rotation=0)
 plt.xlabel(r'$\dot{\gamma}$', fontsize=18)
 #fig = plt.gcf()
 ax1 = plt.gca()
 ax2 = ax1.twinx()
-#ax2.plot(final_x, final_yy, '--o', color='forestgreen')
-#ax2.fill_between(final_x, final_yy - final_yy_err_std, final_yy + final_yy_err_std, color="forestgreen", alpha=0.1)
-ax2.plot(final_x, final_yy_pois, '--o', color='forestgreen')
-ax2.fill_between(final_x, final_yy_pois - final_yy_pois_std, final_yy_pois + final_yy_pois_std, color="forestgreen", alpha=0.1)
-ax2.set_ylabel(r'$\psi^L_2$', fontsize=18)
+ax2.plot(final_x, final_yy, '--o', color='forestgreen')
+ax2.fill_between(final_x, final_yy - final_yy_err_std, final_yy + final_yy_err_std, color="forestgreen", alpha=0.1)
+#ax2.plot(final_x, final_yy_pois, '--o', color='forestgreen')
+#ax2.fill_between(final_x, final_yy_pois - final_yy_pois_std, final_yy_pois + final_yy_pois_std, color="forestgreen", alpha=0.1)
+ax2.set_ylabel(r'$\psi^L_2$', fontsize=18, rotation=0)
 #ax2.plot(theta_1, '--o', color='forestgreen')
 #ax2.set_ylabel('r', fontsize=18)
 ax1.tick_params(axis='y', colors='firebrick')
@@ -807,6 +929,81 @@ for tick in ax1.xaxis.get_ticklabels():
 #plt.axvline(x=0.0001, linestyle='--', linewidth=1, color='k')
 ax1.set_ylim(0, 1)
 ax2.set_ylim(0, 1)
+plt.vlines(x=0.0001, ymin=0, ymax=0.1770427643629094, linestyle='--', color='k', linewidth=1)
+plt.vlines(x=0.0017, ymin=0, ymax=0.7141504126736063, linestyle='--', color='k', linewidth=1)
+plt.vlines(x=0.0161, ymin=0, ymax=0.41734099626748744, linestyle='--', color='k', linewidth=1)
+plt.vlines(x=0.1083, ymin=0, ymax=0.46004282892650616, linestyle='--', color='k', linewidth=1)
+plt.vlines(x=1, ymin=0, ymax=0.4193536624523622, linestyle='--', color='k', linewidth=1)
+plt.xscale('log')
+plt.tight_layout()
+y_pos1 = 0.445  # center
+y_pos2 = 0.555  # center
+ax1.yaxis.set_label_coords(-0.12, y_pos1)
+ax2.yaxis.set_label_coords(1.12, y_pos2)
+'''
+
+'''
+plt.figure(figsize=(6.4, 3.8))
+stress_values = np.array(stress_values)
+E_diss_values = np.array(E_diss_values)
+
+# reshape into (29, 10)
+groups = stress_values.reshape(29, jobs[0])
+sem1 = np.std(groups, axis=1, ddof=1) / np.sqrt(groups.shape[1])
+groups = E_diss_values.reshape(29, jobs[0])
+sem2 = np.std(groups, axis=1, ddof=1) / np.sqrt(groups.shape[1])
+#print(sem1, sem2)
+#print(stress_values[280:290])
+
+stress_values = stress_values.reshape(29, jobs[0]).sum(axis=1)
+E_diss_values = E_diss_values.reshape(29, jobs[0]).sum(axis=1)
+#sigma_xy and E_dissipated
+#plt.plot(final_x, final_y, '--o', color='firebrick')
+#plt.fill_between(final_x, final_y - final_y_err_std, final_y + final_y_err_std, color="firebrick", alpha=0.1)
+plt.plot(final_x, stress_values, '--o', color='firebrick')
+plt.fill_between(final_x, stress_values - sem1, stress_values + sem1, color="firebrick", alpha=0.1)
+#plt.fill_between(final_x, final_y_pois - final_y_pois_std, final_y_pois + final_y_pois_std, color="firebrick", alpha=0.1)
+plt.ylabel(r'$\sigma_{xy}^T$', fontsize=18, rotation=0, labelpad=25)
+plt.xlabel(r'$\dot{\gamma}$', fontsize=18)
+#fig = plt.gcf()
+ax1 = plt.gca()
+ax2 = ax1.twinx()
+#ax2.plot(final_x, final_yy, '--o', color='forestgreen')
+#ax2.fill_between(final_x, final_yy - final_yy_err_std, final_yy + final_yy_err_std, color="forestgreen", alpha=0.1)
+ax2.plot(final_x, E_diss_values, '--o', color='forestgreen')
+ax2.fill_between(final_x, E_diss_values - sem2, E_diss_values + sem2, color="forestgreen", alpha=0.1)
+#ax2.fill_between(final_x, final_yy_pois - final_yy_pois_std, final_yy_pois + final_yy_pois_std, color="forestgreen", alpha=0.1)
+ax2.set_ylabel(r'$E_{diss}$', fontsize=18, rotation=0, labelpad=25)
+#ax2.plot(theta_1, '--o', color='forestgreen')
+#ax2.set_ylabel('r', fontsize=18)
+ax1.tick_params(axis='y', colors='firebrick')
+ax1.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+ax2.tick_params(axis='y', colors='forestgreen')
+ax2.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+ax1.yaxis.label.set_color('firebrick')
+ax2.yaxis.label.set_color('forestgreen')
+ax2.spines['right'].set_color('forestgreen')
+ax2.spines['left'].set_color('firebrick')
+ax2.yaxis.set_major_locator(MaxNLocator(nbins=5))
+for tick in ax2.yaxis.get_ticklabels():
+    tick.set_fontsize(18)
+    tick.set_fontname('Times New Roman')
+for tick in ax1.yaxis.get_ticklabels():
+    tick.set_fontsize(18)
+    tick.set_fontname('Times New Roman')
+for tick in ax1.xaxis.get_ticklabels():
+    tick.set_fontsize(18)
+    tick.set_fontname('Times New Roman')
+offset = ax2.yaxis.get_offset_text()
+offset.set_fontsize(14)
+offset.set_fontname('Times New Roman')   # or any installed font
+offset = ax1.yaxis.get_offset_text()
+offset.set_fontsize(14)
+offset.set_fontname('Times New Roman')   # or any installed font
+
+#plt.axvline(x=0.0001, linestyle='--', linewidth=1, color='k')
+#ax1.set_ylim(0, 1)
+#ax2.set_ylim(0, 1)
 #plt.vlines(x=0.0001, ymin=0, ymax=0.1770427643629094, linestyle='--', color='k', linewidth=1)
 #plt.vlines(x=0.0017, ymin=0, ymax=0.7141504126736063, linestyle='--', color='k', linewidth=1)
 #plt.vlines(x=0.0161, ymin=0, ymax=0.41734099626748744, linestyle='--', color='k', linewidth=1)
@@ -814,6 +1011,12 @@ ax2.set_ylim(0, 1)
 #plt.vlines(x=1, ymin=0, ymax=0.4193536624523622, linestyle='--', color='k', linewidth=1)
 plt.xscale('log')
 plt.tight_layout()
+y_pos1 = 0.445  # center
+y_pos2 = 0.555  # center
+ax1.yaxis.set_label_coords(-0.2, y_pos1)
+ax2.yaxis.set_label_coords(1.2, y_pos2)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_stress_E_ref.png", transparent=True)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_stress_E_ref.svg", transparent=True)
 '''
 
 
@@ -848,8 +1051,8 @@ plt.tight_layout()
 #plt.legend(ncols=1, frameon=False, loc='upper left')
 #plt.xscale('log')
 #plt.yscale('log')
-#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear.png", transparent=True)
-#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear.svg", transparent=True)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear.png", transparent=True)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear.svg", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/sim_ODE_comp_high_shear.png", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/sim_ODE_comp_high_shear.svg", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/period_shear.png", transparent=True)
