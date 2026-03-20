@@ -82,6 +82,7 @@ time = []
 
 l_avg=(ly-100)*lx
 l_t_avg=(ly-100)*lx*(end_frame-start_frame)
+t_avg=(end_frame-start_frame)
 #l_avg=(ly/2-50)*lx
 #l_t_avg=(ly/2-50)*lx*(end_frame-start_frame)
 
@@ -159,17 +160,17 @@ for i in range(start_frame, end_frame, 1):
 
             if yy>50 and yy<ly-50:
             #if yy>50 and yy<ly/2:
-                avg_stress_xy_time[i-start_frame] += value_xy/l_avg 
-                avg_stress_xx_time[i-start_frame] += value_xx/l_avg
-                avg_stress_yy_time[i-start_frame] += value_yy/l_avg
-                avg_ChemPot_time[i-start_frame] += value_ChemPot/l_avg
-                avg_ChemPot_time_2[i-start_frame] += value_ChemPot_2/l_avg
+                avg_stress_xy_time[i-start_frame] += value_xy 
+                avg_stress_xx_time[i-start_frame] += value_xx
+                avg_stress_yy_time[i-start_frame] += value_yy
+                avg_ChemPot_time[i-start_frame] += value_ChemPot
+                avg_ChemPot_time_2[i-start_frame] += value_ChemPot_2
 
-                avg_stress_xy += value_xy/l_t_avg
-                avg_stress_xx += value_xx/l_t_avg
-                avg_stress_yy += value_yy/l_t_avg
-                avg_ChemPot += value_ChemPot/l_t_avg
-                avg_ChemPot_2 += value_ChemPot_2/l_t_avg
+                avg_stress_xy += value_xy/t_avg
+                avg_stress_xx += value_xx/t_avg
+                avg_stress_yy += value_yy/t_avg
+                avg_ChemPot += value_ChemPot/t_avg
+                avg_ChemPot_2 += value_ChemPot_2/t_avg
 
 
         read_line += 1
