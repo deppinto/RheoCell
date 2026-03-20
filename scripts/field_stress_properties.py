@@ -74,10 +74,12 @@ avg_stress_xy_time = [0. for i in range(end_frame-start_frame)]
 avg_stress_xx_time = [0. for i in range(end_frame-start_frame)]
 avg_stress_yy_time = [0. for i in range(end_frame-start_frame)]
 avg_ChemPot_time = [0. for i in range(end_frame-start_frame)]
+avg_ChemPot_time_2 = [0. for i in range(end_frame-start_frame)]
 avg_stress_xy = 0.
 avg_stress_xx = 0.
 avg_stress_yy = 0.
 avg_ChemPot = 0.
+avg_ChemPot_2 = 0.
 time = []
 
 l_avg=(ly-100)*lx

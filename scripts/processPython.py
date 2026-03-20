@@ -399,10 +399,10 @@ for traj in range(start, end):
 
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
 
-        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time.txt","r")
 
-        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Single_runs/save_confs/Running/confs_46/elongation_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_minor_shape.txt","r")
@@ -415,13 +415,13 @@ for traj in range(start, end):
         sum_time = 0.
         for line in fileoutput:
             save=line.split()
-            theta_5.append((2*(float(save[variable]))*pi/180))
+            #theta_5.append((2*(float(save[variable]))*pi/180))
             #sum_time += float(save[variable])
             #theta_5.append(float(save[variable]))
             #theta_1.append(float(save[variable]))
-            #stress_values.append(float(save[2]))
+            stress_values.append(float(save[2]))
             #stress_values.append(float(save[0])-float(save[1]))
-            #E_diss_values.append(float(save[3]))
+            E_diss_values.append(float(save[4]))
             #stress_values.append(0.5 * (float(save[variable]) +  float(save[variable+1])))
 
             #plt.plot(
@@ -473,6 +473,7 @@ for traj in range(start, end):
         fileoutput.close()
         #last_yy.append(np.mean(theta_5[-50:]))
 
+        '''
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
         fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/aspect_ratio_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/time_jamm.txt","r")
@@ -516,6 +517,7 @@ for traj in range(start, end):
             save=line.split()
             theta_7.append((2*(float(save[variable]))*pi/180))
         fileoutput.close()
+        '''
 
 
     #print("-------------------------")
@@ -656,7 +658,7 @@ plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
 #plt.plot(omega, '--o')
 '''
 
-
+'''
 gamma = [0.0418, 0.0574, 0.0788, 0.1083, 0.1487, 0.2043, 0.2807, 0.3857, 0.5298, 0.7279, 1]
 #T_period = [5561.116672, 5005.005005, 3925.494122, 2860.00286, 2002.002002, 1668.335002, 1112.223334, 834.1675008, 625.6256256, 455.000455, 333.6670003]
 T_period = [7500, 5005.005005, 3925.494122, 2860.00286, 2002.002002, 1668.335002, 1112.223334, 834.1675008, 625.6256256, 455.000455, 333.6670003]
@@ -890,6 +892,8 @@ fig_p3.tight_layout()
 # Save to file
 fig_p3.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset3.png", dpi=300, bbox_inches="tight")
 fig_p3.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset3.svg", dpi=300, bbox_inches="tight")
+'''
+
 
 '''
 #psi6 and psi2
@@ -942,7 +946,8 @@ ax1.yaxis.set_label_coords(-0.12, y_pos1)
 ax2.yaxis.set_label_coords(1.12, y_pos2)
 '''
 
-'''
+
+#stress and dissipated energy plot
 plt.figure(figsize=(6.4, 3.8))
 stress_values = np.array(stress_values)
 E_diss_values = np.array(E_diss_values)
@@ -1015,9 +1020,8 @@ y_pos1 = 0.445  # center
 y_pos2 = 0.555  # center
 ax1.yaxis.set_label_coords(-0.2, y_pos1)
 ax2.yaxis.set_label_coords(1.2, y_pos2)
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_stress_E_ref.png", transparent=True)
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_stress_E_ref.svg", transparent=True)
-'''
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_stress_E_ref.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_stress_E_ref.svg", transparent=True)
 
 
 '''
