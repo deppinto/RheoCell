@@ -160,8 +160,8 @@ for i in range(start_frame, end_frame, 1):
             Z_ChemPot_2[int(yy)][int(xx)]=value_ChemPot_2
 
 
-            #if yy>50 and yy<ly-50:
-            if yy>50 and yy<ly/2:
+            if yy>50 and yy<ly-50:
+            #if yy>50 and yy<ly/2:
                 avg_stress_xy_time[i-start_frame] += value_xy 
                 avg_stress_xx_time[i-start_frame] += value_xx
                 avg_stress_yy_time[i-start_frame] += value_yy
