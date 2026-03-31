@@ -160,8 +160,9 @@ for i in range(start_frame, end_frame, 1):
             Z_ChemPot_2[int(yy)][int(xx)]=value_ChemPot_2
 
 
-            if yy>50 and yy<ly-50:
+            #if yy>50 and yy<ly-50:
             #if yy>50 and yy<ly/2:
+            if yy>=0 and yy<=ly:
                 avg_stress_xy_time[i-start_frame] += value_xy 
                 avg_stress_xx_time[i-start_frame] += value_xx
                 avg_stress_yy_time[i-start_frame] += value_yy
@@ -181,10 +182,10 @@ for i in range(start_frame, end_frame, 1):
 if variable==1:
     #print("Stress:", avg_stress_xx, avg_stress_yy, avg_stress_xy)
 
-    with open('stress_time_avg_new.txt', 'w') as f:
+    with open('stress_time_avg_all_test.txt', 'w') as f:
         print(avg_stress_xx, avg_stress_yy, avg_stress_xy, avg_ChemPot, avg_ChemPot_2, file=f)
 
-    with open('stress_time_new.txt', 'w') as f:
+    with open('stress_time_all_test.txt', 'w') as f:
         for i in range(len(avg_stress_xy_time)):
             print(time[i], avg_stress_xx_time[i], avg_stress_yy_time[i], avg_stress_xy_time[i], avg_ChemPot_time[i], avg_ChemPot_time_2[i], file=f)
 
