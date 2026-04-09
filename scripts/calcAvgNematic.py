@@ -276,12 +276,12 @@ for line in cfile:
         CoMX[pt_num]=float(words[2])
         CoMY[pt_num]=float(words[3])
 
-        CoMX[pt_num] -= 60
-        CoMY[pt_num] -= 30
-        if CoMY[pt_num] < 0:
-            CoMY[pt_num] += ly
-        if CoMX[pt_num] < 0:
-            CoMX[pt_num] += lx
+        #CoMX[pt_num] -= 60
+        #CoMY[pt_num] -= 30
+        #if CoMY[pt_num] < 0:
+            #CoMY[pt_num] += ly
+        #if CoMX[pt_num] < 0:
+            #CoMX[pt_num] += lx
 
         offsetX[pt_num]=int(float(words[4]))
         offsetY[pt_num]=int(float(words[5]))
@@ -313,12 +313,12 @@ for line in cfile:
             #if xx >= lx:
                 #xx -= lx
 
-            xx = xx - 60
-            yy = yy - 30
-            if yy < 0:
-                yy += ly
-            if xx < 0:
-                xx += lx
+            #xx = xx - 60
+            #yy = yy - 30
+            #if yy < 0:
+                #yy += ly
+            #if xx < 0:
+                #xx += lx
 
             Z[yy][xx]=value
             area[pt_num]+=value*value
