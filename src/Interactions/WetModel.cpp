@@ -104,8 +104,9 @@ void WetModel::set_box(BaseBox *boxArg) {
 	sumQ00.resize(Lx*Ly);
 	sumQ01.resize(Lx*Ly);
 	sum_phi.resize(Lx*Ly);
-	//grad_free_energy_x.resize(Lx*Ly);
-	//grad_free_energy_y.resize(Lx*Ly);
+	sum_ChemPot.resize(Lx*Ly);
+	grad_free_energy_x.resize(Lx*Ly);
+	grad_free_energy_y.resize(Lx*Ly);
 	size_store_site_velocity_index.resize(Lx*Ly);
 	store_site_velocity_index.resize(Lx*Ly*store_max_size);
 	store_site_field.resize(Lx*Ly*store_max_size);
@@ -113,12 +114,13 @@ void WetModel::set_box(BaseBox *boxArg) {
 }
 
 void WetModel::resetSums(int k) {
-	phi2[k]=0;
-        sumQ00[k]=0;
-        sumQ01[k]=0;
-        sum_phi[k]=0;
-	//grad_free_energy_x[k]=0.;
-	//grad_free_energy_y[k]=0.;
+	phi2[k]=0.;
+        sumQ00[k]=0.;
+        sumQ01[k]=0.;
+        sum_phi[k]=0.;
+        sum_ChemPot[k]=0.;
+	grad_free_energy_x[k]=0.;
+	grad_free_energy_y[k]=0.;
 }
 
 void WetModel::initFieldProperties(BaseField *p) {
@@ -217,8 +219,8 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 		mat_m_x.setZero();
 
 
-	//F_total_x = 0.;
-	//F_total_y = 0.;
+	F_total_x = 0.;
+	F_total_y = 0.;
 	//number grad_x = 0.;
 	//number grad_y = 0.;
         U = (number) 0;
@@ -226,21 +228,58 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
                 for(int q=0; q<p->subSize;q++)
 			U += f_interaction(p, q);
 
-                /*for(int q=0; q<p->subSize;q++){
-        		grad_free_energy_x[p->map_sub_to_box[q]] += (-1) * 0.5 * p->fieldScalar[q] * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] );
-        		grad_free_energy_y[p->map_sub_to_box[q]] += (-1) * 0.5 * p->fieldScalar[q] * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] );
-        		grad_x += (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] );
-        		grad_y += (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] );
-		}*/
+		/*
+		number Force_pass_x = 0.;
+		number Force_pass_y = 0.;
+		number box_point_y = p->sub_corner_bottom_left / box->getXsize();
+		number box_point_x = p->sub_corner_bottom_left - box_point_y * box->getXsize();
+		int size_x = p->LsubX;
+		int size_y = p->LsubY;
+        	for(auto pp : fields) {
+	                for(int q=0; q<pp->subSize;q++){
+				int k = pp->GetSubIndex(q, box);
+				int ky = k / box->getXsize();
+				int kx = k - ky * box->getXsize();
+
+				std::vector<number> distance = box->min_image(std::vector<number>{box_point_x, box_point_y}, std::vector<number>{kx, ky});
+				//std::cout<<distance[0]<<" "<<distance[1]<<" "<<box_point_x<<" "<<box_point_y<<" "<<kx<<" "<<ky<< std::endl;
+				if(distance[0]<size_x && distance[1]<size_y && distance[0]>=0 && distance[1]>=0){
+					//std::cout<<distance[0]<<" "<<distance[1]<<" "<<box_point_x<<" "<<box_point_y<<" "<<kx<<" "<<ky<<" "<<distance[0]+distance[1]*size_x<<" "<<p->GetSubIndex( ((int)distance[0]-p->offset[0])%size_x + (((int)distance[1]-p->offset[1])%size_y) * size_x, box)<<" "<< k <<" "<<size_x<<" "<<size_y<<" "<< p->GetSubIndex(0, box) << std::endl;
+
+	        			//grad_free_energy_x[p->map_sub_to_box[q]] += (-1) * 0.5 * p->fieldScalar[q] * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] );
+        				//grad_free_energy_y[p->map_sub_to_box[q]] += (-1) * 0.5 * p->fieldScalar[q] * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] );
+        				Force_pass_x += (-1) * 0.5 * p->fieldScalar[distance[0]+distance[1]*size_x] * pp->fieldScalar[q] * ( pp->freeEnergy[p->neighbors_sub[5+q*9]] - pp->freeEnergy[p->neighbors_sub[3+q*9]] );
+	        			Force_pass_y += (-1) * 0.5 * p->fieldScalar[distance[0]+distance[1]*size_x] * pp->fieldScalar[q] * ( pp->freeEnergy[p->neighbors_sub[7+q*9]] - pp->freeEnergy[p->neighbors_sub[1+q*9]] );
+				}
+			}
+		}
+		//std::cout<<"Passive Forces: "<<Force_pass_x<<" "<<Force_pass_y<<" "<<p->index <<std::endl;
+		F_total_x += Force_pass_x;
+		F_total_y += Force_pass_y;
+		*/
+
+
+
         }
 	//for(int q=0; q<box->getXsize()*box->getYsize();q++){grad_x+=grad_free_energy_x[q];grad_y+=grad_free_energy_y[q];}
-	//std::cout<<"Passive Forces: "<<F_total_x<<" "<<F_total_y<<" "<<grad_x<<" "<<grad_y<<" "<<grad_free_energy_x[0]<<" "<<grad_free_energy_y[0] <<std::endl;
+	//std::cout<<"Passive Forces: ------------------------"<<F_total_x<<" "<<F_total_y <<std::endl;
+
+	/*
+	F_total_x = 0.;
+	F_total_y = 0.;
+	for(int i=0; i<box->getXsize()*box->getYsize();i++){
+	
+		F_total_x += - 0.5 * (sum_ChemPot[box->neighbors[5+i*9]] - sum_ChemPot[box->neighbors[3+i*9]]);
+		F_total_y += - 0.5 * (sum_ChemPot[box->neighbors[7+i*9]] - sum_ChemPot[box->neighbors[1+i*9]]);
+	}
+	std::cout<<"Passive Forces: ------------------------"<<F_total_x<<" "<<F_total_y <<std::endl;
+	*/
 
 
         K = (number) 0;
 	std::vector<Eigen::Triplet<double>> tri_t_x;
-	//F_total_x = 0.;
-	//F_total_y = 0.;
+	F_total_x = 0.;
+	F_total_y = 0.;
 	//mat_m_x.setZero();
         for(auto p : fields) {
                 for(int q=0; q<p->subSize;q++){
@@ -497,8 +536,11 @@ number WetModel::f_interaction(BaseField *p, int q) {
 	}
 
 	// CH term coupled to chemical (use first)
-	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*p->laplacianPhi[q]);
+	//number CH = gamma*((8/lambda)*(4*p->fieldScalar[q]*p->fieldScalar[q]*p->fieldScalar[q]+2*p->fieldScalar[q]) - 2*lambda*p->laplacianPhi[q]);
+	//number CH = gamma*((2/lambda) * p->fieldScalar[q] * (p->fieldScalar[q] - 1.) * (p->fieldScalar[q] - 0.5) - 2*lambda*p->laplacianPhi[q]);
 	//number CH = gamma*(8*p->fieldScalar[q]*(p->fieldScalar[q]-1)*(2*p->fieldScalar[q]-1)/lambda - 2*lambda*laplacianPhi);
+	number CH = gamma*(8*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-2*p->fieldScalar[q])/lambda - 2*lambda*p->laplacianPhi[q]);
+	number CH_density = (gamma/lambda)*4*p->fieldScalar[q]*p->fieldScalar[q]*(1-p->fieldScalar[q])*(1-p->fieldScalar[q]) + gamma*lambda*(p->fieldDX[q]*p->fieldDX[q] + p->fieldDY[q]*p->fieldDY[q]);
 	//CH term anisotropy
 	/*number phixx = (p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldScalar[p->neighbors_sub[3+q*9]] - 2 * p->fieldScalar[q]);
 	number phiyy = (p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldScalar[p->neighbors_sub[1+q*9]] - 2 * p->fieldScalar[q]);
@@ -516,9 +558,12 @@ number WetModel::f_interaction(BaseField *p, int q) {
    
 	// area conservation term
 	number A = - 4*(mu/a0)*(1-p->area/a0)*p->fieldScalar[q];
+	number A_density = - mu/a0*p->fieldScalar[q]*p->fieldScalar[q];
 
 	// repulsion term
 	number Rep = 4*(kappa/lambda)*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
+	number Rep_density = (kappa/lambda)*p->fieldScalar[q]*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
+
 
 	// adhesion term
 	number lsquare = 2 * p->fieldScalar[q] * p->laplacianPhi[q] + 2 * (p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q]);
@@ -556,7 +601,12 @@ number WetModel::f_interaction(BaseField *p, int q) {
 	//number V = CH + A + Rep + Adh + Shape;
 	//if(p->index==0 && q==0)std::cout<<p->freeEnergy[q]<<" "<<p->LsubX<<" "<<p->LsubY<<" "<< p->neighbors_sub[5+q*9]<<" "<< p->neighbors_sub[3+q*9]<<" "<< p->neighbors_sub[7+q*9]<<" "<<p->neighbors_sub[1+q*9]<<" "<<CH<<" "<<A<<" "<<Rep<<std::endl;
 	p->freeEnergy[q] += V;
+	sum_ChemPot[k] += p->fieldScalar[q] * p->freeEnergy[q];
 	p->Pressure[q] = Rep - CH - A;
+
+	p->freeEnergyDensity[q] += CH_density + A_density + Rep_density;
+	p->freeEnergyDensityGradient_x[q] = 2 * gamma * lambda * p->fieldDX[q];
+	p->freeEnergyDensityGradient_y[q] = 2 * gamma * lambda * p->fieldDY[q];
 	//if(p->index==0 && q==0)std::cout<<"Free energy: "<<p->freeEnergy[q]<<" "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<<dx<<" "<<dy <<std::endl;
 
 	return V;
@@ -571,10 +621,18 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	//if(p->index==0 && q==0)std::cout<<"Forces: "<< p->freeEnergy[q]*p->fieldDX[q] <<" "<< p->freeEnergy[q]*p->fieldDY[q]<<" "<<  0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] )  << " "<< 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] ) <<std::endl;
 
 	//passive (passive force)
-	number f_passive_x = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] );
-	number f_passive_y = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] );
+	//number f_passive_x = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] );
+	//number f_passive_y = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] );
+	//number f_passive_x = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] ) * p->fieldScalar[q];
+	//number f_passive_y = (-1) * 0.5 * ( p->freeEnergy[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] ) * p->fieldScalar[q];
 	//number f_passive_x = p->freeEnergy[q]*p->fieldDX[q];
 	//number f_passive_y = p->freeEnergy[q]*p->fieldDY[q];
+	//number f_passive_x = grad_free_energy_x[k] * p->fieldScalar[q];
+	//number f_passive_y = grad_free_energy_y[k] * p->fieldScalar[q];
+	//number f_passive_x = 0.;
+	//number f_passive_y = 0.;
+	number f_passive_x = -0.5 *( (p->freeEnergyDensity[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[5+q*9]] * p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldDX[p->neighbors_sub[5+q*9]] * p->freeEnergyDensityGradient_x[p->neighbors_sub[5+q*9]]) - (p->freeEnergyDensity[p->neighbors_sub[3+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] * p->fieldScalar[p->neighbors_sub[3+q*9]] + p->fieldDX[p->neighbors_sub[3+q*9]] * p->freeEnergyDensityGradient_x[p->neighbors_sub[3+q*9]]) ) - 0.5 * ((p->fieldDX[p->neighbors_sub[7+q*9]] * p->freeEnergyDensityGradient_y[p->neighbors_sub[7+q*9]])  -  (p->fieldDX[p->neighbors_sub[1+q*9]] * p->freeEnergyDensityGradient_y[p->neighbors_sub[1+q*9]]));
+	number f_passive_y = -0.5 *( (p->freeEnergyDensity[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[7+q*9]] * p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldDY[p->neighbors_sub[7+q*9]] * p->freeEnergyDensityGradient_y[p->neighbors_sub[7+q*9]]) - (p->freeEnergyDensity[p->neighbors_sub[1+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] * p->fieldScalar[p->neighbors_sub[1+q*9]] + p->fieldDY[p->neighbors_sub[1+q*9]] * p->freeEnergyDensityGradient_y[p->neighbors_sub[1+q*9]]) ) - 0.5 * ((p->fieldDY[p->neighbors_sub[5+q*9]] * p->freeEnergyDensityGradient_x[p->neighbors_sub[5+q*9]])  -  (p->fieldDY[p->neighbors_sub[3+q*9]] * p->freeEnergyDensityGradient_x[p->neighbors_sub[3+q*9]]));
 	p->Fpassive_x[q] = f_passive_x * passive_alpha;
 	p->Fpassive_y[q] = f_passive_y * passive_alpha;
 
@@ -621,8 +679,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 		//if(abs(fQ_self_y * zetaQ_self)>F_total_y) F_total_y = fQ_self_y * zetaQ_self;
 		//F_total_x += fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//F_total_y += fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
-		//F_total_x += f_passive_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
-		//F_total_y += f_passive_y + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		//if(p->index==0)F_total_x += f_passive_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		//if(p->index==0)F_total_y += f_passive_y + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 
 		//vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;

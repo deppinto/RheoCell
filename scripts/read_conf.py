@@ -141,6 +141,18 @@ for line in cfile:
     print(pt_num, area)
     pt_num+=1
 
+
+'''
+plt.clf()
+Z = np.array(Z)
+flat_data = Z.flatten()
+plt.hist(flat_data, bins=10, weights=np.ones(len(flat_data)) / len(flat_data))
+plt.xlabel("Value")
+plt.ylabel("Frequency")
+plt.title("Histogram of 2D array values")
+plt.show()
+'''
+
 print('Packing fraction: ', totarea)
 
 ax = plt.gca()
