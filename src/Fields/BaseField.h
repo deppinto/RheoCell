@@ -111,7 +111,8 @@ public:
         inline void set_V_ext(int k, int lx, int ly) {
                 if(ext_forces.size() > 0) {
                         for(auto ext_force : ext_forces) {
-                                V_ext = ext_force->velocity_profile(k, lx, ly);
+				if(ext_force->get_type() == "stretching") V_ext = ext_force->velocity_profile(index, 10, 10);
+				else V_ext = ext_force->velocity_profile(k, lx, ly);
                         }
                 }
         }

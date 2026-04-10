@@ -51,6 +51,7 @@ SET(forces_SOURCES
 	Forces/ChannelWalls.cpp
 	Forces/ShearFlowChannel.cpp
 	Forces/PoiseuilleFlowChannel.cpp
+	Forces/Stretching.cpp
 )
 
 SET(box_SOURCES

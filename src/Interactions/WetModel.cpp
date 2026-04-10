@@ -659,9 +659,6 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 
 	//vec_f_x[q+p->index*p->subSize] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 	//vec_f_y[q+p->index*p->subSize] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
-	/*double v0=0.01;
-	if(p->index==0)v0*=1;
-	else v0*=-1;*/
 
 	if(box->getWalls(k)<wall_slip){
 		//if(p->index==0){
