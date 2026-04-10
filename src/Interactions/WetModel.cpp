@@ -193,7 +193,7 @@ void WetModel::begin_energy_computation() {
 void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 
 	std::fill(size_store_site_velocity_index.begin(), size_store_site_velocity_index.end(), 0);
-	if(restart_solver<10)
+	if(restart_solver<100)
 		size_rows_old = size_rows;
 	else{
 		size_rows_old = 0;
