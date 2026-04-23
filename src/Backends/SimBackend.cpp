@@ -318,7 +318,7 @@ void SimBackend::apply_simulation_changes_after_equilibration(){
 	int i = 0;
 	while(i < N()) {
 		BaseField *p = fields[i];
-		p->set_sub_border();
+		//p->set_sub_border();
 		p->set_ext_properties();
 		i++;
 	}
