@@ -240,9 +240,9 @@ void MultiPhaseField::set_positions(BaseBox *box) {
 		unrap_sub_corner_bottom_left_y += displacement[1];
 		offset[0] =  int(offset[0] + LsubX - displacement[0])%LsubX; offset[1] =  int(offset[1] + LsubY - displacement[1])%LsubY;
 
-		if(displacement[0] * displacement[0] + displacement[1] * displacement[1] > 5.) {
+		/*if(displacement[0] * displacement[0] + displacement[1] * displacement[1] > 5.) {
 			OX_LOG(Logger::LOG_WARNING, "The following particle had a displacement greater than %f in this step: %d", 5. , index);
-		}
+		}*/
 
 	}
 	else{
