@@ -29,4 +29,14 @@ where NN should be replaced by integers and will specify the the length and widt
 
 ## Examples
 
-Some example input files are included in the `examples` directory. The `scripts` directory includes multiple python scripts that are used to analyse the results. In particular, the `read_conf.py` allows the user to visualize a configuration by supplying the topology file (see `examples` directory) and the configuration file extracted from a run (e.g. `last_conf.dat`).
+Some example input files are included in the `examples` directory. To run an example simulation with the files provided, use the following commands:
+
+```
+cd examples
+../build/bin/confgenerator input 140x140
+../build/bin/rheocell input
+```
+
+Depending on the input parameters - such as the total number of timesteps (e.g., steps = 1000) - and the hardware the code runs on, execution may take approximately five minutes to complete.
+
+The `scripts` directory includes multiple python scripts that are used to analyse the results. In particular, the `read_conf.py` allows the user to visualize a configuration by supplying the topology file (see `examples` directory) and the configuration file extracted from a run (e.g. `last_conf.dat`).
