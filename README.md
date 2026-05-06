@@ -37,6 +37,6 @@ cd examples
 ../build/bin/rheocell input
 ```
 
-Depending on the input parameters - such as the total number of timesteps (e.g., steps = 1000) - and the hardware the code runs on, execution may take approximately five minutes to complete.
+Depending on the input parameters - such as the total number of timesteps (e.g., steps = 1000) - and the hardware the code runs on, execution may take less than five minutes to complete.
 
 The `scripts` directory includes multiple python scripts that are used to analyse the results. In particular, the `read_conf.py` allows the user to visualize a configuration by supplying the topology file (see `examples` directory) and the configuration file extracted from a run (e.g. `last_conf.dat`).
