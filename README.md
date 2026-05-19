@@ -39,4 +39,8 @@ cd examples
 
 Depending on the input parameters - such as the total number of timesteps (e.g., steps = 1000) - and the hardware the code runs on, execution may take less than five minutes to complete.
 
-The `scripts` directory includes multiple python scripts that are used to analyse the results. In particular, the `read_conf.py` allows the user to visualize a configuration by supplying the topology file (see `examples` directory) and the configuration file extracted from a run (e.g. `last_conf.dat`).
+The `scripts` directory includes multiple python scripts that are used to analyse the results. In particular, the `read_conf.py` allows the user to visualize a configuration by supplying the topology file (see `examples` directory) and the configuration file extracted from a run (e.g. `last_conf.dat`). After finishing an example simulation using the previous commands, one can visualize the configuration by running the following in the `examples` directory:
+
+```
+python3 ../scripts/read_conf.py topology.top last_conf.dat 2
+```
