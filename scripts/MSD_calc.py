@@ -490,6 +490,7 @@ if variable==5:
 
 if variable==6:
 
+    '''
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
@@ -512,6 +513,7 @@ if variable==6:
     plt.show()
     #plt.savefig('./MSD_time.png')
     plt.close()
+    '''
 
     MSD = np.array(MSD)
     time = np.array(time_conf)
@@ -528,15 +530,16 @@ if variable==6:
     # 3. Fit a 1st-degree polynomial (linear regression: y = mx + c)
     # The first returned value [0] is the slope, which is your power-law exponent.
     slope, intercept = np.polyfit(log_time, log_MSD, 1)
-    print(f"Power-law exponent (slope): {slope:.4f}")
+    #print(f"Power-law exponent (slope): {slope:.4f}")
 
 
 
-    '''
     with open('MSD.txt', 'w') as f:
         for i in range(len(MSD)):
             print(time_conf[i]*dt,MSD[i], file=f)  
-    '''
+
+    with open('MSD_stats.txt', 'w') as f:
+        print(time_conf[-1]*dt, slope, intercept, file=f)  
 
 
     '''
