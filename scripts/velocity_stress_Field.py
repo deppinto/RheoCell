@@ -281,14 +281,16 @@ for line in cfile:
         Z_xx[int(yy)][int(xx)] = value_field_xx
         Z_yy[int(yy)][int(xx)] = value_field_yy
         Z_xy[int(yy)][int(xx)] = value_field_xy
-        Z_iso[int(yy)][int(xx)] = (Z_xx[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)]) / 2
+        #Z_iso[int(yy)][int(xx)] = (Z_xx[int(yy)][int(xx)] + Z_yy[int(yy)][int(xx)]) / 2
+        Z_iso[int(yy)][int(xx)] = sqrt( (Z_xx[int(yy)][int(xx)] - Z_yy[int(yy)][int(xx)])**2 + (Z_xy[int(yy)][int(xx)] + Z_xy[int(yy)][int(xx)])**2 )
         #Z_iso[int(yy)][int(xx)] = Z_xy[int(yy)][int(xx)]
 
     z_min, z_max = 0., np.abs(Z_iso).max()
     for i in range(ly):
         for j in range(lx):
             Z_iso[i][j] = Z_iso[i][j] / z_max
-    cset1 = plt.imshow(Z_iso, cmap='RdBu_r', interpolation='nearest', vmin=-1, vmax=1)
+    #cset1 = plt.imshow(Z_iso, cmap='RdBu_r', interpolation='nearest', vmin=-1, vmax=1)
+    cset1 = plt.imshow(Z_iso, cmap='RdBu_r', interpolation='nearest', vmin=0, vmax=1)
 
 
 '''
