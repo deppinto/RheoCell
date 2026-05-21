@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -490,11 +490,33 @@ if variable==5:
 
 if variable==6:
 
-    '''
+    MSD = np.array(MSD)
+    time = np.array(time_conf)
+    print(len(MSD))
+
+    # 1. Slice the last 10 points
+    time_last_10 = time[-65:]
+    MSD_last_10 = MSD[-65:]
+
+    # 2. Transform the sliced data into log space (Base e or Base 10 both work)
+    log_time = np.log(time_last_10)
+    log_MSD = np.log(MSD_last_10)
+
+    # 3. Fit a 1st-degree polynomial (linear regression: y = mx + c)
+    # The first returned value [0] is the slope, which is your power-law exponent.
+    slope, intercept = np.polyfit(log_time, log_MSD, 1)
+    print(f"Power-law exponent (slope): {slope:.4f}")
+
+    # 2. Calculate the corresponding y values (y = mx + b)
+    y_vals = np.exp(intercept) * (time ** slope)
+
+
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
     plt.plot(time_conf, MSD, '-o' , color='darkgreen')
+    plt.plot(time, y_vals, color='blue', label=f'y = {slope}x + {intercept}')
+    # (0, intercept) provides the starting point on the y-axis
     #plt.plot(Gamma_rot, '-o' , color='darkgreen')
     #plt.plot(averages, '-o' , color='royalblue')
     #plt.ylabel(r'$\Gamma$', fontsize=18)
@@ -513,33 +535,16 @@ if variable==6:
     plt.show()
     #plt.savefig('./MSD_time.png')
     plt.close()
+
+
     '''
-
-    MSD = np.array(MSD)
-    time = np.array(time_conf)
-    print(len(MSD))
-
-    # 1. Slice the last 10 points
-    time_last_10 = time[-15:]
-    MSD_last_10 = MSD[-15:]
-
-    # 2. Transform the sliced data into log space (Base e or Base 10 both work)
-    log_time = np.log(time_last_10)
-    log_MSD = np.log(MSD_last_10)
-
-    # 3. Fit a 1st-degree polynomial (linear regression: y = mx + c)
-    # The first returned value [0] is the slope, which is your power-law exponent.
-    slope, intercept = np.polyfit(log_time, log_MSD, 1)
-    #print(f"Power-law exponent (slope): {slope:.4f}")
-
-
-
     with open('MSD.txt', 'w') as f:
         for i in range(len(MSD)):
             print(time_conf[i]*dt,MSD[i], file=f)  
 
     with open('MSD_stats.txt', 'w') as f:
         print(time_conf[-1]*dt, slope, intercept, file=f)  
+    '''
 
 
     '''

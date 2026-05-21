@@ -402,10 +402,10 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
                 for(int q=0; q<p->subSize;q++){
 			//F_total_x += friction * vec_v_x[q+field_start_index[p->index]] + 8 * vec_v_x[q+field_start_index[p->index]];
 			//F_total_y += friction * vec_v_y[q+field_start_index[p->index]] + 8 * vec_v_y[q+field_start_index[p->index]];
-			V_total_x += friction * vec_v_x[q+field_start_index[p->index]];
-			V_total_y += friction * vec_v_y[q+field_start_index[p->index]];
-			V_All_x += vec_v_x[q+field_start_index[p->index]];
-			V_All_y += vec_v_y[q+field_start_index[p->index]];
+			V_total_x += vec_v_x[q+field_start_index[p->index]];
+			V_total_y += vec_v_y[q+field_start_index[p->index]];
+			V_All_x += friction * vec_v_x[q+field_start_index[p->index]];
+			V_All_y += friction * vec_v_y[q+field_start_index[p->index]];
 			V_gammaphi_x += vec_v_x[q+field_start_index[p->index]] * p->fieldDX[q];
 			V_gammaphi_y += vec_v_y[q+field_start_index[p->index]] * p->fieldDY[q];
 			V_phi_x += p->fieldScalar[q] * vec_v_x[q+field_start_index[p->index]];
@@ -636,6 +636,7 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	p->Fpassive_x[q] = f_passive_x * passive_alpha;
 	p->Fpassive_y[q] = f_passive_y * passive_alpha;
 
+
 	//active inter cells (active force)
 	number fQ_self_x = - (p->Q00*p->fieldDX[q] + p->Q01*p->fieldDY[q]);
 	number fQ_self_y = - (p->Q01*p->fieldDX[q] - p->Q00*p->fieldDY[q]);
@@ -676,8 +677,10 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 		//if(abs(fQ_self_y * zetaQ_self)>F_total_y) F_total_y = fQ_self_y * zetaQ_self;
 		//F_total_x += fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//F_total_y += fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
-		//if(p->index==0)F_total_x += f_passive_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
-		//if(p->index==0)F_total_y += f_passive_y + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		//F_total_x += f_passive_x + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
+		//F_total_y += f_passive_y + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		//F_total_x += f_passive_x;
+		//F_total_y += f_passive_y;
 
 		//vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
