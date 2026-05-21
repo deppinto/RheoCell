@@ -384,7 +384,7 @@ for line in cfile:
             S00 += -0.5*(field_dx * field_dx - field_dy * field_dy)
             S01 += -field_dx * field_dy
 
-        D_major_axis = 0.5 * np.atan2(S01, S00)
+        D_major_axis = 0.5 * np.arctan2(S01, S00)
         D_major_axis_vec_x = 2*np.cos(D_major_axis)
         D_major_axis_vec_y = 2*np.sin(D_major_axis)
         D_i = np.sqrt(S00 * S00 + S01 * S01)
