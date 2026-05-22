@@ -277,6 +277,9 @@ neigh = []
 neigh_old = []
 
 
+Z = np.zeros((ly, lx), dtype=np.float32)
+
+
 cont_line=0
 vmax=0.1
 start_line=(N+2)*int(float(sys.argv[3])) 
@@ -329,7 +332,8 @@ for line in cfile:
         y=np.arange(0,ly,1)
 
     else:
-        Z=[[0. for q in range(lx)] for k in range(ly)]
+        Z.fill(0)
+        #Z=[[0. for q in range(lx)] for k in range(ly)]
         LsubX[pt_num]=int(float(words[0]))
         LsubY[pt_num]=int(float(words[1]))
         CoMX[pt_num]=float(words[2])
@@ -406,7 +410,7 @@ for line in cfile:
         pointsCoM.append([CoMX[pt_num], CoMY[pt_num]])
 
 
-        X, Y = np.meshgrid(x, y)
+        #X, Y = np.meshgrid(x, y)
         step = 0.01
         m = np.amax(Z)
         #if m<0.000001:
@@ -414,7 +418,7 @@ for line in cfile:
 
         levels = np.arange(0.0, m, step) + step
 
-        if variable==1 or variable==2 or variable==3:
+        #if variable==1 or variable==2 or variable==3:
             #if pt_num==52:
                 #cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
             #else:
@@ -423,8 +427,8 @@ for line in cfile:
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 3*nemX, 3*nemY, width=0.5, head_width=0, color='k')
             #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -3*nemX, -3*nemY, width=0.5, head_width=0, color='k')
 
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 1*D_major_axis_vec_x, 1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
-            cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -1*D_major_axis_vec_x, -1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], 1*D_major_axis_vec_x, 1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
+            #cset1 = plt.arrow(CoMX[pt_num], CoMY[pt_num], -1*D_major_axis_vec_x, -1*D_major_axis_vec_y, width=0.5, head_width=0, color='r')
 
         #increment phase field index
         pt_num+=1
@@ -456,6 +460,7 @@ for line in cfile:
             #if cont_line>N+2:
                 #cset1 = plt.imshow(velocity_grid, vmin=velmin, vmax=velmax, cmap=cm.Reds)
             ax = plt.gca()
+            '''
             for pointidx, simplex in zip(vor.ridge_points, vor.ridge_vertices):
                 simplex = np.asarray(simplex)
                 if np.all(simplex >= 0):
@@ -472,7 +477,7 @@ for line in cfile:
                 far_point = vor.vertices[i] + n * 10  # Extend far for visibility
 
                 ax.plot([vor.vertices[i, 0], far_point[0]],[vor.vertices[i, 1], far_point[1]], 'b--')
-
+            '''
 
 
             ax.set_aspect('equal', adjustable='box')
