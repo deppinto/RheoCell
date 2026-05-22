@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=5:
     print(sys.argv[0]," [topology file] [nematic file] [velocity file] [1:save conf; 2:make plot]")
@@ -197,11 +197,15 @@ for p in range(0,LLY):
                 num += s*dxQxy - dyQxx
                 den += dxQxx + s*dyQxy
             psi = s/(2.-s)*atan2(num, den)
+            defect_length = 6.
             if s==1:
                 cset1 = plt.plot(x, y, 'go', markersize=10)
-                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='g', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='g', head_width=0, head_length=0, width=1.0)
             elif s==-1:
-                cset1 = plt.plot(x, y, 'b^', markersize=10)
+                #cset1 = plt.plot(x, y, 'b^', markersize=10)
+                cset1 = plt.arrow(x, y, 0.6*defect_length*cos(psi), 0.6*defect_length*sin(psi), color='b', head_width=1.5, head_length=1.5, width=0.75)
+                cset1 = plt.arrow(x, y, 0.6*defect_length*cos(psi + 2.0944), 0.6*defect_length*sin(psi + 2.0944), color='b', head_width=1.5, head_length=1.5, width=0.75)
+                cset1 = plt.arrow(x, y, 0.6*defect_length*cos(psi + 2 * 2.0944), 0.6*defect_length*sin(psi + 2 * 2.0944), color='b', head_width=1.5, head_length=1.5, width=0.75)
 
 
         # keep this just in case our other symmetries give us integer defects

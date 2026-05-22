@@ -140,9 +140,29 @@ for i in range(size_R):
 
 
 if variable == 1 or variable == 3:
-    with open('correlations_velocity.txt', 'w') as f:
+    with open('Correlations_velocity.txt', 'w') as f:
         for i in range(size_R):
             print(corr_dist[i], correlations[i], correlations_vorticity[i], file=f)
+
+    corr_length = 0.
+    index = 0
+    for i in correlations:
+        if i<0:
+            corr_length = i
+            break
+        index += 1
+
+    corr_length_vort = 0.
+    index_vort = 0
+    for i in correlations_vorticity:
+        if i<0:
+            corr_length_vort = i
+            break
+        index_vort+=1
+
+    with open('Correlations_velocity_stats.txt', 'w') as f:
+        print(corr_dist[-1], corr_dist[index], corr_dist[index_vort], file=f)
+
 
 
 if variable==2:
