@@ -3,19 +3,19 @@
 
 WetModel::WetModel() :
 				BaseInteraction(),
-				gamma(0.01),
-				lambda(2.5),
-				omega(0.004),
-				mu(3.),
+				gamma(0.06),
+				lambda(2.),
+				omega(0.),
+				mu(20.),
 				Kg(0.1),
-				kappa(0.1),
+				kappa(0.5),
 				friction(1.),
 				zetaQ_self(0),
 				zetaQ_inter(0),
-				J_Q(0),
+				J_Q(1.0),
 				friction_cell(0.),
 				tolerance(0.0001),
-				wall_slip(0.5),
+				wall_slip(2.),
 				passive_alpha(1.){
 	a0=PI*R*R;
 }
