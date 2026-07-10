@@ -234,6 +234,7 @@ for p in range(0,LLY):
                 #if y<130:
                     #print(x,y)
                 cset1 = plt.plot(x, y, '*', color='#00FFFF', markersize=10)
+                #print(x, y)
             elif s==-1:
                 cset1 = plt.plot(x, y, 'kX', markersize=10)
 

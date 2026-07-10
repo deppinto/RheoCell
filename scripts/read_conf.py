@@ -54,6 +54,7 @@ fig = plt.figure(figsize=(6,6))
 start_value = 11
 totphi=[0. for i in range(lx*ly)]
 totarea = 0
+totout = 0
 for line in cfile:
     area=0
     out_area=0
@@ -93,8 +94,8 @@ for line in cfile:
         if value>=0.:
             Z[yy][xx]=value
 
-        if value<0.5:
-            out_area=value*value
+        if value>0.9:
+            out_area+=1
 
         area+=value*value
         if value>1.5 or value<-0.5:
@@ -110,9 +111,9 @@ for line in cfile:
         print("area is not conserved: ", pt_num, area)
         cmap=cm.winter
 
-    if out_area/area > 0.9:
-        print("cell is leaking: ", pt_num, area, out_area)
-        cmap=cm.autumn
+    #if out_area/area > 0.9:
+        #print("cell is leaking: ", pt_num, area, out_area)
+        #cmap=cm.autumn
     
 
     X, Y = np.meshgrid(x, y)
@@ -138,7 +139,8 @@ for line in cfile:
         cset1 = plt.arrow(CoMX, CoMY, 3*nemX, 3*nemY, color='k')
         cset1 = plt.arrow(CoMX, CoMY, -3*nemX, -3*nemY, color='k')
 
-    print(pt_num, area)
+    totout+=out_area
+    print(pt_num, area, out_area)
     pt_num+=1
 
 
@@ -153,7 +155,7 @@ plt.title("Histogram of 2D array values")
 plt.show()
 '''
 
-print('Packing fraction: ', totarea)
+print('Packing fraction: ', totarea, totout)
 
 ax = plt.gca()
 ax.set_aspect('equal', adjustable='box')

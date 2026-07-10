@@ -44,6 +44,7 @@ ly=int(float(header[3]))
 
 walls = [0. for i in range(lx*ly)]
 set_walls(lx,ly,walls)
+defect_length = 6.
 
 x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
@@ -202,10 +203,13 @@ for p in range(0,LLY):
                 den += dxQxx + s*dyQxy
             psi = s/(2.-s)*atan2(num, den)
             if s==1:
-                cset1 = plt.plot(x, y, 'go', markersize=10)
-                cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='g', head_width=1.5, head_length=1.5, width=0.5)
+                cset1 = plt.plot(x, y, 'go', markersize=5)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='g', head_width=0, head_length=0, width=1.0)
             elif s==-1:
-                cset1 = plt.plot(x, y, 'b^', markersize=10)
+                #cset1 = plt.plot(x, y, 'b^', markersize=10)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='b', head_width=1.5, head_length=1.5, width=0.75)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi + 2.0944), defect_length*sin(psi + 2.0944), color='b', head_width=1.5, head_length=1.5, width=0.75)
+                cset1 = plt.arrow(x, y, defect_length*cos(psi + 2 * 2.0944), defect_length*sin(psi + 2 * 2.0944), color='b', head_width=1.5, head_length=1.5, width=0.75)
 
 
         # keep this just in case our other symmetries give us integer defects

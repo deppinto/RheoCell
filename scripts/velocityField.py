@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [topology file] [conf file] [1:save conf; 2:make plot]")
@@ -75,7 +75,7 @@ for line in cfile:
         Z[int(yy)][int(xx)]=sqrt(value_x*value_x+value_y*value_y)
         if int(xx)%4==0 and int(yy)%4==0:
             #cset1 = plt.arrow(xx, yy, 100*value_x, 100*value_y, width=0.2, color='k')
-            cset1 = plt.arrow(xx, yy, 2000*value_x, 2000*value_y, width=0.3, color='k')
+            cset1 = plt.arrow(xx, yy, 40*value_x, 40*value_y, width=0.3, color='k')
             #cset1 = plt.arrow(xx, yy, 75*value_x, 75*value_y, width=0.2, color='k')
 
     read_line += 1
@@ -114,19 +114,149 @@ for line in cfile:
 
         dvxdx = (Z_x[y1][xnext] - Z_x[y1][xprev])/2
         dvydy = (Z_y[ynext][x1] - Z_y[yprev][x1])/2
-        strain[y1][x1] = 0.5 * (dvxdx + dvydy)
+        strain[y1][x1] = -0.5 * (dvxdx + dvydy)
 
         
     #z_min, z_max = -np.abs(Z).max(), np.abs(Z).max()
-    z_min, z_max = -np.abs(vorticity).max(), np.abs(vorticity).max()
+    #z_min, z_max = -np.abs(vorticity).max(), np.abs(vorticity).max()
     #z_min, z_max = 0., np.abs(Z).max()
-    #z_min, z_max = -np.abs(strain).max(), np.abs(strain).max()
+    z_min, z_max = -np.abs(strain).max(), np.abs(strain).max()
     X, Y = np.meshgrid(x, y)
     #cset1 = plt.imshow(Z, cmap='hot', interpolation='nearest')
     #cset1 = plt.pcolormesh(X, Y, vorticity, cmap='RdBu', vmin=z_min, vmax=z_max)
-    cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=z_min, vmax=z_max)
+    #cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=z_min, vmax=z_max)
     #cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=-1, vmax=1)
-    #cset1 = plt.imshow(strain, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
+    cset1 = plt.imshow(strain, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
+
+
+def rotate(n,p):
+    '''
+    takes as arguments a vector n and an integer p
+    rotates v by 2pi/p and returns the result
+    '''
+
+    t = 2*np.pi/p
+    nx = cos(t)*n[0] - sin(t)*n[1]
+    ny = sin(t)*n[0] + sin(t)*n[1]
+    return [nx,ny]
+
+
+def wang(a, b):
+    """Infamous chinese function"""
+    p = 1.
+    ang = atan2(abs(a[0]*b[1]-a[1]*b[0]), a[0]*b[0]+a[1]*b[1])
+
+    #if(ang > pi/2.):
+        #b = [-i for i in b]
+
+    while(abs(ang) > np.pi/p + 1e-3):
+        b = rotate(b,p)
+        ang = atan2(abs(a[0]*b[1]-a[1]*b[0]), a[0]*b[0]+a[1]*b[1])
+
+    m = a[0]*b[1]-a[1]*b[0]
+    return -np.sign(m)*atan2(abs(m), a[0]*b[0]+a[1]*b[1])
+
+
+def collapse(i, j, s, LX, LY, w, x=0, y=0, n=0,rng = [0.4,0.6]):
+
+    if (s*w[i][j] > rng[0]) and (s*w[i][j] < rng[1]):
+        w[i][j] = 0
+        x1,y1,n1 = collapse((i+1) % LY, j, s, LX, LY, w, x, y, n,rng)
+        x2,y2,n2 = collapse((i-1+LY) % LY, j, s, LX, LY, w, x, y, n, rng)
+        x3,y3,n3 = collapse(i, (j+1) % LX, s, LX, LY, w, x, y, n, rng)
+        x4,y4,n4 = collapse(i, (j-1+LX) % LX, s, LX, LY, w, x, y, n, rng)
+        x = j + x1 + x2 +x3 +x4
+        y = i + y1 + y2 +y3 +y4
+        n = 1 + n1 + n2 +n3 +n4
+        return x,y,n
+    else:
+        return 0,0,0
+
+LLX = lx
+LLY = ly
+vecfield_nx = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+vecfield_ny = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+
+vecfield_nx = Z_x
+vecfield_ny = Z_y
+
+winding_number = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+for p in range(0, LLY):
+    for q in range(0, LLX):
+        ax1 = [vecfield_nx[p][(q+1) % LLX], vecfield_ny[p][(q+1) % LLX]]
+        ax2 = [vecfield_nx[p][(q-1+LLX) % LLX], vecfield_ny[p][(q-1+LLX) % LLX]]
+        ax3 = [vecfield_nx[(p+1) % LLY][q], vecfield_ny[(p+1) % LLY][q]]
+        ax4 = [vecfield_nx[(p-1+LLY) % LLY][q], vecfield_ny[(p-1+LLY) % LLY][q]]
+        ax5 = [vecfield_nx[(p-1+LLY) % LLY][(q+1) % LLX], vecfield_ny[(p-1+LLY) % LLY][(q+1) % LLX]]
+        ax6 = [vecfield_nx[(p-1+LLY) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p-1+LLY)%LLY][(q-1+LLX)%LLX]]
+        ax7 = [vecfield_nx[(p+1) % LLY][(q+1) % LLX], vecfield_ny[(p+1) % LLY][(q+1) % LLX]]
+        ax8 = [vecfield_nx[(p+1) % LLY][(q-1+LLX) % LLX], vecfield_ny[(p+1) % LLY][(q-1+LLX) % LLX]]
+
+        winding_number[p][q] = wang(ax1, ax5)
+        winding_number[p][q] += wang(ax5, ax4)
+        winding_number[p][q] += wang(ax4, ax6)
+        winding_number[p][q] += wang(ax6, ax2)
+        winding_number[p][q] += wang(ax2, ax8)
+        winding_number[p][q] += wang(ax8, ax3)
+        winding_number[p][q] += wang(ax3, ax7)
+        winding_number[p][q] += wang(ax7, ax1)
+        winding_number[p][q] /= 2. * pi
+
+
+
+charge = 1.0/2.0
+thresh = 0.05
+for p in range(0,LLY):
+    for q in range(0,LLX):
+        # detect simplest charge 1/p defects
+        if  (abs(winding_number[p][q]) > charge - thresh) and (abs(winding_number[p][q]) < charge + thresh):
+            # charge sign
+            s = np.sign(winding_number[p][q])
+            # bfs
+            sum_x, sum_y, n = collapse(p, q, s, LLX, LLY, winding_number, rng = [charge - thresh, charge + thresh])
+            x,y = sum_x/n,sum_y/n
+            # compute angle, see doi:10.1039/c6sm01146b
+            num = 0
+            den = 0
+            '''
+            for (dx, dy) in [(0, 0), (0, 1), (1, 1), (1, 0)]:
+                # coordinates of nodes around the defect
+                kk = (int(x) + LLX + dx) % LLX
+                ll = (int(y) + LLY + dy) % LLY
+                # derivative at these points
+                dxQxx = .5*(vecfield_Q00[ll][(kk+1) % LLX] - vecfield_Q00[ll][(kk-1+LLX) % LLX])
+                dxQxy = .5*(vecfield_Q01[ll][(kk+1) % LLX] - vecfield_Q01[ll][(kk-1+LLX) % LLX])
+                dyQxx = .5*(vecfield_Q00[(ll+1) % LLY][kk] - vecfield_Q00[(ll-1+LLY) % LLY][kk])
+                dyQxy = .5*(vecfield_Q01[(ll+1) % LLY][kk] - vecfield_Q01[(ll-1+LLY) % LLY][kk])
+                # accumulate numerator and denominator
+                num += s*dxQxy - dyQxx
+                den += dxQxx + s*dyQxy
+            psi = s/(2.-s)*atan2(num, den)
+            '''
+            if s==1:
+                cset1 = plt.plot(x, y, 'go', markersize=10)
+                #cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='g', head_width=1.5, head_length=1.5, width=0.5)
+            elif s==-1:
+                cset1 = plt.plot(x, y, 'b^', markersize=10)
+
+
+        # keep this just in case our other symmetries give us integer defects
+        elif (abs(winding_number[p][q]) > 1 - thresh) and (abs(winding_number[p][q])< 1 + thresh):
+            # charge sign
+            s = np.sign(winding_number[p][q])
+            # bfs
+            sum_x, sum_y, n = collapse(p, q, s, LLX, LLY, winding_number, rng = [1-thresh, 1+thresh])
+            x,y = sum_x/n,sum_y/n
+            # add defect to list
+            if s==1:
+                #if y<130:
+                    #print(x,y)
+                cset1 = plt.plot(x, y, '*', color='#00FFFF', markersize=10)
+                #print(x, y)
+            elif s==-1:
+                cset1 = plt.plot(x, y, 'kX', markersize=10)
+
+
 
 
 ax = plt.gca()
