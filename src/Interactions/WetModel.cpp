@@ -16,7 +16,8 @@ WetModel::WetModel() :
 				friction_cell(0.),
 				tolerance(0.0001),
 				wall_slip(2.),
-				passive_alpha(1.){
+				passive_alpha(1.),
+				lambda_wall(0.){
 	a0=PI*R*R;
 }
 
@@ -44,6 +45,7 @@ void WetModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "wall_slip", &wall_slip, 0);
 	getInputNumber(&inp, "Kg", &Kg, 0);
 	getInputNumber(&inp, "passive_alpha", &passive_alpha, 0);
+	getInputInt(&inp, "lambda_wall", &lambda_wall, 0);
 }
 
 void WetModel::init() {
@@ -661,7 +663,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	//vec_f_x[q+p->index*p->subSize] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 	//vec_f_y[q+p->index*p->subSize] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 
-	if(box->getWalls(k)<wall_slip){
+	//if(box->getWalls(k)<wall_slip){
+	if(box->getWalls(k)<0.5){
 		//if(p->index==0){
 		//F_total_x += p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//F_total_y += p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
@@ -749,7 +752,7 @@ void WetModel::updateDirectedActiveForces(number dt, BaseField*p, bool store){
 
 void WetModel::update_anchoring(BaseField*p){
 
-	number walls_length = 8;
+	number walls_length = lambda_wall;
 	number dist1 = ((double)p->CoM_old[1] - walls_length);
 	number dist2 = ((double)box->getYsize() - walls_length) - (double)p->CoM_old[1];
 	number theta;

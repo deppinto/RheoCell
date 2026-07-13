@@ -42,6 +42,8 @@ protected:
 	number tolerance;
 	number wall_slip; //if more than 1 there is no slip, if smaller than 1 there is slip. The length of slip on the walls is greater with decreasing values
 	number passive_alpha;
+	int lambda_wall;
+
 
 	number F_total_x;
 	number F_total_y;
