@@ -16,6 +16,7 @@ WetModel::WetModel() :
 				friction_cell(0.),
 				tolerance(0.0001),
 				wall_slip(2.),
+				freeEnergy_wall_slip(2.),
 				passive_alpha(1.),
 				lambda_wall(0.){
 	a0=PI*R*R;
@@ -95,6 +96,7 @@ void WetModel::apply_changes_after_equilibration(){
 	J_Q=J_Q_active;
 	friction=friction_active;
 	friction_cell=friction_cell_active;
+	freeEnergy_wall_slip=0.5;
 }
 
 void WetModel::set_box(BaseBox *boxArg) {
@@ -602,7 +604,13 @@ number WetModel::f_interaction(BaseField *p, int q) {
 	number V = CH + A + Rep + Adh;
 	//number V = CH + A + Rep + Adh + Shape;
 	//if(p->index==0 && q==0)std::cout<<p->freeEnergy[q]<<" "<<p->LsubX<<" "<<p->LsubY<<" "<< p->neighbors_sub[5+q*9]<<" "<< p->neighbors_sub[3+q*9]<<" "<< p->neighbors_sub[7+q*9]<<" "<<p->neighbors_sub[1+q*9]<<" "<<CH<<" "<<A<<" "<<Rep<<std::endl;
-	p->freeEnergy[q] += V;
+	
+	if(box->getWalls(k)<freeEnergy_wall_slip){
+		p->freeEnergy[q] += V;
+	}
+	else{
+		p->freeEnergy[q] = 0.;
+	}
 	sum_ChemPot[k] += p->fieldScalar[q] * p->freeEnergy[q];
 	p->Pressure[q] = Rep - CH - A;
 

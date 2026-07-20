@@ -143,7 +143,8 @@ exit(1)
 '''
 
 #filedata=open("/scratch/pinto/Phase_Field/RheoCell/Work/Results/scripts"+str(scripts)+"/dados.txt","r")
-filedata=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/params","r")
+#filedata=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/params","r")
+filedata=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Shear/scripts"+str(scripts)+"/params","r")
 #JOBS	N	LX	LY	EQTIME	TIME	DT	PRTCONF	JO	FRICELL	FRIC	NEMSELF	NEMINTR	GAMMA	KAPPA	LAMBDA	MU	OMEGA	CGTOL	CORES	WSLIP	SHEAR
 jobs=[]
 jobs_seq=[1]
@@ -400,9 +401,10 @@ for traj in range(start, end):
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
 
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg_new.txt","r")
-        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg_all_test.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Shear/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg_all_test.txt","r")
 
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Single_runs/save_confs/Running/confs_46/elongation_shape.txt","r")
@@ -421,8 +423,8 @@ for traj in range(start, end):
             #sum_time += float(save[variable])
             #theta_5.append(float(save[variable]))
             #theta_1.append(float(save[variable]))
-            #stress_values.append(float(save[2]))
-            stress_values.append(float(save[0])-float(save[1]))
+            stress_values.append(float(save[2]))
+            #stress_values.append(float(save[0])-float(save[1]))
             #E_diss_values.append(float(save[4]))
             E_diss_values.append(float(save[4]))
             #stress_values.append(0.5 * (float(save[variable]) +  float(save[variable+1])))
@@ -993,8 +995,8 @@ ax2.yaxis.set_label_coords(1.155, y_pos2)
 plt.figure(figsize=(6.4, 3.8))
 #plt.figure(figsize=(6.4, 4.8))
 stress_values = np.array(stress_values)
-#stress_values = stress_values * -1/(70*(308-100))
-stress_values = stress_values * -1/(30*30)
+stress_values = stress_values * -1/(70*(308-100))
+#stress_values = stress_values * -1/(30*30)
 E_diss_values = np.array(E_diss_values)
 E_diss_values = E_diss_values * 0.5
 
@@ -1014,7 +1016,8 @@ E_diss_values = E_diss_values.reshape(29, jobs[0]).sum(axis=1)
 plt.plot(final_x, stress_values, '--o', color='firebrick')
 plt.fill_between(final_x, stress_values - sem1, stress_values + sem1, color="firebrick", alpha=0.1)
 #plt.fill_between(final_x, final_y_pois - final_y_pois_std, final_y_pois + final_y_pois_std, color="firebrick", alpha=0.1)
-plt.ylabel(r'$\sigma_{N}^T$', fontsize=18, rotation=0, labelpad=25)
+#plt.ylabel(r'$\sigma_{N}^T$', fontsize=18, rotation=0, labelpad=25)
+plt.ylabel(r'$\sigma^T$', fontsize=18, rotation=0, labelpad=25)
 plt.xlabel(r'$\dot{\gamma}$', fontsize=18)
 #fig = plt.gcf()
 #plt.yscale('log')
@@ -1066,14 +1069,17 @@ plt.yscale('log')
 plt.tight_layout()
 y_pos1 = 0.445  # center
 y_pos2 = 0.555  # center
-ax1.yaxis.set_label_coords(-0.15, y_pos1)
+ax1.yaxis.set_label_coords(-0.22, y_pos1)
 ax2.yaxis.set_label_coords(1.21, y_pos2)
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/logscale_stress_E_ref_pois.png", transparent=True)
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/logscale_stress_E_ref_pois.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/logscale_stress_E_ref_pois.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/logscale_stress_E_ref_pois.svg", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/single_stress_E_ref.png", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/single_stress_E_ref.svg", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/test_stress_E_ref.png", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/test_stress_E_ref.svg", transparent=True)
+
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_test_stress_E_ref.png", transparent=True)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_test_stress_E_ref.svg", transparent=True)
 
 
 '''
