@@ -288,8 +288,8 @@ number WetPolarModel::f_interaction(BaseField *p, int q) {
 	//Perimeter term
 	//number p0 = 12; //2 * PI * 8;
 	//number beta = mu * 10.;
-	number P = 4*(beta/p0) * (1 - p->perimeter/p0) * p->laplacianPhi[q];
-	//number P = 0;
+	//number P = 4*(beta/p0) * (1 - p->perimeter/p0) * p->laplacianPhi[q];
+	number P = 0;
 	
 
 	// delta F / delta phi_i
