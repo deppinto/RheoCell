@@ -4,7 +4,7 @@
 
 ShearFlowChannel::ShearFlowChannel() :
 				BaseForce() {
-	//lambda_wall = 1.;
+	lambda_wall = 14.;
 	lambda = 2.;
 	kappa_wall = 0.;
 	shear_rate = 0.;
@@ -22,6 +22,8 @@ std::tuple<std::vector<int>, std::string> ShearFlowChannel::init(input_file &inp
 	getInputNumber(&inp, "kappa_wall", &kappa_wall, 1);
 	getInputNumber(&inp, "lambda", &lambda, 1);
 	getInputNumber(&inp, "shear_rate", &shear_rate_active, 1);
+
+	lambda_wall += 2 * lambda;
 
 	getInputBool(&inp, "generate_inside", &generate_inside, 0);
 
@@ -54,7 +56,7 @@ std::vector<number> ShearFlowChannel::velocity_profile(int k, int lx, int ly) {
 	//int x = (k-(int(k/lx)*lx));
 	int y = (k/lx);
 	//if(y > lambda && y < ly - lambda) return std::vector<number> { ((y - (lambda+1) + 0.5) - 0.5 * (ly - 2 * (lambda+1))) * shear_rate / (ly - 2 * (lambda+1)), 0.};
-	if(y <= lambda) return std::vector<number> { (((lambda+1) - (lambda+1) + 0.5) - 0.5 * (ly - 2 * (lambda+1))) * shear_rate / (ly - 2 * (lambda+1)), 0.};
-	else if(y >= ly - lambda) return std::vector<number> { (((ly-lambda-1) - (lambda+1) + 0.5) - 0.5 * (ly - 2 * (lambda+1))) * shear_rate / (ly - 2 * (lambda+1)), 0.};
+	if(y <= lambda_wall) return std::vector<number> { (((lambda_wall+1) - (lambda_wall+1) + 0.5) - 0.5 * (ly - 2 * (lambda_wall+1))) * shear_rate / (ly - 2 * (lambda_wall+1)), 0.};
+	else if(y >= ly - lambda_wall) return std::vector<number> { (((ly-lambda_wall-1) - (lambda_wall+1) + 0.5) - 0.5 * (ly - 2 * (lambda_wall+1))) * shear_rate / (ly - 2 * (lambda_wall+1)), 0.};
 	else return std::vector<number> {0., 0.};
 }

@@ -6,7 +6,7 @@
 class ShearFlowChannel: public BaseForce {
 private:
 	bool generate_inside;
-	//number lambda_wall;
+	number lambda_wall;
 	number kappa_wall;
 	number shear_rate;
 	number shear_rate_active;
