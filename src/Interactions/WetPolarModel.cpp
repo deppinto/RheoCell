@@ -16,7 +16,9 @@ WetPolarModel::WetPolarModel() :
 				tolerance(0.0001),
 				wall_slip(0.5),
 				passive_alpha(1.),
-				beta(0.){
+				beta(0.),
+				shear_rate(0.),
+				lambda_wall(14){
 	a0=PI*R*R;
 }
 
@@ -44,6 +46,9 @@ void WetPolarModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "wall_slip", &wall_slip, 0);
 	getInputNumber(&inp, "passive_alpha", &passive_alpha, 0);
 	getInputNumber(&inp, "beta", &beta_active, 0);
+	getInputNumber(&inp, "lees_edwards_shear_rate", &shear_rate_active, 1);
+	getInputInt(&inp, "lambda_wall", &lambda_wall, 1);
+	lambda_wall+=2*lambda;
 }
 
 void WetPolarModel::init() {
@@ -90,6 +95,7 @@ void WetPolarModel::apply_changes_after_equilibration(){
 	friction=friction_active;
 	friction_cell=friction_cell_active;
 	beta=beta_active;
+	shear_rate = shear_rate_active;
 }
 
 void WetPolarModel::set_box(BaseBox *boxArg) {
@@ -331,6 +337,11 @@ void WetPolarModel::calc_internal_forces(BaseField *p, int q) {
 		vec_f_y[q+field_start_index[p->index]] = f_passive_y * passive_alpha + fQ_self_y * zetaQ_self;
 		p->total_force_x += vec_f_x[q+field_start_index[p->index]] * p->fieldScalar[q];
 		p->total_force_y += vec_f_y[q+field_start_index[p->index]] * p->fieldScalar[q];
+
+
+		if(int(k/box->getXsize()) <= lambda_wall) vec_f_x[q+field_start_index[p->index]] += (((lambda_wall+1) - (lambda_wall+1) + 0.5) - 0.5 * (box->getYsize() - 2 * (lambda_wall+1))) * shear_rate / (box->getYsize() - 2 * (lambda_wall+1));
+		else if(int(k/box->getXsize()) >= box->getYsize() - lambda_wall) vec_f_x[q+field_start_index[p->index]] += (((box->getYsize()-lambda_wall-1) - (lambda_wall+1) + 0.5) - 0.5 * (box->getYsize() - 2 * (lambda_wall+1))) * shear_rate / (box->getYsize() - 2 * (lambda_wall+1));
+
 	}
 	else{
 		vec_f_x[q+field_start_index[p->index]] = 0.;

@@ -38,6 +38,9 @@ protected:
 	number tolerance;
 	number wall_slip; //if more than 1 there is no slip, if smaller than 1 there is slip. The length of slip on the walls is greater with decreasing values
 	number passive_alpha;
+	number shear_rate;
+	number shear_rate_active;
+	int lambda_wall;
 
 	number p0 = 12.;
 	number beta;
