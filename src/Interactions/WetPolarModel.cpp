@@ -339,8 +339,8 @@ void WetPolarModel::calc_internal_forces(BaseField *p, int q) {
 		p->total_force_y += vec_f_y[q+field_start_index[p->index]] * p->fieldScalar[q];
 
 
-		if(int(k/box->getXsize()) <= lambda_wall) vec_f_x[q+field_start_index[p->index]] += (((lambda_wall+1) - (lambda_wall+1) + 0.5) - 0.5 * (box->getYsize() - 2 * (lambda_wall+1))) * shear_rate / (box->getYsize() - 2 * (lambda_wall+1));
-		else if(int(k/box->getXsize()) >= box->getYsize() - lambda_wall) vec_f_x[q+field_start_index[p->index]] += (((box->getYsize()-lambda_wall-1) - (lambda_wall+1) + 0.5) - 0.5 * (box->getYsize() - 2 * (lambda_wall+1))) * shear_rate / (box->getYsize() - 2 * (lambda_wall+1));
+		//if(int(k/box->getXsize()) <= lambda_wall) vec_f_x[q+field_start_index[p->index]] += (((lambda_wall+1) - (lambda_wall+1) + 0.5) - 0.5 * (box->getYsize() - 2 * (lambda_wall+1))) * shear_rate / (box->getYsize() - 2 * (lambda_wall+1));
+		//else if(int(k/box->getXsize()) >= box->getYsize() - lambda_wall) vec_f_x[q+field_start_index[p->index]] += (((box->getYsize()-lambda_wall-1) - (lambda_wall+1) + 0.5) - 0.5 * (box->getYsize() - 2 * (lambda_wall+1))) * shear_rate / (box->getYsize() - 2 * (lambda_wall+1));
 
 	}
 	else{
@@ -396,8 +396,8 @@ void WetPolarModel::updateDirectedActiveForces(number dt, BaseField*p, bool stor
 	//std::vector<number> ff = std::vector<number> {p->total_force_x, p->total_force_y};
 
 	//CIL
-	//std::vector<number> ff = std::vector<number> {-p->total_force_repulsion_x, -p->total_force_repulsion_y};
-	std::vector<number> ff = std::vector<number> {p->total_force_repulsion_x, p->total_force_repulsion_y};
+	std::vector<number> ff = std::vector<number> {-p->total_force_repulsion_x, -p->total_force_repulsion_y};
+	//std::vector<number> ff = std::vector<number> {p->total_force_repulsion_x, p->total_force_repulsion_y};
 	//std::vector<number> fff = std::vector<number> {p->total_force_repulsion_x, p->total_force_repulsion_y};
 
 	//p->thetaQ = p->thetaQ_old - dt * J_Q * sqrt(ff[0] * ff[0] + ff[1] * ff[1]) * atan2(ff[0]*p->Q01 - ff[1]*p->Q00, ff[0]*p->Q00 + ff[1]*p->Q01);
