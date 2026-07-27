@@ -296,13 +296,13 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			}
 
 			//populate sparse matrix
-			if(box->getWalls(p->map_sub_to_box[q])<1.)//wall_slip)
+			if(box->getWalls(p->map_sub_to_box[q])<0.5)//<wall_slip)
 				//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+4*friction_cell)));
 				//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+friction_cell)));
 				//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction+8*friction_cell)));
 				tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction)));
 			else
-				tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], 1.0));
+				tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], 100.0));
 			//tri_t_x.push_back(Eigen::Triplet<double> (q+field_start_index[p->index], q+field_start_index[p->index], (double)(friction) ));
 
 			/*other_site_patch = q;
@@ -605,12 +605,7 @@ number WetModel::f_interaction(BaseField *p, int q) {
 	//number V = CH + A + Rep + Adh + Shape;
 	//if(p->index==0 && q==0)std::cout<<p->freeEnergy[q]<<" "<<p->LsubX<<" "<<p->LsubY<<" "<< p->neighbors_sub[5+q*9]<<" "<< p->neighbors_sub[3+q*9]<<" "<< p->neighbors_sub[7+q*9]<<" "<<p->neighbors_sub[1+q*9]<<" "<<CH<<" "<<A<<" "<<Rep<<std::endl;
 	
-	if(box->getWalls(k)<freeEnergy_wall_slip){
-		p->freeEnergy[q] += V;
-	}
-	else{
-		p->freeEnergy[q] = 0.;
-	}
+	p->freeEnergy[q] += V;
 	sum_ChemPot[k] += p->fieldScalar[q] * p->freeEnergy[q];
 	p->Pressure[q] = Rep - CH - A;
 
@@ -671,8 +666,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	//vec_f_x[q+p->index*p->subSize] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 	//vec_f_y[q+p->index*p->subSize] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 
-	//if(box->getWalls(k)<wall_slip){
-	if(box->getWalls(k)<0.5){
+	if(box->getWalls(k)<wall_slip){
+	//if(box->getWalls(k)<0.5){
 		//if(p->index==0){
 		//F_total_x += p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//F_total_y += p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
