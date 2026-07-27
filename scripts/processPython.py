@@ -371,6 +371,10 @@ markers = ['o', 's', '^', 'D', 'v', '<', '>', 'p', '*', 'x']
 colors = plt.cm.tab10.colors  # 10 distinct colors
 
 
+order_1 = []
+order_2 = []
+
+
 final_x = []
 final_y = []
 final_yy = []
@@ -397,14 +401,21 @@ for traj in range(start, end):
     S = []
     phi_all = []
     for job in range(jobs_seq[traj], jobs_seq[traj+1]):
+        if job==120 or job==131 or job==143:
+            stress_values.append(stress_values[len(stress_values)-1])
+            E_diss_values.append(E_diss_values[len(E_diss_values)-1])
+            order_1.append(order_1[len(order_1)-1])
+            order_2.append(order_2[len(order_2)-1])
+            continue
 
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
+        fileoutput1=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Shear/scripts"+str(scripts)+"/Job_"+str(job)+"/order_parameters.txt","r")
 
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg_new.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg_all_test.txt","r")
-        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Shear/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg_all_test.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Shear/scripts"+str(scripts)+"/Job_"+str(job)+"/stress_time_avg_all_test_few.txt","r")
 
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/theta_shape.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Single_runs/save_confs/Running/confs_46/elongation_shape.txt","r")
@@ -417,14 +428,27 @@ for traj in range(start, end):
         mean_orientation = 0.
         mean_phi = 0.
         sum_time = 0.
+        order_tmp1 = []
+        order_tmp2 = []
+        for line in fileoutput1:
+            save=line.split()
+            order_tmp1.append(float(save[1]))
+            order_tmp2.append(float(save[2]))
+
+        
+        order_1.append(sum(order_tmp1[-50:])/50)
+        order_2.append(sum(order_tmp2[-50:])/50)
+        fileoutput1.close()
+
+
         for line in fileoutput:
             save=line.split()
             #theta_5.append((2*(float(save[variable]))*pi/180))
             #sum_time += float(save[variable])
             #theta_5.append(float(save[variable]))
             #theta_1.append(float(save[variable]))
-            stress_values.append(float(save[2]))
-            #stress_values.append(float(save[0])-float(save[1]))
+            #stress_values.append(float(save[2]))
+            stress_values.append(float(save[0])-float(save[1]))
             #E_diss_values.append(float(save[4]))
             E_diss_values.append(float(save[4]))
             #stress_values.append(0.5 * (float(save[variable]) +  float(save[variable+1])))
@@ -449,8 +473,7 @@ for traj in range(start, end):
         #for qq in range(len(theta_5)-50, len(theta_5)):
             #last_yy.append(theta_5[qq])
 
-
-            '''
+        '''
             num_rows = 0
             sin_sum = 0.
             cos_sum = 0.
@@ -468,7 +491,7 @@ for traj in range(start, end):
                 #avg_value_S += cos(2*(float(save[q]) - mean_orientation))
                 avg_value_S += cos(2*( (float(save[q])*pi/180) - mean_phi))
             S.append(avg_value_S / num_rows)
-            '''
+        '''
 
             #if traj == start:
                 #theta_5.append(float(save[variable]))
@@ -477,6 +500,7 @@ for traj in range(start, end):
 
         fileoutput.close()
         #last_yy.append(np.mean(theta_5[-50:]))
+
 
         '''
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_"+str(job)+"/elongation_shape.txt","r")
@@ -512,12 +536,14 @@ for traj in range(start, end):
         
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/order_parameters.txt","r")
         #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_23/elongation_shape.txt","r")
-        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_2/aspect_ratio_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_2/aspect_ratio_shape.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Shear/scripts4/Job_33/aspect_ratio_shape.txt","r")
         for line in fileoutput:
             save=line.split()
             theta_6.append(float(save[variable]))
         fileoutput.close()
-        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_2/theta_shape.txt","r")
+        #fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/scripts"+str(scripts)+"/Job_2/theta_shape.txt","r")
+        fileoutput=open("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Shear/scripts4/Job_33/theta_shape.txt","r")
         for line in fileoutput:
             save=line.split()
             theta_7.append((2*(float(save[variable]))*pi/180))
@@ -663,6 +689,7 @@ plt.subplots_adjust(left=0.21, bottom=0.225, right=0.985, top=0.995)
 #plt.plot(omega, '--o')
 '''
 
+
 '''
 gamma = [0.0418, 0.0574, 0.0788, 0.1083, 0.1487, 0.2043, 0.2807, 0.3857, 0.5298, 0.7279, 1]
 #T_period = [5561.116672, 5005.005005, 3925.494122, 2860.00286, 2002.002002, 1668.335002, 1112.223334, 834.1675008, 625.6256256, 455.000455, 333.6670003]
@@ -710,8 +737,8 @@ ax.text(0.08, 5580, "-1", fontsize=16, ha='center', va='bottom', fontname='Times
 
 #phase_space_plots
 # Axes through center
-size_r1 = max(theta_1)
-size_r2 = max(theta_2)
+#size_r1 = max(theta_1)
+#size_r2 = max(theta_2)
 size_r3 = max(theta_6)
 
 # Compute velocity = sqrt((Δθ)^2 + (Δr)^2)
@@ -725,8 +752,8 @@ ax_inset2 = fig.add_axes([0.2, 0.275, 0.25, 0.25], polar=True)  # bottom-left
 
 # Line in polar coordinates
 #ax_inset1.scatter(theta_5[0:500], theta_1[0:500], c=vel[0:500], cmap="RdBu_r", alpha=0.2, s=2)
-ax_inset1.scatter(theta_5[0:500], theta_1[0:500], c='royalblue', alpha=0.2, s=2)
-#ax_inset1.scatter(theta_5[-500:], theta_1[-500:], color='firebrick', s=2)
+#ax_inset1.scatter(theta_5[0:500], theta_1[0:500], c='royalblue', alpha=0.2, s=2)
+ax_inset1.scatter(theta_5[-500:], theta_1[-500:], color='firebrick', s=2)
 #sc1 = ax_inset1.scatter(theta_5[-500:], theta_1[-500:], c=vel[-500:], cmap="RdBu_r" , s=2)
 sc1 = ax_inset1.scatter(theta_5[-500:], theta_1[-500:], c='royalblue' , s=2)
 
@@ -782,7 +809,6 @@ ax_inset2.set_thetagrids([0, 90, 180, 270], labels=[r"$0$", r"$\frac{\pi}{2}$", 
 #ax_inset2.set_yticklabels(['',''])
 ax_inset2.grid(True)
 ax_inset2.spines['polar'].set_color('forestgreen')
-
 plt.tight_layout()
 #plt.show()
 plt.clf()
@@ -795,16 +821,20 @@ fig_p1 = plt.figure(figsize=(5,5))
 ax_p1 = fig_p1.add_subplot(111, polar=True)
 
 # scatter the same data as in your inset (use the same index ranges and styling)
-ax_p1.scatter(theta_5[0:500], theta_1[0:500], c='royalblue', alpha=0.2, s=3)
-ax_p1.scatter(theta_5[-500:], theta_1[-500:], c='royalblue', s=3)  # same as sc1
+#ax_p1.scatter(theta_5[0:500], theta_1[0:500], c='royalblue', alpha=0.2, s=3)
+#ax_p1.scatter(theta_5[-500:], theta_1[-500:], c='royalblue', s=3)  # same as sc1
+#ax_p1.scatter(theta_6[0:50], theta_7[0:50], c='royalblue', alpha=0.2, s=3)
+ax_p1.scatter(theta_7, theta_6, c='royalblue', s=5)  # same as sc1
 
 # If you prefer to color by velocity (uncomment & adapt):
 # sc1 = ax_p1.scatter(theta_5[-500:], theta_1[-500:], c=vel[-500:], cmap="RdBu_r", s=2)
 # fig_p1.colorbar(sc1, ax=ax_p1, fraction=0.046, pad=0.04).set_label(r"$\omega$", fontsize=12)
 
+print(len(theta_6))
+
 # styling to match inset1
-ax_p1.set_rmax(1.2 * size_r1)
-ax_p1.set_rticks([1.2*size_r1])
+ax_p1.set_rmax(1.2 * size_r3)
+ax_p1.set_rticks([1.2*size_r3])
 ax_p1.set_thetagrids([0, 90, 180, 270],
                      labels=[r"$0$", r"$\frac{\pi}{2}$", r"$\pi$", r"$\frac{3\pi}{2}$"],
                      fontsize=30, fontname='Times New Roman')
@@ -822,8 +852,10 @@ for label in ax_p1.get_yticklabels() + ax_p1.get_xticklabels():
 
 fig_p1.tight_layout()
 # Save to file
-fig_p1.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset1.png", dpi=300, bbox_inches="tight")
-fig_p1.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset1.svg", dpi=300, bbox_inches="tight")
+fig_p1.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset1_wetmodel.png", dpi=300, bbox_inches="tight")
+fig_p1.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset1_wetmodel.svg", dpi=300, bbox_inches="tight")
+plt.show()
+exit(1)
 
 
 # -----------------------
@@ -899,6 +931,7 @@ fig_p3.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/pola
 fig_p3.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/polar_inset3.svg", dpi=300, bbox_inches="tight")
 '''
 
+
 '''
 stress_values = np.array(stress_values)
 stress_values = stress_values * -1/(70*(308-100)/2)
@@ -906,16 +939,32 @@ groups = stress_values.reshape(29, jobs[0])
 sem1 = np.std(groups, axis=1, ddof=1) / np.sqrt(groups.shape[1])
 stress_values = stress_values.reshape(29, jobs[0]).sum(axis=1)
 
+
+order_1 = np.array(order_1)
+groups = order_1.reshape(29, jobs[0])
+sem2 = np.std(groups, axis=1, ddof=1) / np.sqrt(groups.shape[1])
+order_1 = order_1.reshape(29, jobs[0]).sum(axis=1) / jobs[0]
+
+order_2 = np.array(order_2)
+groups = order_2.reshape(29, jobs[0])
+sem3 = np.std(groups, axis=1, ddof=1) / np.sqrt(groups.shape[1])
+order_2 = order_2.reshape(29, jobs[0]).sum(axis=1) / jobs[0]
+
+
 #psi6 and psi2
 plt.figure(figsize=(6.4, 3.8))
 #plt.plot(final_x, final_y, '--o', color='firebrick', label="$\psi_6$")
 #plt.fill_between(final_x, final_y - final_y_err_std, final_y + final_y_err_std, color="firebrick", alpha=0.1)
 #plt.plot(final_x, final_yy, '--^', color='forestgreen', label="$\psi_2^L$")
 #plt.fill_between(final_x, final_yy - final_yy_err_std, final_yy + final_yy_err_std, color="forestgreen", alpha=0.1)
-plt.plot(final_x, final_y_pois, '--o', color='firebrick', label="$\psi_6$")
-plt.fill_between(final_x, final_y_pois - final_y_pois_std, final_y_pois + final_y_pois_std, color="firebrick", alpha=0.1)
-plt.plot(final_x, final_yy_pois, '--^', color='forestgreen', label="$\psi_2^L$")
-plt.fill_between(final_x, final_yy_pois - final_yy_pois_std, final_yy_pois + final_yy_pois_std, color="forestgreen", alpha=0.1)
+#plt.plot(final_x, final_y_pois, '--o', color='firebrick', label="$\psi_6$")
+#plt.fill_between(final_x, final_y_pois - final_y_pois_std, final_y_pois + final_y_pois_std, color="firebrick", alpha=0.1)
+#plt.plot(final_x, final_yy_pois, '--^', color='forestgreen', label="$\psi_2^L$")
+#plt.fill_between(final_x, final_yy_pois - final_yy_pois_std, final_yy_pois + final_yy_pois_std, color="forestgreen", alpha=0.1)
+plt.plot(final_x, order_1, '--o', color='firebrick', label="$\psi_6$")
+plt.fill_between(final_x, order_1 - sem2, order_1 + sem2, color="firebrick", alpha=0.1)
+plt.plot(final_x, order_2, '--^', color='forestgreen', label="$\psi_2^L$")
+plt.fill_between(final_x, order_2 - sem3, order_2 + sem3, color="forestgreen", alpha=0.1)
 #plt.vlines(x=0.0001, ymin=0, ymax=0.02, linestyle='--', color='goldenrod', linewidth=5)
 #plt.vlines(x=0.0017, ymin=0, ymax=0.02, linestyle='--', color='goldenrod', linewidth=5)
 #plt.vlines(x=0.0161, ymin=0, ymax=0.02, linestyle='--', color='goldenrod', linewidth=5)
@@ -982,7 +1031,7 @@ y_pos1 = 0.445  # center
 y_pos2 = 0.555  # center
 ax1.yaxis.set_label_coords(-0.12, y_pos1)
 #ax2.yaxis.set_label_coords(1.12, y_pos2)
-ax2.yaxis.set_label_coords(1.155, y_pos2)
+ax2.yaxis.set_label_coords(1.14, y_pos2)
 #plt.vlines(x=0.0001, ymin=0, ymax=0.1770427643629094, linestyle='--', color='k', linewidth=1)
 #plt.vlines(x=0.0017, ymin=0, ymax=0.7141504126736063, linestyle='--', color='k', linewidth=1)
 #plt.vlines(x=0.0161, ymin=0, ymax=0.41734099626748744, linestyle='--', color='k', linewidth=1)
@@ -1016,8 +1065,8 @@ E_diss_values = E_diss_values.reshape(29, jobs[0]).sum(axis=1)
 plt.plot(final_x, stress_values, '--o', color='firebrick')
 plt.fill_between(final_x, stress_values - sem1, stress_values + sem1, color="firebrick", alpha=0.1)
 #plt.fill_between(final_x, final_y_pois - final_y_pois_std, final_y_pois + final_y_pois_std, color="firebrick", alpha=0.1)
-#plt.ylabel(r'$\sigma_{N}^T$', fontsize=18, rotation=0, labelpad=25)
-plt.ylabel(r'$\sigma^T$', fontsize=18, rotation=0, labelpad=25)
+plt.ylabel(r'$\sigma_{N}^T$', fontsize=18, rotation=0, labelpad=25)
+#plt.ylabel(r'$\sigma^T$', fontsize=18, rotation=0, labelpad=25)
 plt.xlabel(r'$\dot{\gamma}$', fontsize=18)
 #fig = plt.gcf()
 #plt.yscale('log')
@@ -1067,10 +1116,10 @@ offset.set_fontname('Times New Roman')   # or any installed font
 plt.xscale('log')
 plt.yscale('log')
 plt.tight_layout()
-y_pos1 = 0.445  # center
-y_pos2 = 0.555  # center
-ax1.yaxis.set_label_coords(-0.22, y_pos1)
-ax2.yaxis.set_label_coords(1.21, y_pos2)
+y_pos1 = 0.455  # center
+y_pos2 = 0.545  # center
+ax1.yaxis.set_label_coords(-0.28, y_pos1)
+ax2.yaxis.set_label_coords(1.24, y_pos2)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/logscale_stress_E_ref_pois.png", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/logscale_stress_E_ref_pois.svg", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/single_stress_E_ref.png", transparent=True)
@@ -1078,8 +1127,8 @@ ax2.yaxis.set_label_coords(1.21, y_pos2)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/test_stress_E_ref.png", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/test_stress_E_ref.svg", transparent=True)
 
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_test_stress_E_ref.png", transparent=True)
-plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_test_stress_E_ref.svg", transparent=True)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_test_stress_E_force.png", transparent=True)
+plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_test_stress_E_force.svg", transparent=True)
 
 
 '''
@@ -1113,8 +1162,8 @@ plt.tight_layout()
 #plt.legend(ncols=1, frameon=False, loc='upper left')
 #plt.xscale('log')
 #plt.yscale('log')
-#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear_pois.png", transparent=True)
-#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear_pois.svg", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear_force.png", transparent=True)
+#plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/new_psi6_psiN_shear_force.svg", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/sim_ODE_comp_high_shear.png", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/sim_ODE_comp_high_shear.svg", transparent=True)
 #plt.savefig("/home/diogo/Phase_Field/RheoCell/Work/Analysis/Slides/Shear/period_shear.png", transparent=True)

@@ -1,0 +1,77 @@
+##############################
+####  PROGRAM PARAMETERS  ####
+##############################
+backend = CPU
+debug = 0
+seed = 1
+omp_thread_num = 1
+
+##############################
+####    SIM PARAMETERS    ####
+##############################
+#sim_type = FD_CH
+box = square
+#box = orthogonal
+#box = lees_edwards
+
+#initial_configuration_type = lattice
+#n_rows = 20
+#n_columns = 5
+
+lees_edwards_shear_rate = 0
+equilibration_steps = 10000
+steps = 10000
+print_conf_interval = 500
+print_energy_every = 1000
+time_scale = linear
+dt = 0.2
+restart_step_counter = 1
+
+##############################
+####     INTERACTIONS     ####
+##############################
+#interaction_type = activenematic
+#interaction_type = wetmodel
+#interaction_type = lebcactivenematic
+#interaction_type = lebcwetmodel
+#interaction_type = simplefield
+interaction_type = wetpolarmodel
+
+
+CGtolerance = 0.00001
+R = 8
+J0 = 1
+gamma = 0.06
+mu = 20
+lambda = 2.0
+kappa = 0.5
+friction = 1
+omega = 0
+wall_slip = 2
+passive_alpha = 1
+beta = 0
+
+friction_cell = 0
+
+J_Q = 0.001
+anchoring = 0
+
+zetaQ_self = 0.5
+zetaQ_inter = 0.025
+
+##############################
+####    EXTERNAL FORCE    ####
+##############################
+external_forces = 1
+external_forces_file = external.conf 
+type = triangle_walls
+#type = shear_flow_channel
+lambda_wall = 6
+
+##############################
+####    INPUT / OUTPUT    ####
+##############################
+topology = test.top
+conf_file = start_conf.dat
+trajectory_file = trajectory.dat
+T=0.1

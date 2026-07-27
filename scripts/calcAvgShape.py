@@ -9,11 +9,45 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
     sys.exit(1)
+
+
+from matplotlib.font_manager import FontProperties
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from matplotlib import font_manager, rcParams
+
+
+# Load font from file
+#font_path = "/home/diogo/Fonts/Times_New_Roman_Normal.ttf"
+font_path = "/home/diogo/Fonts/times.ttf"
+italic_font_path = "/home/diogo/Fonts/timesi.ttf"
+bold_font_path = "/home/diogo/Fonts/timesbd.ttf"
+
+custom_font = FontProperties(fname=font_path)
+legend_font = FontProperties(fname=font_path, size=12)
+font = font_manager.FontProperties(fname=font_path)
+fonti = font_manager.FontProperties(fname=italic_font_path)
+fontbd = font_manager.FontProperties(fname=bold_font_path)
+
+# Register font with a name
+font_manager.fontManager.addfont(font_path)
+font_manager.fontManager.addfont(italic_font_path)
+font_manager.fontManager.addfont(bold_font_path)
+
+# Set custom mathtext font to match your font
+rcParams['mathtext.fontset'] = 'custom'
+
+# Set roman (upright), italic, and bold versions (all Times New Roman if needed)
+#rcParams['mathtext.rm'] = font.get_name()  # e.g. "Times New Roman"
+#rcParams['mathtext.it'] = fonti.get_name()
+#rcParams['mathtext.bf'] = fontbd.get_name()
+rcParams['mathtext.it'] = 'Times New Roman:italic'
+rcParams['mathtext.rm'] = 'Times New Roman'
+rcParams['mathtext.bf'] = 'Times New Roman:bold'
 
 
 variable=int(float(sys.argv[2])) 
@@ -195,6 +229,7 @@ theta_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 elongation_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 minor_axis_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 aspect_ratio = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
+area_fields = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 S_time = []
 
 
@@ -334,6 +369,7 @@ for line in cfile:
             elongation_time[int(pt_num / n_columns)][frame_num] = sqrt(D_major_axis_vec_x**2 + D_major_axis_vec_y**2)
             minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec_x**2 + D_minor_axis_vec_y**2)
             aspect_ratio[int(pt_num / n_columns)][frame_num] = sqrt(S[0]/S[1]) - 1
+            area_fields[int(pt_num / n_columns)][frame_num] = area[pt_num]
             #elongation_time[int(pt_num / n_columns)][frame_num] = sqrt(D_major_axis_vec[0]**2 + D_major_axis_vec[1]**2)
             #minor_axis_time[int(pt_num / n_columns)][frame_num] = sqrt(D_minor_axis_vec[0]**2 + D_minor_axis_vec[1]**2)
             #print(elongation_time[int(pt_num / n_columns)][frame_num], minor_axis_time[int(pt_num / n_columns)][frame_num])
@@ -423,9 +459,10 @@ plt.close()
 
 if variable==5:
 
+    '''
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
-    plt.plot(theta_time, '-o' , color='firebrick', label='Row 9')
+    plt.plot(theta_time[9], '-o' , color='firebrick', label='Row 9')
     #plt.plot(theta_time_2, '-s' , color='green', label='Row 7')
     #plt.plot(theta_time_3, '-^' , color='royalblue', label='Row 5')
     #plt.plot(theta_time_4, '-p' , color='goldenrod', label='Row 3')
@@ -437,6 +474,37 @@ if variable==5:
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
     plt.show()
     #plt.savefig('./theta_width_coarse.png')
+    plt.close()
+    '''
+
+
+    #fig = plt.figure(figsize=(8,6))
+    fig = plt.figure(figsize=(5.452423529, 4.089317647))
+    plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+    plt.plot(area_fields[5], '-o' , color='firebrick')
+    plt.plot(area_fields[8], '-s' , color='forestgreen')
+    plt.plot(area_fields[12], '-^' , color='royalblue')
+    plt.plot(area_fields[15], '-p' , color='goldenrod')
+    #plt.xlabel('Channel width', fontsize=18, fontname='Times New Roman')
+    #plt.ylabel(r'Velocity $v_y$', fontsize=18, fontname='Times New Roman')
+    #plt.xticks(fontsize=18, fontname='Times New Roman')
+    #plt.yticks(fontsize=18, fontname='Times New Roman')
+    plt.ylabel('Area', fontname='Times New Roman', fontsize=18)
+    plt.xlabel('Time', fontname='Times New Roman', fontsize=18)
+    plt.xticks(fontname='Times New Roman', fontsize=18)
+    plt.yticks(fontname='Times New Roman', fontsize=18)
+        # --- ADDED CODE TO CHANGE THE EXPONENT FONT ---
+    ax = plt.gca()
+    ax.xaxis.get_offset_text().set_fontname('Times New Roman')
+    ax.xaxis.get_offset_text().set_fontsize(18)
+    # ---------------------------------------------
+    #plt.xlim(velmin_x,velmax_x)
+    #plt.xlim(-3*1e-5,2.5*1e-5)
+    plt.locator_params(axis='x', nbins=6)
+    plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
+    plt.savefig('./area_fields.png')
+    plt.savefig('./area_fields.svg')
+    plt.show()
     plt.close()
 
 if variable==6:
@@ -477,5 +545,16 @@ if variable==6:
                 print_str += ' '
 
             print(print_str , file=f)  
+
+
+    with open('area_fields.txt', 'w') as f:
+        for i in range(total_time_frames):
+            print_str = ''
+            for j in range(n_rows):
+                print_str += str(area_fields[j][i])
+                print_str += ' '
+
+            print(print_str , file=f)  
+
 
 print('done')

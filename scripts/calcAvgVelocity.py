@@ -9,7 +9,43 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
+
+
+from matplotlib.font_manager import FontProperties
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from matplotlib import font_manager, rcParams
+
+
+# Load font from file
+#font_path = "/home/diogo/Fonts/Times_New_Roman_Normal.ttf"
+font_path = "/home/diogo/Fonts/times.ttf"
+italic_font_path = "/home/diogo/Fonts/timesi.ttf"
+bold_font_path = "/home/diogo/Fonts/timesbd.ttf"
+
+custom_font = FontProperties(fname=font_path)
+legend_font = FontProperties(fname=font_path, size=12)
+font = font_manager.FontProperties(fname=font_path)
+fonti = font_manager.FontProperties(fname=italic_font_path)
+fontbd = font_manager.FontProperties(fname=bold_font_path)
+
+# Register font with a name
+font_manager.fontManager.addfont(font_path)
+font_manager.fontManager.addfont(italic_font_path)
+font_manager.fontManager.addfont(bold_font_path)
+
+# Set custom mathtext font to match your font
+rcParams['mathtext.fontset'] = 'custom'
+
+# Set roman (upright), italic, and bold versions (all Times New Roman if needed)
+#rcParams['mathtext.rm'] = font.get_name()  # e.g. "Times New Roman"
+#rcParams['mathtext.it'] = fonti.get_name()
+#rcParams['mathtext.bf'] = fontbd.get_name()
+rcParams['mathtext.it'] = 'Times New Roman:italic'
+rcParams['mathtext.rm'] = 'Times New Roman'
+rcParams['mathtext.bf'] = 'Times New Roman:bold'
+
+
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -214,11 +250,11 @@ velocity_y_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
 n_grid=[[0. for j in range(0, lx)] for i in range(0, ly)]
 velocity_x_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
 velocity_y_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
-size_grid = 3*R+1
+size_grid = 2*R+1
 
 
 lambda_wall+=2
-lambda_wall=0
+#lambda_wall=0
 avg_velocity_x=np.zeros(ly-ceil(2*lambda_wall))
 avg_velocity_y=np.zeros(ly-ceil(2*lambda_wall))
 counter_for_avg=np.zeros(ly-ceil(2*lambda_wall))
@@ -458,7 +494,6 @@ for line in cfile:
 
             Gamma_rot.append(vector_sum/N) 
 
-            '''
             for p in range(0,sizey_coarse):
                 ynext = p + 1
                 yprev = p - 1
@@ -527,18 +562,18 @@ for line in cfile:
                     dvxdy = (vx_ynext-vx_yprev)/(2*deltay_coarse)
                     dvydy = (vy_ynext-vy_yprev)/(2*deltay_coarse)
 
-                    vorticity[p][q] = dvydx - dvxdy
-                    Q_criterion[p][q] = dvxdx * dvydy - dvxdy * dvydx
+                    #vorticity[p][q] = dvydx - dvxdy
+                    #Q_criterion[p][q] = dvxdx * dvydy - dvxdy * dvydx
 
-                    if Q_criterion[p][q]>0:
-                        Q_criterion[p][q]=1
-                    elif Q_criterion[p][q]<0:
-                        Q_criterion[p][q]=-1
-                    else:
-                        Q_criterion[p][q]=0
+                    #if Q_criterion[p][q]>0:
+                        #Q_criterion[p][q]=1
+                    #elif Q_criterion[p][q]<0:
+                        #Q_criterion[p][q]=-1
+                    #else:
+                        #Q_criterion[p][q]=0
 
-                    if abs(Q_criterion[p][q])>2e-5:
-                       print("max: ",Q_criterion[p][q])
+                    #if abs(Q_criterion[p][q])>2e-5:
+                       #print("max: ",Q_criterion[p][q])
 
                     if n_coarse[p][q]>0:
                         if variable==3 or variable==4:
@@ -546,7 +581,6 @@ for line in cfile:
                     else:
                         if variable==3 or variable==4:
                             cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.8*deltax_coarse*velocity_grid_coarse_x[p][q], 0.8*deltay_coarse*velocity_grid_coarse_y[p][q], width=deltax_coarse/15, color="w")
-            '''
 
             #vx_max = max(map(max, velocity_grid_coarse_x))
             #vy_max = max(map(max, velocity_grid_coarse_y))
@@ -750,7 +784,6 @@ for line in cfile:
 
 plt.close()
 
-'''
 y=np.arange(0., ly, deltay_coarse)
 vx_width=[0. for i in range(0, sizey_coarse)]
 vy_width=[0. for i in range(0, sizey_coarse)]
@@ -758,14 +791,16 @@ avg_val=0
 for p in range(0, sizey_coarse):
     avg_val=0
     for q in range(0, sizex_coarse):
-        vx_width[p]+=timeavg_velocity_grid_coarse_x[p][q]/float(timeavg_n_coarse[p][q])
-        vy_width[p]+=timeavg_velocity_grid_coarse_y[p][q]/float(timeavg_n_coarse[p][q])
+        if timeavg_n_coarse[p][q]>0:
+            vx_width[p]+=timeavg_velocity_grid_coarse_x[p][q]/float(timeavg_n_coarse[p][q])
+            vy_width[p]+=timeavg_velocity_grid_coarse_y[p][q]/float(timeavg_n_coarse[p][q])
+        else:
+            vx_width[p]+=0.
+            vy_width[p]+=0.
         avg_val+=1
 
     vx_width[p] = vx_width[p]/float(avg_val)
     vy_width[p] = vy_width[p]/float(avg_val)
-'''
-
 
 if variable==5:
 
@@ -791,12 +826,12 @@ if variable==5:
     vx_max = 0.3
     vy_max = 0.3
     fig = plt.figure(figsize=(6,6))
-    for p in range(0, sizey_coarse):
-        for q in range(0, sizex_coarse):
-            vx=timeavg_velocity_grid_coarse_x[p][q]/float(timeavg_n_coarse[p][q])
-            vy=timeavg_velocity_grid_coarse_y[p][q]/float(timeavg_n_coarse[p][q])
+    #for p in range(0, sizey_coarse):
+        #for q in range(0, sizex_coarse):
+            #vx=timeavg_velocity_grid_coarse_x[p][q]/float(timeavg_n_coarse[p][q])
+            #vy=timeavg_velocity_grid_coarse_y[p][q]/float(timeavg_n_coarse[p][q])
 
-            cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.8*deltax_coarse*vx/(vx_max), 0.8*deltay_coarse*vy/(vy_max), width=deltax_coarse/15, color="k")
+            #cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.8*deltax_coarse*vx/(vx_max), 0.8*deltay_coarse*vy/(vy_max), width=deltax_coarse/15, color="k")
 
     ax = plt.gca()
     ax.set_aspect('equal', adjustable='box')
@@ -809,20 +844,21 @@ if variable==5:
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
-    plt.plot(vx_width, y, '-o' , color='darkred')
+    plt.plot(vx_width[3:-3], y[3:-3], '-o' , color='darkred')
     #plt.xlabel('Channel width', fontsize=18, fontname='Times New Roman')
     #plt.ylabel(r'Velocity $v_y$', fontsize=18, fontname='Times New Roman')
     #plt.xticks(fontsize=18, fontname='Times New Roman')
     #plt.yticks(fontsize=18, fontname='Times New Roman')
-    plt.ylabel('Channel width', fontsize=18)
-    plt.xlabel(r'Velocity $v_x$', fontsize=18)
-    plt.xticks(fontsize=18)
-    plt.yticks(fontsize=18)
+    plt.ylabel('Channel width', fontname='Times New Roman', fontsize=18)
+    plt.xlabel(r'Velocity $v_x$', fontname='Times New Roman', fontsize=18)
+    plt.xticks(fontname='Times New Roman', fontsize=18)
+    plt.yticks(fontname='Times New Roman', fontsize=18)
     #plt.xlim(velmin_x,velmax_x)
     #plt.xlim(-3*1e-5,2.5*1e-5)
     plt.locator_params(axis='x', nbins=6)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
     plt.savefig('./vx_width_coarse.png')
+    plt.savefig('./vx_width_coarse.svg')
     plt.show()
     #plt.savefig('./vx_width.png')
     plt.clf()
