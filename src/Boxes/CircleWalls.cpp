@@ -29,16 +29,22 @@ void CircleWalls::init(int Lx, int Ly) {
 	sides[1] = Ly;
 
 	walls.resize(Lx*Ly);
-	int empty_area=0;
+	//int empty_area=0;
+	int empty_area=Ly*Lx;
 	for(int y=0; y<Ly; y++){
 		for(int x=0; x<Lx; x++){
 			int k=x+y*Lx;
 			double dist = Lx/2 - sqrt( ((Lx/2) - x) * ((Lx/2) - x) + ((Ly/2) - y) * ((Ly/2) - y) );
 			//if(dist<=0) dist = 0.;
 			//walls[k]=exp(-double(dist)/lambda_wall);
-			if(dist <= 0) walls[k] = 1.;
-			else if(dist < lambda_wall) walls[k] = 1.;
-			else {walls[k] = 0.;empty_area+=1;}
+
+			//if(dist <= 0) walls[k] = 1.;
+			//else if(dist < lambda_wall) walls[k] = 1.;
+			//else {walls[k] = 0.;empty_area+=1;}
+
+			if(dist <= 0) walls[k] = 0.;
+			else if(dist < lambda_wall) walls[k] = 0.;
+			else {walls[k] = 1.;empty_area-=1;}
 		}
 	}
 

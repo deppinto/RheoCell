@@ -295,8 +295,8 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 					vec_v_y[q+field_start_index[p->index]] = vec_f_y[q+field_start_index[p->index]]/friction;
 				}
 				else{//<wall_slip){
-					vec_v_x[q+field_start_index[p->index]] = vec_f_x[q+field_start_index[p->index]]/100.0;
-					vec_v_y[q+field_start_index[p->index]] = vec_f_y[q+field_start_index[p->index]]/100.0;
+					vec_v_x[q+field_start_index[p->index]] = vec_f_x[q+field_start_index[p->index]]/100000.0;
+					vec_v_y[q+field_start_index[p->index]] = vec_f_y[q+field_start_index[p->index]]/100000.0;
 				}
 				continue;
 			}

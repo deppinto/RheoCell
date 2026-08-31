@@ -278,6 +278,9 @@ com_avg_velocity_calc = 0.
 com_all_x = 0.
 com_all_y = 0.
 Gamma_rot = []
+com_velocity_all_x = []
+com_velocity_all_y = []
+
 for line in cfile:
     cont_line+=1
     words=line.split()
@@ -375,6 +378,10 @@ for line in cfile:
             com_velocity_x[pt_num]=dist_com_x/((time_conf[t1]-time_conf[t2])*dt)
             com_velocity_y[pt_num]=dist_com_y/((time_conf[t1]-time_conf[t2])*dt)
             com_avg_velocity_calc += sqrt(com_velocity_x[pt_num]*com_velocity_x[pt_num] + com_velocity_y[pt_num]*com_velocity_y[pt_num])
+
+            com_velocity_all_x.append(com_velocity_x[pt_num])
+            com_velocity_all_y.append(com_velocity_y[pt_num])
+
 
         nemX=float(words[9])
         nemY=float(words[10])
@@ -833,6 +840,15 @@ if variable==5:
 
             #cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.8*deltax_coarse*vx/(vx_max), 0.8*deltay_coarse*vy/(vy_max), width=deltax_coarse/15, color="k")
 
+    com_velocity_all_x = np.array(com_velocity_all_x)
+    com_velocity_all_y = np.array(com_velocity_all_y)
+    average = np.mean(com_velocity_all_x)
+    std_dev = np.std(com_velocity_all_x)
+    print(average, std_dev)
+
+    exit (1)
+
+
     ax = plt.gca()
     ax.set_aspect('equal', adjustable='box')
     ax.set_xlim([0, lx])
@@ -841,10 +857,15 @@ if variable==5:
     plt.savefig('./v_avg_coarse.png')
     plt.close()
 
+    slop = []
+    for i in y:
+        slop.append((i-308/2)*0.1083/308)
+
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
     plt.plot(vx_width[3:-3], y[3:-3], '-o' , color='darkred')
+    plt.plot(slop[3:-3], y[3:-3], '--o' , color='forestgreen', fillstyle='none')
     #plt.xlabel('Channel width', fontsize=18, fontname='Times New Roman')
     #plt.ylabel(r'Velocity $v_y$', fontsize=18, fontname='Times New Roman')
     #plt.xticks(fontsize=18, fontname='Times New Roman')
@@ -853,12 +874,17 @@ if variable==5:
     plt.xlabel(r'Velocity $v_x$', fontname='Times New Roman', fontsize=18)
     plt.xticks(fontname='Times New Roman', fontsize=18)
     plt.yticks(fontname='Times New Roman', fontsize=18)
+    # --- ADD THESE THREE LINES TO FIX THE SCIENTIFIC NOTATION FONT ---
+    ax = plt.gca()
+    ax.xaxis.get_offset_text().set_fontname('Times New Roman')
+    ax.xaxis.get_offset_text().set_fontsize(18)
+    # -----------------------------------------------------------------
     #plt.xlim(velmin_x,velmax_x)
     #plt.xlim(-3*1e-5,2.5*1e-5)
     plt.locator_params(axis='x', nbins=6)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-    plt.savefig('./vx_width_coarse.png')
-    plt.savefig('./vx_width_coarse.svg')
+    #plt.savefig('./vx_width_coarse.png')
+    #plt.savefig('./vx_width_coarse.svg')
     plt.show()
     #plt.savefig('./vx_width.png')
     plt.clf()
@@ -879,8 +905,8 @@ if variable==5:
     #plt.xlim(-3*1e-5,2.5*1e-5)
     plt.locator_params(axis='x', nbins=6)
     plt.subplots_adjust(left=0.235, bottom=0.235, right=0.95, top=0.95)
-    #plt.show()
-    plt.savefig('./vy_width_coarse.png')
+    plt.show()
+    #plt.savefig('./vy_width_coarse.png')
     plt.close()
 
 
