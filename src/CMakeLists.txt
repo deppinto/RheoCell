@@ -50,6 +50,7 @@ SET(forces_SOURCES
 	Forces/BaseForce.cpp
 	Forces/ChannelWalls.cpp
 	Forces/ShearFlowChannel.cpp
+	Forces/KolmogorovFlowChannel.cpp
 	Forces/PoiseuilleFlowChannel.cpp
 	Forces/Stretching.cpp
 )
