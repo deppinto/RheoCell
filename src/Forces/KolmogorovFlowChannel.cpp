@@ -10,6 +10,7 @@ KolmogorovFlowChannel::KolmogorovFlowChannel() :
 	shear_rate = 0.;
 	shear_rate_active = 0.;
 	generate_inside = false;
+	period_n = 1;
 }
 
 std::tuple<std::vector<int>, std::string> KolmogorovFlowChannel::init(input_file &inp) {
@@ -23,7 +24,7 @@ std::tuple<std::vector<int>, std::string> KolmogorovFlowChannel::init(input_file
 	getInputNumber(&inp, "lambda", &lambda, 1);
 	getInputNumber(&inp, "shear_rate", &shear_rate_active, 1);
 
-	//lambda_wall += 2 * lambda;
+	getInputInt(&inp, "period_n", &period_n, 1);
 
 	getInputBool(&inp, "generate_inside", &generate_inside, 0);
 
@@ -55,6 +56,6 @@ number KolmogorovFlowChannel::potential(int k, number walls) {
 std::vector<number> KolmogorovFlowChannel::velocity_profile(int k, int lx, int ly) {
 	//int x = (k-(int(k/lx)*lx));
 	int y = (k/lx);
-	if(y > lambda_wall && y < ly - lambda_wall) return std::vector<number> { shear_rate * sin(2*PI*y/(ly/2)), 0.};
+	if(y > lambda_wall && y < ly - lambda_wall) return std::vector<number> { shear_rate * sin(2*PI*y/(ly/period_n)), 0.};
 	else return std::vector<number> {0., 0.};
 }

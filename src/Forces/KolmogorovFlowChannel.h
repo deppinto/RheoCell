@@ -12,6 +12,7 @@ private:
 	number shear_rate_active;
 	//std::vector<double> walls;
 	number lambda;
+	int period_n;
 
 public:
 	KolmogorovFlowChannel();
