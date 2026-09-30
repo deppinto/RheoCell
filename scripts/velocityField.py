@@ -47,6 +47,9 @@ ly=int(float(header[3]))
 walls = [0. for i in range(lx*ly)]
 set_walls(lx,ly,walls)
 
+U = np.zeros((ly, lx), dtype=float)
+V = np.zeros((ly, lx), dtype=float)
+
 x=np.arange(0,lx,1)
 y=np.arange(0,ly,1)
 Z_x=[[0 for q in range(lx)] for k in range(ly)]
@@ -73,9 +76,11 @@ for line in cfile:
         Z_x[int(yy)][int(xx)]=value_x
         Z_y[int(yy)][int(xx)]=value_y
         Z[int(yy)][int(xx)]=sqrt(value_x*value_x+value_y*value_y)
-        if int(xx)%4==0 and int(yy)%4==0:
+        U[int(yy), int(xx)] = value_x
+        V[int(yy), int(xx)] = value_y
+        #if int(xx)%4==0 and int(yy)%4==0:
             #cset1 = plt.arrow(xx, yy, 100*value_x, 100*value_y, width=0.2, color='k')
-            cset1 = plt.arrow(xx, yy, 40*value_x, 40*value_y, width=0.3, color='k')
+            #cset1 = plt.arrow(xx, yy, 40*value_x, 40*value_y, width=0.3, color='k')
             #cset1 = plt.arrow(xx, yy, 75*value_x, 75*value_y, width=0.2, color='k')
 
     read_line += 1
@@ -118,15 +123,50 @@ for line in cfile:
 
         
     #z_min, z_max = -np.abs(Z).max(), np.abs(Z).max()
-    #z_min, z_max = -np.abs(vorticity).max(), np.abs(vorticity).max()
+    z_min, z_max = -np.abs(vorticity).max(), np.abs(vorticity).max()
     #z_min, z_max = 0., np.abs(Z).max()
-    z_min, z_max = -np.abs(strain).max(), np.abs(strain).max()
+    #z_min, z_max = -np.abs(strain).max(), np.abs(strain).max()
     X, Y = np.meshgrid(x, y)
     #cset1 = plt.imshow(Z, cmap='hot', interpolation='nearest')
     #cset1 = plt.pcolormesh(X, Y, vorticity, cmap='RdBu', vmin=z_min, vmax=z_max)
-    #cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=z_min, vmax=z_max)
+    cset1 = plt.imshow(vorticity, cmap='RdBu_r', interpolation='bicubic', vmin=z_min, vmax=z_max)
     #cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=-1, vmax=1)
-    cset1 = plt.imshow(strain, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
+    #cset1 = plt.imshow(strain, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
+
+# smooth the velocity field a bit for cleaner streamlines
+import scipy.ndimage as ndi
+U = ndi.gaussian_filter(U, sigma=2.0)
+V = ndi.gaussian_filter(V, sigma=2.0)
+
+from scipy.interpolate import RegularGridInterpolator
+# original grid
+xg = np.arange(lx)
+yg = np.arange(ly)
+
+# finer grid
+xf = np.linspace(0, lx - 1, 4 * lx)
+yf = np.linspace(0, ly - 1, 4 * ly)
+Xf, Yf = np.meshgrid(xf, yf)
+
+interp_U = RegularGridInterpolator((yg, xg), U, bounds_error=False, fill_value=None)
+interp_V = RegularGridInterpolator((yg, xg), V, bounds_error=False, fill_value=None)
+
+pts = np.stack([Yf.ravel(), Xf.ravel()], axis=-1)
+Uf = interp_U(pts).reshape(Yf.shape)
+Vf = interp_V(pts).reshape(Yf.shape)
+
+cset1 = plt.streamplot(
+    x,
+    y,
+    U,
+    V,
+    color="k",
+    density=2.,
+    linewidth=0.8,
+    arrowsize=1.0,
+    minlength=0.1,
+    zorder=5,
+)
 
 
 def rotate(n,p):
@@ -172,6 +212,7 @@ def collapse(i, j, s, LX, LY, w, x=0, y=0, n=0,rng = [0.4,0.6]):
     else:
         return 0,0,0
 
+'''
 LLX = lx
 LLY = ly
 vecfield_nx = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
@@ -203,7 +244,6 @@ for p in range(0, LLY):
         winding_number[p][q] /= 2. * pi
 
 
-
 charge = 1.0/2.0
 thresh = 0.05
 for p in range(0,LLY):
@@ -218,7 +258,6 @@ for p in range(0,LLY):
             # compute angle, see doi:10.1039/c6sm01146b
             num = 0
             den = 0
-            '''
             for (dx, dy) in [(0, 0), (0, 1), (1, 1), (1, 0)]:
                 # coordinates of nodes around the defect
                 kk = (int(x) + LLX + dx) % LLX
@@ -232,7 +271,6 @@ for p in range(0,LLY):
                 num += s*dxQxy - dyQxx
                 den += dxQxx + s*dyQxy
             psi = s/(2.-s)*atan2(num, den)
-            '''
             if s==1:
                 cset1 = plt.plot(x, y, 'go', markersize=10)
                 #cset1 = plt.arrow(x, y, 4*cos(psi), 4*sin(psi), color='g', head_width=1.5, head_length=1.5, width=0.5)
@@ -255,8 +293,7 @@ for p in range(0,LLY):
                 #print(x, y)
             elif s==-1:
                 cset1 = plt.plot(x, y, 'kX', markersize=10)
-
-
+'''
 
 
 ax = plt.gca()

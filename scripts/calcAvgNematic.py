@@ -159,6 +159,7 @@ com_x_t = []
 com_y_t = []
 time_conf = []
 start_value = 11
+defect_length = 4.
 
 
 unrap_comx=[0. for i in range(0,N)]
@@ -378,7 +379,7 @@ for line in cfile:
 
         levels = np.arange(0.0, m, step) + step
 
-        if variable==1 or variable==2 or variable==3:
+        if variable==1 or variable==2:
             if pt_num==-1:
                 cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
             else:
@@ -477,13 +478,13 @@ for line in cfile:
 
                             if variable==3 or variable==4:
                                 if q%2==0 and p%2==0:
-                                    cset1 = plt.arrow(q+1/2, p+1/2, 0.5*nx, 0.5*ny, width=1/15, color="k", head_width=0)
-                                    cset1 = plt.arrow(q+1/2, p+1/2, -0.5*nx, -0.5*ny, width=1/15, color="k", head_width=0)
+                                    cset1 = plt.arrow(q+1/2, p+1/2, 0.75*nx, 0.75*ny, width=1/7, color="k", head_width=0)
+                                    cset1 = plt.arrow(q+1/2, p+1/2, -0.75*nx, -0.75*ny, width=1/7, color="k", head_width=0)
                         else:
                             if variable==3 or variable==4:
                                 if q%2==0 and p%2==0:
-                                    cset1 = plt.arrow(q+1/2, p+1/2, 0.5*nx, 0.5*ny, width=1/15, color="w", head_width=0)
-                                    cset1 = plt.arrow(q+1/2, p+1/2, -0.5*nx, -0.5*ny, width=1/15, color="w", head_width=0)
+                                    cset1 = plt.arrow(q+1/2, p+1/2, 0.75*nx, 0.75*ny, width=1/7, color="w", head_width=0)
+                                    cset1 = plt.arrow(q+1/2, p+1/2, -0.75*nx, -0.75*ny, width=1/7, color="w", head_width=0)
 
                 winding_number = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
                 for p in range(0, LLY):
@@ -521,33 +522,35 @@ for line in cfile:
                             x,y = sum_x/n,sum_y/n
 
                             # compute angle, see doi:10.1039/c6sm01146b
-                            '''
                             num = 0
                             den = 0
                             for (dx, dy) in [(0, 0), (0, 1), (1, 1), (1, 0)]:
                                 # coordinates of nodes around the defect
-                                kk = (int(x) + sizex_coarse + dx) % sizex_coarse
-                                ll = (int(y) + sizey_coarse + dy) % sizey_coarse
+                                kk = (int(x) + LLX + dx) % LLX
+                                ll = (int(y) + LLY + dy) % LLY
                                 # derivative at these points
-                                dxQxx = .5*(vecfield_Q00[(kk+1) % sizex_coarse, ll] - vecfield_Q00[(kk-1+sizex_coarse) % sizex_coarse, ll])
-                                dxQxy = .5*(vecfield_Q01[(kk+1) % sizex_coarse, ll] - vecfield_Q01[(kk-1+sizex_coarse) % sizex_coarse, ll])
-                                dyQxx = .5*(vecfield_Q00[kk, (ll+1) % sizey_coarse] - vecfield_Q00[kk, (ll-1+sizey_coarse) % sizey_coarse])
-                                dyQxy = .5*(vecfield_Q01[kk, (ll+1) % sizey_coarse] - vecfield_Q01[kk, (ll-1+sizey_coarse) % sizey_coarse])
+                                dxQxx = .5*(vecfield_Q00[int((kk+1) % LLX)][ll] - vecfield_Q00[int((kk-1+LLX) % LLX)][ll])
+                                dxQxy = .5*(vecfield_Q01[int((kk+1) % LLX)][ll] - vecfield_Q01[int((kk-1+LLX) % LLX)][ll])
+                                dyQxx = .5*(vecfield_Q00[kk][int((ll+1) % LLY)] - vecfield_Q00[kk][int((ll-1+LLY) % LLY)])
+                                dyQxy = .5*(vecfield_Q01[kk][int((ll+1) % LLY)] - vecfield_Q01[kk][int((ll-1+LLY) % LLY)])
                                 # accumulate numerator and denominator
                                 num += s*dxQxy - dyQxx
                                 den += dxQxx + s*dyQxy
                             psi = s/(2.-s)*atan2(num, den)
-                            '''
                             if variable==3 or variable==4:
                                 if s==1:
                                     if n_grid[int(x)][int(y)]>1e-1:
                                         cset1 = plt.plot(x, y, 'go', markersize=10)
+                                        cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='g', head_width=0, head_length=0, width=1.0)
                                         #cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'go', markersize=10)
                                         #cset1 = plt.arrow(x, y, -0.4*deltax_coarse*cos(psi), -0.4*deltay_coarse*sin(psi), width=deltax_coarse/15, color="r")
                                         plotted_flag=1
                                 elif s==-1:
                                     if n_grid[int(x)][int(y)]>1e-1:
-                                        cset1 = plt.plot(x, y, 'b^', markersize=10)
+                                        #cset1 = plt.plot(x, y, 'b^', markersize=10)
+                                        cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='b', head_width=1.5, head_length=1.5, width=0.75)
+                                        cset1 = plt.arrow(x, y, defect_length*cos(psi + 2.0944), defect_length*sin(psi + 2.0944), color='b', head_width=1.5, head_length=1.5, width=0.75)
+                                        cset1 = plt.arrow(x, y, defect_length*cos(psi + 2 * 2.0944), defect_length*sin(psi + 2 * 2.0944), color='b', head_width=1.5, head_length=1.5, width=0.75)
                                         #cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'b^', markersize=10)
                                         plotted_flag=1
 
