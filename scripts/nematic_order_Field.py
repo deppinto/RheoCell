@@ -265,10 +265,10 @@ for line in cfile:
             norm1 = 1.
         if norm2 == 0:
             norm2 = 1.
-        ang1 = np.acos(dot_prod / (norm1 * norm2))
+        ang1 = np.arccos(dot_prod / (norm1 * norm2))
 
         dot_prod = nemX * (-1.) * Z_x[int(yy)][int(xx)] + nemY * (-1.) * Z_y[int(yy)][int(xx)]
-        ang2 = np.acos(dot_prod / (norm1 * norm2))
+        ang2 = np.arccos(dot_prod / (norm1 * norm2))
 
 
         if abs(ang1) < abs(ang2):
