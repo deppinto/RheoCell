@@ -87,6 +87,7 @@ string NematicField::f_field(llint step) {
 	std::fill(f_field_coarse_y.begin(), f_field_coarse_y.end(), 0.);
 	std::fill(phi_field_coarse.begin(), phi_field_coarse.end(), 0.);
 
+
 	for(auto p_idx : visible_fields) {
 		BaseField *p = config_info->fields()[p_idx];
 		bool visible = (only_type == -1 || p->type == only_type);
@@ -119,7 +120,7 @@ string NematicField::f_field(llint step) {
 					phi_field_coarse[site] += 1.;				
 				}
 			}
-
+			
 			conf << j + 0.5 <<" "<<  i + 0.5  << " " << f_field_coarse_x[site] << " " << f_field_coarse_y[site] << " ";
 		}
 	}

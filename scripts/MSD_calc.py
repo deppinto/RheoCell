@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [input] [variable] [start line]")
@@ -153,6 +153,7 @@ v_com_y_t = []
 com_x_t = []
 com_y_t = []
 MSD = []
+MSD_corr = []
 time_conf = []
 start_value = 11
 avg_mean_velocity=0.
@@ -161,6 +162,11 @@ unrap_comx=[0. for i in range(0,N)]
 unrap_comx_save_1=[0. for i in range(0,N)]
 unrap_comx_save_2=[0. for i in range(0,N)]
 unrap_comy=[0. for i in range(0,N)]
+
+unrap_comx_all=0.
+unrap_comx_save_1_all=0.
+unrap_comx_save_2_all=0.
+unrap_comy_all=0.
 
 CoMX=[0. for i in range(0,N)]
 CoMY=[0. for i in range(0,N)]
@@ -179,6 +185,7 @@ cornerSite_x=[0. for i in range(0,N)]
 cornerSite_y=[0. for i in range(0,N)]
 com_velocity_x = [0. for i in range(0,N)]
 com_velocity_y = [0. for i in range(0,N)]
+
 
 lfile=open(lastconf_file,"r")
 header=lfile.readline().split()
@@ -218,6 +225,7 @@ for line in cfile:
         com_all_x = 0.
         com_all_y = 0.
         MSD.append(0.)
+        MSD_corr.append(0.)
 
         pt_num=0
         CoMX_old=CoMX
@@ -276,14 +284,8 @@ for line in cfile:
                 dist_com_y-=ly
             if dist_com_y<-ly/2:
                 dist_com_y+=ly
+
             unrap_comx[pt_num]+=dist_com_x
-
-            #if t==10000:
-                #unrap_comx_save_1[pt_num]=unrap_comx[pt_num]
-            #if t==30000:
-                #unrap_comx_save_2[pt_num]=unrap_comx[pt_num]
-                #avg_mean_velocity+=(unrap_comx_save_2[pt_num]-unrap_comx_save_1[pt_num])/(20000*dt*N)
-
             unrap_comy[pt_num]+=dist_com_y
             MSD[len(MSD)-1]+=(unrap_comx[pt_num]*unrap_comx[pt_num]+unrap_comy[pt_num]*unrap_comy[pt_num])/N
             com_velocity_x[pt_num]=dist_com_x/((time_conf[t1]-time_conf[t2])*dt)
@@ -331,10 +333,21 @@ for line in cfile:
 
     if cont_line%(N+2)==0:
 
+            # Mean unwrapped displacement of the whole system
+            system_disp_x = np.mean(unrap_comx)
+            system_disp_y = np.mean(unrap_comy)
+            # MSD relative to the translating system COM
+            MSD_corr[-1] = 0.0
+
             com_all_x = com_all_x / N
             com_all_y = com_all_y / N
             vector_sum = 0.
             for p in range(N):
+                dx_corr = unrap_comx[p] - system_disp_x
+                dy_corr = unrap_comy[p] - system_disp_y
+                MSD_corr[-1] += (dx_corr*dx_corr + dy_corr*dy_corr) / N
+
+
                 distx = CoMX[p] - com_all_x
                 if distx>lx/2:
                     distx-=lx
@@ -491,26 +504,30 @@ if variable==5:
 if variable==6:
 
     MSD = np.array(MSD)
+    MSD_corr = np.array(MSD_corr)
     time = np.array(time_conf)
-    print(len(MSD))
 
     # 1. Slice the last 10 points
-    time_last_10 = time[-65:]
-    MSD_last_10 = MSD[-65:]
+    time_last_10 = time[-50:]
+    MSD_last_10 = MSD[-50:]
+    MSD_corr_last_10 = MSD_corr[-50:]
 
     # 2. Transform the sliced data into log space (Base e or Base 10 both work)
     log_time = np.log(time_last_10)
     log_MSD = np.log(MSD_last_10)
+    log_MSD_corr = np.log(MSD_corr_last_10)
 
     # 3. Fit a 1st-degree polynomial (linear regression: y = mx + c)
     # The first returned value [0] is the slope, which is your power-law exponent.
     slope, intercept = np.polyfit(log_time, log_MSD, 1)
-    print(f"Power-law exponent (slope): {slope:.4f}")
+    slope_corr, intercept_corr = np.polyfit(log_time, log_MSD_corr, 1)
+    #print(f"Power-law exponent (slope): {slope:.4f}")
 
     # 2. Calculate the corresponding y values (y = mx + b)
-    y_vals = np.exp(intercept) * (time ** slope)
+    #y_vals = np.exp(intercept) * (time ** slope)
 
 
+    '''
     #fig = plt.figure(figsize=(8,6))
     fig = plt.figure(figsize=(5.452423529, 4.089317647))
     plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
@@ -535,16 +552,15 @@ if variable==6:
     plt.show()
     #plt.savefig('./MSD_time.png')
     plt.close()
-
-
     '''
+
+
     with open('MSD.txt', 'w') as f:
         for i in range(len(MSD)):
-            print(time_conf[i]*dt,MSD[i], file=f)  
+            print(time_conf[i]*dt,MSD[i],MSD_corr[i], file=f)  
 
     with open('MSD_stats.txt', 'w') as f:
-        print(time_conf[-1]*dt, slope, intercept, file=f)  
-    '''
+        print(time_conf[-1]*dt, slope, intercept, slope_corr, intercept_corr, file=f)  
 
 
     '''

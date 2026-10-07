@@ -158,3 +158,9 @@ void FD_CPUBackend::sim_step() {
 
 	mytimer->pause();
 }
+
+
+void FD_CPUBackend::analyse_step() {
+
+	compute_forces();
+}

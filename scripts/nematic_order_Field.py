@@ -76,13 +76,13 @@ for line in cfile:
 
         Q00=float(words[i+2])
         Q01=float(words[i+3])
-        if Q00 != 0 and Q01 != 0:
-            S = sqrt(Q00**2 + Q01**2)
-            nx = sqrt(2*S) * sqrt((1 + Q00/S)/2)
-            ny = sqrt(2*S) * np.sign(Q01) * sqrt((1 - Q00/S)/2)
-        else:
-            nx = 0.
-            ny = 0.
+        #if Q00 != 0 and Q01 != 0:
+        S = sqrt(Q00**2 + Q01**2)
+        nx = sqrt(2*S) * sqrt((1 + Q00/S)/2)
+        ny = sqrt(2*S) * np.sign(Q01) * sqrt((1 - Q00/S)/2)
+        #else:
+            #nx = 0.
+            #ny = 0.
 
         Z_x[int(yy)][int(xx)]=nx
         Z_y[int(yy)][int(xx)]=ny
@@ -156,6 +156,7 @@ vecfield_nx = Z_x
 vecfield_ny = Z_y
 vecfield_Q00 = Z_Q00
 vecfield_Q01 = Z_Q01
+
 
 winding_number = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
 for p in range(0, LLY):
@@ -294,10 +295,12 @@ z_min, z_max = 0., np.abs(Z_S).max()
 X, Y = np.meshgrid(x, y)
 #cset1 = plt.imshow(Z, cmap='hot', interpolation='nearest')
 #cset1 = plt.pcolormesh(X, Y, vorticity, cmap='RdBu', vmin=z_min, vmax=z_max)
+
 cset1 = plt.imshow(Z_S, cmap='Purples_r', interpolation="bicubic")
+
 #cset1 = plt.imshow(vorticity, cmap='RdBu', interpolation='nearest', vmin=-1, vmax=1)
 #cset1 = plt.imshow(strain, cmap='RdBu', interpolation='nearest', vmin=-z_max, vmax=z_max)
-print(np.abs(Z_S).min(), np.abs(Z_S).max())
+#print(np.abs(Z_S).min(), np.abs(Z_S).max())
 
 
 ax = plt.gca()

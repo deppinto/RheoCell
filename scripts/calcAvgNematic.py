@@ -213,7 +213,8 @@ Q01_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
 n_grid=[[0. for j in range(0, lx)] for i in range(0, ly)]
 Q00_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
 Q01_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
-size_grid = 3*R+1
+#size_grid = 3*R+1
+size_grid = 17
 
 
 lambda_wall+=2
@@ -452,19 +453,22 @@ for line in cfile:
             if variable==3 or variable==4:
                 for p in range(0, LLY):
                     for q in range(0, LLX):
-                        if n_grid[p][q]>1e-1:
+                        if n_grid[p][q]>-1e-1:
                             for k in range(0, size_grid):
                                 for l in range(0, size_grid):
                                     pp = (((p - int(size_grid/2) + LLY) % LLY) + k) % LLY
                                     qq = (((q - int(size_grid/2) + LLX) % LLX) + l) % LLX
                                     if n_grid[pp][qq]>1e-1:
-                                        Q00_avg_grid[p][q] += (Q00_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
-                                        Q01_avg_grid[p][q] += (Q01_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
+                                        #Q00_avg_grid[p][q] += (Q00_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
+                                        #Q01_avg_grid[p][q] += (Q01_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
+                                        Q00_avg_grid[p][q] += (Q00_grid[pp][qq] ) / (size_grid * size_grid)
+                                        Q01_avg_grid[p][q] += (Q01_grid[pp][qq] ) / (size_grid * size_grid)
 
+                        
                         S = 0.
                         nx = 0.
                         ny = 0.
-                        if n_grid[p][q]>1e-1:
+                        if n_grid[p][q]>-1e-1:
                             Q00=Q00_avg_grid[p][q]
                             Q01=Q01_avg_grid[p][q]
                             S = sqrt(Q00**2 + Q01**2)
@@ -477,14 +481,14 @@ for line in cfile:
                             vecfield_Q01[p][q] = Q01
 
                             if variable==3 or variable==4:
-                                if q%2==0 and p%2==0:
-                                    cset1 = plt.arrow(q+1/2, p+1/2, 0.75*nx, 0.75*ny, width=1/7, color="k", head_width=0)
-                                    cset1 = plt.arrow(q+1/2, p+1/2, -0.75*nx, -0.75*ny, width=1/7, color="k", head_width=0)
+                                if q%4==0 and p%4==0:
+                                    cset1 = plt.arrow(q+1/2, p+1/2, 2*nx, 2*ny, width=0.2, color="k", head_width=0)
+                                    cset1 = plt.arrow(q+1/2, p+1/2, -2*nx, -2*ny, width=0.2, color="k", head_width=0)
                         else:
                             if variable==3 or variable==4:
-                                if q%2==0 and p%2==0:
-                                    cset1 = plt.arrow(q+1/2, p+1/2, 0.75*nx, 0.75*ny, width=1/7, color="w", head_width=0)
-                                    cset1 = plt.arrow(q+1/2, p+1/2, -0.75*nx, -0.75*ny, width=1/7, color="w", head_width=0)
+                                if q%4==0 and p%4==0:
+                                    cset1 = plt.arrow(q+1/2, p+1/2, 2*nx, 2*ny, width=0.2, color="w", head_width=0)
+                                    cset1 = plt.arrow(q+1/2, p+1/2, -2*nx, -2*ny, width=0.2, color="w", head_width=0)
 
                 winding_number = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
                 for p in range(0, LLY):
@@ -539,14 +543,14 @@ for line in cfile:
                             psi = s/(2.-s)*atan2(num, den)
                             if variable==3 or variable==4:
                                 if s==1:
-                                    if n_grid[int(x)][int(y)]>1e-1:
+                                    if n_grid[int(x)][int(y)]>-1e-1:
                                         cset1 = plt.plot(x, y, 'go', markersize=10)
                                         cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='g', head_width=0, head_length=0, width=1.0)
                                         #cset1 = plt.plot(x*sizex_coarse+sizex_coarse/2, y*sizey_coarse+sizey_coarse/2, 'go', markersize=10)
                                         #cset1 = plt.arrow(x, y, -0.4*deltax_coarse*cos(psi), -0.4*deltay_coarse*sin(psi), width=deltax_coarse/15, color="r")
                                         plotted_flag=1
                                 elif s==-1:
-                                    if n_grid[int(x)][int(y)]>1e-1:
+                                    if n_grid[int(x)][int(y)]>-1e-1:
                                         #cset1 = plt.plot(x, y, 'b^', markersize=10)
                                         cset1 = plt.arrow(x, y, defect_length*cos(psi), defect_length*sin(psi), color='b', head_width=1.5, head_length=1.5, width=0.75)
                                         cset1 = plt.arrow(x, y, defect_length*cos(psi + 2.0944), defect_length*sin(psi + 2.0944), color='b', head_width=1.5, head_length=1.5, width=0.75)

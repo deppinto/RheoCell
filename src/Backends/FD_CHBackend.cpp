@@ -156,3 +156,9 @@ void FD_CHBackend::sim_step() {
 
 	mytimer->pause();
 }
+
+
+void FD_CHBackend::analyse_step() {
+
+	compute_forces();
+}

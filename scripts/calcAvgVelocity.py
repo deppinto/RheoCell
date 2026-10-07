@@ -582,12 +582,12 @@ for line in cfile:
                     #if abs(Q_criterion[p][q])>2e-5:
                        #print("max: ",Q_criterion[p][q])
 
-                    if n_coarse[p][q]>0:
-                        if variable==3 or variable==4:
-                            cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.8*deltax_coarse*velocity_grid_coarse_x[p][q]/(n_coarse[p][q]*vx_max), 0.8*deltay_coarse*velocity_grid_coarse_y[p][q]/(n_coarse[p][q]*vy_max), width=deltax_coarse/15, color="k")
-                    else:
-                        if variable==3 or variable==4:
-                            cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.8*deltax_coarse*velocity_grid_coarse_x[p][q], 0.8*deltay_coarse*velocity_grid_coarse_y[p][q], width=deltax_coarse/15, color="w")
+                    #if n_coarse[p][q]>0:
+                        #if variable==3 or variable==4:
+                            #cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.8*deltax_coarse*velocity_grid_coarse_x[p][q]/(n_coarse[p][q]*vx_max), 0.8*deltay_coarse*velocity_grid_coarse_y[p][q]/(n_coarse[p][q]*vy_max), width=deltax_coarse/15, color="k")
+                    #else:
+                        #if variable==3 or variable==4:
+                            #cset1 = plt.arrow(q*deltax_coarse+deltax_coarse/2, p*deltay_coarse+deltay_coarse/2, 0.8*deltax_coarse*velocity_grid_coarse_x[p][q], 0.8*deltay_coarse*velocity_grid_coarse_y[p][q], width=deltax_coarse/15, color="w")
 
             #vx_max = max(map(max, velocity_grid_coarse_x))
             #vy_max = max(map(max, velocity_grid_coarse_y))
@@ -617,8 +617,8 @@ for line in cfile:
                                     pp = (((p - int(size_grid/2) + LLY) % LLY) + k) % LLY
                                     qq = (((q - int(size_grid/2) + LLX) % LLX) + l) % LLX
                                     if n_grid[pp][qq]>1e-1:
-                                        velocity_x_avg_grid[p][q] += (velocity_x_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
-                                        velocity_y_avg_grid[p][q] += (velocity_y_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
+                                        velocity_x_avg_grid[p][q] += (velocity_x_grid[pp][qq] ) / (size_grid * size_grid)
+                                        velocity_y_avg_grid[p][q] += (velocity_y_grid[pp][qq] ) / (size_grid * size_grid)
 
                         if n_grid[p][q]>1e-1:
                             nx = velocity_x_avg_grid[p][q]
@@ -731,8 +731,9 @@ for line in cfile:
                         #if plotted_flag==0 and abs(winding_number[p][q]) > 0.1:
                             #print("Defect topology: ", q, p, winding_number[p][q])
 
-                z_min, z_max = -np.abs(Q_criterion).max(), np.abs(Q_criterion).max()
-                cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos')
+                #z_min, z_max = -np.abs(Q_criterion).max(), np.abs(Q_criterion).max()
+                #cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos')
+                cset1 = plt.imshow(vorticity, cmap='RdBu_r', alpha=0.6, interpolation='lanczos')
 
 
 
@@ -754,6 +755,8 @@ for line in cfile:
             #z_max = 2e-5
             #if variable==3 or variable==4:
                 #cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos', extent=[0,lx,0,ly])
+
+            print(velocity_x_avg_grid[50][50], velocity_y_avg_grid[50][50])
 
             frame_num=int(t/print_conf_interval)-1
             #print(frame_num)

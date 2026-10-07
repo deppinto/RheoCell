@@ -35,6 +35,7 @@ public:
 	void init();
 	void get_settings(input_file &inp);
 	void sim_step();
+	void analyse_step();
 };
 
 #endif /* FD_CHBACKEND_H_ */

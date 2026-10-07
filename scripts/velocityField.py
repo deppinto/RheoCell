@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 if len(sys.argv)!=4:
     print(sys.argv[0]," [topology file] [conf file] [1:save conf; 2:make plot]")
@@ -135,8 +135,8 @@ for line in cfile:
 
 # smooth the velocity field a bit for cleaner streamlines
 import scipy.ndimage as ndi
-U = ndi.gaussian_filter(U, sigma=2.0)
-V = ndi.gaussian_filter(V, sigma=2.0)
+U = ndi.gaussian_filter(U, sigma=5.0)
+V = ndi.gaussian_filter(V, sigma=5.0)
 
 from scipy.interpolate import RegularGridInterpolator
 # original grid
@@ -161,11 +161,7 @@ cset1 = plt.streamplot(
     U,
     V,
     color="k",
-    density=2.,
-    linewidth=0.8,
-    arrowsize=1.0,
-    minlength=0.1,
-    zorder=5,
+    density=2.
 )
 
 

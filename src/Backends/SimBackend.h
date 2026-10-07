@@ -131,6 +131,10 @@ public:
 	 * @brief Performs a simulation step.
 	 */
 	virtual void sim_step() = 0;
+	/**
+	 * @brief Performs an analysis step.
+	 */
+	virtual void analyse_step() = 0;
 
 	/**
 	 * @brief Synchronize the simulation data with the data structures that are used to analyse/print the current simulation status.

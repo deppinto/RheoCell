@@ -120,6 +120,7 @@ string VelocityField::f_field(llint step) {
 				}
 			}
 
+			if(j==50 && i==50) std::cout<< f_field_coarse_x[site] << " " << f_field_coarse_y[site]<<std::endl;
 			conf << j + 0.5 <<" "<<  i + 0.5  << " " << f_field_coarse_x[site] << " " << f_field_coarse_y[site] << " ";
 		}
 	}
