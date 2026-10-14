@@ -675,6 +675,7 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	//vec_f_x[q+p->index*p->subSize] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 	//vec_f_y[q+p->index*p->subSize] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
 
+	p->set_V_ext(k, box->getXsize(), box->getYsize());
 	if(box->getWalls(k)<wall_slip){
 	//if(box->getWalls(k)<0.5){
 		//if(p->index==0){
@@ -699,8 +700,8 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 
 		//vec_f_x[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDX[q] + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
 		//vec_f_y[q+field_start_index[p->index]] = p->freeEnergy[q]*p->fieldDY[q] + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
-		vec_f_x[q+field_start_index[p->index]] = f_passive_x * passive_alpha + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter;
-		vec_f_y[q+field_start_index[p->index]] = f_passive_y * passive_alpha + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter;
+		vec_f_x[q+field_start_index[p->index]] = f_passive_x * passive_alpha + fQ_self_x * zetaQ_self + fQ_inter_x * zetaQ_inter + p->V_ext[0];
+		vec_f_y[q+field_start_index[p->index]] = f_passive_y * passive_alpha + fQ_self_y * zetaQ_self + fQ_inter_y * zetaQ_inter + p->V_ext[1];
 	}
 	else{
 		vec_f_x[q+field_start_index[p->index]] = 0.;

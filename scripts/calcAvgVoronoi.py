@@ -239,6 +239,21 @@ def lane_order_local(points, neighbors, box_lengths, Ly):
     return psi_lane
 
 
+def positional_order_x(points, Lx, Nx=10):
+    """
+    Positional order parameter along x:
+
+        Psi_x = | (1/N) sum_j exp(i Gx x_j) |
+
+    where Gx = 2*pi*Nx/Lx.
+    """
+    Gx = 2.0 * np.pi * Nx / Lx
+    psi_x = np.mean(np.exp(1j * Gx * points[:, 0]))
+
+    return np.abs(psi_x)
+
+
+
 ##-------------------------------------------------------------------------for lattice configurations--------------------------------------------------
 def periodic_delaunay_theta(points, box, y_min, y_max,
                             tile_range=1, nbins=360, sigma_bins=2.0, peak_prominence_frac=0.05, window_deg=12):
@@ -502,6 +517,7 @@ order_psiN = []
 order_psiL = []
 theta_lattice = []
 pointsCoM = []
+order_psiX = []
 
 
 cont_line=0
@@ -655,6 +671,16 @@ for line in cfile:
             points = np.array([[CoMX[qq], CoMY[qq]] for qq in range(0, N)])
             vor = Voronoi(points)
 
+            # Positional order along x
+            Nx = 10
+
+            bulk_mask = (points[:, 1] > 50) & (points[:, 1] < ly - 50)
+            bulk_points = points[bulk_mask]
+
+            PsiX_global = positional_order_x(bulk_points, lx, Nx)
+            order_psiX.append(PsiX_global)
+
+
             neigh = periodic_delaunay_neighbors(points, (lx, ly))
             #plot_periodic_delaunay(points, (lx, ly))
             #for i, nset in enumerate(neigh):
@@ -668,11 +694,11 @@ for line in cfile:
             PsiN_global = 0.
             PsiL_global = 0.
             for pp in range(N):
-                if CoMY[pp]>50 and CoMY[pp]<ly-50:
-                    cont_bulk+=1
-                    Psi6_global += psi6[pp]
-                    PsiN_global += psiN[pp]
-                    PsiL_global += psiL[pp]
+                #if CoMY[pp]>50 and CoMY[pp]<ly-50:
+                cont_bulk+=1
+                Psi6_global += psi6[pp]
+                PsiN_global += psiN[pp]
+                PsiL_global += psiL[pp]
             Psi6_global = np.abs(Psi6_global/cont_bulk)
             PsiN_global = np.abs(PsiN_global/cont_bulk)
             PsiL_global = PsiL_global/cont_bulk
@@ -690,7 +716,7 @@ for line in cfile:
 
 
             frame_num=int(t/print_conf_interval)-1
-            #print(frame_num)
+            print(frame_num)
             #if frame_num%1==0:
                 #print(frame_num, cont_line, t)
             #if cont_line>N+2:
@@ -738,6 +764,33 @@ for line in cfile:
             if variable<=4:
                 plt.clf()
 plt.close()
+
+
+if variable == 7:
+
+    # Plot positional order parameter Psi_x vs time
+    fig = plt.figure(figsize=(5.45, 4.09))
+
+    plt.plot(
+        np.array(time_conf) * dt,
+        order_psiX,
+        '-',
+        linewidth=2
+    )
+
+    plt.xlabel(r'Time $t$', fontsize=18)
+    plt.ylabel(r'$\Psi_x$', fontsize=18)
+
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
+
+    plt.ylim(0, 1)
+
+    plt.tight_layout()
+    plt.savefig('psiX_vs_time.png', dpi=300)
+    plt.show()
+    plt.close()
+
 
 
 if variable==5:

@@ -163,6 +163,7 @@ ax.set_xlim([0, lx])
 ax.set_ylim([0, ly])
 #fig.tight_layout()
 if variable==1:
+    plt.axis('off')
     plt.savefig('frame.png')
 if variable==2:
     plt.axis('off')

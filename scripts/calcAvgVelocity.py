@@ -280,6 +280,10 @@ com_all_y = 0.
 Gamma_rot = []
 com_velocity_all_x = []
 com_velocity_all_y = []
+# Fourier analysis of v_y(y)
+vy_mode_history = []
+vy_rms_history = []
+vy_mode_times = []
 
 for line in cfile:
     cont_line+=1
@@ -461,6 +465,40 @@ for line in cfile:
         
 
     if cont_line%(N+2)==0:
+
+            if variable==7:
+                # ============================================================
+                # Fourier decomposition of v_y along y
+                # ============================================================
+
+                # Full 2D velocity field: shape = (ly, lx)
+                vy = np.asarray(velocity_grid_y)
+                # Remove spatially uniform mode if desired
+                vy -= np.mean(vy)
+                # Fourier transform along y
+                fft_y = np.fft.rfft(vy, axis=0) / ly
+                # Fourier amplitude
+                #vy_modes = np.abs(vy_fft)
+                # Average POWER over x, not velocity
+                power_ky = np.mean(np.abs(fft_y)**2, axis=1)
+                amplitude_ky = np.sqrt(power_ky)
+
+                # --------------------------------
+                # 4. Full 2D spectrum
+                # --------------------------------
+                fft_2d = np.fft.fft2(vy) / (lx * ly)
+                power_2d = np.abs(fft_2d)**2
+
+                vy_mode_history.append(amplitude_ky)
+                vy_mode_times.append(t)
+
+                # --------------------------------
+                # 2. Overall transverse activity
+                # --------------------------------
+                vy_rms = np.sqrt(np.mean(vy**2))
+                vy_rms_history.append(vy_rms)
+
+
 
             com_all_x = com_all_x / N
             com_all_y = com_all_y / N
@@ -756,9 +794,9 @@ for line in cfile:
             #if variable==3 or variable==4:
                 #cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos', extent=[0,lx,0,ly])
 
-            print(velocity_x_avg_grid[50][50], velocity_y_avg_grid[50][50])
 
             frame_num=int(t/print_conf_interval)-1
+            print(frame_num, t)
             #print(frame_num)
             #if frame_num%1==0:
                 #print(frame_num, cont_line, t)
@@ -792,7 +830,77 @@ for line in cfile:
             if variable<=4:
                 plt.clf()
 
+plt.clf()
 plt.close()
+
+if variable == 7:
+
+    vy_rms_history = np.asarray(vy_rms_history)
+    vy_mode_history = np.asarray(vy_mode_history)
+    vy_mode_times = np.asarray(vy_mode_times)
+
+
+    #print("times shape =", vy_mode_times.shape)
+    #print("RMS shape   =", vy_rms_history.shape)
+
+    #for tt, rr in zip(vy_mode_times, vy_rms_history):
+        #print(tt, rr)
+
+
+    fig = plt.figure(figsize=(6, 5))
+    plt.plot(vy_mode_times, vy_rms_history, "o")
+
+    plt.xlabel("time")
+    plt.ylabel(r"$\sqrt{\langle v_y^2\rangle}$")
+
+    plt.tight_layout()
+    plt.savefig('vel_rms_time.png', dpi=300)
+    plt.show()
+
+
+    plt.figure(figsize=(7, 5))
+    for m in range(1, min(10, vy_mode_history.shape[1])):
+        plt.semilogy(
+            vy_mode_times,
+            vy_mode_history[:, m],
+            label=f"m={m}"
+        )
+
+    plt.xlabel("time")
+    plt.ylabel(r"$A_m$")
+    plt.legend()
+
+    plt.tight_layout()
+    plt.savefig('Amplitude_modes.png', dpi=300)
+    plt.show()
+
+
+    plt.figure(figsize=(7, 5))
+    nmodes_to_show = min(15, vy_mode_history.shape[1])
+    plt.imshow(
+        np.log10(vy_mode_history[:, 1:nmodes_to_show].T + 1e-20),
+        origin="lower",
+        aspect="auto",
+        extent=[
+            vy_mode_times[0],
+            vy_mode_times[-1],
+            1,
+            nmodes_to_show - 1
+        ],
+        interpolation="nearest"
+    )
+
+    plt.xlabel("time")
+    plt.ylabel(r"mode $m$")
+
+    cbar = plt.colorbar()
+    cbar.set_label(r"$\log_{10} A_m$")
+
+    plt.tight_layout()
+    plt.savefig('modes_amplitude_time.png', dpi=300)
+    plt.show()
+
+
 
 y=np.arange(0., ly, deltay_coarse)
 vx_width=[0. for i in range(0, sizey_coarse)]

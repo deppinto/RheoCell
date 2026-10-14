@@ -212,6 +212,12 @@ cornerSite=[0 for i in range(0,N)]
 cornerSite_x=[0. for i in range(0,N)]
 cornerSite_y=[0. for i in range(0,N)]
 
+
+D00=[0. for i in range(0,N)]
+D01=[0. for i in range(0,N)]
+Di=[0. for i in range(0,N)]
+
+
 lfile=open(lastconf_file,"r")
 header=lfile.readline().split()
 t=int(header[2])
@@ -224,13 +230,22 @@ y=np.arange(0,ly,1)
 
 total_time_frames = int(steps / print_conf_interval)
 n_rows = 20
-n_columns = 5
+n_columns = 20
 theta_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 elongation_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 minor_axis_time = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 aspect_ratio = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 area_fields = [[0. for j in range(total_time_frames)] for i in range(n_rows)]
 S_time = []
+
+
+Q00_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+Q01_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+n_grid=[[0. for j in range(0, lx)] for i in range(0, ly)]
+Q00_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+Q01_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+#size_grid = 3*R+1
+size_grid = 25
 
 
 cont_line=0
@@ -271,11 +286,20 @@ for line in cfile:
         cornerSite_y=[0. for i in range(0,N)]
         theta_all = []
 
+        D00=[0. for i in range(0,N)]
+        D01=[0. for i in range(0,N)]
+        Di=[0. for i in range(0,N)]
+
     elif words[0]=='b':
         lx=int(float(words[2]))
         ly=int(float(words[3]))
         x=np.arange(0,lx,1)
         y=np.arange(0,ly,1)
+        Q00_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+        Q01_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+        Q00_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+        Q01_avg_grid =[[0. for j in range(0, lx)] for i in range(0, ly)]
+        n_grid=[[0. for j in range(0, lx)] for i in range(0, ly)]
 
     else:
         Z=[[0. for q in range(lx)] for k in range(ly)]
@@ -295,9 +319,12 @@ for line in cfile:
         nemY = np.sign(float(words[10]))*sqrt((1 - float(words[9])/nemQ_mod)/2)
         Q00[pt_num]=float(words[9])
         Q01[pt_num]=float(words[10])
+        
+        grid_points = [] 
 
         for i in range(start_value,len(words),2):
             site=int(float(words[i]))
+            grid_points.append(site)
             value=float(words[i+1])
             yy=int(site/lx)
             xx=site-int(yy*lx)
@@ -353,6 +380,20 @@ for line in cfile:
             D_major_axis_vec_x = D_major_axis_vec_y = 0.
             D_minor_axis_vec_x = D_minor_axis_vec_y = 0.
 
+
+        D00[pt_num] = D_major_axis_vec_x
+        D01[pt_num] = D_major_axis_vec_y
+        Di[pt_num] = D_i
+
+        for k in grid_points:
+            yy=int(k/lx)
+            xx=k-int(yy*lx)
+            value = Z[yy][xx]
+            Q00_grid[yy][xx] += value * D00[pt_num]
+            Q01_grid[yy][xx] += value * D01[pt_num]
+            n_grid[yy][xx] += value
+
+
         #F = np.array([[S00, S01],[S01, -S00]], dtype=float)
         F = np.array([[test_s00, test_s01],[test_s01, test_s11]], dtype=float)
 
@@ -388,7 +429,7 @@ for line in cfile:
 
         levels = np.arange(0.0, m, step) + step
 
-        if variable==1 or variable==2 or variable==3:
+        if variable==1 or variable==2:
             if pt_num==-1:
                 cset1 = plt.contour(X, Y, Z, levels, cmap=cm.winter, alpha=0.5)
             else:
@@ -424,8 +465,68 @@ for line in cfile:
             #print(avg_value_S / len(theta_all))
 
 
+            LLX = lx
+            LLY = ly
+            vecfield_nx = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            vecfield_ny = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            vecfield_Q00 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+            vecfield_Q01 = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+
+            # --- NEW: Initialize a grid to store the length at each site ---
+            length_grid = [[0. for j in range(0, LLX)] for i in range(0, LLY)]
+
+            if variable==3 or variable==4:
+                for p in range(0, LLY):
+                    for q in range(0, LLX):
+                        if n_grid[p][q]>-1e-1:
+                            for k in range(0, size_grid):
+                                for l in range(0, size_grid):
+                                    pp = (((p - int(size_grid/2) + LLY) % LLY) + k) % LLY
+                                    qq = (((q - int(size_grid/2) + LLX) % LLX) + l) % LLX
+                                    if n_grid[pp][qq]>1e-1:
+                                        #Q00_avg_grid[p][q] += (Q00_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
+                                        #Q01_avg_grid[p][q] += (Q01_grid[pp][qq] / n_grid[pp][qq]) / (size_grid * size_grid)
+                                        Q00_avg_grid[p][q] += (Q00_grid[pp][qq] ) / (size_grid * size_grid)
+                                        Q01_avg_grid[p][q] += (Q01_grid[pp][qq] ) / (size_grid * size_grid)
+
+                        
+                        S = 0.
+                        nx = 0.
+                        ny = 0.
+                        if n_grid[p][q]>-1e-1:
+                            Q00=Q00_avg_grid[p][q]
+                            Q01=Q01_avg_grid[p][q]
+                            S = sqrt(Q00**2 + Q01**2)
+                            # --- NEW: Save the computed length ---
+                            length_grid[p][q] = S
+
+                            #nx = sqrt(2*S) * sqrt((1 + Q00/S)/2)
+                            #ny = sqrt(2*S) * np.sign(Q01) * sqrt((1 - Q00/S)/2)
+
+                            #vecfield_nx[p][q] = nx
+                            #vecfield_ny[p][q] = ny
+                            vecfield_Q00[p][q] = Q00
+                            vecfield_Q01[p][q] = Q01
+
+                            if variable==3 or variable==4:
+                                if q%4==0 and p%4==0:
+                                    cset1 = plt.arrow(q+1/2, p+1/2, Q00, Q01, width=0.2, color="k", head_width=0)
+                                    cset1 = plt.arrow(q+1/2, p+1/2, -Q00, -Q01, width=0.2, color="k", head_width=0)
+                        else:
+                            # --- NEW: Set length to 0 if it falls in the else condition ---
+                            length_grid[p][q] = 0.
+                            if variable==3 or variable==4:
+                                if q%4==0 and p%4==0:
+                                    cset1 = plt.arrow(q+1/2, p+1/2, Q00, Q01, width=0.2, color="w", head_width=0)
+                                    cset1 = plt.arrow(q+1/2, p+1/2, -Q00, -Q01, width=0.2, color="w", head_width=0)
+
+            if variable==3 or variable==4:
+                cset1 = plt.imshow(length_grid, cmap='Purples', origin='lower', extent=[0, LLX, 0, LLY])
+                #cset1 = plt.colorbar(label='Arrow Length ($S$)') # Optional: adds a color bar scale
+
+
             frame_num=int(t/print_conf_interval)-1
-            #print(frame_num)
+            print(frame_num)
             #if frame_num%1==0:
                 #print(frame_num, cont_line, t)
             #if cont_line>N+2:
