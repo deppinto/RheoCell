@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 
 if len(sys.argv)!=6:
@@ -168,7 +168,7 @@ if variable == 1 or variable == 3:
 if variable==2:
     plt.figure(figsize=(5.452423529,4.089317647))
     plt.plot(corr_dist, correlations, '--o')
-    plt.plot(corr_dist, correlations_vorticity, '--o')
+    #plt.plot(corr_dist, correlations_vorticity, '--o')
     plt.ylabel(r'$C_v$', fontsize=18)
     plt.xlabel('R', fontsize=18)
     plt.xticks(fontsize=18)

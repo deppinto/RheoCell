@@ -157,8 +157,10 @@ void BaseInteraction::generate_lattice_configuration(std::vector<BaseField *> &f
 
 
 	// Choose your oblique lattice parameters
-	number a = 2*R - 2;         // spacing along columns
-	number b = 2*R - 2;         // spacing along rows (can be different from a)
+	//number a = 2*R - 2;         // spacing along columns
+	//number b = 2*R - 2;         // spacing along rows (can be different from a)
+	number a = box->getXsize()/n_columns;         // spacing along columns
+	number b = box->getYsize()/n_rows;         // spacing along rows (can be different from a)
 	number theta = 60.0 * M_PI/180.0;  // angle between a and b (radians)
 
 	// Lattice basis vectors (x right, y up; use -sin if you want rows to go downward)
