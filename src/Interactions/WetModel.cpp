@@ -569,6 +569,7 @@ number WetModel::f_interaction(BaseField *p, int q) {
 	// area conservation term
 	number A = - 4*(mu/a0)*(1-p->area/a0)*p->fieldScalar[q];
 	number A_density = - mu/a0*p->fieldScalar[q]*p->fieldScalar[q];
+	//number A_density = -2*(mu/a0)*(1-p->area/a0)*p->fieldScalar[q]*p->fieldScalar[q];
 
 	// repulsion term
 	number Rep = 4*(kappa/lambda)*p->fieldScalar[q]*(phi2[k]-p->fieldScalar[q]*p->fieldScalar[q]);
