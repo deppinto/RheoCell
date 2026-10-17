@@ -18,7 +18,7 @@ WetModel::WetModel() :
 				wall_slip(2.),
 				freeEnergy_wall_slip(2.),
 				passive_alpha(1.),
-				beta(1.),
+				beta(0.),
 				lambda_wall(0.){
 	a0=PI*R*R;
 }
@@ -46,7 +46,7 @@ void WetModel::get_settings(input_file &inp) {
 	getInputNumber(&inp, "CGtolerance", &tolerance, 0);
 	getInputNumber(&inp, "wall_slip", &wall_slip, 0);
 	getInputNumber(&inp, "Kg", &Kg, 0);
-	getInputNumber(&inp, "beta", &beta, 0);
+	getInputNumber(&inp, "beta", &beta_active, 0);
 	getInputNumber(&inp, "passive_alpha", &passive_alpha, 0);
 	getInputInt(&inp, "lambda_wall", &lambda_wall, 0);
 }
@@ -98,6 +98,7 @@ void WetModel::apply_changes_after_equilibration(){
 	J_Q=J_Q_active;
 	friction=friction_active;
 	friction_cell=friction_cell_active;
+	beta=beta_active;
 	freeEnergy_wall_slip=0.5;
 }
 
@@ -490,9 +491,9 @@ void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 	p->laplacianPhi[q] = BaseInteraction::Laplacian(p, q, k);
 	sum_grad_ai_x[k] += 2.0 * p->fieldScalar[q] * p->fieldDX[q];
         sum_grad_ai_y[k] += 2.0 * p->fieldScalar[q] * p->fieldDY[q];
-	p->perimeter += sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q]);
-	p->normal_x[q] = (p->fieldDX[q] * p->fieldDX[q]) / sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q]);
-	p->normal_y[q] = (p->fieldDY[q] * p->fieldDY[q]) / sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q]);
+	p->perimeter += sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps) - eps;
+	p->normal_x[q] = (p->fieldDX[q] * p->fieldDX[q]) / sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps);
+	p->normal_y[q] = (p->fieldDY[q] * p->fieldDY[q]) / sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps);
 
 	BaseInteraction::updateFieldProperties(p, q, k);
 
@@ -600,7 +601,7 @@ number WetModel::f_interaction(BaseField *p, int q) {
 
 	//Perimeter term
 	number p0 = 2 * PI * 8;
-	number P = - beta * (p->perimeter - p0) * ((p->normal_x[p->neighbors_sub[5+q*9]] - p->normal_x[p->neighbors_sub[3+q*9]]) + (p->normal_y[p->neighbors_sub[7+q*9]] - p->normal_y[p->neighbors_sub[1+q*9]]));
+	number P = - beta * (p->perimeter - p0) * (0.5*(p->normal_x[p->neighbors_sub[5+q*9]] - p->normal_x[p->neighbors_sub[3+q*9]]) + 0.5*(p->normal_y[p->neighbors_sub[7+q*9]] - p->normal_y[p->neighbors_sub[1+q*9]]));
 
 
 	// delta F / delta phi_i
@@ -617,15 +618,15 @@ number WetModel::f_interaction(BaseField *p, int q) {
 	p->freeEnergyDensityGradient_y[q] = 2 * gamma * lambda * p->fieldDY[q];
 
 	
-	p->sigma_xx[q] = ((4.0 * gamma / lambda) * p->fieldScalar[q] * p->fieldScalar[q] * (1.0 - p->fieldScalar[q]) * (1.0 - p->fieldScalar[q])) + gamma * lambda * (p->fieldDX[q] * p->fieldDX[q] - p->fieldDY[q] * p->fieldDY[q]) + p->fieldScalar[q] * p->fieldScalar[q] * (-2.0 * (mu / a0) * (1.0 - p->area / a0)) + (beta * (p->perimeter - p0)) * (sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q]) - p->fieldDX[q] * p->fieldDX[q]/(sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q])));
+	p->sigma_xx[q] = ((4.0 * gamma / lambda) * p->fieldScalar[q] * p->fieldScalar[q] * (1.0 - p->fieldScalar[q]) * (1.0 - p->fieldScalar[q])) + gamma * lambda * (p->fieldDX[q] * p->fieldDX[q] - p->fieldDY[q] * p->fieldDY[q]) + p->fieldScalar[q] * p->fieldScalar[q] * (-2.0 * (mu / a0) * (1.0 - p->area / a0)) + (beta * (p->perimeter - p0)) * ((sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps) - eps) - p->fieldDX[q] * p->fieldDX[q]/(sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps)));
 
-	p->sigma_yy[q] = ((4.0 * gamma / lambda) * p->fieldScalar[q] * p->fieldScalar[q] * (1.0 - p->fieldScalar[q]) * (1.0 - p->fieldScalar[q])) + gamma * lambda * (p->fieldDY[q] * p->fieldDY[q] - p->fieldDX[q] * p->fieldDX[q]) + p->fieldScalar[q] * p->fieldScalar[q] * (-2.0 * (mu / a0) * (1.0 - p->area / a0)) + (beta * (p->perimeter - p0)) * (sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q]) - p->fieldDY[q] * p->fieldDY[q]/(sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q])));
+	p->sigma_yy[q] = ((4.0 * gamma / lambda) * p->fieldScalar[q] * p->fieldScalar[q] * (1.0 - p->fieldScalar[q]) * (1.0 - p->fieldScalar[q])) + gamma * lambda * (p->fieldDY[q] * p->fieldDY[q] - p->fieldDX[q] * p->fieldDX[q]) + p->fieldScalar[q] * p->fieldScalar[q] * (-2.0 * (mu / a0) * (1.0 - p->area / a0)) + (beta * (p->perimeter - p0)) * ((sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps) - eps) - p->fieldDY[q] * p->fieldDY[q]/(sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps)));
 
-	p->sigma_xy[q] = 2.0 * gamma * lambda * p->fieldDX[q] * p->fieldDY[q] - (beta * (p->perimeter - p0)) * (p->fieldDX[q] * p->fieldDY[q]/(sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q])));
+	p->sigma_xy[q] = 2.0 * gamma * lambda * p->fieldDX[q] * p->fieldDY[q] - (beta * (p->perimeter - p0)) * (p->fieldDX[q] * p->fieldDY[q]/(sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps)));
 
 	p->rep_ai[q] = p->fieldScalar[q] * p->fieldScalar[q];
 	p->rep_product[q] = p->fieldScalar[q] * p->fieldScalar[q] * (phi2[k] - p->fieldScalar[q] * p->fieldScalar[q]);
-	//if(p->index==0 && q==0)std::cout<<"Free energy: "<<p->freeEnergy[q]<<" "<<CH<<" "<<A<<" "<<Rep<<" "<<Adh<<" "<<dx<<" "<<dy <<std::endl;
+	//if(p->index==0 && q==0)std::cout<<"Stress: "<<p->sigma_xx[q]<<" "<<p->sigma_yy[q] <<" "<<p->sigma_xy[q] << " "<< P <<std::endl;
 
 	return V;
 }

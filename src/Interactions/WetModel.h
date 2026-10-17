@@ -44,11 +44,13 @@ protected:
 	number freeEnergy_wall_slip; //if more than 1 there is no slip, if smaller than 1 there is slip. The length of slip on the walls is greater with decreasing values
 	number passive_alpha;
 	number beta;
+	number beta_active;
 	int lambda_wall;
 
 
 	std::vector<number> sum_grad_ai_x;
 	std::vector<number> sum_grad_ai_y;
+	const number eps = 1e-3;
 
 
 	number F_total_x;
