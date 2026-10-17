@@ -35,9 +35,17 @@ void MultiPhaseField::resizing() {
 	freeEnergyDensity.resize(subSize);
 	freeEnergyDensityGradient_x.resize(subSize);
 	freeEnergyDensityGradient_y.resize(subSize);
+	sigma_xx.resize(subSize);
+	sigma_xy.resize(subSize);
+	sigma_yy.resize(subSize);
+	rep_ai.resize(subSize);
+	rep_product.resize(subSize);
+	normal_x.resize(subSize);
+	normal_y.resize(subSize);
 	fieldScalar_old.resize(subSize);
 	dfield_old.resize(subSize);
 	neighbors_sub.resize(subSize*9);
+	neighbors_dir.resize(subSize*9);
 	velocityX.resize(subSize);
         velocityY.resize(subSize);
 	map_sub_to_box.resize(subSize);
@@ -158,7 +166,7 @@ void MultiPhaseField::init() {
 }
 
 void MultiPhaseField::setNeighborsSub() {
-	//setNeighborsSubSquareDirichlet();
+	setNeighborsSubSquareDirichlet();
 	setNeighborsSubSquarePeriodic();
 }
 
@@ -178,7 +186,7 @@ void MultiPhaseField::setNeighborsSubSquareDirichlet() {
 				else if(x==LsubX-1 && k==1)site=-1;
 				if(y==0 && j==-1)site=-1;
 				else if(y==LsubY-1 && j==1)site=-1;
-				neighbors_sub[ss+i*9]=site;
+				neighbors_dir[ss+i*9]=site;
 				ss++;
 			}
 		}

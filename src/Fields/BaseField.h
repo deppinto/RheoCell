@@ -192,7 +192,15 @@ public:
         std::vector<number> freeEnergyDensityGradient_y;
         std::vector<number> fieldScalar_old;
         std::vector<number> dfield_old;
+        std::vector<number> sigma_xx;
+        std::vector<number> sigma_xy;
+        std::vector<number> sigma_yy;
+        std::vector<number> rep_ai;
+        std::vector<number> rep_product;
+        std::vector<number> normal_x;
+        std::vector<number> normal_y;
 	std::vector<int> neighbors_sub;
+	std::vector<int> neighbors_dir;
 
 	//field patch values
 	int LsubX;
