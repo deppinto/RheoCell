@@ -401,7 +401,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 	//vec_v_x.array() += target_mean_vx - vec_v_x.mean();
 	//vec_v_y.array() += target_mean_vy - vec_v_y.mean();
 
-	/*number V_All_x=0.;
+	number V_All_x=0.;
 	number V_All_y=0.;
 	number V_CoM_x=0.;
 	number V_CoM_y=0.;
@@ -456,7 +456,7 @@ void WetModel::begin_energy_computation(std::vector<BaseField *> &fields) {
 			}
 		}
 	}
-	std::cout<<"velocities: "<<V_total_x<<" "<<V_total_y<<" "<< F_total_x<<" "<<F_total_y <<" "<<V_CoM_x<<" "<<V_CoM_y<<" "<<F_CoM_x<<" "<<F_CoM_y<<" "<<V_All_x<<" "<<V_All_y<<" "<<V_phi_x<<" "<<V_phi_y<<" "<<F_phi_x<<" "<<F_phi_y <<" " << vec_f_x[450]<<" "<< vec_f_y[450] << " "<< V_gammaphi_x<< " "<< V_gammaphi_y  <<std::endl; */
+	std::cout<<"velocities: "<<V_total_x<<" "<<V_total_y<<" "<< F_total_x<<" "<<F_total_y <<" "<<V_CoM_x<<" "<<V_CoM_y<<" "<<F_CoM_x<<" "<<F_CoM_y<<" "<<V_All_x<<" "<<V_All_y<<" "<<V_phi_x<<" "<<V_phi_y<<" "<<F_phi_x<<" "<<F_phi_y <<" " << vec_f_x[450]<<" "<< vec_f_y[450] << " "<< V_gammaphi_x<< " "<< V_gammaphi_y  <<std::endl; 
 
 }
 
@@ -492,8 +492,8 @@ void WetModel::computeGlobalSums(BaseField *p, int q, bool update_global_sums) {
 	sum_grad_ai_x[k] += 2.0 * p->fieldScalar[q] * p->fieldDX[q];
         sum_grad_ai_y[k] += 2.0 * p->fieldScalar[q] * p->fieldDY[q];
 	p->perimeter += sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps) - eps;
-	p->normal_x[q] = (p->fieldDX[q] * p->fieldDX[q]) / sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps);
-	p->normal_y[q] = (p->fieldDY[q] * p->fieldDY[q]) / sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps);
+	p->normal_x[q] = (p->fieldDX[q] ) / sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps);
+	p->normal_y[q] = (p->fieldDY[q] ) / sqrt(p->fieldDX[q] * p->fieldDX[q] + p->fieldDY[q] * p->fieldDY[q] + eps * eps);
 
 	BaseInteraction::updateFieldProperties(p, q, k);
 
@@ -651,6 +651,7 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 	//number f_passive_y = grad_free_energy_y[k] * p->fieldScalar[q];
 	//number f_passive_x = 0.;
 	//number f_passive_y = 0.;
+	
 	//number f_passive_x = -0.5 *( (p->freeEnergyDensity[p->neighbors_sub[5+q*9]] - p->freeEnergy[p->neighbors_sub[5+q*9]] * p->fieldScalar[p->neighbors_sub[5+q*9]] + p->fieldDX[p->neighbors_sub[5+q*9]] * p->freeEnergyDensityGradient_x[p->neighbors_sub[5+q*9]]) - (p->freeEnergyDensity[p->neighbors_sub[3+q*9]] - p->freeEnergy[p->neighbors_sub[3+q*9]] * p->fieldScalar[p->neighbors_sub[3+q*9]] + p->fieldDX[p->neighbors_sub[3+q*9]] * p->freeEnergyDensityGradient_x[p->neighbors_sub[3+q*9]]) ) - 0.5 * ((p->fieldDX[p->neighbors_sub[7+q*9]] * p->freeEnergyDensityGradient_y[p->neighbors_sub[7+q*9]])  -  (p->fieldDX[p->neighbors_sub[1+q*9]] * p->freeEnergyDensityGradient_y[p->neighbors_sub[1+q*9]]));
 	//number f_passive_y = -0.5 *( (p->freeEnergyDensity[p->neighbors_sub[7+q*9]] - p->freeEnergy[p->neighbors_sub[7+q*9]] * p->fieldScalar[p->neighbors_sub[7+q*9]] + p->fieldDY[p->neighbors_sub[7+q*9]] * p->freeEnergyDensityGradient_y[p->neighbors_sub[7+q*9]]) - (p->freeEnergyDensity[p->neighbors_sub[1+q*9]] - p->freeEnergy[p->neighbors_sub[1+q*9]] * p->fieldScalar[p->neighbors_sub[1+q*9]] + p->fieldDY[p->neighbors_sub[1+q*9]] * p->freeEnergyDensityGradient_y[p->neighbors_sub[1+q*9]]) ) - 0.5 * ((p->fieldDY[p->neighbors_sub[5+q*9]] * p->freeEnergyDensityGradient_x[p->neighbors_sub[5+q*9]])  -  (p->fieldDY[p->neighbors_sub[3+q*9]] * p->freeEnergyDensityGradient_x[p->neighbors_sub[3+q*9]]));
 	
@@ -666,7 +667,7 @@ void WetModel::calc_internal_forces(BaseField *p, int q) {
 		- p->sigma_xy[p->neighbors_sub[3 + q*9]])
 		+ 0.5 * (p->sigma_yy[p->neighbors_sub[7 + q*9]]
 		- p->sigma_yy[p->neighbors_sub[1 + q*9]])
-		+ (kappa/lambda) * ( (0.5 * (p->rep_product[p->neighbors_sub[7 + q*9]] - p->rep_product[p->neighbors_sub[1 + q*9]])) + (phi2[k] * (2.0 * p->fieldScalar[q] * p->fieldDY[q])) - (p->fieldScalar[q]*p->fieldScalar[q]) * sum_grad_ai_y[k]); 
+		+ (kappa/lambda) * ( (0.5 * (p->rep_product[p->neighbors_sub[7 + q*9]] - p->rep_product[p->neighbors_sub[1 + q*9]])) + (phi2[k] * (2.0 * p->fieldScalar[q] * p->fieldDY[q])) - (p->fieldScalar[q]*p->fieldScalar[q]) * sum_grad_ai_y[k]);
 
 
 	p->Fpassive_x[q] = f_passive_x * passive_alpha;

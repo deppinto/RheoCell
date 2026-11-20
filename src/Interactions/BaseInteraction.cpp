@@ -155,83 +155,64 @@ void BaseInteraction::generate_random_configuration(std::vector<BaseField *> &fi
 
 void BaseInteraction::generate_lattice_configuration(std::vector<BaseField *> &fields, int n_rows, int n_columns) {
 
+    const int N = fields.size();
 
-	// Choose your oblique lattice parameters
-	//number a = 2*R - 2;         // spacing along columns
-	//number b = 2*R - 2;         // spacing along rows (can be different from a)
-	number a = box->getXsize()/n_columns;         // spacing along columns
-	number b = box->getYsize()/n_rows;         // spacing along rows (can be different from a)
-	number theta = 60.0 * M_PI/180.0;  // angle between a and b (radians)
+    const int Lx = static_cast<int>(box->getXsize());
+    const int Ly = static_cast<int>(box->getYsize());
 
-	// Lattice basis vectors (x right, y up; use -sin if you want rows to go downward)
-	number ax = a;              number ay = 0;
-	number bx = b * cos(theta); number by = b * sin(theta);
+    if (n_rows <= 0 || n_columns <= 0 ||
+        n_rows % 2 != 0 ||
+        N != n_rows * n_columns) {
+        throw std::runtime_error("Invalid lattice dimensions.");
+    }
 
-	// Center the lattice in the box
-	int N = fields.size();
-	number cx = box->getXsize() / 2.0;
-	number cy = box->getYsize() / 2.0;
+    if (Lx % n_columns != 0 ||
+        Ly % n_rows != 0) {
+        throw std::runtime_error(
+            "Box dimensions incompatible with integer lattice."
+        );
+    }
 
-	// If you want the whole n_columns x n_rows block centered:
-	number start_x = cx - 0.5 * ((n_columns - 1) * ax + (n_rows - 1) * bx);
-	number start_y = cy - 0.5 * ((n_columns - 1) * ay + (n_rows - 1) * by);
+    const int a = Lx / n_columns;
+    const int h = Ly / n_rows;
 
+    if (a % 2 != 0) {
+        throw std::runtime_error(
+            "Horizontal spacing must be even."
+        );
+    }
 
-	// Honeycomb hex: add a second point per site
-	bool make_honeycomb = false; // set false for triangular
-	std::vector<std::vector<number>> basis;
-	basis.push_back({0.0, 0.0});                         // A sublattice
-	if (make_honeycomb) basis.push_back({(ax+bx)/3.0, (ay+by)/3.0}); // B sublattice
+    const double diagonal =
+        std::hypot(a / 2.0, static_cast<double>(h));
 
-	int placed = 0;
-	for (int r = 0; r < n_rows && placed < N; ++r) {
-		for (int c = 0; c < n_columns && placed < N; ++c) {
-			number x0 = start_x + c*ax + r*bx;
-			number y0 = start_y + c*ay + r*by;
-			
-			for (auto &d : basis) {
-				if (placed >= N) break;
-				BaseField* p = fields[placed++];
-				p->CoM = std::vector<number>{ x0 + d[0], y0 + d[1] };
-				p->set_positions_initial(box);
-				if(placed > 0 && N > 5 && placed % (N / 4) == 0) printf("Inserted %d%% of the particles (%d/%d)\n", placed*100/N, placed, N);
-			}
-		}
-	}
-	printf("Inserted %d%% of the particles (%d/%d)\n", 100, placed, N);
+    const double distortion =
+        std::abs(diagonal / a - 1.0);
 
+    printf(
+        "Lattice: a=%d, h=%d, distortion=%.5f%%\n",
+        a, h, 100.0 * distortion
+    );
 
-	/*int N = fields.size();
-	//number totalNodes = box->getXsize() * box->getYsize();
-	number lattice_const = 2 * R - 2;
-	number lattice_factor = sqrt(3.) / 2.; 
-	//int n_rows = 20;
-	//int n_columns = 5;
-	number start_x = box->getXsize()/2. - (n_columns/2.) * lattice_const;
-	number start_y = box->getYsize()/2. + (n_rows/2.) * lattice_const * lattice_factor;
-	int lattice_row = 0;
-	int lattice_column = 0;
-	for(int i = 0; i < N; i++) {
-		BaseField *p = fields[i];
+    int placed = 0;
 
-		bool inserted = false;
-		do {
-			if(lattice_row % 2 == 0){p->CoM = std::vector<number> {start_x + lattice_column * lattice_const, start_y - (lattice_row+0.5) * lattice_const * lattice_factor};}
-			else {p->CoM = std::vector<number> {start_x + lattice_column * lattice_const + lattice_const/2, start_y - (lattice_row+0.5) * lattice_const * lattice_factor};}
-			p->set_positions_initial(box);
+    for (int r = 0; r < n_rows; ++r) {
+        const int shift = (r % 2) * (a / 2);
 
-			lattice_column += 1;
-			if(i > 0 && (i+1) % n_columns == 0){
-				lattice_column = 0;
-				lattice_row += 1;
-			}
+        for (int c = 0; c < n_columns; ++c) {
+            const int x = (c * a + shift) % Lx;
+            const int y = r * h;
 
-			inserted = true;
-		} while(!inserted);
+            BaseField* p = fields[placed++];
 
-		if(i > 0 && N > 5 && i % (N / 4) == 0) printf("Inserted %d%% of the particles (%d/%d)\n", i*100/N, i, N);
-	}
-	printf("Inserted %d%% of the particles (%d/%d)\n", 100, N, N);*/
+            p->CoM = std::vector<number>{
+                static_cast<number>(x),
+                static_cast<number>(y)
+            };
+
+            p->set_positions_initial(box);
+        }
+    }
+
 }
 
 

@@ -466,39 +466,6 @@ for line in cfile:
 
     if cont_line%(N+2)==0:
 
-            if variable==7:
-                # ============================================================
-                # Fourier decomposition of v_y along y
-                # ============================================================
-
-                # Full 2D velocity field: shape = (ly, lx)
-                vy = np.asarray(velocity_grid_y)
-                # Remove spatially uniform mode if desired
-                vy -= np.mean(vy)
-                # Fourier transform along y
-                fft_y = np.fft.rfft(vy, axis=0) / ly
-                # Fourier amplitude
-                #vy_modes = np.abs(vy_fft)
-                # Average POWER over x, not velocity
-                power_ky = np.mean(np.abs(fft_y)**2, axis=1)
-                amplitude_ky = np.sqrt(power_ky)
-
-                # --------------------------------
-                # 4. Full 2D spectrum
-                # --------------------------------
-                fft_2d = np.fft.fft2(vy) / (lx * ly)
-                power_2d = np.abs(fft_2d)**2
-
-                vy_mode_history.append(amplitude_ky)
-                vy_mode_times.append(t)
-
-                # --------------------------------
-                # 2. Overall transverse activity
-                # --------------------------------
-                vy_rms = np.sqrt(np.mean(vy**2))
-                vy_rms_history.append(vy_rms)
-
-
 
             com_all_x = com_all_x / N
             com_all_y = com_all_y / N
@@ -646,7 +613,7 @@ for line in cfile:
             YY,XX = np.mgrid[0.:LLY:1., 0.:LLX:1.]
             U, V = YY**2, XX**2
 
-            if variable==3 or variable==4:
+            if variable==3 or variable==4 or variable==7:
                 for p in range(0, LLY):
                     for q in range(0, LLX):
                         if n_grid[p][q]>1e-1:
@@ -680,6 +647,7 @@ for line in cfile:
                                     #cset1 = plt.arrow(q+1/2, p+1/2, 0.5*nx, 0.5*ny, width=1/15, color="w")
 
                 #X, Y = np.meshgrid( np.arange(0, lx) , np.arange(0, ly) )
+            if variable==3 or variable==4:
                 cset1 = plt.streamplot(X, Y, U, V, density = 2)#, broken_streamlines = False)
 
                 vorticity=[[0. for q in range(0, LLX)] for k in range(0, LLY)]
@@ -795,8 +763,48 @@ for line in cfile:
                 #cset1 = plt.imshow(Q_criterion, cmap='RdBu', vmin=z_min, vmax=z_max, alpha=0.6, interpolation='lanczos', extent=[0,lx,0,ly])
 
 
+            if variable==7:
+                # ============================================================
+                # Fourier decomposition of v_y along y
+                # ============================================================
+
+                # Full 2D velocity field: shape = (ly, lx)
+                #vy = np.asarray(velocity_grid_y)
+                vy = np.asarray(vecfield_ny)
+                # Remove spatially uniform mode if desired
+                vy -= np.mean(vy)
+                # Fourier transform along y
+                #fft_y = np.fft.rfft(vy, axis=0) / ly
+                fft_x = np.fft.rfft(vy, axis=1) / lx
+                # Fourier amplitude
+                #vy_modes = np.abs(vy_fft)
+                # Average POWER over x, not velocity
+                #power_ky = np.mean(np.abs(fft_y)**2, axis=1)
+                #amplitude_ky = np.sqrt(power_ky)
+
+                power_kx = np.mean(np.abs(fft_x)**2, axis=0)
+                amplitude_kx = np.sqrt(power_kx)
+
+                # --------------------------------
+                # 4. Full 2D spectrum
+                # --------------------------------
+                fft_2d = np.fft.fft2(vy) / (lx * ly)
+                power_2d = np.abs(fft_2d)**2
+
+                #vy_mode_history.append(amplitude_ky)
+                vy_mode_history.append(amplitude_kx)
+                vy_mode_times.append(t)
+
+                # --------------------------------
+                # 2. Overall transverse activity
+                # --------------------------------
+                vy_rms = np.sqrt(np.mean(vy**2))
+                vy_rms_history.append(vy_rms)
+
+
+
             frame_num=int(t/print_conf_interval)-1
-            print(frame_num, t)
+            print(frame_num, t, vy_rms)
             #print(frame_num)
             #if frame_num%1==0:
                 #print(frame_num, cont_line, t)
