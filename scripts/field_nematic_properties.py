@@ -9,7 +9,7 @@ import scipy.ndimage
 
 from matplotlib import cm
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 
 if len(sys.argv)!=6:
@@ -129,9 +129,21 @@ for i in range(size_R):
     
 
 if variable == 1 or variable == 3:
-    with open('correlations_'+file_string+'.txt', 'w') as f:
+    with open('Correlations_'+file_string+'.txt', 'w') as f:
         for i in range(size_R):
             print(corr_dist[i], correlations[i], file=f)
+
+    corr_length = 0.
+    index = 0
+    for i in correlations:
+        if i<0:
+            corr_length = i
+            break
+        index += 1
+
+    with open('Correlations_'+file_string+'_stats.txt', 'w') as f:
+        print(corr_dist[-1], corr_dist[index], file=f)
+
 
 
 if variable == 2 or variable == 4:
